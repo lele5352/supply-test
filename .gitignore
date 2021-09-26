@@ -145,5 +145,4 @@ logs/
 barcodes/
 
 # idea
-.idea/
-
+.idea
