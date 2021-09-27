@@ -223,12 +223,13 @@ class ImsDataHelper(RequestHandler):
         return all_ware_sku_inventory
 
     def get_current_inventory(self, sale_sku_code, current_warehouse_id, target_warehouse_id):
-        # 发货仓库存模型
         current_inventory = dict()
         central_inventor = self.get_central_inventory(sale_sku_code)
         if not target_warehouse_id:
+            # 发货仓、备货仓
             sale_sku_central_inventory = self.get_warehouse_central_inventory(sale_sku_code, current_warehouse_id)
         else:
+            # 中转仓
             sale_sku_central_inventory = self.get_warehouse_central_inventory(sale_sku_code, target_warehouse_id)
 
         goods_inventory = self.get_goods_inventory(sale_sku_code, current_warehouse_id, target_warehouse_id)
