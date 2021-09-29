@@ -1,26 +1,26 @@
 import time
 import pytest
 
-from data_helper.ims_data_helper import ImsDataHelper
+from testcase.ims_test import *
 
 
-class TestImsDeliveryPick(object):
+class TestDeliveryPick(object):
     """
     README:
         仅发货仓、直发仓支持销售出库流程，对应IMS库存数据模型为AA型，即warehouse_id与target_warehouse_id相同且不为空
     """
 
     def setup_class(self):
-        self.ims = ImsDataHelper()
-        self.sale_sku_code = '11471839197'
-        self.warehouse_id = 31
-        self.target_warehouse_id = 31
-        self.bom_version = "A"
+        self.ims = ims
+        self.sale_sku_code = sale_sku_code
+        self.warehouse_id = delivery_warehouse_id
+        self.target_warehouse_id = delivery_warehouse_id
+        self.bom_version = bom_version
+
         self.sale_sku_count = 2
         self.bom_detail = self.ims.get_sale_sku_bom_detail(self.sale_sku_code, self.bom_version)
-        self.ware_skus = self.ims.get_bom_version_ware_sku(self.sale_sku_code, self.bom_version)
-        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.ware_skus), 5, self.warehouse_id)
-        self.yk_location_codes = self.ims.wms_api.get_location_codes(len(self.ware_skus), 4, self.warehouse_id)
+        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 5, self.warehouse_id)
+        self.yk_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 4, self.warehouse_id)
         self.sj_location_ids = [self.ims.wms_api.get_location_id(location_code, self.warehouse_id) for location_code in
                                 self.sj_location_codes]
 
@@ -86,7 +86,7 @@ class TestImsDeliveryPick(object):
             }
         # 更新期望仓库库存数据，加入dock库存为实拣数
         expect_ware_sku_inventory_dict.update({
-            -self.warehouse_id:  {'block': 0, 'stock': actual_pick_num}
+            -self.warehouse_id: {'block': 0, 'stock': actual_pick_num}
         })
         confirm_pick_res = self.ims.confirm_pick(
             self.delivery_code,

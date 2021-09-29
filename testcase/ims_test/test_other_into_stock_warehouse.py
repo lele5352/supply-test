@@ -1,18 +1,17 @@
 import pytest
 
-from data_helper.ims_data_helper import ImsDataHelper
+from testcase.ims_test import *
 
 
-class TestOtherIntoDeliveryWarehouse(object):
+class TestOtherIntoWarehouse(object):
     def setup_class(self):
-        self.ims = ImsDataHelper()
-        self.sale_sku_code = '11471839197'
-        self.warehouse_id = 31
-        self.target_warehouse_id = 31
-        self.bom_version = "A"
-        self.bom_detail = self.ims.get_sale_sku_bom_detail(self.sale_sku_code, self.bom_version)
-        self.ware_skus = self.ims.get_bom_version_ware_sku(self.sale_sku_code, self.bom_version)
-        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.ware_skus), 5, self.warehouse_id)
+        self.ims = ims
+        self.sale_sku_code = sale_sku_code
+        self.warehouse_id = stock_warehouse_id
+        self.target_warehouse_id = ''
+        self.bom_detail = bom_detail
+
+        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 5, self.warehouse_id)
         self.sj_location_ids = [self.ims.wms_api.get_location_id(location_code, self.warehouse_id) for location_code in
                                 self.sj_location_codes]
 
@@ -191,7 +190,7 @@ class TestOtherIntoDeliveryWarehouse(object):
     def test_4_other_into_warehouse_two_set(self):
         """
         tips：销售sku不能是单品，单品会单件成套，不存在计算成套逻辑
-        测试场景：刚好2套
+        测试场景：超过1套，不满2套
         """
         set_num = 2
         ware_sku_list = list()
@@ -275,8 +274,9 @@ class TestOtherIntoDeliveryWarehouse(object):
                     }
                 }
             )
-            current_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id, self.target_warehouse_id)
-            if iter_time >= len(self.ware_skus) - 1:
+            current_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
+                                                               self.target_warehouse_id)
+            if iter_time >= len(self.bom_detail) - 1:
                 self.expect_inventory.update(
                     {
                         "central_inventory_stock": 1,

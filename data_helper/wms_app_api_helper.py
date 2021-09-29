@@ -48,14 +48,15 @@ class WmsAppApiHelper(RequestHandler):
             LIMIT %s
         """
         locations = self.db.get_all(query_warehouse_location_code_sql % (location_type, warehouse_id, num))
-        if locations:
+        if not locations:
+            location_codes = self.location_create(num, location_type)
+            return location_codes
+        elif len(locations) == 1:
+            return locations[0]['warehouse_location_code']
+        else:
             for location in locations:
                 location_codes.append(location['warehouse_location_code'])
-        else:
-            location_codes = self.location_create(num, location_type)
-        # for code in location_codes:
-        #     barcode_generate(code, 'location')
-        return location_codes
+            return location_codes
 
     # 创建库位
     def location_create(self, num=1, location_type=1, extra=None):
@@ -312,8 +313,5 @@ if __name__ == '__main__':
     num = 2
     sj_locations_codes = pa.get_location_codes(num, 5, 31)
     print(sj_locations_codes)
-    for code in sj_locations_codes:
-        id = pa.get_location_id(code, 31)
-        print(id)
 
-    print(pa.receipt_order_create('RK2109250001',1))
+

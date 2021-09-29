@@ -1,19 +1,18 @@
 import pytest
 
-from data_helper.ims_data_helper import ImsDataHelper
+from testcase.ims_test import *
 
-
-class TestImsPurchaseIntoExchangeWarehouse(object):
+class TestPurchaseIntoDeliveryWarehouse(object):
     def setup_class(self):
-        self.ims = ImsDataHelper()
-        self.sale_sku_code = '11471839197'
-        self.warehouse_id = 31
-        self.target_warehouse_id = 29
-        self.bom_version = "A"
+        self.ims = ims
+        self.sale_sku_code = sale_sku_code
+        self.warehouse_id = delivery_warehouse_id
+        self.target_warehouse_id = delivery_warehouse_id
+        self.bom_detail = bom_detail
+        self.bom_version = bom_version
+
         self.sale_sku_count = 3
-        self.bom_detail = self.ims.get_sale_sku_bom_detail(self.sale_sku_code, self.bom_version)
-        self.ware_skus = self.ims.get_bom_version_ware_sku(self.sale_sku_code, self.bom_version)
-        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.ware_skus), 5, self.warehouse_id)
+        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 5, self.warehouse_id)
         self.sj_location_ids = [self.ims.wms_api.get_location_id(location_code, self.warehouse_id) for location_code in
                                 self.sj_location_codes]
         self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
@@ -62,7 +61,6 @@ class TestImsPurchaseIntoExchangeWarehouse(object):
             self.warehouse_id,
             self.target_warehouse_id
         )
-
         expect_ims_inventory_data = {
             "central_inventory_stock": self.sale_sku_count,
             "central_inventory_block": 0,

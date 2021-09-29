@@ -103,8 +103,8 @@ wms_app_api_config = {
                 'planArrivalTime': 1630058027000,
                 'supplierCode': 'S31637083',
                 'remark': '我只是个备注',
-                'warehouseId': 19,
-                'destWarehouseId': 7
+                'warehouseId': 31,
+                'destWarehouseId': 31
             },
             'skuList': [
                 {

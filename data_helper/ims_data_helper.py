@@ -28,6 +28,11 @@ class ImsDataHelper(RequestHandler):
         for sql in sql_list:
             self.db.execute(sql)
 
+    def delete_unqualified_goods_inventory_data(self, ware_sku_code, warehouse_id):
+        del_sql = "DELETE from nogood_wares_inventory where ware_sku_code='%s' and warehouse_id = %s;" % (
+            ware_sku_code, warehouse_id)
+        self.db.execute(del_sql)
+
     # 获取销售商品bom比例
     def get_sale_sku_bom_detail(self, sale_sku_code, bom_version):
         """
@@ -41,8 +46,7 @@ class ImsDataHelper(RequestHandler):
         # 获取bom明细数据，组装成{"仓库sku1":数量1,"仓库sku2":数量2}格式
         get_bom_detail_sql = """
                    SELECT
-                       ware_sku_code,
-                       bom_qty 
+                       ware_sku_code,bom_qty 
                    FROM
                        bom_detail 
                    WHERE
@@ -101,33 +105,29 @@ class ImsDataHelper(RequestHandler):
     def get_goods_inventory(self, sale_sku_code, current_warehouse_id, target_warehouse_id):
         if not target_warehouse_id:
             sql = """
-                        SELECT
-                            type,
-                            stock,
-                            block 
-                        FROM
-                            goods_inventory 
-                        WHERE
-                            goods_sku_code = '%s' 
-                            AND current_warehouse_id = %s 
-                            AND target_warehouse_id is NULL;
-                        """ % (
+                    SELECT 
+                        type,stock,block 
+                    FROM
+                        goods_inventory 
+                    WHERE
+                        goods_sku_code = '%s' 
+                        AND current_warehouse_id = %s 
+                        AND target_warehouse_id is NULL;
+                    """ % (
                 sale_sku_code,
                 current_warehouse_id
             )
         else:
             sql = """
-                SELECT
-                    type,
-                    stock,
-                    block 
-                FROM
-                    goods_inventory 
-                WHERE
-                    goods_sku_code = '%s' 
-                    AND current_warehouse_id = %s 
-                    AND target_warehouse_id = %s
-                """ % (
+                    SELECT 
+                        type,stock,block 
+                    FROM
+                        goods_inventory 
+                    WHERE
+                        goods_sku_code = '%s' 
+                        AND current_warehouse_id = %s 
+                        AND target_warehouse_id = %s
+                    """ % (
                 sale_sku_code,
                 current_warehouse_id,
                 target_warehouse_id
@@ -163,7 +163,7 @@ class ImsDataHelper(RequestHandler):
         return goods_inventory_dict
 
     # 获取仓库商品总库存
-    def get_wares_inventory(self, sale_sku_code, current_warehouse_id, target_warehouse_id):
+    def get_wares_inventory(self, sale_sku_code, warehouse_id, target_warehouse_id):
         if not target_warehouse_id:
             get_ware_sku_code_sql = "SELECT DISTINCT ware_sku_code from wares_inventory where goods_sku_code = '%s' and target_warehouse_id is null;" % sale_sku_code
         else:
@@ -175,22 +175,36 @@ class ImsDataHelper(RequestHandler):
         all_ware_sku_inventory = dict()
 
         for ware_sku_code in ware_sku_code_list:
-            sql = """
-                SELECT
-                    storage_location_id,
-                    stock,
-                    block 
-                FROM
-                    wares_inventory 
-                WHERE
-                    goods_sku_code = '%s' 
-                    AND warehouse_id = %s
-                    AND ware_sku_code = '%s'
-                    OR storage_location_id = -%s
-                ORDER BY
-                    ware_sku_code;
-                """ % (
-                sale_sku_code, current_warehouse_id, ware_sku_code, current_warehouse_id)
+            if target_warehouse_id:
+                sql = """
+                       SELECT
+                           storage_location_id,stock,block 
+                       FROM
+                           wares_inventory 
+                       WHERE
+                           goods_sku_code = '%s' 
+                           AND warehouse_id = %s
+                           AND target_warehouse_id = %s
+                           AND ware_sku_code = '%s'
+                           OR storage_location_id = -%s
+                       ORDER BY
+                           ware_sku_code;
+                       """ % (sale_sku_code, warehouse_id, target_warehouse_id, ware_sku_code, warehouse_id)
+            else:
+                sql = """
+                        SELECT
+                            storage_location_id,stock,block 
+                        FROM
+                            wares_inventory 
+                        WHERE
+                            goods_sku_code = '%s' 
+                            AND warehouse_id = %s
+                            AND target_warehouse_id is NULL
+                            AND ware_sku_code = '%s'
+                            OR storage_location_id = -%s
+                        ORDER BY
+                            ware_sku_code;
+                        """ % (sale_sku_code, warehouse_id, ware_sku_code, warehouse_id)
             ware_sku_inventory_data = self.db.get_all(sql)
             if not ware_sku_inventory_data:
                 return
@@ -210,11 +224,11 @@ class ImsDataHelper(RequestHandler):
             all_ware_sku_inventory.update({
                 ware_sku_code: temp_ware_sku_inventory
             })
-            get_dock_sql = "select storage_location_id,stock,block from wares_inventory where storage_location_id =-%s;" % current_warehouse_id
+            get_dock_sql = "select storage_location_id,stock,block from wares_inventory where storage_location_id =-%s;" % warehouse_id
             dock_data = self.db.get_one(get_dock_sql)
             if dock_data:
                 dock = {
-                    -current_warehouse_id: {
+                    -warehouse_id: {
                         "stock": dock_data['stock'],
                         "block": dock_data['block']
                     }
@@ -222,6 +236,7 @@ class ImsDataHelper(RequestHandler):
                 all_ware_sku_inventory.update(dock)
         return all_ware_sku_inventory
 
+    # 获取良品库存
     def get_current_inventory(self, sale_sku_code, current_warehouse_id, target_warehouse_id):
         current_inventory = dict()
         central_inventor = self.get_central_inventory(sale_sku_code)
@@ -245,6 +260,40 @@ class ImsDataHelper(RequestHandler):
         if wares_inventory:
             current_inventory.update(wares_inventory)
         return current_inventory
+
+    # 获取仓库商品总库存
+    def get_unqualified_inventory(self, ware_sku_code, warehouse_id):
+        unqualified_goods_inventory = dict()
+
+        sql = """
+                SELECT
+                    storage_location_id,stock,block 
+                FROM
+                    nogood_wares_inventory 
+                WHERE
+                    warehouse_id = %s
+                    AND ware_sku_code = '%s';
+                """ % (warehouse_id, ware_sku_code)
+        ware_sku_inventory_data = self.db.get_all(sql)
+        if not ware_sku_inventory_data:
+            return
+        temp_ware_sku_inventory = dict()
+        for data in ware_sku_inventory_data:
+            if data['storage_location_id'] is None:
+                temp_ware_sku_inventory.update(
+                    {
+                        "total": {'stock': data['stock'], 'block': data['block']}
+                    }
+                )
+            elif data['storage_location_id'] > 0:
+                temp_ware_sku_inventory.update(
+                    {
+                        data['storage_location_id']: {'stock': data['stock'], 'block': data['block']}}
+                )
+        unqualified_goods_inventory.update({
+            ware_sku_code: temp_ware_sku_inventory
+        })
+        return unqualified_goods_inventory
 
     # OMS下单预占中央库存、销售商品总库存
     def oms_order_block(self, sale_sku_code, count, current_warehouse_id):
@@ -315,7 +364,7 @@ class ImsDataHelper(RequestHandler):
     def other_into_warehouse(self, ware_sku_list, current_warehouse_id, target_warehouse_id):
         ims_api_config['other_into_warehouse']['data'][0].update(
             {
-                "sourceNo": "RK" + str(int(time.time())),
+                "sourceNo": "RK" + str(int(time.time() * 1000)),
                 "targetWarehouseId": target_warehouse_id,
                 "warehouseId": current_warehouse_id,
                 "wareSkuList": ware_sku_list
@@ -441,3 +490,120 @@ class ImsDataHelper(RequestHandler):
             current_warehouse_id,
             target_warehouse_id)
         return purchase_into_warehouse_res
+
+    def qualified_goods_other_out_block(self, ware_sku_list, warehouse_id, target_warehouse_id):
+        ims_api_config['qualified_goods_other_out_block']['data'][0].update(
+            {
+                "sourceNo": "CK" + str(int(time.time() * 1000)),
+                "targetWarehouseId": target_warehouse_id,
+                "wareSkuList": ware_sku_list,
+                "warehouseId": warehouse_id
+            }
+        )
+        qualified_goods_other_out_block_res = self.send_request(**ims_api_config['qualified_goods_other_out_block'])
+        return qualified_goods_other_out_block_res
+
+    def cancel_qualified_goods_other_out_block(self, block_book_id, source_no):
+        ims_api_config['cancel_qualified_goods_other_out_block']['data'].update(
+            {
+                "sourceNo": source_no,
+                "blockBookId": block_book_id
+            }
+        )
+        cancel_block_res = self.send_request(**ims_api_config['cancel_qualified_goods_other_out_block'])
+        return cancel_block_res
+
+    def cancel_unqualified_goods_other_out_block(self, block_book_id, source_no):
+        ims_api_config['cancel_unqualified_goods_other_out_block']['data'].update(
+            {
+                "sourceNo": source_no,
+                "blockBookId": block_book_id
+            }
+        )
+        cancel_block_res = self.send_request(**ims_api_config['cancel_unqualified_goods_other_out_block'])
+        return cancel_block_res
+
+    def unqualified_goods_other_out_block(self, ware_sku_list, warehouse_id):
+        ims_api_config['unqualified_goods_other_out_block']['data'][0].update(
+            {
+                "sourceNo": "CK" + str(int(time.time() * 1000)),
+                "wareSkuList": ware_sku_list,
+                "warehouseId": warehouse_id
+            }
+        )
+        unqualified_goods_other_out_block_res = self.send_request(**ims_api_config['unqualified_goods_other_out_block'])
+        return unqualified_goods_other_out_block_res
+
+    def qualified_goods_other_out_delivered(self, ware_sku_list, warehouse_id, target_warehouse_id):
+        ims_api_config['qualified_goods_other_out_delivery_goods']['data'][0].update(
+            {
+                "sourceNo": "CK" + str(int(time.time() * 1000)),
+                "targetWarehouseId": target_warehouse_id,
+                "wareSkuList": ware_sku_list,
+                "warehouseId": warehouse_id
+            }
+        )
+        qualified_goods_other_out_block_res = self.send_request(
+            **ims_api_config['qualified_goods_other_out_delivery_goods'])
+        return qualified_goods_other_out_block_res
+
+    def unqualified_goods_other_out_delivered(self, ware_sku_list, warehouse_id):
+        ims_api_config['unqualified_goods_other_out_delivery_goods']['data'][0].update(
+            {
+                "sourceNo": "CK" + str(int(time.time() * 1000)),
+                "wareSkuList": ware_sku_list,
+                "warehouseId": warehouse_id
+            }
+        )
+        unqualified_goods_other_out_block_res = self.send_request(
+            **ims_api_config['unqualified_goods_other_out_delivery_goods'])
+        return unqualified_goods_other_out_block_res
+
+    def turn_to_unqualified_goods(self, ware_sku, from_location_id, to_location_id, qty, warehouse_id,
+                                  target_warehouse_id):
+        ims_api_config['turn_to_unqualified_goods']['data'].update(
+            {
+                "sourceNo": "LZC" + str(int(time.time() * 1000)),
+                "qty": qty,
+                "fromStorageLocationId": from_location_id,
+                "toStorageLocationId": to_location_id,
+                "warehouseId": warehouse_id,
+                "targetWarehouseId": target_warehouse_id,
+                "wareSkuCode": ware_sku
+            }
+        )
+        turn_to_unqualified_goods = self.send_request(**ims_api_config['turn_to_unqualified_goods'])
+        return turn_to_unqualified_goods
+
+    def add_unqualified_stock_by_other_in(self, ware_sku, from_location_id, to_location_id, qty, warehouse_id,
+                                          target_warehouse_id):
+        ware_sku_list = [{
+            "qty": qty,
+            "storageLocationId": from_location_id,
+            "storageLocationType": 5,
+            "wareSkuCode": ware_sku
+        }]
+        ims_api_config['other_into_warehouse']['data'][0].update(
+            {
+                "sourceNo": "RK" + str(int(time.time() * 1000)),
+                "targetWarehouseId": target_warehouse_id,
+                "warehouseId": warehouse_id,
+                "wareSkuList": ware_sku_list
+            })
+        other_in_res = self.send_request(**ims_api_config['other_into_warehouse'])
+        if not other_in_res or other_in_res['code'] != 200:
+            return
+
+        ims_api_config['turn_to_unqualified_goods']['data'].update(
+            {
+                "sourceNo": "LZC" + str(int(time.time() * 1000)),
+                "qty": qty,
+                "fromStorageLocationId": from_location_id,
+                "toStorageLocationId": to_location_id,
+                "wareHouseId": warehouse_id,
+                "targetWarehouseId": target_warehouse_id,
+                "wareSkuCode": ware_sku
+            }
+        )
+        turn_to_unqualified_goods = self.send_request(**ims_api_config['turn_to_unqualified_goods'])
+        return turn_to_unqualified_goods
