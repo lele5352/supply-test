@@ -3,17 +3,14 @@ import pytest
 from testcase.ims_test import *
 
 
-class TestOtherIntoWarehouse(object):
+class TestOtherIntoStockWarehouse(object):
     def setup_class(self):
         self.ims = ims
         self.sale_sku_code = sale_sku_code
         self.warehouse_id = stock_warehouse_id
         self.target_warehouse_id = ''
         self.bom_detail = bom_detail
-
-        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 5, self.warehouse_id)
-        self.sj_location_ids = [self.ims.wms_api.get_location_id(location_code, self.warehouse_id) for location_code in
-                                self.sj_location_codes]
+        self.sj_location_ids = bsj_location_ids
 
     def setup(self):
         self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)

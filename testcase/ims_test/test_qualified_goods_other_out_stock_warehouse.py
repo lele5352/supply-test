@@ -11,12 +11,9 @@ class TestQualifiedGoodsOtherOutStockWarehouse(object):
         self.target_warehouse_id = ''
         self.bom_version = bom_version
         self.bom_detail = bom_detail
-
         self.sale_sku_count = 2
-        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 5, self.warehouse_id)
-        self.sj_location_ids = [self.ims.wms_api.get_location_id(location_code, self.warehouse_id) for location_code in
-                                self.sj_location_codes]
-        # self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
+        self.sj_location_ids = bsj_location_ids
+        self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
         # 采购入库生成库存
         self.ims.add_stock_by_purchase_into_warehouse(
             self.sale_sku_code, self.bom_version,
@@ -24,8 +21,10 @@ class TestQualifiedGoodsOtherOutStockWarehouse(object):
             self.sale_sku_count,
             self.warehouse_id,
             self.target_warehouse_id)
-        self.expect_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
-                                                               self.target_warehouse_id)
+        self.expect_inventory = self.ims.get_current_inventory(
+            self.sale_sku_code,
+            self.warehouse_id,
+            self.target_warehouse_id)
 
     # @pytest.mark.skip(reason='test')
     def test_1_qualified_goods_other_out_delivery_warehouse(self):

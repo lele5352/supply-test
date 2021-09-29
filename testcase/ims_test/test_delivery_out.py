@@ -5,12 +5,6 @@ from testcase.ims_test import *
 
 
 class TestDeliveryOut(object):
-    """
-    README:
-        仅发货仓、直发仓支持销售出库流程，对应IMS库存数据模型为AA型，即warehouse_id与target_warehouse_id相同且不为空；
-        发货库存变化检查用例将一个销售出库单从生成库存到发货出库一路执行并逐个点检查库存变，注意单据号delivery_code必须放在setup_class中保证全局单号统一
-    """
-
     def setup_class(self):
         self.ims = ims
         self.sale_sku_code = sale_sku_code
@@ -18,12 +12,9 @@ class TestDeliveryOut(object):
         self.target_warehouse_id = delivery_warehouse_id
         self.bom_version = bom_version
         self.bom_detail = bom_detail
-
         self.delivery_code = 'CK' + str(int(time.time() * 1000))
         self.sale_sku_count = 2
-        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 5, self.warehouse_id)
-        self.sj_location_ids = [self.ims.wms_api.get_location_id(location_code, self.warehouse_id) for location_code in
-                                self.sj_location_codes]
+        self.sj_location_ids = fsj_location_ids
 
         # 干掉该销售sku的库存数据；
         self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)

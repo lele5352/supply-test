@@ -7,7 +7,7 @@ target_warehouse_id = 31
 sale_sku_code = '11471839197'
 # sale_sku_code = '73781610267'
 
-# ims_handler.delete_ims_data(sale_sku_code, current_warehouse_id)
+ims_handler.delete_ims_data(sale_sku_code, current_warehouse_id)
 ware_sku_list = [
     # {
     #     "qty": 3,

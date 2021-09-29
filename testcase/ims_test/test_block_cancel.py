@@ -13,11 +13,8 @@ class TestBlockCancel(object):
         self.sale_sku_count = 2
         self.bom_version = bom_version
         self.bom_detail = bom_detail
-        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 5, self.warehouse_id)
-        self.sj_location_ids = [self.ims.wms_api.get_location_id(location_code, self.warehouse_id) for location_code in
-                                self.sj_location_codes]
-        self.yk_location_code = self.ims.wms_api.get_location_codes(1, 4, self.warehouse_id)
-        self.yk_location_id = self.ims.wms_api.get_location_id(self.yk_location_code, self.warehouse_id)
+        self.sj_location_ids = fsj_location_ids
+        self.yk_location_id = yk_location_id
 
     def setup(self):
         self.delivery_code = 'CK' + str(int(time.time()))

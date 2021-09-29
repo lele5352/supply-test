@@ -5,24 +5,15 @@ from testcase.ims_test import *
 
 
 class TestDeliveryPick(object):
-    """
-    README:
-        仅发货仓、直发仓支持销售出库流程，对应IMS库存数据模型为AA型，即warehouse_id与target_warehouse_id相同且不为空
-    """
-
     def setup_class(self):
         self.ims = ims
         self.sale_sku_code = sale_sku_code
         self.warehouse_id = delivery_warehouse_id
         self.target_warehouse_id = delivery_warehouse_id
         self.bom_version = bom_version
-
         self.sale_sku_count = 2
-        self.bom_detail = self.ims.get_sale_sku_bom_detail(self.sale_sku_code, self.bom_version)
-        self.sj_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 5, self.warehouse_id)
-        self.yk_location_codes = self.ims.wms_api.get_location_codes(len(self.bom_detail), 4, self.warehouse_id)
-        self.sj_location_ids = [self.ims.wms_api.get_location_id(location_code, self.warehouse_id) for location_code in
-                                self.sj_location_codes]
+        self.bom_detail = bom_detail
+        self.sj_location_ids = fsj_location_ids
 
     def setup(self):
         # 这里踩过坑，单据号不能放在setupclass里面，否则每次单据号都一样，会触发幂等，导致结果不正确

@@ -7,7 +7,8 @@ def barcode_generate(code_str, barcode_type):
 
 
 if __name__ == '__main__':
-    # barcode_generate('11471839197A01', 'ware_sku')
+    barcode_generate('11471839197A02', 'ware_sku')
     # barcode_generate('CPKW001', 'locations')
-    barcode_generate('SHKW001', 'locations')
+    # barcode_generate('SHKW001', 'locations')
+    # barcode_generate('sjkw-003', 'locations')
 

@@ -29,6 +29,8 @@ class WmsAppApiHelper(RequestHandler):
                 AND warehouse_id = %s;
                 """ % (location_code, warehouse_id)
         location_id = self.db.get_one(query_warehouse_location_id_sql)
+        if not location_id:
+            return
         return location_id['id']
 
     # 获取库位，先从数据库获取，获取不到则新建

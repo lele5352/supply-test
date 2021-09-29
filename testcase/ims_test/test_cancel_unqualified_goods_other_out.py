@@ -9,15 +9,18 @@ class TestCancelUnqualifiedGoodsOtherOut(object):
         self.warehouse_id = delivery_warehouse_id
         self.target_warehouse_id = delivery_warehouse_id
         self.ware_sku_code = ware_sku_code
-
         self.ware_sku_count = 10
-        self.sj_location_code = self.ims.wms_api.get_location_codes(1, 5, self.warehouse_id)
-        self.sj_location_id = self.ims.wms_api.get_location_id(self.sj_location_code, self.warehouse_id)
-        self.cp_location_code = self.ims.wms_api.get_location_codes(1, 6, self.warehouse_id)
-        self.cp_location_id = self.ims.wms_api.get_location_id(self.cp_location_code, self.warehouse_id)
+        self.sj_location_id = fsj_location_ids[0]
+        self.cp_location_id = fcp_location_id
+
         self.ims.delete_unqualified_goods_inventory_data(self.ware_sku_code, self.warehouse_id)
-        self.ims.add_unqualified_stock_by_other_in(self.ware_sku_code, self.sj_location_id, self.cp_location_id,
-                                                   self.ware_sku_count, self.warehouse_id, self.target_warehouse_id)
+        self.ims.add_unqualified_stock_by_other_in(
+            self.ware_sku_code,
+            self.sj_location_id,
+            self.cp_location_id,
+            self.ware_sku_count,
+            self.warehouse_id,
+            self.target_warehouse_id)
         self.expect_inventory = self.ims.get_unqualified_inventory(self.ware_sku_code, self.warehouse_id)
 
     # @pytest.mark.skip(reason='test')

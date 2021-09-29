@@ -237,7 +237,7 @@ ims_api_config = {
         "method": "post",
         "data": [
             {
-                "functionType": "4",
+                "functionType": "5",
                 "operateType": "2",
                 "operatorId": 204,
                 "processType": 1,
@@ -255,34 +255,12 @@ ims_api_config = {
             }
         ],
     },
-    "qualified_goods_other_out_delivery_goods": {
-        "uri_path": "/ims/service/wms/business/out/of/other/stock",
-        "method": "post",
-        "data": [
-            {
-                "functionType": "5",
-                "operateType": "5",
-                "operatorId": 204,
-                "processType": 1,
-                "sourceNo": "sourceNo2109022001",
-                "targetWarehouseId": 19,
-                "wareSkuList": [
-                    {
-                        "qty": 2,
-                        "storageLocationId": 743,
-                        "wareSkuCode": "W83173944"
-                    }
-                ],
-                "warehouseId": 19
-            }
-        ]
-    },
     "unqualified_goods_other_out_block": {
         "uri_path": "/ims/service/wms/business/distribute/bad/block",
         "method": "post",
         "data": [
             {
-                "functionType": "4",
+                "functionType": "5",
                 "operateType": "2",
                 "operatorId": 204,
                 "processType": 1,
@@ -299,34 +277,34 @@ ims_api_config = {
             }
         ]
     },
-    "cancel_unqualified_goods_other_out_block": {
-        "uri_path": "/ims/service/wms/business/rollback/bad/block",
+    "qualified_goods_other_out_delivery_goods": {
+        "uri_path": "/ims/service/wms/business/out/of/other/stock",
         "method": "post",
-        "data": {
-            "blockBookId": "",
-            "functionType": 8,
-            "operateType": 2,
-            "operatorId": 8,
-            "sourceNo": ""
-        }
-    },
-    "cancel_qualified_goods_other_out_block": {
-        "uri_path": "/ims/service/wms/business/rollback/other/block",
-        "method": "post",
-        "data": {
-            "blockBookId": "",
-            "functionType": 8,
-            "operateType": 2,
-            "operatorId": 8,
-            "sourceNo": ""
-        }
+        "data": [
+            {
+                "functionType": "39",
+                "operateType": "5",
+                "operatorId": 204,
+                "processType": 1,
+                "sourceNo": "sourceNo2109022001",
+                "targetWarehouseId": 19,
+                "wareSkuList": [
+                    {
+                        "qty": 2,
+                        "storageLocationId": 743,
+                        "wareSkuCode": "W83173944"
+                    }
+                ],
+                "warehouseId": 19
+            }
+        ]
     },
     "unqualified_goods_other_out_delivery_goods": {
         "uri_path": "/ims/service/wms/business/out/of/bad",
         "method": "post",
         "data": [
             {
-                "functionType": "5",
+                "functionType": "39",
                 "operateType": "5",
                 "operatorId": 204,
                 "processType": 1,
@@ -341,6 +319,28 @@ ims_api_config = {
                 "warehouseId": 19
             }
         ]
+    },
+    "cancel_unqualified_goods_other_out_block": {
+        "uri_path": "/ims/service/wms/business/rollback/bad/block",
+        "method": "post",
+        "data": {
+            "blockBookId": "",
+            "functionType": 40,
+            "operateType": 3,
+            "operatorId": 8,
+            "sourceNo": ""
+        }
+    },
+    "cancel_qualified_goods_other_out_block": {
+        "uri_path": "/ims/service/wms/business/rollback/other/block",
+        "method": "post",
+        "data": {
+            "blockBookId": "",
+            "functionType": 40,
+            "operateType": 3,
+            "operatorId": 8,
+            "sourceNo": ""
+        }
     },
     "turn_to_unqualified_goods": {
         "uri_path": "/ims/service/stock/manage/bad",
