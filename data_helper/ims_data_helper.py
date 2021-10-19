@@ -163,13 +163,8 @@ class ImsDataHelper(RequestHandler):
         return goods_inventory_dict
 
     # 获取仓库商品总库存
-    def get_wares_inventory(self, sale_sku_code, warehouse_id, target_warehouse_id):
-        if not target_warehouse_id:
-            get_ware_sku_code_sql = "SELECT DISTINCT ware_sku_code from wares_inventory where goods_sku_code = '%s' and target_warehouse_id is null;" % sale_sku_code
-        else:
-            get_ware_sku_code_sql = "SELECT DISTINCT ware_sku_code from wares_inventory where goods_sku_code = '%s' and target_warehouse_id ='%s';" % (
-                sale_sku_code, target_warehouse_id)
-        ware_sku_code_list = [data['ware_sku_code'] for data in self.db.get_all(get_ware_sku_code_sql)]
+    def get_wares_inventory(self, sale_sku_code, bom_version, warehouse_id, target_warehouse_id):
+        ware_sku_code_list = self.get_bom_version_ware_sku(sale_sku_code, bom_version)
         if not ware_sku_code_list:
             return
         all_ware_sku_inventory = dict()
@@ -186,10 +181,9 @@ class ImsDataHelper(RequestHandler):
                            AND warehouse_id = %s
                            AND target_warehouse_id = %s
                            AND ware_sku_code = '%s'
-                           OR storage_location_id = -%s
                        ORDER BY
                            ware_sku_code;
-                       """ % (sale_sku_code, warehouse_id, target_warehouse_id, ware_sku_code, warehouse_id)
+                       """ % (sale_sku_code, warehouse_id, target_warehouse_id, ware_sku_code)
             else:
                 sql = """
                         SELECT
@@ -201,13 +195,12 @@ class ImsDataHelper(RequestHandler):
                             AND warehouse_id = %s
                             AND target_warehouse_id is NULL
                             AND ware_sku_code = '%s'
-                            OR storage_location_id = -%s
                         ORDER BY
                             ware_sku_code;
-                        """ % (sale_sku_code, warehouse_id, ware_sku_code, warehouse_id)
+                        """ % (sale_sku_code, warehouse_id, ware_sku_code)
             ware_sku_inventory_data = self.db.get_all(sql)
             if not ware_sku_inventory_data:
-                return
+                continue
             temp_ware_sku_inventory = dict()
             for data in ware_sku_inventory_data:
                 if data['storage_location_id'] is None:
@@ -216,7 +209,7 @@ class ImsDataHelper(RequestHandler):
                             "total": {'stock': data['stock'], 'block': data['block']}
                         }
                     )
-                elif data['storage_location_id'] > 0:
+                else:
                     temp_ware_sku_inventory.update(
                         {
                             data['storage_location_id']: {'stock': data['stock'], 'block': data['block']}}
@@ -224,20 +217,11 @@ class ImsDataHelper(RequestHandler):
             all_ware_sku_inventory.update({
                 ware_sku_code: temp_ware_sku_inventory
             })
-            get_dock_sql = "select storage_location_id,stock,block from wares_inventory where storage_location_id =-%s;" % warehouse_id
-            dock_data = self.db.get_one(get_dock_sql)
-            if dock_data:
-                dock = {
-                    -warehouse_id: {
-                        "stock": dock_data['stock'],
-                        "block": dock_data['block']
-                    }
-                }
-                all_ware_sku_inventory.update(dock)
+
         return all_ware_sku_inventory
 
     # 获取良品库存
-    def get_current_inventory(self, sale_sku_code, current_warehouse_id, target_warehouse_id):
+    def get_current_inventory(self, sale_sku_code, bom_version, current_warehouse_id, target_warehouse_id):
         current_inventory = dict()
         central_inventor = self.get_central_inventory(sale_sku_code)
         if not target_warehouse_id:
@@ -248,7 +232,8 @@ class ImsDataHelper(RequestHandler):
             sale_sku_central_inventory = self.get_warehouse_central_inventory(sale_sku_code, target_warehouse_id)
 
         goods_inventory = self.get_goods_inventory(sale_sku_code, current_warehouse_id, target_warehouse_id)
-        wares_inventory = self.get_wares_inventory(sale_sku_code, current_warehouse_id, target_warehouse_id)
+        wares_inventory = self.get_wares_inventory(sale_sku_code, bom_version, current_warehouse_id,
+                                                   target_warehouse_id)
 
         # 库存字典数据合并
         if central_inventor:

@@ -26,8 +26,11 @@ class TestBlockCancel(object):
             self.sale_sku_count,
             self.warehouse_id,
             self.target_warehouse_id)
-        self.expect_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
-                                                               self.target_warehouse_id)
+        self.expect_inventory = self.ims.get_current_inventory(
+            self.sale_sku_code,
+            self.bom_version,
+            self.warehouse_id,
+            self.target_warehouse_id)
 
     # @pytest.mark.skip(reason='test')
     def test_1_cancel_oms_order_block(self):
@@ -45,6 +48,7 @@ class TestBlockCancel(object):
         )
         cancel_oms_order_block_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -78,6 +82,7 @@ class TestBlockCancel(object):
 
         cancel_block_before_pick_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -120,6 +125,7 @@ class TestBlockCancel(object):
 
         cancel_block_before_pick_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -187,6 +193,7 @@ class TestBlockCancel(object):
 
         cancel_block_after_pick_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -204,12 +211,10 @@ class TestBlockCancel(object):
                     self.yk_location_id: {
                         "stock": detail[1] * self.sale_sku_count,
                         "block": 0
-                    }
+                    },
+                    # 拣货时库位库存转移到dock库存，取消后dock库存又转移到移库库位，所以相当于插入dock为0的库存数据
+                    -self.warehouse_id: {'stock': 0, 'block': 0}
                 })
-        # 拣货时库位库存转移到dock库存，取消后dock库存又转移到移库库位，所以相当于插入dock为0的库存数据
-        self.expect_inventory.update({
-            -self.warehouse_id: {'stock': 0, 'block': 0}
-        })
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200

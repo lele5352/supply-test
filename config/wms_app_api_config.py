@@ -1,4 +1,18 @@
 wms_app_api_config = {
+    "get_warehouse_area": {
+        "uri_path": "/api/ec-wms-api/warehousearea/page",
+        "method": "post",
+        "data": {
+            "warehouseAreaStatus": 0,
+            "sortField": [{"field": "create_time", "type": "DESC"}],
+            "warehouseAreaType": 1,
+            "warehouseAreaCode": "",
+            "warehouseAreaName": "",
+            "size": 1,
+            "current": 1,
+            "warehouseId": 2
+        }
+    },
     "location_create": {
         "uri_path": "/api/ec-wms-api/location/save",
         "method": "post",

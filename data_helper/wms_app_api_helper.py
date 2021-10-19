@@ -12,11 +12,22 @@ from utils.ums_handler import get_app_headers
 class WmsAppApiHelper(RequestHandler):
     def __init__(self):
         self.prefix_key = 'app_26'
-        self.infix = '/api/ec-wms-api'
+        # self.infix = '/api/ec-wms-api'
         self.app_headers = get_app_headers()
-        super().__init__(self.prefix_key, self.app_headers, self.infix)
+        super().__init__(self.prefix_key, self.app_headers)
         self.db = MysqlHandler('test_163', 'supply_wms')
         self.log_handler = LoggerHandler('WmsAppApiHelper')
+
+    def get_warehouse_area(self, warehouse_id, area_type):
+        wms_app_api_config['get_warehouse_area']['data'].update(
+            {
+                'warehouseAreaType': area_type,
+                'warehouseId': warehouse_id
+            }
+        )
+        res = self.send_request(**wms_app_api_config['get_warehouse_area'])
+        area_id = res['data']['records'][0]['warehouseAreaId']
+        return int(area_id)
 
     def get_location_id(self, location_code, warehouse_id):
         query_warehouse_location_id_sql = """
@@ -34,59 +45,118 @@ class WmsAppApiHelper(RequestHandler):
         return location_id['id']
 
     # 获取库位，先从数据库获取，获取不到则新建
-    def get_location_codes(self, num=1, location_type=1, warehouse_id=19):
+    def get_location_codes(self, num, location_type, warehouse_id, target_warehouse_id=None):
         location_codes = list()
-        query_warehouse_location_code_sql = """
-        SELECT
-            warehouse_location_code 
-        FROM
-            base_warehouse_location 
-        WHERE
-            type = %s 
-            AND use_state = 0 
-            AND state = 0 
-            AND warehouse_id = %s 
-            AND del_flag = 0 
-            LIMIT %s
-        """
-        locations = self.db.get_all(query_warehouse_location_code_sql % (location_type, warehouse_id, num))
+        if not target_warehouse_id:
+            query_warehouse_location_code_sql = """
+                    SELECT
+                        warehouse_location_code 
+                    FROM
+                        base_warehouse_location 
+                    WHERE
+                        type = %s 
+                        AND use_state = 0 
+                        AND state = 0 
+                        AND warehouse_id = %s 
+                        AND dest_warehouse_id is NULL
+                        AND del_flag = 0 
+                        LIMIT %s
+                    """ % (location_type, warehouse_id, num)
+        else:
+            query_warehouse_location_code_sql = """
+            SELECT
+                warehouse_location_code 
+            FROM
+                base_warehouse_location 
+            WHERE
+                type = %s 
+                AND use_state = 0 
+                AND state = 0 
+                AND warehouse_id = %s 
+                AND dest_warehouse_id = %s
+                AND del_flag = 0 
+                LIMIT %s
+        """ % (location_type, warehouse_id, target_warehouse_id, num)
+        locations = self.db.get_all(
+            query_warehouse_location_code_sql
+        )
         if not locations:
-            location_codes = self.location_create(num, location_type)
+            location_codes = self.location_create(num, location_type, warehouse_id, target_warehouse_id)
             return location_codes
-        elif len(locations) == 1:
-            return locations[0]['warehouse_location_code']
+        # 可能存在有库位，但是数量少于需要的，这种情况需要获取已有的，创建缺的
+        elif 1 <= len(locations) < num:
+            for location in locations:
+                location_codes.append(location['warehouse_location_code'])
+            new_location_codes = self.location_create((num - len(locations)), location_type, warehouse_id,
+                                                      target_warehouse_id)
+            location_codes.extend(new_location_codes)
+            return location_codes
         else:
             for location in locations:
                 location_codes.append(location['warehouse_location_code'])
             return location_codes
 
     # 创建库位
-    def location_create(self, num=1, location_type=1, extra=None):
+    def location_create(self, num, location_type, warehouse_id, target_warehouse_id=None, extra=None):
         """
         :param location_type: 库位类型：1-收货库位 2-质检库位 3-调拨库位 4-移库库位 5-上架库位 6-不良品库位 7-入库异常库位 8-出库异常库位
         :param num: 新建的库位数
         :param extra: 为空时用接口配置中的参数；非空时则更新接口配置中的参数
+        :param warehouse_id: 所属仓库id
+        :param target_warehouse_id: 目的仓id
         :return: list 库位列表
 
-        Tips:各类型库位对应写死的库区
-        1-收货库位 库区id：15，类型：容器库区-5
-        2-质检库位 库区id：15，类型：容器库区-5
-        3-调拨库位 库区id：15，类型：容器库区-5
-        4-移库库位 库区id：15，类型：容器库区-5
-        5-上架库位 库区id：42，类型：上架库区-1
-        6-不良品库位 库区id：40，类型：不良品库区-2
-        7-入库异常库位 库区id：41，类型：入库异常库区-3
-        8-出库异常库位 库区id：19，类型：出库异常库区-4
+        库位类型对应的库区类型
+        1-收货库位 类型：容器库区-5
+        2-质检库位 类型：容器库区-5
+        3-调拨库位 类型：容器库区-5
+        4-移库库位 类型：容器库区-5
+        5-上架库位 类型：上架库区-1
+        6-不良品库位 类型：不良品库区-2
+        7-入库异常库位 类型：入库异常库区-3
+        8-出库异常库位 类型：出库异常库区-4
         """
         location_area_maps = {
-            1: {'area_type': 5, "area_id": 15, "code_prefix": "SH", "name_prefix": "SHN"},
-            2: {'area_type': 5, "area_id": 15, "code_prefix": "ZJ", "name_prefix": "ZJN"},
-            3: {'area_type': 5, "area_id": 15, "code_prefix": "DB", "name_prefix": "DBN"},
-            4: {'area_type': 5, "area_id": 15, "code_prefix": "YK", "name_prefix": "YJN"},
-            5: {'area_type': 1, "area_id": 42, "code_prefix": "SJ", "name_prefix": "SJN"},
-            6: {'area_type': 2, "area_id": 40, "code_prefix": "BLP", "name_prefix": "BLPN"},
-            7: {'area_type': 3, "area_id": 41, "code_prefix": "RKYC", "name_prefix": "RKYCN"},
-            8: {'area_type': 4, "area_id": 19, "code_prefix": "CKYC", "name_prefix": "CKYCN"}
+            1: {
+                'area_type': 5,
+                "code_prefix": "SH",
+                "name_prefix": "SHKW"
+            },
+            2: {
+                'area_type': 5,
+                "code_prefix": "ZJ",
+                "name_prefix": "ZJKW"
+            },
+            3: {
+                'area_type': 5,
+                "code_prefix": "DB",
+                "name_prefix": "DBKW"
+            },
+            4: {
+                'area_type': 5,
+                "code_prefix": "YK",
+                "name_prefix": "YJKW"
+            },
+            5: {
+                'area_type': 1,
+                "code_prefix": "SJ",
+                "name_prefix": "SJKW"
+            },
+            6: {
+                'area_type': 2,
+                "code_prefix": "CP",
+                "name_prefix": "CPKW"
+            },
+            7: {
+                'area_type': 3,
+                "code_prefix": "RKYC",
+                "name_prefix": "RKYCKW"
+            },
+            8: {
+                'area_type': 4,
+                "code_prefix": "CKYC",
+                "name_prefix": "CKYCKW"
+            }
         }
 
         if extra:
@@ -99,11 +169,13 @@ class WmsAppApiHelper(RequestHandler):
                 'warehouseLocationCode': location_area_maps[location_type]['code_prefix'] + now,
                 'warehouseLocationName': location_area_maps[location_type]['name_prefix'] + now,
                 'warehouseLocationType': location_type,
-                'belongWarehouseAreaId': location_area_maps[location_type]['area_id'],
-                'warehouseAreaType': location_area_maps[location_type]['area_type']
+                'belongWarehouseAreaId': self.get_warehouse_area(warehouse_id,location_area_maps[location_type]['area_type']),
+                'warehouseAreaType': location_area_maps[location_type]['area_type'],
+                'belongWarehouseId': warehouse_id,
+                'destWarehouseId': target_warehouse_id
             }
+            print(location_info)
             wms_app_api_config['location_create']['data'].update(location_info)
-
             location_create_res = self.send_request(**wms_app_api_config['location_create'])
             if location_create_res['code'] != 200:
                 self.log_handler.log('创建库位失败', 'ERROR')
@@ -312,8 +384,18 @@ class WmsAppApiHelper(RequestHandler):
 
 if __name__ == '__main__':
     pa = WmsAppApiHelper()
-    num = 2
-    sj_locations_codes = pa.get_location_codes(num, 5, 31)
-    print(sj_locations_codes)
+    # num = 1
+    # sj_locations_codes = pa.get_location_codes(num, 6, 31)
+    # print(sj_locations_codes)
 
+    # code = pa.location_create(1, 6, 31)
+    # code = pa.get_location_codes(3, 1, 29)
+    # print(code)
 
+    zsj_location_codes = pa.get_location_codes(2, 5, 30, 31)
+    print(zsj_location_codes)
+    # zsj_location_ids = [pa.get_location_id(location_code, 30) for location_code in
+    #                     zsj_location_codes]
+    # print(zsj_location_ids)
+    # area = pa.get_warehouse_area(30, 1)
+    # print(area)

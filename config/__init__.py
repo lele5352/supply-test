@@ -8,7 +8,7 @@ url_prefix = {
     'receipt_service_26': 'http://10.0.0.26:8323',
     'delivery_service_26': 'http://10.0.0.26:8330',
     'ims_service_26': 'http://10.0.0.26:28801'
-    # 'ims_service_26': 'http://10.0.0.25:28801'
+    # 'ims_service_26': 'http://10.0.9.3:28801'
 }
 
 mysql_config = {

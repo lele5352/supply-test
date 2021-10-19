@@ -23,6 +23,7 @@ class TestQualifiedGoodsOtherOutStockWarehouse(object):
             self.target_warehouse_id)
         self.expect_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id)
 
@@ -57,9 +58,9 @@ class TestQualifiedGoodsOtherOutStockWarehouse(object):
                     # 调用其他出库预占库存接口后获取库存数据，用于与构造的期望库存数据进行比对
                     after_block_inventory = self.ims.get_current_inventory(
                         self.sale_sku_code,
+                        self.bom_version,
                         self.warehouse_id,
-                        self.target_warehouse_id
-                    )
+                        self.target_warehouse_id)
 
                     # 构造期望库存
                     if out_count == 1:
@@ -84,9 +85,9 @@ class TestQualifiedGoodsOtherOutStockWarehouse(object):
                     )
                     after_delivered_inventory = self.ims.get_current_inventory(
                         self.sale_sku_code,
+                        self.bom_version,
                         self.warehouse_id,
-                        self.target_warehouse_id
-                    )
+                        self.target_warehouse_id)
                     if out_count == 1:
                         self.expect_inventory['central_inventory_stock'] -= 1
                         self.expect_inventory['central_inventory_block'] -= 1

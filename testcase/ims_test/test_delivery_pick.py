@@ -22,7 +22,8 @@ class TestDeliveryPick(object):
         self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
         # 采购入库生成销售sku现货库存
         self.ims.add_stock_by_purchase_into_warehouse(
-            self.sale_sku_code, self.bom_version,
+            self.sale_sku_code,
+            self.bom_version,
             self.sj_location_ids,
             self.sale_sku_count,
             self.warehouse_id,
@@ -53,7 +54,6 @@ class TestDeliveryPick(object):
         )
         ware_sku_list = list()
         expect_ware_sku_inventory_dict = dict()
-        actual_pick_num = 0
 
         # 构造拣货sku明细数据，此处为完整拣货，非短拣
         for location_id, detail in zip(self.sj_location_ids, self.bom_detail.items()):
@@ -65,20 +65,16 @@ class TestDeliveryPick(object):
                 "wareSkuCode": detail[0]
             }
             ware_sku_list.append(temp_dict)
-            # 实拣数累加
-            actual_pick_num += detail[1] * self.sale_sku_count
 
             # 根据拣货数据构造拣货后期望的仓库库存数据
             expect_ware_sku_inventory_dict[detail[0]] = {
                 location_id: {'block': detail[1] * self.sale_sku_count - pick_qty,
                               'stock': detail[1] * self.sale_sku_count - pick_qty},
                 'total': {'block': detail[1] * self.sale_sku_count,
-                          'stock': detail[1] * self.sale_sku_count}
+                          'stock': detail[1] * self.sale_sku_count},
+                -self.warehouse_id: {'block': 0, 'stock': pick_qty}
             }
-        # 更新期望仓库库存数据，加入dock库存为实拣数
-        expect_ware_sku_inventory_dict.update({
-            -self.warehouse_id: {'block': 0, 'stock': actual_pick_num}
-        })
+
         confirm_pick_res = self.ims.confirm_pick(
             self.delivery_code,
             ware_sku_list,
@@ -87,6 +83,7 @@ class TestDeliveryPick(object):
 
         after_pick_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -116,7 +113,7 @@ class TestDeliveryPick(object):
         assert delivery_order_block_res['code'] == 200
         assert assign_location_stock_res['code'] == 200
         assert confirm_pick_res['code'] == 200
-        assert after_pick_inventory == expect_after_pick_inventory
+        assert expect_after_pick_inventory == after_pick_inventory
 
     # @pytest.mark.skip(reason='test')
     def test_2_short_pick(self):
@@ -156,19 +153,16 @@ class TestDeliveryPick(object):
             }
             ware_sku_list.append(temp_dict)
             # 实拣数累加
-            actual_pick_num += pick_qty
 
             # 根据拣货数据构造拣货后期望的仓库库存数据
             expect_ware_sku_inventory_dict[detail[0]] = {
                 location_id: {'block': detail[1] * self.sale_sku_count - pick_qty,
                               'stock': detail[1] * self.sale_sku_count - pick_qty},
                 'total': {'block': detail[1] * self.sale_sku_count,
-                          'stock': detail[1] * self.sale_sku_count}
+                          'stock': detail[1] * self.sale_sku_count},
+                -self.warehouse_id: {'block': 0, 'stock': pick_qty}
             }
-        # 更新期望仓库库存数据，加入dock库存为实拣数
-        expect_ware_sku_inventory_dict.update({
-            -self.warehouse_id: {'block': 0, 'stock': actual_pick_num}
-        })
+
         confirm_pick_res = self.ims.confirm_pick(
             self.delivery_code,
             ware_sku_list,
@@ -177,6 +171,7 @@ class TestDeliveryPick(object):
 
         after_short_pick_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )

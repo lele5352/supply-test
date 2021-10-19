@@ -25,9 +25,9 @@ class TestPurchaseIntoExchangeWarehouse(object):
         # 获取库存数据
         current_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
-            self.target_warehouse_id
-        )
+            self.target_warehouse_id)
         expect_ims_inventory_data = {
             "central_inventory_stock": self.sale_sku_count,
             "central_inventory_block": 0,
@@ -56,9 +56,9 @@ class TestPurchaseIntoExchangeWarehouse(object):
         # 获取库存数据
         current_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
-            self.target_warehouse_id
-        )
+            self.target_warehouse_id)
 
         expect_ims_inventory_data = {
             "central_inventory_stock": self.sale_sku_count,

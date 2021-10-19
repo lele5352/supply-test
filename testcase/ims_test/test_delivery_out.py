@@ -25,8 +25,11 @@ class TestDeliveryOut(object):
             self.sale_sku_count,
             self.warehouse_id,
             self.target_warehouse_id)
-        self.expect_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
-                                                               self.target_warehouse_id)
+        self.expect_inventory = self.ims.get_current_inventory(
+            self.sale_sku_code,
+            self.bom_version,
+            self.warehouse_id,
+            self.target_warehouse_id)
 
     def test_1_oms_order_block(self):
         res = self.ims.oms_order_block(
@@ -37,6 +40,7 @@ class TestDeliveryOut(object):
         # 获取库存数据
         current_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -58,6 +62,7 @@ class TestDeliveryOut(object):
         # 获取库存数据
         current_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -82,6 +87,7 @@ class TestDeliveryOut(object):
         # 获取库存数据
         current_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -97,7 +103,6 @@ class TestDeliveryOut(object):
 
     def test_4_confirm_pick(self):
         ware_sku_list = list()
-        actual_pick_num = 0
         # 构造拣货sku明细数据，此处为完整拣货，非短拣
         for location_id, detail in zip(self.sj_location_ids, self.bom_detail.items()):
             pick_qty = detail[1] * self.sale_sku_count
@@ -108,17 +113,15 @@ class TestDeliveryOut(object):
                 "wareSkuCode": detail[0]
             }
             ware_sku_list.append(temp_dict)
-            # 实拣数累加
-            actual_pick_num += detail[1] * self.sale_sku_count
 
             # 释放库位库存
             self.expect_inventory[detail[0]][location_id]['block'] -= detail[1] * self.sale_sku_count
             self.expect_inventory[detail[0]][location_id]['stock'] -= detail[1] * self.sale_sku_count
-
-        # 更新期望仓库库存数据，加入dock库存为实拣数
-        self.expect_inventory.update({
-            -self.warehouse_id: {'block': 0, 'stock': actual_pick_num}
-        })
+            self.expect_inventory[detail[0]].update(
+                {
+                    -self.warehouse_id: {'block': 0, 'stock': pick_qty}
+                }
+            )
 
         confirm_pick_res = self.ims.confirm_pick(
             self.delivery_code,
@@ -128,6 +131,7 @@ class TestDeliveryOut(object):
         # 获取库存数据
         current_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -147,6 +151,7 @@ class TestDeliveryOut(object):
         # 获取库存数据
         current_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
+            self.bom_version,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -160,15 +165,13 @@ class TestDeliveryOut(object):
         self.expect_inventory["goods_inventory_spot_goods_stock"] -= self.sale_sku_count
         self.expect_inventory["goods_inventory_spot_goods_block"] -= self.sale_sku_count
 
-        pick_num = 0
         for detail in self.bom_detail.items():
             # 释放仓库商品总库存
             self.expect_inventory[detail[0]]['total']['stock'] -= detail[1] * self.sale_sku_count
             self.expect_inventory[detail[0]]['total']['block'] -= detail[1] * self.sale_sku_count
-            pick_num += detail[1] * self.sale_sku_count
 
-        # 扣掉dock库存
-        self.expect_inventory[-self.warehouse_id]['stock'] -= pick_num
+            # 扣掉dock库存
+            self.expect_inventory[detail[0]][-self.warehouse_id]['stock'] -= detail[1] * self.sale_sku_count
 
         assert res['code'] == 200
         assert current_inventory == self.expect_inventory

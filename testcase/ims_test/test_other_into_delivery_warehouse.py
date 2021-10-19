@@ -10,12 +10,17 @@ class TestOtherIntoDeliveryWarehouse(object):
         self.warehouse_id = delivery_warehouse_id
         self.target_warehouse_id = delivery_warehouse_id
         self.bom_detail = bom_detail
+        self.bom_version = bom_version
         self.sj_location_ids = fsj_location_ids
 
     def setup(self):
         self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
-        self.expect_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
-                                                               self.target_warehouse_id)
+        self.expect_inventory = self.ims.get_current_inventory(
+            self.sale_sku_code,
+            self.bom_version,
+            self.warehouse_id,
+            self.target_warehouse_id
+        )
 
     # @pytest.mark.skip(reason='test')
     def test_1_other_into_warehouse_less_than_one_set(self):
@@ -70,8 +75,11 @@ class TestOtherIntoDeliveryWarehouse(object):
                     }
                 }
             )
-        current_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
-                                                           self.target_warehouse_id)
+        current_inventory = self.ims.get_current_inventory(
+            self.sale_sku_code,
+            self.bom_version,
+            self.warehouse_id,
+            self.target_warehouse_id)
         assert res['code'] == 200
         assert current_inventory == self.expect_inventory
 
@@ -119,8 +127,11 @@ class TestOtherIntoDeliveryWarehouse(object):
                     }
                 }
             )
-        current_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
-                                                           self.target_warehouse_id)
+        current_inventory = self.ims.get_current_inventory(
+            self.sale_sku_code,
+            self.bom_version,
+            self.warehouse_id,
+            self.target_warehouse_id)
         assert res['code'] == 200
         assert current_inventory == self.expect_inventory
 
@@ -178,8 +189,11 @@ class TestOtherIntoDeliveryWarehouse(object):
                     }
                 }
             )
-        current_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
-                                                           self.target_warehouse_id)
+        current_inventory = self.ims.get_current_inventory(
+            self.sale_sku_code,
+            self.bom_version,
+            self.warehouse_id,
+            self.target_warehouse_id)
         assert res['code'] == 200
         assert current_inventory == self.expect_inventory
 
@@ -228,8 +242,11 @@ class TestOtherIntoDeliveryWarehouse(object):
                     }
                 }
             )
-        current_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
-                                                           self.target_warehouse_id)
+        current_inventory = self.ims.get_current_inventory(
+            self.sale_sku_code,
+            self.bom_version,
+            self.warehouse_id,
+            self.target_warehouse_id)
         assert res['code'] == 200
         assert current_inventory == self.expect_inventory
 
@@ -252,11 +269,10 @@ class TestOtherIntoDeliveryWarehouse(object):
             "goods_inventory_spot_goods_block": 0
         })
         # 构造入库仓库sku明细数据,刚好成1套的
-        iter_time = 0
+        iter_time = 1
         for sj_location_id, detail in zip(self.sj_location_ids, self.bom_detail.items()):
-            pick_qty = detail[1]
             ware_sku_list = [{
-                "qty": pick_qty,
+                "qty": detail[1],
                 "storageLocationId": sj_location_id,
                 "storageLocationType": 5,
                 "wareSkuCode": detail[0]
@@ -271,9 +287,12 @@ class TestOtherIntoDeliveryWarehouse(object):
                     }
                 }
             )
-            current_inventory = self.ims.get_current_inventory(self.sale_sku_code, self.warehouse_id,
-                                                               self.target_warehouse_id)
-            if iter_time >= len(self.bom_detail) - 1:
+            current_inventory = self.ims.get_current_inventory(
+                self.sale_sku_code,
+                self.bom_version,
+                self.warehouse_id,
+                self.target_warehouse_id)
+            if iter_time >= len(self.bom_detail):
                 self.expect_inventory.update(
                     {
                         "central_inventory_stock": 1,
@@ -283,7 +302,7 @@ class TestOtherIntoDeliveryWarehouse(object):
                 )
             iter_time += 1
             assert res['code'] == 200
-            assert current_inventory == self.expect_inventory
+            assert self.expect_inventory == current_inventory
 
 
 if __name__ == '__main__':
