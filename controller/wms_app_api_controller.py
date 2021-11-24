@@ -1,22 +1,22 @@
 import copy
+import json
 import time
 
+from config import mysql_info, app_prefix
+from config.api_config.wms_app_api_config import wms_app_api_config
 from utils.barcode_handler import barcode_generate
 from utils.request_handler import RequestHandler
-from config.wms_app_api_config import wms_app_api_config
 from utils.mysql_handler import MysqlHandler
-from utils.log_handler import LoggerHandler
 from utils.ums_handler import get_app_headers
+from utils.log_handler import logger as log
 
 
-class WmsAppApiHelper(RequestHandler):
+class WmsAppApiController(RequestHandler):
     def __init__(self):
-        self.prefix_key = 'app_26'
-        # self.infix = '/api/ec-wms-api'
+        self.prefix = app_prefix
         self.app_headers = get_app_headers()
-        super().__init__(self.prefix_key, self.app_headers)
-        self.db = MysqlHandler('test_163', 'supply_wms')
-        self.log_handler = LoggerHandler('WmsAppApiHelper')
+        super().__init__(self.prefix, self.app_headers)
+        self.db = MysqlHandler(mysql_info, 'supply_wms')
 
     def get_warehouse_area(self, warehouse_id, area_type):
         wms_app_api_config['get_warehouse_area']['data'].update(
@@ -129,13 +129,13 @@ class WmsAppApiHelper(RequestHandler):
             },
             3: {
                 'area_type': 5,
-                "code_prefix": "DB",
-                "name_prefix": "DBKW"
+                "code_prefix": "TP",
+                "name_prefix": "TPKW"
             },
             4: {
                 'area_type': 5,
                 "code_prefix": "YK",
-                "name_prefix": "YJKW"
+                "name_prefix": "YKKW"
             },
             5: {
                 'area_type': 1,
@@ -169,7 +169,8 @@ class WmsAppApiHelper(RequestHandler):
                 'warehouseLocationCode': location_area_maps[location_type]['code_prefix'] + now,
                 'warehouseLocationName': location_area_maps[location_type]['name_prefix'] + now,
                 'warehouseLocationType': location_type,
-                'belongWarehouseAreaId': self.get_warehouse_area(warehouse_id,location_area_maps[location_type]['area_type']),
+                'belongWarehouseAreaId': self.get_warehouse_area(warehouse_id,
+                                                                 location_area_maps[location_type]['area_type']),
                 'warehouseAreaType': location_area_maps[location_type]['area_type'],
                 'belongWarehouseId': warehouse_id,
                 'destWarehouseId': target_warehouse_id
@@ -178,19 +179,20 @@ class WmsAppApiHelper(RequestHandler):
             wms_app_api_config['location_create']['data'].update(location_info)
             location_create_res = self.send_request(**wms_app_api_config['location_create'])
             if location_create_res['code'] != 200:
-                self.log_handler.log('创建库位失败', 'ERROR')
+                log.error('创建库位失败:%s' % json.dumps(location_create_res, ensure_ascii=False))
                 return
             location_codes.append(wms_app_api_config['location_create']['data']['warehouseLocationCode'])
         return location_codes
 
     # 确认收货，生成收货单
-    def receipt_order_create(self, entry_order_code, num=1):
+    def receipt_order_create(self, entry_order_code, warehouse_id, num=1):
         """
         :param entry_order_code: string，入库单号
         :param num:int,收货单数量
+        :param warehouse_id: 所属仓库id
         :return: 收货单编码-list、收货库位编码-list
         """
-        sh_location_codes = self.get_location_codes(num, 1)
+        sh_location_codes = self.get_location_codes(num, 1, warehouse_id)
         if not (entry_order_code and sh_location_codes):
             return
         wms_app_api_config['receipt_order_create']['data'].update({'entryOrderCode': entry_order_code})
@@ -217,8 +219,9 @@ class WmsAppApiHelper(RequestHandler):
             return True
 
     # 质检完成，生成质检单
-    def quality_order_create(self, entry_order_code, sh_order_codes, sh_location_codes, num=1):
+    def quality_order_create(self, warehouse_id, entry_order_code, sh_order_codes, sh_location_codes, num=1):
         """
+        :param warehouse_id: 所属仓库
         :param sh_location_codes: list 收货库位编码
         :param sh_order_codes: list 收货单编码
         :param entry_order_code: string 入库单编码
@@ -226,7 +229,7 @@ class WmsAppApiHelper(RequestHandler):
         :return: 质检单编码-list，质检库位编码-list
         """
         # 生成质检库位
-        zj_location_codes = self.get_location_codes(num, 2)
+        zj_location_codes = self.get_location_codes(num, 2, warehouse_id)
 
         temp = zip(sh_location_codes, zj_location_codes, sh_order_codes)
         target_sku_list = list()
@@ -244,7 +247,7 @@ class WmsAppApiHelper(RequestHandler):
 
         quality_order_create_res = self.send_request(**wms_app_api_config['quality_order_create'])
         if quality_order_create_res['code'] != 200:
-            self.log_handler.log('质检单创建失败', 'ERROR')
+            log.error('质检单创建失败')
             return
         query_quality_order_code_sql = """
         SELECT
@@ -328,7 +331,7 @@ class WmsAppApiHelper(RequestHandler):
         package_call_back_res = self.send_request(
             **wms_app_api_config['package_assign_call_back'])
         if package_call_back_res['code'] != 200:
-            self.log_handler.log('包裹方案回调失败', 'ERROR')
+            log.error('包裹方案回调失败')
             return
         return True
 
@@ -362,7 +365,7 @@ class WmsAppApiHelper(RequestHandler):
             **wms_app_api_config['front_label_express_order_call_back'])
 
         if express_order_create_res['code'] != 200:
-            self.log_handler.log('面单回调失败', 'ERROR')
+            log.error('面单回调失败')
             return
         return True
 
@@ -377,13 +380,13 @@ class WmsAppApiHelper(RequestHandler):
             **wms_app_api_config['stock_assign'])
 
         if stock_assign_res['code'] != 200:
-            self.log_handler.log('库存分配失败', 'ERROR')
+            log.error('库存分配失败')
             return
         return True
 
 
 if __name__ == '__main__':
-    pa = WmsAppApiHelper()
+    pa = WmsAppApiController()
     # num = 1
     # sj_locations_codes = pa.get_location_codes(num, 6, 31)
     # print(sj_locations_codes)
@@ -392,7 +395,7 @@ if __name__ == '__main__':
     # code = pa.get_location_codes(3, 1, 29)
     # print(code)
 
-    zsj_location_codes = pa.get_location_codes(2, 5, 30, 31)
+    zsj_location_codes = pa.get_location_codes(2, 5, 513, 513)
     print(zsj_location_codes)
     # zsj_location_ids = [pa.get_location_id(location_code, 30) for location_code in
     #                     zsj_location_codes]

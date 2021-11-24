@@ -2,19 +2,19 @@ import time
 
 from utils.barcode_handler import barcode_generate
 from utils.request_handler import RequestHandler
-from config.wms_app_api_config import wms_app_api_config
 from utils.ums_handler import get_service_headers
 from utils.mysql_handler import MysqlHandler
-from utils.log_handler import LoggerHandler
+from utils.log_handler import logger as log
+from config import mysql_info, delivery_service_prefix
+from config.api_config.wms_app_api_config import wms_app_api_config
 
 
-class WmsDeliveryServiceHelper(RequestHandler):
+class WmsDeliveryServiceController(RequestHandler):
     def __init__(self):
-        self.prefix_key = 'delivery_service_26'
+        self.prefix = delivery_service_prefix
         self.service_headers = get_service_headers()
-        super().__init__(self.prefix_key, self.service_headers)
-        self.db = MysqlHandler('test_163', 'supply_wms')
-        self.log_handler = LoggerHandler('WmsDeliveryServiceHelper')
+        super().__init__(self.prefix, self.service_headers)
+        self.db = MysqlHandler(mysql_info, 'supply_wms')
 
     # 创建出库单
     def front_label_delivery_order_create(self):
@@ -33,7 +33,7 @@ class WmsDeliveryServiceHelper(RequestHandler):
         service_delivery_order_create_res = self.send_request(
             **wms_app_api_config['front_label_delivery_order_create'])
         if service_delivery_order_create_res['code'] != 200:
-            self.log_handler.log('出库单创建失败', 'ERROR')
+            log.error('出库单创建失败')
             return
         delivery_order_code = service_delivery_order_create_res['data']['deliveryOrderCode']
         barcode_generate(delivery_order_code, 'delivery_order')
@@ -59,7 +59,7 @@ class WmsDeliveryServiceHelper(RequestHandler):
         service_delivery_order_create_res = self.send_request(
             **wms_app_api_config['behind_label_delivery_order_create'])
         if service_delivery_order_create_res['code'] != 200:
-            self.log_handler.log('出库单创建失败', 'ERROR')
+            log.error('出库单创建失败')
             return
         delivery_order_code = service_delivery_order_create_res['data']['deliveryOrderCode']
         barcode_generate(delivery_order_code, 'delivery_order')
@@ -67,7 +67,7 @@ class WmsDeliveryServiceHelper(RequestHandler):
 
 
 if __name__ == '__main__':
-    dah = WmsDeliveryServiceHelper()
+    dah = WmsDeliveryServiceController()
     count = 3
 
     # 生成后置面单出库单、分配库存并回调包裹方案

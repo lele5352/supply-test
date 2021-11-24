@@ -1,27 +1,17 @@
+from config.mysql_config import mysql_config
+from config.api_config import url_prefix
+
 user = {
     'username': 'xuhongwei@popicorns.com',
-    'password': 'hw1234'
+    'password': '123456'
 }
 
-url_prefix = {
-    'app_26': 'https://test-26.popicorns.com',
-    'receipt_service_26': 'http://10.0.0.26:8323',
-    'delivery_service_26': 'http://10.0.0.26:8330',
-    'ims_service_26': 'http://10.0.0.26:28801'
-    # 'ims_service_26': 'http://10.0.9.3:28801'
-}
+mysql_info = mysql_config.get('test_160')
 
-mysql_config = {
-    'test_163': {
-        'user': 'app',
-        'passwd': '123456',
-        'host': '10.0.0.163',
-        'port': 3306
-    },
-    'test_72': {
-        'user': 'root',
-        'passwd': '123456',
-        'host': '10.0.0.72',
-        'port': 3306
-    }
-}
+ims_service_prefix = url_prefix.get('ims_service_160')
+
+app_prefix = url_prefix.get('app_160')
+
+delivery_service_prefix = url_prefix.get('delivery_service_160')
+
+receipt_service_prefix = url_prefix.get('receipt_service_160')

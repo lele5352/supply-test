@@ -2,19 +2,19 @@ import time
 
 from utils.barcode_handler import barcode_generate
 from utils.request_handler import RequestHandler
-from config.wms_app_api_config import wms_app_api_config
 from utils.mysql_handler import MysqlHandler
-from utils.log_handler import LoggerHandler
+from utils.log_handler import logger as log
 from utils.ums_handler import get_service_headers
+from config import mysql_info, receipt_service_prefix
+from config.api_config.wms_app_api_config import wms_app_api_config
 
 
-class WmsReceiptServiceHelper(RequestHandler):
+class WmsReceiptServiceController(RequestHandler):
     def __init__(self):
-        self.prefix_key = 'receipt_service_26'
+        self.prefix = receipt_service_prefix
         self.service_headers = get_service_headers()
-        super().__init__(self.prefix_key, self.service_headers)
-        self.db = MysqlHandler('test_163', 'supply_wms')
-        self.log_handler = LoggerHandler('WmsReceiptServiceHelper')
+        super().__init__(self.prefix, self.service_headers)
+        self.db = MysqlHandler(mysql_info, 'supply_wms')
 
     # 创建入库单
     def entry_order_create(self, sale_sku_count=1, extra=None):
@@ -43,13 +43,13 @@ class WmsReceiptServiceHelper(RequestHandler):
         service_entry_order_create_res = self.send_request(
             **wms_app_api_config['service_entry_order_create'])
         if service_entry_order_create_res['code'] != 200:
-            self.log_handler.log('入库单创建失败', 'ERROR')
+            log.error('入库单创建失败')
             return
         barcode_generate(service_entry_order_create_res['data']['entryOrderCode'], 'entry_order')
         return service_entry_order_create_res['data']['entryOrderCode']
 
 
 if __name__ == '__main__':
-    pa = WmsReceiptServiceHelper()
+    pa = WmsReceiptServiceController()
     entry_order_code = pa.entry_order_create(2)
     print(entry_order_code)

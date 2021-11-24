@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 from utils.rsa_handler import encrypt_data
 from config import user, url_prefix
 from utils.mysql_handler import MysqlHandler
+from config import app_prefix, mysql_info
 
 
 def get_ims_headers():
@@ -22,7 +23,7 @@ def get_app_headers():
 
 
 def get_service_headers():
-    db = MysqlHandler('test_163', 'supply_auth')
+    db = MysqlHandler(mysql_info, 'supply_auth')
     username = user['username']
     user_id = db.get_one("select id from sys_user where username ='%s'" % username)
     header = {"user": json.dumps({"username": username, 'user_id': user_id['id']})}
@@ -35,7 +36,7 @@ def get_public_key():
     headers = {'Content-Type': 'application/json;charset=UTF-8'}
 
     uri = "/api/ec-ums-api/user/rsa/publicKey"
-    url = urljoin(url_prefix.get('app_26'), uri)
+    url = urljoin(app_prefix, uri)
 
     data = {'t': timestamp}
 
@@ -79,7 +80,7 @@ def ums_login(specific_user=False, username='', password=''):
     headers = {'Content-Type': 'application/json;charset=UTF-8'}
 
     uri = "/api/ec-ums-api/user/login"
-    url = urljoin(url_prefix.get('app_26'), uri)
+    url = urljoin(app_prefix, uri)
 
     data = {
         "code": "dw2m",

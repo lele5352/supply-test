@@ -1,20 +1,16 @@
 import pymysql
-from utils.log_handler import LoggerHandler
-
-from config import mysql_config
+from utils.log_handler import logger as log
 
 
 class MysqlHandler:
     # 构造函数
-    def __init__(self, env, db):
-        db_info = mysql_config[env]
-        db_info['db'] = db
-        self.log_handler = LoggerHandler('MySQLHandler')
+    def __init__(self, mysql_info, db):
+        mysql_info['db'] = db
 
         try:
-            self.conn = pymysql.connect(**db_info, charset='utf8', cursorclass=pymysql.cursors.DictCursor)
+            self.conn = pymysql.connect(**mysql_info, charset='utf8', cursorclass=pymysql.cursors.DictCursor)
         except:
-            self.log_handler.log("connectDatabase failed", 'ERROR')
+            log.error("connectDatabase failed")
         self.cur = self.conn.cursor()
 
     # 关闭数据库
@@ -33,8 +29,8 @@ class MysqlHandler:
                 self.cur.execute(sql, params)
                 self.conn.commit()
         except:
-            self.log_handler.log("execute failed: " + sql, 'ERROR')
-            self.log_handler.log(params, 'ERROR')
+            log.error("execute failed: " + sql)
+            log.error(params)
             self.close()
             return False
         return True
@@ -46,8 +42,8 @@ class MysqlHandler:
                 self.cur.executemany(sql, params)
                 self.conn.commit()
         except:
-            self.log_handler.log("execute failed: " + sql, 'ERROR')
-            self.log_handler.log(params, 'ERROR')
+            log.error("execute failed: " + sql)
+            log.error(params)
             self.close()
             return False
         return True

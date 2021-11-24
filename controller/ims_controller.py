@@ -1,25 +1,21 @@
-import copy
 import time
 
 from utils.request_handler import RequestHandler
 from utils.mysql_handler import MysqlHandler
-from utils.log_handler import LoggerHandler
 from utils.ums_handler import get_ims_headers
-from config.ims_api_config import ims_api_config
-from data_helper.wms_app_api_helper import WmsAppApiHelper
+from config.api_config.ims_api_config import ims_api_config
+from config import mysql_info, ims_service_prefix
 
 
-class ImsDataHelper(RequestHandler):
+class ImsController(RequestHandler):
     def __init__(self):
-        self.prefix_key = 'ims_service_26'
+        self.prefix = ims_service_prefix
         self.service_headers = get_ims_headers()
-        self.wms_api = WmsAppApiHelper()
-        super().__init__(self.prefix_key, self.service_headers)
-        self.db = MysqlHandler('test_72', 'homary_ims')
-        self.log_handler = LoggerHandler('ImsServiceHelper')
+        super().__init__(self.prefix, self.service_headers)
+        self.db = MysqlHandler(mysql_info, 'supply_ims')
 
     def delete_ims_data(self, sale_sku_code, warehouse_id):
-        del_central_inventory_sql = "DELETE from central_inventory where goods_sku_code='%s'" % (sale_sku_code)
+        del_central_inventory_sql = "DELETE from central_inventory where goods_sku_code='%s'" % sale_sku_code
         del_goods_inventory_sql = "DELETE from goods_inventory where goods_sku_code='%s';" % (
             sale_sku_code)
         del_wares_inventory_sql = "DELETE from wares_inventory where goods_sku_code='%s' or storage_location_id='%s';" % (
@@ -28,10 +24,11 @@ class ImsDataHelper(RequestHandler):
         for sql in sql_list:
             self.db.execute(sql)
 
-    def delete_unqualified_goods_inventory_data(self, ware_sku_code, warehouse_id):
-        del_sql = "DELETE from nogood_wares_inventory where ware_sku_code='%s' and warehouse_id = %s;" % (
-            ware_sku_code, warehouse_id)
-        self.db.execute(del_sql)
+    def delete_unqualified_goods_inventory_data(self, sale_sku_code, bom_version, warehouse_id):
+        for ware_sku_code in self.get_bom_version_ware_sku(sale_sku_code, bom_version):
+            del_sql = "DELETE from nogood_wares_inventory where ware_sku_code='%s' and warehouse_id = %s;" % (
+                ware_sku_code, warehouse_id)
+            self.db.execute(del_sql)
 
     # 获取销售商品bom比例
     def get_sale_sku_bom_detail(self, sale_sku_code, bom_version):
@@ -75,7 +72,7 @@ class ImsDataHelper(RequestHandler):
     # 销售商品中央总库存获取
     def get_central_inventory(self, sale_sku_code):
         """
-        :return: dict：{'central_inventory_stock':x,'central_inventory_block':y}
+        return: dict：{'central_inventory_stock':x,'central_inventory_block':y}
         """
         sql = "select stock,block from central_inventory where goods_sku_code ='%s' and warehouse_id is NULL;" % sale_sku_code
         central_inventory_data = self.db.get_one(sql)
@@ -247,37 +244,37 @@ class ImsDataHelper(RequestHandler):
         return current_inventory
 
     # 获取仓库商品总库存
-    def get_unqualified_inventory(self, ware_sku_code, warehouse_id):
+    def get_unqualified_inventory(self, sale_sku_code, bom_version, warehouse_id):
         unqualified_goods_inventory = dict()
-
-        sql = """
-                SELECT
-                    storage_location_id,stock,block 
-                FROM
-                    nogood_wares_inventory 
-                WHERE
-                    warehouse_id = %s
-                    AND ware_sku_code = '%s';
-                """ % (warehouse_id, ware_sku_code)
-        ware_sku_inventory_data = self.db.get_all(sql)
-        if not ware_sku_inventory_data:
-            return
-        temp_ware_sku_inventory = dict()
-        for data in ware_sku_inventory_data:
-            if data['storage_location_id'] is None:
-                temp_ware_sku_inventory.update(
-                    {
-                        "total": {'stock': data['stock'], 'block': data['block']}
-                    }
-                )
-            elif data['storage_location_id'] > 0:
-                temp_ware_sku_inventory.update(
-                    {
-                        data['storage_location_id']: {'stock': data['stock'], 'block': data['block']}}
-                )
-        unqualified_goods_inventory.update({
-            ware_sku_code: temp_ware_sku_inventory
-        })
+        for ware_sku_code in self.get_bom_version_ware_sku(sale_sku_code, bom_version):
+            sql = """
+                    SELECT
+                        storage_location_id,stock,block 
+                    FROM
+                        nogood_wares_inventory 
+                    WHERE
+                        warehouse_id = %s
+                        AND ware_sku_code = '%s';
+                    """ % (warehouse_id, ware_sku_code)
+            ware_sku_inventory_data = self.db.get_all(sql)
+            if not ware_sku_inventory_data:
+                continue
+            temp_ware_sku_inventory = dict()
+            for data in ware_sku_inventory_data:
+                if data['storage_location_id'] is None:
+                    temp_ware_sku_inventory.update(
+                        {
+                            "total": {'stock': data['stock'], 'block': data['block']}
+                        }
+                    )
+                elif data['storage_location_id'] > 0:
+                    temp_ware_sku_inventory.update(
+                        {
+                            data['storage_location_id']: {'stock': data['stock'], 'block': data['block']}}
+                    )
+            unqualified_goods_inventory.update({
+                ware_sku_code: temp_ware_sku_inventory
+            })
         return unqualified_goods_inventory
 
     # OMS下单预占中央库存、销售商品总库存
@@ -579,16 +576,18 @@ class ImsDataHelper(RequestHandler):
         if not other_in_res or other_in_res['code'] != 200:
             return
 
-        ims_api_config['turn_to_unqualified_goods']['data'].update(
-            {
-                "sourceNo": "LZC" + str(int(time.time() * 1000)),
-                "qty": qty,
-                "fromStorageLocationId": from_location_id,
-                "toStorageLocationId": to_location_id,
-                "wareHouseId": warehouse_id,
-                "targetWarehouseId": target_warehouse_id,
-                "wareSkuCode": ware_sku
-            }
-        )
-        turn_to_unqualified_goods = self.send_request(**ims_api_config['turn_to_unqualified_goods'])
-        return turn_to_unqualified_goods
+        turn_to_unqualified_goods_res = self.turn_to_unqualified_goods(
+            ware_sku,
+            from_location_id,
+            to_location_id,
+            qty,
+            warehouse_id,
+            target_warehouse_id)
+        if not turn_to_unqualified_goods_res:
+            return
+        return True
+
+
+if __name__ == '__main__':
+    im = ImsController()
+    im.delete_ims_data('11471839197', 31)

@@ -3,7 +3,9 @@ import pytest
 from testcase.ims_test import *
 
 
-class TestUnqualifiedGoodsOtherOut(object):
+class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
+    """库内管理-库内转良"""
+
     def setup_class(self):
         self.ims = ims
         self.warehouse_id = delivery_warehouse_id
@@ -49,7 +51,8 @@ class TestUnqualifiedGoodsOtherOut(object):
             after_block_inventory = self.ims.get_unqualified_inventory(
                 self.sale_sku_code,
                 self.bom_version,
-                self.warehouse_id)
+                self.warehouse_id
+            )
             assert block_res['code'] == 200
             assert after_block_inventory == self.expect_inventory
 
@@ -62,7 +65,8 @@ class TestUnqualifiedGoodsOtherOut(object):
             after_delivered_inventory = self.ims.get_unqualified_inventory(
                 self.sale_sku_code,
                 self.bom_version,
-                self.warehouse_id)
+                self.warehouse_id
+            )
 
             assert delivered_res['code'] == 200
             assert after_delivered_inventory == self.expect_inventory

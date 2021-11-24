@@ -11,7 +11,7 @@ ims_api_config = {
                 }
             ],
             "operateType": "2",
-            "operatorId": 204,
+            "operatorId": 8,
             "sourceNo": "CG21090310010",
             "warehouseId": 19
         }
@@ -31,7 +31,7 @@ ims_api_config = {
                     }
                 ],
                 "operateType": "1",
-                "operatorId": 204,
+                "operatorId": 8,
                 "sourceNo": "CG21090310010",
                 "warehouseId": 19
             }
@@ -65,7 +65,7 @@ ims_api_config = {
                 }
             ],
             "operateType": "1",
-            "operatorId": 204,
+            "operatorId": 8,
             "sourceNo": "CG21090310010",
             "targetWarehouseId": "19",
             "warehouseId": 19
@@ -78,7 +78,7 @@ ims_api_config = {
             {
                 "functionType": "2",
                 "operateType": "1",
-                "operatorId": 204,
+                "operatorId": 8,
                 "sourceNo": "RK210906001",
                 "targetWarehouseId": "19",
                 "wareSkuList": [
@@ -105,7 +105,7 @@ ims_api_config = {
                 }
             ],
             "operateType": "2",
-            "operatorId": 204,
+            "operatorId": 8,
             "sourceNo": "CK2109031022",
             "targetWarehouseId": 19,
             "warehouseId": 19
@@ -118,7 +118,7 @@ ims_api_config = {
             {
                 "functionType": "4",
                 "operateType": "2",
-                "operatorId": 204,
+                "operatorId": 8,
                 "sourceNo": "CK2109040073",
                 "wareSkuList": [
                     {
@@ -140,7 +140,7 @@ ims_api_config = {
         "data": {
             "functionType": "15",
             "operateType": "4",
-            "operatorId": 204,
+            "operatorId": 8,
             "sourceNo": "CK2109040073",
             "wareSkuList": [
                 {
@@ -164,7 +164,7 @@ ims_api_config = {
             {
                 "functionType": "17",
                 "operateType": "5",
-                "operatorId": 204,
+                "operatorId": 8,
                 "sourceNo": "CK2109040073",
                 "targetWarehouseId": 19,
                 "wareSkuList": [
@@ -190,7 +190,7 @@ ims_api_config = {
             "blockBookId": "",
             "functionType": "8",
             "operateType": "2",
-            "operatorId": 204,
+            "operatorId": 8,
             "sourceNo": "CK2109040006"
         }
     },
@@ -200,7 +200,7 @@ ims_api_config = {
         "data": {
             "functionType": "8",
             "operateType": "2",
-            "operatorId": 204,
+            "operatorId": 8,
             "sourceNo": "CK2109040006"
         }
     },
@@ -210,7 +210,7 @@ ims_api_config = {
         "data": {
             "functionType": "8",
             "operateType": "2",
-            "operatorId": 204,
+            "operatorId": 8,
             "sourceNo": "CK2109040068",
             "wareSkuList": [
                 {
@@ -239,7 +239,7 @@ ims_api_config = {
             {
                 "functionType": "5",
                 "operateType": "2",
-                "operatorId": 204,
+                "operatorId": 8,
                 "processType": 1,
                 "sourceNo": "source210906002",
                 "targetWarehouseId": 19,
@@ -262,7 +262,7 @@ ims_api_config = {
             {
                 "functionType": "5",
                 "operateType": "2",
-                "operatorId": 204,
+                "operatorId": 8,
                 "processType": 1,
                 "sourceNo": "source210906002",
                 "wareSkuList": [
@@ -284,7 +284,7 @@ ims_api_config = {
             {
                 "functionType": "39",
                 "operateType": "5",
-                "operatorId": 204,
+                "operatorId": 8,
                 "processType": 1,
                 "sourceNo": "sourceNo2109022001",
                 "targetWarehouseId": 19,
@@ -306,7 +306,7 @@ ims_api_config = {
             {
                 "functionType": "39",
                 "operateType": "5",
-                "operatorId": 204,
+                "operatorId": 8,
                 "processType": 1,
                 "sourceNo": "sourceNo2109022001",
                 "wareSkuList": [
