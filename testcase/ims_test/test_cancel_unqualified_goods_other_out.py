@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from testcase.ims_test import *
@@ -55,7 +57,7 @@ class TestCancelUnqualifiedGoodsOtherOut(object):
 
         source_no = block_res['data'][0]['sourceNo']
         block_book_id = block_res['data'][0]['blockBookId']
-
+        # time.sleep(15)
         cancel_block_res = self.ims.cancel_unqualified_goods_other_out_block(block_book_id, source_no)
         after_cancel_block_inventory = self.ims.get_unqualified_inventory(
             self.sale_sku_code,

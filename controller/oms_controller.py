@@ -10,7 +10,7 @@ from config import mysql_info
 
 class OmsController(RequestHandler):
     def __init__(self):
-        self.prefix_key = ims_service
+        self.prefix_key = oms_service
         self.service_headers = get_ims_headers()
         self.wms_api = WmsAppApiController()
         super().__init__(self.prefix_key, self.service_headers)

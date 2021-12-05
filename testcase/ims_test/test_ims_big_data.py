@@ -24,12 +24,13 @@ class TestImsBigData():
                           '49867082543A01', '95241686939A01', '85828995629A01', '85828995557A01', '58098403028A01',
                           '21572453013A01', '20622209014A01', '31139935517A01', '31139935548A01', '31139935269A01',
                           '95241686427A01', '34185049648A01', '87682034011A01', '23269605815A01', '23269605272A01',
-                          '18546799244A01', '59276388680A01', '39513819707A01', '30630549089A01', '30630549926A01']
+                          '18546799244A01', '59276388680A01', '39513819707A01', '30630549089A01', '30630549926A01'
+                          ]
         self.ims = ims
         self.wms = wms
         self.sj_location_id = self.wms.get_location_id(self.wms.get_location_codes(1, 5, 513)[0], 513)
 
-    @pytest.mark.skip(reason='test')
+    # @pytest.mark.skip(reason='test')
     def test_other_into_warehouse(self):
         ware_sku_list = list()
         for ware_sku in self.ware_skus:
@@ -48,6 +49,7 @@ class TestImsBigData():
         assert res['code'] == 200
         assert end_time - start_time < 5000
 
+    @pytest.mark.skip(reason='test')
     def test_other_out_warehouse_block(self):
         ware_sku_list = list()
         for ware_sku in self.ware_skus:

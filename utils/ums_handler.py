@@ -4,7 +4,7 @@ import requests
 from urllib.parse import urljoin
 
 from utils.rsa_handler import encrypt_data
-from config import user, url_prefix
+from config import user
 from utils.mysql_handler import MysqlHandler
 from config import app_prefix, mysql_info
 

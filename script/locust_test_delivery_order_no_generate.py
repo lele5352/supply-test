@@ -16,7 +16,7 @@ class TestDeliveryOrderNoGenerate(TaskSet):
         self.headers = {"user": json.dumps(user)}
 
     @task(9)
-    def test_domain_create_delivery_order(self):
+    def domain_create_delivery_order(self):
         # 定义请求头
         suffix = int(time.time() * 1000)
         temp_data = {
@@ -91,5 +91,5 @@ class WebSitUser(HttpUser):
 
 
 if __name__ == '__main__':
-    os.system('cd /Users/essenxu/supply-test/supply/script')
+    os.system('/Users/essenxu/PycharmProjects/supply-test/script')
     os.system('locust -f locust_test_delivery_order_no_generate.py --host=http://10.0.0.26:8330/')
