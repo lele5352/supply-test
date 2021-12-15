@@ -2,16 +2,16 @@ from locust import TaskSet, task, HttpUser
 import queue
 import os
 
-from utils.ums_login_handler import ums_login
+from controller.ums_controller import UmsController
 
 
 class UserBehavior(TaskSet):
     def on_start(self):
         try:
-
+            ums = UmsController()
             account = self.user.user_data_queue.get()
             print(account)
-            authorization = ums_login('test_26', True, account['username'], account['password'])
+            authorization = ums.ums_login(True, account['username'], account['password'])
             self.headers = {
                 'Content-Type': 'application/json;charset=UTF-8',
                 'Authorization': authorization

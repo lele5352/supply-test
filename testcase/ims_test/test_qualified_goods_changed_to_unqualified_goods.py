@@ -1,5 +1,3 @@
-import time
-
 import pytest
 
 from testcase.ims_test import *
@@ -86,7 +84,6 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
                                     'total': {'stock': 1, 'block': 0}
                                 }
                             }
-
                         )
                     else:
                         self.expect_unqualified_inventory[detail[0]][self.cp_location_id]['stock'] += 1
@@ -103,9 +100,6 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
                         self.bom_version,
                         self.warehouse_id
                     )
-                    print(current_inventory)
-                    print(current_unqualified_inventory)
-
                     assert turn_to_unqualified_goods_res['code'] == 200
                     assert self.expect_inventory == current_inventory
                     assert self.expect_unqualified_inventory == current_unqualified_inventory

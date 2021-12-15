@@ -14,7 +14,7 @@ class RequestHandler:
     def send_request(self, uri_path, method, data):
         combined_prefix = urljoin(self.prefix, self.infix)
         request_url = combined_prefix + uri_path
-        log.info('请求内容：%s' % json.dumps({'method': method, 'path': uri_path, 'data': data}, ensure_ascii=False))
+        log.info('请求内容：%s' % json.dumps({'method': method, 'url': request_url, 'data': data}, ensure_ascii=False))
         log.info('请求头：%s' % json.dumps(self.headers, ensure_ascii=False))
         try:
             if method == 'post':

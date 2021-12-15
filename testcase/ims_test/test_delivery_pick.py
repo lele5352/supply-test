@@ -20,6 +20,7 @@ class TestDeliveryPick(object):
         self.delivery_code = 'CK' + str(int(time.time()))
         # 清掉测试的销售sku库存数据
         self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
+        # time.sleep(1)
         # 采购入库生成销售sku现货库存
         self.ims.add_stock_by_purchase_into_warehouse(
             self.sale_sku_code,
@@ -200,7 +201,7 @@ class TestDeliveryPick(object):
         assert delivery_order_block_res['code'] == 200
         assert assign_location_stock_res['code'] == 200
         assert confirm_pick_res['code'] == 200
-        assert after_short_pick_inventory == expect_after_short_pick_inventory
+        assert expect_after_short_pick_inventory == after_short_pick_inventory
 
 
 if __name__ == '__main__':

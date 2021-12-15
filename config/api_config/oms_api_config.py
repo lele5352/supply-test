@@ -38,7 +38,21 @@ oms_api_config = {
             "city": "Paris",
             "readyTime": "09:00",
             "closeTime": "18:00",
-            "items": "[{\"itemSkuCode\":\"53170041074\",\"eta\":\"1-2 days\",\"itemQty\":\"1\",\"itemPrice\":\"849.81\",\"itemPayPrice\":\"760.35\",\"itemTitle\":\"21.7\\\" 3D Gold Fashion Metal Oversized Wall Clock Luxury Home Decor\",\"itemPicture\":\"https://img1.homary.com/fit-in/400x400/filters:quality(80)/mall/file/2021/06/10/af94c466c6654bbe98e8b2bbbee09afa.jpg\",\"itemSpuCode\":\"11471839\",\"itemCurrencyPrice\":\"84.99\",\"itemDollarPrice\":\"117.51\",\"planDataTime\":\"7-8 weeks\"}]"
+            "items": [
+                {
+                    "itemSkuCode": "53170041074",
+                    "eta": "1-2 days",
+                    "itemQty": "1",
+                    "itemPrice": "849.81",
+                    "itemPayPrice": "760.35",
+                    "itemTitle": "21.7\" 3D Gold Fashion Metal Oversized Wall Clock Luxury Home Decor",
+                    "itemPicture": "https://img1.homary.com/fit-in/400x400/filters:quality(80)/mall/file/2021/06/10/af94c466c6654bbe98e8b2bbbee09afa.jpg",
+                    "itemSpuCode": "11471839",
+                    "itemCurrencyPrice": "84.99",
+                    "itemDollarPrice": "117.51",
+                    "planDataTime": "7-8 weeks"
+                }
+            ]
         }
     }
 }

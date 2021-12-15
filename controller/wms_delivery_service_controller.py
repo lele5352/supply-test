@@ -2,19 +2,20 @@ import time
 
 from utils.barcode_handler import barcode_generate
 from utils.request_handler import RequestHandler
-from utils.ums_handler import get_service_headers
 from utils.mysql_handler import MysqlHandler
 from utils.log_handler import logger as log
-from config import mysql_info, delivery_service_prefix
+
+from config.sys_config import env_config
 from config.api_config.wms_app_api_config import wms_app_api_config
 
 
 class WmsDeliveryServiceController(RequestHandler):
-    def __init__(self):
-        self.prefix = delivery_service_prefix
-        self.service_headers = get_service_headers()
+    def __init__(self, ums):
+        self.prefix = env_config.get('delivery_service_prefix')
+        self.service_headers = ums.get_service_headers()
+        self.db = MysqlHandler(**env_config.get('mysql_info_wms'))
         super().__init__(self.prefix, self.service_headers)
-        self.db = MysqlHandler(mysql_info, 'supply_wms')
+
 
     # 创建出库单
     def front_label_delivery_order_create(self):

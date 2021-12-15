@@ -1,7 +1,6 @@
 import requests
 from locust import HttpUser, TaskSet, task
 import os
-from utils.ums_login_handler import ums_login
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
