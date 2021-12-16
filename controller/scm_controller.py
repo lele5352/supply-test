@@ -1,7 +1,7 @@
 import copy
+
 from config.sys_config import env_config
 from config.api_config.scm_api_config import scm_api_config
-
 from utils.request_handler import RequestHandler
 from utils.mysql_handler import MysqlHandler
 from utils.log_handler import logger as log
@@ -19,6 +19,8 @@ class ScmController(RequestHandler):
         """获取供应商产品信息"""
         scm_api_config['get_product_info']['data'].update({'skuCode': sale_sku_code})
         res = self.send_request(**scm_api_config['get_product_info'])
+        if not res:
+            return
         sku_info = res['data']['list']
         return sku_info
 
@@ -28,11 +30,13 @@ class ScmController(RequestHandler):
         for sale_sku in sale_sku_list:
             sku_info = self.get_sku_info(sale_sku)
             if not sku_info:
+                log.error('获取销售sku%s信息失败' % sale_sku)
                 continue
             sku_info[0].update({"minOrderQuantity": 1, "purchaseQuantity": num})
             sale_sku_info_list.append(sku_info[0])
         # 销售sku不存在，直接返回
         if not sale_sku_info_list or len(sale_sku_info_list) < 1:
+            log.error('获取不到销售SKU信息！')
             return
         scm_api_config['stock_plan_submit']['data'].update({
             'productInfos': sale_sku_info_list,
@@ -196,16 +200,3 @@ if __name__ == '__main__':
     destination_warehouse = 'ESFH'
     delivery_warehouse = 'ESZZ'
     scm.stock_plan_submit(sale_sku_list, sale_sku_num, delivery_warehouse, destination_warehouse)
-
-    # scm.stock_plan_batch_audit(['1470734195616780290'])
-    # res = scm.get_purchase_demand_detail('1470748972736974851')
-    # res2 = scm.confirm_and_generate_purchase_order(res)
-    # print(res2)
-
-    # # 获取采购单详情
-    # res1 = scm.get_purchase_order_detail('1470750582380826626')
-    # # 采购单编辑并提交审核
-    # res2 = scm.update_and_submit_purchase_order_to_audit(res1)
-    # # 采购单审核
-    # res3 = scm.purchase_order_audit(['1470750582380826626'])
-    scm.purchase_order_batch_buy(['1470750582380826626'])

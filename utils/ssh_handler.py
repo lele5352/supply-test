@@ -2,7 +2,7 @@ import paramiko
 import time
 
 
-class SSHHelper():
+class SSHHandler:
     def __init__(self, hostname, port, username, password):
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy)

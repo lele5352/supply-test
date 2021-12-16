@@ -5,7 +5,7 @@ from data_generator import ums
 from utils.log_handler import logger as log
 
 
-class ScmDataGenerator():
+class ScmDataGenerator:
     def __init__(self):
         self.scm = ScmController(ums)
 
@@ -17,6 +17,8 @@ class ScmDataGenerator():
             return
         stock_plan_id = stock_plan_res['data']['id']
         stock_plan_no = stock_plan_res['data']['stockPlanNumber']
+        print('备货计划单号：%s' % stock_plan_no)
+        print('备货计划id：%s' % stock_plan_id)
         return stock_plan_id, stock_plan_no
 
     def create_purchase_demand(self, sale_sku_list, num, delivery_warehouse, destination_warehouse):
@@ -33,12 +35,14 @@ class ScmDataGenerator():
             log.error('备货计划审核失败：%s' % audit_res)
             return
         # 备货计划生成采购需求是异步的，可能存在延迟
-        time.sleep(1)
+        time.sleep(2)
         # 获取生成的采购需求id
         purchase_demand_ids = self.scm.get_stock_plan_purchase_demand_id(stock_plan_no)
         if not purchase_demand_ids:
             log.error('查询不到创建的备货计划的采购需求id')
             return
+        print('备货计划单号：%s' % stock_plan_no)
+        print('采购需求id：%s' % purchase_demand_ids)
         return purchase_demand_ids, stock_plan_no
 
     def create_purchase_order(self, sale_sku_list, num, delivery_warehouse, destination_warehouse):
@@ -58,9 +62,12 @@ class ScmDataGenerator():
         purchase_order_nos, purchase_order_ids = self.scm.get_purchase_order_page(stock_plan_no)
         if not (purchase_order_ids and purchase_order_nos):
             log.error("根据备货计划单号查询采购单号失败")
+        print('采购订单单号：%s' % purchase_order_nos)
+        print('采购订单id：%s' % purchase_order_ids)
         return purchase_order_nos, purchase_order_ids
 
     def create_distribute_order(self, sale_sku_list, num, delivery_warehouse, destination_warehouse):
+        """生成采购订单，并批量发货"""
         purchase_order_nos, purchase_order_ids = self.create_purchase_order(
             sale_sku_list,
             num,
@@ -85,30 +92,41 @@ class ScmDataGenerator():
             return
         # 采购订单批量发货
         for purchase_order_id in purchase_order_ids:
+            # 获取采购订单发货明细
             purchase_order_delivery_detail = self.scm.get_purchase_order_delivery_detail(purchase_order_id)
             if not purchase_order_delivery_detail:
                 log.error('获取采购单发货详情失败')
                 return
+            # 根据采购订单发货明细生成分货单信息
             distribute_order_info = self.scm.generate_distribute_order(purchase_order_delivery_detail,
                                                                        delivery_warehouse)
             if not distribute_order_info:
                 log.error('根据采购单发货详情生成分货单信息失败')
                 return
+            # 采购订单发货
             delivery_res = self.scm.purchase_order_delivery(distribute_order_info)
             if not delivery_res:
                 log.error("采购订单发货失败：%s" % delivery_res)
                 return
         time.sleep(1)
+        # 获取分货单号
         distribute_order_nos = self.scm.get_distribute_order_page(purchase_order_nos)
+        print('分货单号：%s' % distribute_order_nos)
         return distribute_order_nos
 
 
 if __name__ == '__main__':
     data_generator = ScmDataGenerator()
+    # 160
     sale_sku_list = ['63203684930', 'J04MDG000218034']
+    # 26
+    # sale_sku_list = ['71557351878', '72510482492']
+
     sale_sku_num = 2
     destination_warehouse = 'ESFH'
     delivery_warehouse = 'ESZZ'
-    res = data_generator.create_distribute_order(sale_sku_list, sale_sku_num, delivery_warehouse,
-                                                 destination_warehouse)
-    print(res)
+    # res1 = data_generator.create_stock_plan(sale_sku_list, sale_sku_num, delivery_warehouse, destination_warehouse)
+    # res2 = data_generator.create_purchase_demand(sale_sku_list, sale_sku_num, delivery_warehouse, destination_warehouse)
+    # res3 = data_generator.create_purchase_order(sale_sku_list, sale_sku_num, delivery_warehouse, destination_warehouse)
+    res4 = data_generator.create_distribute_order(sale_sku_list, sale_sku_num, delivery_warehouse,
+                                                  destination_warehouse)

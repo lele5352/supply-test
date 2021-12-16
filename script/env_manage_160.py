@@ -1,9 +1,9 @@
 import time
 
-from utils.ssh_helper import SSHHelper
+from utils.ssh_handler import SSHHandler
 
 
-class EnvManager160(SSHHelper):
+class EnvManager160(SSHHandler):
     def __init__(self):
         self.server_info = {
             'hostname': '10.0.0.160',
