@@ -8,7 +8,7 @@ def barcode_generate(code_str, barcode_type):
 
 if __name__ == '__main__':
     # barcode_generate('PRE-BG2111150001', 'express')
-    barcode_generate('CKYCKW-001', 'locations')
-    # barcode_generate('SHKW001', 'locations')
+    # barcode_generate('TPKW-001', 'locations')
+    barcode_generate('20607392841A01', 'ware_sku')
     # barcode_generate('sjkw-003', 'locations')
 

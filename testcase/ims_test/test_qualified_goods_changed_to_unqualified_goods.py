@@ -16,7 +16,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
         self.sale_sku_count = 2
         self.sj_location_ids = fsj_location_ids
         self.cp_location_id = fcp_location_id
-        self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
+        self.ims.delete_ims_data(self.sale_sku_code)
         self.ims.delete_unqualified_goods_inventory_data(self.sale_sku_code, self.bom_version, self.warehouse_id)
         self.ims.add_stock_by_purchase_into_warehouse(
             self.sale_sku_code,

@@ -14,7 +14,7 @@ class TestOtherIntoStockWarehouse(object):
         self.sj_location_ids = bsj_location_ids
 
     def setup(self):
-        self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
+        self.ims.delete_ims_data(self.sale_sku_code)
         self.expect_inventory = self.ims.get_current_inventory(
             self.sale_sku_code,
             self.bom_version,

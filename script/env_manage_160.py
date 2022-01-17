@@ -78,4 +78,4 @@ class EnvManager160(SSHHandler):
 
 if __name__ == '__main__':
     env160 = EnvManager160()
-    env160.restart_service('ec-oms')
+    env160.restart_service()

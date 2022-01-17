@@ -13,7 +13,7 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
         self.bom_detail = bom_detail
         self.sale_sku_count = 2
         self.sj_location_ids = zsj_location_ids
-        self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
+        self.ims.delete_ims_data(self.sale_sku_code)
         # 采购入库生成库存
         self.ims.add_stock_by_purchase_into_warehouse(
             self.sale_sku_code, self.bom_version,

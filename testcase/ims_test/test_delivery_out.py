@@ -17,7 +17,7 @@ class TestDeliveryOut(object):
         self.sj_location_ids = fsj_location_ids
 
         # 干掉该销售sku的库存数据；
-        self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
+        self.ims.delete_ims_data(self.sale_sku_code)
         # 采购入库生成销售sku现货库存
         self.ims.add_stock_by_purchase_into_warehouse(
             self.sale_sku_code, self.bom_version,

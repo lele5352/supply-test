@@ -3,6 +3,7 @@ import time
 from controller.scm_controller import ScmController
 from data_generator import ums
 from utils.log_handler import logger as log
+from utils.barcode_handler import barcode_generate
 
 
 class ScmDataGenerator:
@@ -111,22 +112,7 @@ class ScmDataGenerator:
         time.sleep(1)
         # 获取分货单号
         distribute_order_nos = self.scm.get_distribute_order_page(purchase_order_nos)
+        for code in distribute_order_nos:
+            barcode_generate(code, 'entry_order')
         print('分货单号：%s' % distribute_order_nos)
         return distribute_order_nos
-
-
-if __name__ == '__main__':
-    data_generator = ScmDataGenerator()
-    # 160
-    sale_sku_list = ['63203684930', 'J04MDG000218034']
-    # 26
-    # sale_sku_list = ['71557351878', '72510482492']
-
-    sale_sku_num = 2
-    destination_warehouse = 'ESFH'
-    delivery_warehouse = 'ESZZ'
-    # res1 = data_generator.create_stock_plan(sale_sku_list, sale_sku_num, delivery_warehouse, destination_warehouse)
-    # res2 = data_generator.create_purchase_demand(sale_sku_list, sale_sku_num, delivery_warehouse, destination_warehouse)
-    # res3 = data_generator.create_purchase_order(sale_sku_list, sale_sku_num, delivery_warehouse, destination_warehouse)
-    res4 = data_generator.create_distribute_order(sale_sku_list, sale_sku_num, delivery_warehouse,
-                                                  destination_warehouse)

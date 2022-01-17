@@ -19,8 +19,8 @@ class TestDeliveryPick(object):
         # 这里踩过坑，单据号不能放在setupclass里面，否则每次单据号都一样，会触发幂等，导致结果不正确
         self.delivery_code = 'CK' + str(int(time.time()))
         # 清掉测试的销售sku库存数据
-        self.ims.delete_ims_data(self.sale_sku_code, self.warehouse_id)
-        # time.sleep(1)
+        self.ims.delete_ims_data(self.sale_sku_code)
+        time.sleep(1)
         # 采购入库生成销售sku现货库存
         self.ims.add_stock_by_purchase_into_warehouse(
             self.sale_sku_code,

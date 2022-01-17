@@ -5,7 +5,6 @@ from config.api_config.scm_api_config import scm_api_config
 from utils.request_handler import RequestHandler
 from utils.mysql_handler import MysqlHandler
 from utils.log_handler import logger as log
-from controller.ums_controller import UmsController
 
 
 class ScmController(RequestHandler):
@@ -19,10 +18,7 @@ class ScmController(RequestHandler):
         """获取供应商产品信息"""
         scm_api_config['get_product_info']['data'].update({'skuCode': sale_sku_code})
         res = self.send_request(**scm_api_config['get_product_info'])
-        if not res:
-            return
-        sku_info = res['data']['list']
-        return sku_info
+        return res['data']['list'] if res else None
 
     def stock_plan_submit(self, sale_sku_list, num, delivery_warehouse_code, destination_warehouse_code):
         """备货计划提交"""
@@ -71,13 +67,13 @@ class ScmController(RequestHandler):
         """获取采购需求详情"""
         scm_api_config['get_purchase_demand_detail']['uri_path'] += str(purchase_demand_id)
         res = self.send_request(**scm_api_config['get_purchase_demand_detail'])
-        return res['data']
+        return res['data'] if res else None
 
     def batch_get_purchase_demand_detail(self, purchase_demand_id_list):
         """获取采购需求详情"""
         scm_api_config['batch_get_purchase_demand_detail'].update({'data': purchase_demand_id_list})
         res = self.send_request(**scm_api_config['batch_get_purchase_demand_detail'])
-        return res['data']
+        return res['data'] if res else None
 
     def confirm_and_generate_purchase_order(self, purchase_demand_id_list):
         """采购需求确认并生单"""
@@ -117,7 +113,7 @@ class ScmController(RequestHandler):
         })
 
         res = self.send_request(**body)
-        return res['data']
+        return res['data'] if res else None
 
     def update_and_submit_purchase_order_to_audit(self, purchase_order_detail):
         """采购订单更新并提交审核"""
@@ -154,11 +150,10 @@ class ScmController(RequestHandler):
             'ids': [purchase_order_id]
         })
         res = self.send_request(**scm_api_config['get_purchase_order_delivery_detail'])
-        if not res:
-            return
-        return res['data']['list']
+        return res['data']['list'] if res else None
 
     def generate_distribute_order(self, purchase_order_delivery_detail, delivery_warehouse_code):
+        """生成分货单"""
         for detail in purchase_order_delivery_detail:
             detail.update({
                 "fix": True,
@@ -169,9 +164,10 @@ class ScmController(RequestHandler):
             'data': purchase_order_delivery_detail
         })
         res = self.send_request(**scm_api_config['generate_distribute_order'])
-        return res['data']
+        return res['data'] if res else None
 
     def purchase_order_delivery(self, distribute_order_info):
+        """采购单发货"""
         distribute_order_info.update(
             {'logisticsInfos': []}
         )
@@ -182,6 +178,7 @@ class ScmController(RequestHandler):
         return True
 
     def get_distribute_order_page(self, purchase_order_nos):
+        """分货单查询"""
         scm_api_config['get_distribute_order_page']['data'].update({
             "purchaseOrderNos": purchase_order_nos
         })
@@ -190,13 +187,3 @@ class ScmController(RequestHandler):
             return
         distribute_order_nos = [distribute_order['shippingOrderNo'] for distribute_order in res['data']['list']]
         return distribute_order_nos
-
-
-if __name__ == '__main__':
-    ums = UmsController()
-    scm = ScmController(ums)
-    sale_sku_list = ['63203684930', 'J04MDG000218034']
-    sale_sku_num = 2
-    destination_warehouse = 'ESFH'
-    delivery_warehouse = 'ESZZ'
-    scm.stock_plan_submit(sale_sku_list, sale_sku_num, delivery_warehouse, destination_warehouse)
