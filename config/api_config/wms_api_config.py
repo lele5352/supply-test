@@ -80,5 +80,91 @@ wms_api_config = {
             "warehouseLocationType": 1,  # 库位类型 1-收货库位 2-质检库位 3-调拨库位 4-移库库位 5-上架库位 6-不良品库位 7-入库异常库位 8-出库异常库位}
             "warehouseLocationUseStatus": 0
         }
+    },
+    "create_transfer_demand": {
+        "uri_path": "/transferDemand/create",
+        "method": "post",
+        "data": {
+            "receiveWarehouseCode": "LA01",
+            "receiveTargetWarehouseCode": "",
+            "deliveryWarehouseCode": "FSBH",
+            "deliveryTargetWarehouseCode": "",
+            "userId": 1,
+            "username": "admin",
+            "goodsSkuCode": "53586714577",
+            "demandQty": 5,
+            "customerType": 1,  # 1：普通客户 2 ：大客户
+            "customerRemark": "客戶備注",
+            "sourceCode": "aaaaaaaaaaaaaaa",
+            "demandType": 1  # 1:按需调拨需求 2：备货调拨需求
+        }
+    },
+    "create_transfer_pick_order": {
+        "uri_path": "/api/ec-wms-api/transferOut/picking/create",
+        "method": "post",
+        "data": {"demandCodes": ["XQ2201250017"], "pickType": 1}
+    },
+    "transfer_pick_order_assign_pick_user": {
+        "uri_path": "/api/ec-wms-api/transferOut/picking/assignPickUser",
+        "method": "post",
+        "data": {"pickOrderNos": ["DJH2201250008"], "pickUsername": "李强", "pickUserId": "3"}
+    },
+    "transfer_confirm_pick": {
+        "uri_path": "/api/ec-wms-api/transferOut/picking/doPicking",
+        "method": "post",
+        "data": {"pickOrderNo": ["DJH2201250008"], "details": []}
+    },
+    "transfer_pick_order_detail": {
+        "uri_path": "/api/ec-wms-api/transferOut/picking/detail/%s",
+        "method": "get",
+        "data": {"t": 1643333857384}
+    },
+    "transfer_submit_tray": {
+        "uri_path": "/api/ec-wms-api/transferOut/pda/submitTrayInfo",
+        "method": "post",
+        "data": [{
+            "storageLocationCode": "TPKW-001",
+            "pickOrderNo": "DJH2201290004",
+            "trayInfos": [{
+                "id": 792,
+                "waresSkuCode": "63203684930A02",
+                "waresSkuName": "酒柜(金色)07 2/2 X5",
+                "goodsSkuCode": "63203684930",
+                "goodsSkuName": "棕色木纹四裙垂直边独立式浴缸3",
+                "skuQty": 10
+            }]
+        }]
+    },
+    "create_other_entry_order": {
+        "uri_path": "/api/ec-wms-api/entryorder",
+        "method": "put",
+        "data": {
+            "receiveWarehouseCode": "LA01",
+            "deliveryWarehouseCode": "FSBH",
+            "userId": 1,
+            "username": "admin",
+            "goodsSkuCode": "53586714577",
+            "demandQty": 5,
+            "customerType": 1,  # 1：普通客户 2 ：大客户
+            "customerRemark": "客戶備注",
+            "sourceCode": "aaaaaaaaaaaaaaa",
+            "demandType": 1  # 1:按需调拨需求 2：备货调拨需求
+        }
+    },
+    "submit_other_entry_order": {
+        "uri_path": "/api/ec-wms-api/entryorder",
+        "method": "put",
+        "data": {
+            "receiveWarehouseCode": "LA01",
+            "deliveryWarehouseCode": "FSBH",
+            "userId": 1,
+            "username": "admin",
+            "goodsSkuCode": "53586714577",
+            "demandQty": 5,
+            "customerType": 1,  # 1：普通客户 2 ：大客户
+            "customerRemark": "客戶備注",
+            "sourceCode": "aaaaaaaaaaaaaaa",
+            "demandType": 1  # 1:按需调拨需求 2：备货调拨需求
+        }
     }
 }

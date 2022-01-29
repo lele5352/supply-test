@@ -1,6 +1,6 @@
 import pytest
 
-from testcase.ims_test import *
+from testcase import *
 
 
 class TestPurchaseIntoExchangeWarehouse(object):
@@ -48,8 +48,8 @@ class TestPurchaseIntoExchangeWarehouse(object):
         res = self.ims.purchase_into_warehouse(
             self.sale_sku_code,
             self.bom_version,
-            self.sj_location_ids,
             self.sale_sku_count,
+            self.sj_location_ids,
             self.warehouse_id,
             self.target_warehouse_id
         )

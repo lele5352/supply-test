@@ -15,6 +15,11 @@ class ImsController(RequestHandler):
         self.db = MysqlHandler(**env_config.get('mysql_info_ims'))
 
     def delete_ims_data(self, sale_sku_code):
+        """
+        删除销售sku对应的全部库存数据，包括中央库存、销售商品总库存、现货库存、仓库商品总库存、库位库存
+
+        :param sale_sku_code: 销售sku编码
+        """
         del_central_inventory_sql = "delete from central_inventory where goods_sku_code='%s';" % sale_sku_code
         del_goods_inventory_sql = "delete from goods_inventory where goods_sku_code='%s';" % sale_sku_code
         del_wares_inventory_sql = "delete from wares_inventory where goods_sku_code='%s';" % sale_sku_code
@@ -23,6 +28,13 @@ class ImsController(RequestHandler):
             self.db.execute(sql)
 
     def delete_unqualified_goods_inventory_data(self, sale_sku_code, bom_version, warehouse_id):
+        """
+        删除销售sku对应的全部次品库存数据
+
+        :param sale_sku_code: 销售sku编码
+        :param bom_version: bom版本
+        :param warehouse_id: 仓库id
+        """
         for ware_sku_code in self.get_bom_version_ware_sku(sale_sku_code, bom_version):
             del_sql = "delete from nogood_wares_inventory where ware_sku_code='%s' and warehouse_id = %s;" % (
                 ware_sku_code, warehouse_id)
@@ -31,9 +43,10 @@ class ImsController(RequestHandler):
     # 获取销售商品bom比例
     def get_sale_sku_bom_detail(self, sale_sku_code, bom_version):
         """
+        返回销售sku的bom版本明细，格式如： {"ware_sku_code1":x,"ware_sku_code2":y,...}
+
         :param sale_sku_code: 销售sku
         :param bom_version: bom版本
-        :return:格式{"仓库sku1":数量1,"仓库sku2":数量2}
         """
         # 最终要返回的数据
         sale_sku_bom_detail = dict()
@@ -61,7 +74,8 @@ class ImsController(RequestHandler):
         """
         :param sale_sku_code: string，销售sku
         :param bom_version: string，bom版本
-        :return: list，所传的销售sku、bom版本对应的仓库sku列表（不含比例）
+
+        返回所传的销售sku、bom版本对应的仓库sku列表（不含比例）
         """
         bom_detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
         ware_sku_list = bom_detail.keys()
@@ -70,7 +84,9 @@ class ImsController(RequestHandler):
     # 销售商品中央总库存获取
     def get_central_inventory(self, sale_sku_code):
         """
-        return: dict：{'central_inventory_stock':x,'central_inventory_block':y}
+        :param sale_sku_code: 销售sku编码
+
+        return dict：{'central_inventory_stock':x,'central_inventory_block':y}
         """
         sql = "select stock,block from central_inventory where goods_sku_code ='%s' and warehouse_id is NULL;" % sale_sku_code
         central_inventory_data = self.db.get_one(sql)
@@ -82,9 +98,13 @@ class ImsController(RequestHandler):
         }
 
     # 销售商品仓库总库存获取
-    def get_warehouse_central_inventory(self, sale_sku_code, warehouse_id):
+    def get_warehouse_central_inventory(self, sale_sku_code, warehouse_id) -> dict or None:
         """
-        :return: dict：{'central_inventory_sale_stock':x,'central_inventory_sale_block':y}
+        :param sale_sku_code: 销售sku编码
+        :param warehouse_id: 仓库id
+
+        if query stock data fail return None;
+        else return dict like {'central_inventory_sale_stock':x,'central_inventory_sale_block':y}
         """
         sql = "select stock,block from central_inventory where goods_sku_code ='%s' and warehouse_id=%s;" % (
             sale_sku_code, warehouse_id)
@@ -308,34 +328,33 @@ class ImsController(RequestHandler):
         return res
 
     # 采购入库上架
-    def purchase_into_warehouse(self, sale_sku_code, bom_version, sj_location_ids, count, current_warehouse_id,
+    def purchase_into_warehouse(self, sale_sku_code, bom_version, sale_sku_count, sj_location_ids, current_warehouse_id,
                                 target_warehouse_id):
-        sale_sku_bom_detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
-        ware_sku_list = sale_sku_bom_detail.items()
-        temp_ware_sku_list = list()
-        for ware_sku, location_id in zip(ware_sku_list, sj_location_ids):
-            temp_ware_sku_list.append(
+        # 构建上架明细数据
+        ware_sku_list = list()
+        up_shelves_list = list()
+        bom_detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
+        for detail, location_id in zip(bom_detail.items(), sj_location_ids):
+            ware_sku_list.append(
                 {
-                    "bomQty": ware_sku[1],
-                    "qty": ware_sku[1] * count,
+                    "bomQty": detail[1],
+                    "qty": sale_sku_count * detail[1],
                     "storageLocationId": location_id,
                     "storageLocationType": 5,
-                    "wareSkuCode": ware_sku[0]
+                    "wareSkuCode": detail[0]
                 }
             )
+        up_shelves_list.append({
+            "bomVersion": bom_version,
+            "goodsSkuCode": sale_sku_code,
+            "wareSkuList": ware_sku_list
+        })
         temp_data = {
-            "goodsSkuList": [
-                {
-                    "bomVersion": bom_version,
-                    "goodsSkuCode": sale_sku_code,
-                    "wareSkuList": temp_ware_sku_list
-                }
-            ],
+            "goodsSkuList": up_shelves_list,
             "sourceNo": "CG" + str(int(time.time() * 1000)),
             "targetWarehouseId": target_warehouse_id,
             "warehouseId": current_warehouse_id
         }
-
         ims_api_config['purchase_into_warehouse']['data'].update(temp_data)
         res = self.send_request(**ims_api_config['purchase_into_warehouse'])
         return res
@@ -465,8 +484,8 @@ class ImsController(RequestHandler):
         purchase_into_warehouse_res = self.purchase_into_warehouse(
             sale_sku_code,
             bom_version,
-            sj_location_ids,
             count,
+            sj_location_ids,
             current_warehouse_id,
             target_warehouse_id)
         return purchase_into_warehouse_res
@@ -584,6 +603,22 @@ class ImsController(RequestHandler):
         if not turn_to_unqualified_goods_res:
             return
         return True
+
+    def add_stock_by_other_in(self, sale_sku_code, bom_version, add_stock_count, location_id, current_warehouse_id,
+                              target_warehouse_id):
+        detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
+        ware_sku_list = list()
+        for ware_sku, qty in detail.items():
+            ware_sku_list.append(
+                {
+                    "qty": qty * add_stock_count,
+                    "storageLocationId": location_id,
+                    "storageLocationType": 5,
+                    "wareSkuCode": ware_sku
+                }
+            )
+        res = self.other_into_warehouse(ware_sku_list, current_warehouse_id, target_warehouse_id)
+        return res
 
 
 if __name__ == '__main__':

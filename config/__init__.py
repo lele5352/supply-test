@@ -8,6 +8,7 @@ env_configs = {
         'app_prefix': url_prefix.get('app_26'),
         'delivery_service_prefix': url_prefix.get('delivery_service_26'),
         'receipt_service_prefix': url_prefix.get('receipt_service_26'),
+        'transfer_service_prefix': url_prefix.get('transfer_service_26'),
 
         'mysql_info_scm': {'mysql_info': mysql_config.get('test_72'), 'db': 'homary_scm'},
         'mysql_info_ims': {'mysql_info': mysql_config.get('test_72'), 'db': 'homary_ims'},
@@ -21,6 +22,7 @@ env_configs = {
         'app_prefix': url_prefix.get('app_160'),
         'delivery_service_prefix': url_prefix.get('delivery_service_160'),
         'receipt_service_prefix': url_prefix.get('receipt_service_160'),
+        'transfer_service_prefix': url_prefix.get('transfer_service_160'),
 
         'mysql_info_scm': {'mysql_info': mysql_config.get('test_160'), 'db': 'supply_scm'},
         'mysql_info_ims': {'mysql_info': mysql_config.get('test_160'), 'db': 'supply_ims'},

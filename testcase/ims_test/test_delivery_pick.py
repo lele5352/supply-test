@@ -1,7 +1,7 @@
 import time
 import pytest
 
-from testcase.ims_test import *
+from testcase import *
 
 
 class TestDeliveryPick(object):
