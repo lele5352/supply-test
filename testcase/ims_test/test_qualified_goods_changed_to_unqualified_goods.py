@@ -7,34 +7,30 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
     """库内管理-库内转次"""
 
     def setup_class(self):
-        self.ims = ims
         self.warehouse_id = delivery_warehouse_id
         self.target_warehouse_id = delivery_warehouse_id
-        self.sale_sku_code = sale_sku_code
-        self.bom_version = bom_version
-        self.bom_detail = bom_detail
         self.sale_sku_count = 2
-        self.sj_location_ids = fsj_location_ids
-        self.cp_location_id = fcp_location_id
-        self.ims.delete_ims_data(self.sale_sku_code)
-        self.ims.delete_unqualified_goods_inventory_data(self.sale_sku_code, self.bom_version, self.warehouse_id)
-        self.ims.add_stock_by_purchase_into_warehouse(
-            self.sale_sku_code,
-            self.bom_version,
-            self.sj_location_ids,
+        self.sj_kw_ids = fsj_kw_ids
+        self.cp_kw_id = fcp_kw_id
+        ims.delete_ims_data(sale_sku)
+        ims.delete_unqualified_goods_inventory_data(sale_sku, bom, self.warehouse_id)
+        ims.add_stock_by_purchase_in(
+            sale_sku,
+            bom,
+            self.sj_kw_ids,
             self.sale_sku_count,
             self.warehouse_id,
             self.target_warehouse_id
         )
-        self.expect_inventory = self.ims.get_current_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        self.expect_inventory = ims.get_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id,
             self.target_warehouse_id
         )
-        self.expect_unqualified_inventory = self.ims.get_unqualified_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        self.expect_unqualified_inventory = ims.get_unqualified_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id
         )
 
@@ -45,7 +41,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
         测试场景：
         先通过采购入库2套销售商品库存，再每套按仓库sku逐件转次；
         """
-        mix_list = list(zip(self.sj_location_ids, self.bom_detail.items()))
+        mix_list = list(zip(self.sj_kw_ids, bom_detail.items()))
         for index in range(self.sale_sku_count):
             if (index % 2) != 0:
                 mix_list.reverse()
@@ -53,10 +49,10 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
             for location_id, detail in mix_list:
                 for count in range(detail[1]):
                     changed_count += 1
-                    turn_to_unqualified_goods_res = self.ims.turn_to_unqualified_goods(
+                    turn_to_unqualified_goods_res = ims.turn_to_unqualified_goods(
                         detail[0],
                         location_id,
-                        self.cp_location_id,
+                        self.cp_kw_id,
                         1,
                         self.warehouse_id,
                         self.target_warehouse_id
@@ -80,24 +76,24 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
                         self.expect_unqualified_inventory.update(
                             {
                                 detail[0]: {
-                                    self.cp_location_id: {'stock': 1, 'block': 0},
+                                    self.cp_kw_id: {'stock': 1, 'block': 0},
                                     'total': {'stock': 1, 'block': 0}
                                 }
                             }
                         )
                     else:
-                        self.expect_unqualified_inventory[detail[0]][self.cp_location_id]['stock'] += 1
+                        self.expect_unqualified_inventory[detail[0]][self.cp_kw_id]['stock'] += 1
                         self.expect_unqualified_inventory[detail[0]]['total']['stock'] += 1
 
                     # 获取转次后的良品库存
-                    current_inventory = self.ims.get_current_inventory(
-                        self.sale_sku_code,
-                        self.bom_version,
+                    current_inventory = ims.get_inventory(
+                        sale_sku,
+                        bom,
                         self.warehouse_id,
                         self.target_warehouse_id)
-                    current_unqualified_inventory = self.ims.get_unqualified_inventory(
-                        self.sale_sku_code,
-                        self.bom_version,
+                    current_unqualified_inventory = ims.get_unqualified_inventory(
+                        sale_sku,
+                        bom,
                         self.warehouse_id
                     )
                     assert turn_to_unqualified_goods_res['code'] == 200

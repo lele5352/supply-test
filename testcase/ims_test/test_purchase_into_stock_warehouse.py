@@ -5,25 +5,24 @@ from testcase import *
 
 class TestPurchaseIntoStockWarehouse(object):
     def setup_class(self):
-        self.ims = ims
-        self.sale_sku_code = sale_sku_code
+        self.sale_sku_code = sale_sku
         self.warehouse_id = stock_warehouse_id
         self.target_warehouse_id = ''
-        self.bom_version = bom_version
+        self.bom_version = bom
         self.bom_detail = bom_detail
         self.sale_sku_count = 3
-        self.sj_location_ids = bsj_location_ids
-        self.ims.delete_ims_data(self.sale_sku_code)
+        self.sj_location_ids = bsj_kw_ids
+        ims.delete_ims_data(self.sale_sku_code)
 
     def test_1_purchase_create_order(self):
-        res = self.ims.purchase_create_order(
+        res = ims.purchase_create_order(
             self.sale_sku_code,
             self.sale_sku_count,
             self.warehouse_id,
             self.target_warehouse_id
         )
         # 获取库存数据
-        current_inventory = self.ims.get_current_inventory(
+        current_inventory = ims.get_inventory(
             self.sale_sku_code,
             self.bom_version,
             self.warehouse_id,
@@ -45,7 +44,7 @@ class TestPurchaseIntoStockWarehouse(object):
         assert current_inventory == expect_ims_inventory_data
 
     def test_2_purchase_into_warehouse(self):
-        res = self.ims.purchase_into_warehouse(
+        res = ims.purchase_into_warehouse(
             self.sale_sku_code,
             self.bom_version,
             self.sale_sku_count,
@@ -54,7 +53,7 @@ class TestPurchaseIntoStockWarehouse(object):
             self.target_warehouse_id
         )
         # 获取库存数据
-        current_inventory = self.ims.get_current_inventory(
+        current_inventory = ims.get_inventory(
             self.sale_sku_code,
             self.bom_version,
             self.warehouse_id,

@@ -5,19 +5,15 @@ from testcase import *
 
 class TestOtherIntoStockWarehouse(object):
     def setup_class(self):
-        self.ims = ims
-        self.sale_sku_code = sale_sku_code
         self.warehouse_id = stock_warehouse_id
         self.target_warehouse_id = ''
-        self.bom_detail = bom_detail
-        self.bom_version = bom_version
-        self.sj_location_ids = bsj_location_ids
+        self.sj_kw_ids = bsj_kw_ids
 
     def setup(self):
-        self.ims.delete_ims_data(self.sale_sku_code)
-        self.expect_inventory = self.ims.get_current_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        ims.delete_ims_data(sale_sku)
+        self.expect_inventory = ims.get_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id,
             self.target_warehouse_id)
 
@@ -29,7 +25,7 @@ class TestOtherIntoStockWarehouse(object):
         """
         ware_sku_list = list()
         # 构造入库仓库sku明细数据,刚好成1套的
-        for sj_location_id, detail in zip(self.sj_location_ids, self.bom_detail.items()):
+        for sj_location_id, detail in zip(self.sj_kw_ids, bom_detail.items()):
             pick_qty = detail[1]
             temp_dict = {
                 "qty": pick_qty,
@@ -47,7 +43,7 @@ class TestOtherIntoStockWarehouse(object):
                 break
             else:
                 continue
-        res = self.ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
+        res = ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
         self.expect_inventory.update(
             {
                 # 插入中央库存、销售商品总库存数据，stock、block都为0
@@ -74,9 +70,9 @@ class TestOtherIntoStockWarehouse(object):
                     }
                 }
             )
-        current_inventory = self.ims.get_current_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        current_inventory = ims.get_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id,
             self.target_warehouse_id)
         assert res['code'] == 200
@@ -90,7 +86,7 @@ class TestOtherIntoStockWarehouse(object):
         """
         ware_sku_list = list()
         # 构造入库仓库sku明细数据,刚好成1套的
-        for sj_location_id, detail in zip(self.sj_location_ids, self.bom_detail.items()):
+        for sj_location_id, detail in zip(self.sj_kw_ids, bom_detail.items()):
             pick_qty = detail[1]
             temp_dict = {
                 "qty": pick_qty,
@@ -99,7 +95,7 @@ class TestOtherIntoStockWarehouse(object):
                 "wareSkuCode": detail[0]
             }
             ware_sku_list.append(temp_dict)
-        res = self.ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
+        res = ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
         self.expect_inventory.update(
             {
                 # 插入中央库存、销售商品总库存数据，stock、block都为0
@@ -126,9 +122,9 @@ class TestOtherIntoStockWarehouse(object):
                     }
                 }
             )
-        current_inventory = self.ims.get_current_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        current_inventory = ims.get_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id,
             self.target_warehouse_id)
         assert res['code'] == 200
@@ -143,7 +139,7 @@ class TestOtherIntoStockWarehouse(object):
         set_num = 2
         ware_sku_list = list()
         # 构造入库仓库sku明细数据,刚好成1套的
-        for sj_location_id, detail in zip(self.sj_location_ids, self.bom_detail.items()):
+        for sj_location_id, detail in zip(self.sj_kw_ids, bom_detail.items()):
             pick_qty = detail[1] * set_num
             temp_dict = {
                 "qty": pick_qty,
@@ -161,7 +157,7 @@ class TestOtherIntoStockWarehouse(object):
                 break
             else:
                 continue
-        res = self.ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
+        res = ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
         self.expect_inventory.update(
             {
                 # 插入中央库存、销售商品总库存数据，stock、block都为0
@@ -188,9 +184,9 @@ class TestOtherIntoStockWarehouse(object):
                     }
                 }
             )
-        current_inventory = self.ims.get_current_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        current_inventory = ims.get_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id,
             self.target_warehouse_id)
         assert res['code'] == 200
@@ -205,7 +201,7 @@ class TestOtherIntoStockWarehouse(object):
         set_num = 2
         ware_sku_list = list()
         # 构造入库仓库sku明细数据,刚好成1套的
-        for sj_location_id, detail in zip(self.sj_location_ids, self.bom_detail.items()):
+        for sj_location_id, detail in zip(self.sj_kw_ids, bom_detail.items()):
             pick_qty = detail[1] * set_num
             temp_dict = {
                 "qty": pick_qty,
@@ -214,7 +210,7 @@ class TestOtherIntoStockWarehouse(object):
                 "wareSkuCode": detail[0]
             }
             ware_sku_list.append(temp_dict)
-        res = self.ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
+        res = ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
         self.expect_inventory.update(
             {
                 # 插入中央库存、销售商品总库存数据，stock、block都为0
@@ -241,9 +237,9 @@ class TestOtherIntoStockWarehouse(object):
                     }
                 }
             )
-        current_inventory = self.ims.get_current_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        current_inventory = ims.get_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id,
             self.target_warehouse_id)
         assert res['code'] == 200
@@ -269,7 +265,7 @@ class TestOtherIntoStockWarehouse(object):
         })
         # 构造入库仓库sku明细数据,刚好成1套的
         iter_time = 0
-        for sj_location_id, detail in zip(self.sj_location_ids, self.bom_detail.items()):
+        for sj_location_id, detail in zip(self.sj_kw_ids, bom_detail.items()):
             pick_qty = detail[1]
             ware_sku_list = [{
                 "qty": pick_qty,
@@ -278,7 +274,7 @@ class TestOtherIntoStockWarehouse(object):
                 "wareSkuCode": detail[0]
             }]
 
-            res = self.ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
+            res = ims.other_into_warehouse(ware_sku_list, self.warehouse_id, self.target_warehouse_id)
             self.expect_inventory.update(
                 {
                     detail[0]: {
@@ -287,12 +283,12 @@ class TestOtherIntoStockWarehouse(object):
                     }
                 }
             )
-            current_inventory = self.ims.get_current_inventory(
-                self.sale_sku_code,
-                self.bom_version,
+            current_inventory = ims.get_inventory(
+                sale_sku,
+                bom,
                 self.warehouse_id,
                 self.target_warehouse_id)
-            if iter_time >= len(self.bom_detail) - 1:
+            if iter_time >= len(bom_detail) - 1:
                 self.expect_inventory.update(
                     {
                         "central_inventory_stock": 1,

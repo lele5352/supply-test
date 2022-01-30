@@ -5,27 +5,23 @@ from testcase import *
 
 class TestPurchaseIntoDeliveryWarehouse(object):
     def setup_class(self):
-        self.ims = ims
-        self.sale_sku_code = sale_sku_code
         self.warehouse_id = delivery_warehouse_id
         self.target_warehouse_id = delivery_warehouse_id
-        self.bom_detail = bom_detail
-        self.bom_version = bom_version
         self.sale_sku_count = 3
-        self.sj_location_ids = fsj_location_ids
-        self.ims.delete_ims_data(self.sale_sku_code)
+        self.sj_kw_ids = fsj_kw_ids
+        ims.delete_ims_data(sale_sku)
 
     def test_1_purchase_create_order(self):
-        res = self.ims.purchase_create_order(
-            self.sale_sku_code,
+        res = ims.purchase_create_order(
+            sale_sku,
             self.sale_sku_count,
             self.warehouse_id,
             self.target_warehouse_id
         )
         # 获取库存数据
-        current_inventory = self.ims.get_current_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        current_inventory = ims.get_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id,
             self.target_warehouse_id)
         expect_ims_inventory_data = {
@@ -45,17 +41,17 @@ class TestPurchaseIntoDeliveryWarehouse(object):
         assert current_inventory == expect_ims_inventory_data
 
     def test_2_purchase_into_warehouse(self):
-        res = self.ims.purchase_into_warehouse(
-            self.sale_sku_code,
-            self.bom_version,
+        res = ims.purchase_into_warehouse(
+            sale_sku,
+            bom,
             self.sale_sku_count,
-            self.sj_location_ids,
+            self.sj_kw_ids,
             self.warehouse_id,
             self.target_warehouse_id)
         # 获取库存数据
-        current_inventory = self.ims.get_current_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        current_inventory = ims.get_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id,
             self.target_warehouse_id)
         expect_ims_inventory_data = {
@@ -70,7 +66,7 @@ class TestPurchaseIntoDeliveryWarehouse(object):
             'goods_inventory_spot_goods_stock': self.sale_sku_count,
             'goods_inventory_spot_goods_block': 0
         }
-        for location_id, detail in zip(self.sj_location_ids, self.bom_detail.items()):
+        for location_id, detail in zip(self.sj_kw_ids, bom_detail.items()):
             # 构造仓库库存数据
             expect_ims_inventory_data[detail[0]] = {
                 location_id: {

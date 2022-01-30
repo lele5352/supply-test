@@ -5,25 +5,22 @@ from testcase import *
 
 class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
     def setup_class(self):
-        self.ims = ims
-        self.sale_sku_code = sale_sku_code
         self.warehouse_id = exchange_warehouse_id
         self.target_warehouse_id = delivery_warehouse_id
-        self.bom_version = bom_version
-        self.bom_detail = bom_detail
+
         self.sale_sku_count = 2
-        self.sj_location_ids = zsj_location_ids
-        self.ims.delete_ims_data(self.sale_sku_code)
+        self.sj_kw_ids = zsj_kw_ids
+        ims.delete_ims_data(sale_sku)
         # 采购入库生成库存
-        self.ims.add_stock_by_purchase_into_warehouse(
-            self.sale_sku_code, self.bom_version,
-            self.sj_location_ids,
+        ims.add_stock_by_purchase_in(
+            sale_sku, bom,
+            self.sj_kw_ids,
             self.sale_sku_count,
             self.warehouse_id,
             self.target_warehouse_id)
-        self.expect_inventory = self.ims.get_current_inventory(
-            self.sale_sku_code,
-            self.bom_version,
+        self.expect_inventory = ims.get_inventory(
+            sale_sku,
+            bom,
             self.warehouse_id,
             self.target_warehouse_id)
 
@@ -38,7 +35,7 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
         期望：
         每次循环开始出库第一个仓库sku后，中央库存、销售商品总库存、现货库存扣去1套，后续此套内继续出库不扣中央库存、销售商品总库存、现货库存，只扣库位库存，仓库商品总库存
         """
-        mix_list = list(zip(self.sj_location_ids, self.bom_detail.items()))
+        mix_list = list(zip(self.sj_kw_ids, bom_detail.items()))
         for index in range(self.sale_sku_count):
             if (index % 2) != 0:
                 mix_list.reverse()
@@ -51,14 +48,14 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
                         "storageLocationId": location_id,
                         "wareSkuCode": detail[0]
                     }]
-                    block_res = self.ims.qualified_goods_other_out_block(
+                    block_res = ims.qualified_goods_other_out_block(
                         ware_sku_list,
                         self.warehouse_id,
                         self.target_warehouse_id)
                     # 调用其他出库预占库存接口后获取库存数据，用于与构造的期望库存数据进行比对
-                    after_block_inventory = self.ims.get_current_inventory(
-                        self.sale_sku_code,
-                        self.bom_version,
+                    after_block_inventory = ims.get_inventory(
+                        sale_sku,
+                        bom,
                         self.warehouse_id,
                         self.target_warehouse_id)
 
@@ -78,14 +75,14 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
                     assert block_res['code'] == 200
                     assert after_block_inventory == self.expect_inventory
 
-                    delivery_out_res = self.ims.qualified_goods_other_out_delivered(
+                    delivery_out_res = ims.qualified_goods_other_out_delivered(
                         ware_sku_list,
                         self.warehouse_id,
                         self.target_warehouse_id
                     )
-                    after_delivered_inventory = self.ims.get_current_inventory(
-                        self.sale_sku_code,
-                        self.bom_version,
+                    after_delivered_inventory = ims.get_inventory(
+                        sale_sku,
+                        bom,
                         self.warehouse_id,
                         self.target_warehouse_id)
                     if out_count == 1:

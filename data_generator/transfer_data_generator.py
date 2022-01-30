@@ -38,17 +38,17 @@ class WmsTransferDataGenerator:
                 sale_sku_code,
                 'A',
                 demand_qty,
-                self.wms.db_get_location_ids(5, demand_qty, delivery_warehouse_id, delivery_target_warehouse_id),
+                self.wms.db_get_kw_ids(5, demand_qty, delivery_warehouse_id, delivery_target_warehouse_id),
                 delivery_warehouse_id,
                 delivery_target_warehouse_id)
         # 调用创建调拨需求接口
         res = self.transfer.create_transfer_demand(
-            self.wms.db_warehouse_id_to_code(delivery_warehouse_id),
-            self.wms.db_warehouse_id_to_code(receive_warehouse_id),
+            self.wms.db_ck_id_to_code(delivery_warehouse_id),
+            self.wms.db_ck_id_to_code(receive_warehouse_id),
             sale_sku_code,
             demand_qty,
-            self.wms.db_warehouse_id_to_code(delivery_target_warehouse_id),
-            self.wms.db_warehouse_id_to_code(receive_target_warehouse_id),
+            self.wms.db_ck_id_to_code(delivery_target_warehouse_id),
+            self.wms.db_ck_id_to_code(receive_target_warehouse_id),
             demand_type,
             customer_type,
             remark)

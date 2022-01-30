@@ -8,7 +8,7 @@ def add_stock_by_other_in(sale_sku_code, bom_version, add_stock_count, current_w
     ims = ImsController()
     wms = WmsController(ums)
     # ims.delete_ims_data(sale_sku_code)
-    location_id = wms.db_get_location_ids(5, 1, current_warehouse_id, target_warehouse_id)
+    location_id = wms.db_get_kw_ids(5, 1, current_warehouse_id, target_warehouse_id)
     detail = ims.get_sale_sku_bom_detail(sale_sku_code, bom_version)
     ware_sku_list = list()
     for ware_sku, qty in detail.items():
