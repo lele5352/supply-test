@@ -370,9 +370,8 @@ class TestZZCTransToZZCSameTarget:
 
         delivery_res = wms.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
-
-        # 调出仓销售商品总库存、现货库存扣减；；
-        self.trans_out_expect_inventory["central_inventory_sale_stock"] -= self.trans_qty
+        # 调出仓和调入仓的目的仓相同，按目的仓算，销售商品总库存先扣又加，所以不变
+        # 调出仓现货库存扣减；
         self.trans_out_expect_inventory["goods_inventory_spot_goods_stock"] -= self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
@@ -386,8 +385,7 @@ class TestZZCTransToZZCSameTarget:
                     tp_kw_id: {'block': 0, 'stock': 0}
                 }
             )
-        # 调入仓销售商品总库存增加，调拨在途增加
-        self.trans_in_expect_inventory["central_inventory_sale_stock"] += self.trans_qty
+        # 调入仓调拨在途增加
         self.trans_in_expect_inventory["goods_inventory_transfer_on_way_stock"] += self.trans_qty
 
         # 获取当前最新库存数据，比对预期数据
@@ -466,8 +464,7 @@ class TestZZCTransToZZCSameTarget:
         received_res = wms.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
-        # 调出仓销售商品总库存、现货库存扣减；；
-        self.trans_out_expect_inventory["central_inventory_sale_stock"] -= self.trans_qty
+        # 调出仓现货库存扣减；；
         self.trans_out_expect_inventory["goods_inventory_spot_goods_stock"] -= self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
@@ -481,8 +478,7 @@ class TestZZCTransToZZCSameTarget:
                     tp_kw_id: {'block': 0, 'stock': 0}
                 }
             )
-        # 调入仓销售商品总库存增加，调拨在途增加
-        self.trans_in_expect_inventory["central_inventory_sale_stock"] += self.trans_qty
+        # 调入仓调拨在途增加
         self.trans_in_expect_inventory["goods_inventory_transfer_on_way_stock"] += self.trans_qty
 
         # 获取当前最新库存数据，比对预期数据
@@ -566,11 +562,9 @@ class TestZZCTransToZZCSameTarget:
             shelf_res = wms.transfer_in_up_shelf(detail[0], self.trans_in_sj_kw_code)
             assert shelf_res['code'] == 200
 
-        # 调出仓销售商品总库存、现货库存扣减；；
-        self.trans_out_expect_inventory["central_inventory_sale_stock"] -= self.trans_qty
+        # 调出仓现货库存扣减；；
         self.trans_out_expect_inventory["goods_inventory_spot_goods_stock"] -= self.trans_qty
-        # 调入仓销售商品总库存增加，现货库存增加，仓库商品总库存增加，仓库库位库存增加
-        self.trans_in_expect_inventory["central_inventory_sale_stock"] += self.trans_qty
+        # 调入仓现货库存增加，仓库商品总库存增加，仓库库位库存增加
         self.trans_in_expect_inventory["goods_inventory_spot_goods_stock"] += self.trans_qty
 
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):

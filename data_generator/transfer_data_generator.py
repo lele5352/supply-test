@@ -2,20 +2,20 @@ import time
 
 from controller.wms_transfer_service_controller import WmsTransferServiceController
 from controller.wms_controller import WmsController
-from controller.ums_controller import UmsController
 from controller.ims_controller import ImsController
+from data_generator import ums
 from utils.log_handler import logger as log
 from utils.barcode_handler import barcode_generate
 
 
 class WmsTransferDataGenerator:
-    def __init__(self, wms, ims, transfer):
-        self.wms = wms
-        self.transfer = transfer
-        self.ims = ims
+    def __init__(self):
+        self.wms = WmsController(ums)
+        self.transfer = WmsTransferServiceController(ums)
+        self.ims = ImsController()
 
-    def create_transfer_demand(self, delivery_warehouse_id, receive_warehouse_id, sale_sku_code, demand_qty,
-                               delivery_target_warehouse_id='', receive_target_warehouse_id='', demand_type=1,
+    def create_transfer_demand(self, delivery_warehouse_id, delivery_target_warehouse_id, receive_warehouse_id,
+                               receive_target_warehouse_id, sale_sku_code, demand_qty, demand_type=1,
                                customer_type=1, remark=''):
         """
         创建调拨需求
@@ -23,7 +23,7 @@ class WmsTransferDataGenerator:
         :param int delivery_warehouse_id: 调出仓库id
         :param int receive_warehouse_id: 调入仓库id
         :param int delivery_target_warehouse_id: 调出仓库的目的仓id，仅调出仓为中转仓时必填
-        :param imt receive_target_warehouse_id: 调入仓库的目的仓id，仅调入仓为中转仓时必填
+        :param int receive_target_warehouse_id: 调入仓库的目的仓id，仅调入仓为中转仓时必填
         :param string sale_sku_code: 调拨的商品的销售sku
         :param int demand_qty: 调拨数量
         :param int demand_type: 调拨类型
@@ -85,10 +85,7 @@ class WmsTransferDataGenerator:
 
 
 if __name__ == '__main__':
-    ums = UmsController()
-    transfer = WmsTransferServiceController(ums)
-    ims = ImsController()
     transfer_data = WmsTransferDataGenerator()
     demand_qty = 1
-    transfer_data.create_transfer_pick_order(511, 514, '63203684930', 1, 513, 514)
-    # transfer.create_transfer_demand(511, 514, '63203684930', 1, 513, 514, 1, 1, 'test')
+    # transfer_data.create_transfer_pick_order(511, 514, '63203684930', 1, 513, 514)
+    transfer_data.create_transfer_demand(511, 514, '63203684930', 1, 513, 514, 1, 1, 'test')
