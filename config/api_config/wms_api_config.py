@@ -11,62 +11,6 @@ wms_api_config = {
         "method": "put",
         "data": {"dataPermId": 854}
     },
-    "get_warehouse": {
-        "uri_path": "/api/ec-wms-api/warehouse/page",
-        "method": "post",
-        "data": {
-            "warehouseStatus": None,
-            "sortField": [
-                {
-                    "field": "create_time",
-                    "type": "DESC"
-                }
-            ],
-            "operatingMode": None,
-            "warehouseCode": "",
-            "warehouseAbbreviation": "",
-            "warehouseNameEn": "",
-            "warehouseNameCn": "",
-            "cnWarehouseFlag": "",
-            "size": 10,
-            "current": 1
-        }
-    },
-    "get_warehouse_area": {
-        "uri_path": "/api/ec-wms-api/warehousearea/page",
-        "method": "post",
-        "data": {
-            "warehouseAreaStatus": None,
-            "sortField": [{"field": "create_time", "type": "DESC"}],
-            "warehouseAreaType": None,
-            "warehouseAreaCode": "",
-            "warehouseAreaName": "",
-            "size": 1,
-            "current": 1
-        }
-    },
-    "get_warehouse_location": {
-        "uri_path": "/api/ec-wms-api/location/page",
-        "method": "post",
-        "data": {
-            "sortField": [
-                {
-                    "field": "create_time",
-                    "type": "DESC"
-                }
-            ],
-            "warehouseLocationStatus": 0,
-            "belongWareHouseAreaCode": "",
-            "warehouseAreaType": "",
-            "destWarehouseCode": "",
-            "warehouseLocationCode": "",
-            "warehouseLocationName": "",
-            "warehouseLocationType": "",
-            "warehouseLocationUseStatus": "",
-            "size": 10,
-            "current": 1
-        }
-    },
     "create_location": {
         "uri_path": "/api/ec-wms-api/location/save",
         "method": "post",
@@ -134,6 +78,63 @@ wms_api_config = {
                 "skuQty": 10
             }]
         }]
+    },
+    "transfer_pick_order_tray_detail": {
+        "uri_path": "/api/ec-wms-api/transferOut/tray/detail?pickOrderNo=%s",
+        "method": "get",
+        "data": ""
+    },
+    "transfer_finish_packing": {
+        "uri_path": "/api/ec-wms-api/transferOut/pda/finishPacking",
+        "method": "post",
+        "data": {
+            "pickOrderNo": "",
+            "storageLocationCodes": []
+        }
+    },
+    "transfer_out_order_detail": {
+        "uri_path": "/api/ec-wms-api/transferOut/handover/boxes?transferOutNo=%s",
+        "method": "get",
+        "data": ""
+    },
+    "transfer_out_order_review": {
+        "uri_path": "/api/ec-wms-api/transferOut/box/review/submit",
+        "method": "post",
+        "data": {
+            "boxNo": "DC2202070002-1",
+            "storageLocationCode": "TPKW-001"
+        }
+    },
+    "transfer_box_bind": {
+        "uri_path": "/api/ec-wms-api/transferOut/handover/bind",
+        "method": "post",
+        "data": {
+            "boxNo": "DC2202070002-1",
+            "handoverNo": "",
+            "receiveWarehouseCode": ""
+        }
+    },
+    "transfer_delivery": {
+        "uri_path": "/api/ec-wms-api/transferOut/handover/delivery/confirm",
+        "method": "post",
+        "data": {
+            "handoverNo": ""
+        }
+    },
+    "transfer_in_received": {
+        "uri_path": "/api/ec-wms-api/transferIn/handover/received/confirm",
+        "method": "post",
+        "data": {
+            "handoverNo": ""
+        }
+    },
+    "transfer_box_up_shelf": {
+        "uri_path": "/api/ec-wms-api/transferIn/input/box/shelf",
+        "method": "post",
+        "data": {
+            "boxNo": "DC2202070021-1",
+            "storageLocationCode": "SJKW-001"
+        }
     },
     "create_other_entry_order": {
         "uri_path": "/api/ec-wms-api/entryorder",

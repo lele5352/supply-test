@@ -91,26 +91,36 @@ class ImsController(RequestHandler):
         sql = "select stock,block from central_inventory where goods_sku_code ='%s' and warehouse_id is NULL;" % sale_sku_code
         central_inventory_data = self.db.get_one(sql)
         if not central_inventory_data:
-            return
+            return {
+                "central_inventory_stock": 0,
+                "central_inventory_block": 0
+            }
         return {
             "central_inventory_stock": central_inventory_data['stock'],
             "central_inventory_block": central_inventory_data['block']
         }
 
     # 销售商品仓库总库存获取
-    def get_warehouse_central_inventory(self, sale_sku_code, warehouse_id) -> dict or None:
+    def get_warehouse_central_inventory(self, sale_sku_code, warehouse_id, target_warehouse_id) -> dict or None:
         """
-        :param sale_sku_code: 销售sku编码
-        :param warehouse_id: 仓库id
+        获取销售商品总库存
+
+        :param string sale_sku_code: 销售sku编码
+        :param int warehouse_id: 仓库id
+        :param int target_warehouse_id: 目的仓库id
 
         if query stock data fail return None;
         else return dict like {'central_inventory_sale_stock':x,'central_inventory_sale_block':y}
         """
-        sql = "select stock,block from central_inventory where goods_sku_code ='%s' and warehouse_id=%s;" % (
-            sale_sku_code, warehouse_id)
+        temp_sql = 'warehouse_id=%s' % target_warehouse_id if target_warehouse_id else 'warehouse_id=%s' % warehouse_id
+        sql = "select stock,block from central_inventory where goods_sku_code ='%s' and %s" % (
+            sale_sku_code, temp_sql)
         sale_sku_warehouse_central_inventory = self.db.get_one(sql)
         if not sale_sku_warehouse_central_inventory:
-            return
+            return {
+                "central_inventory_sale_stock": 0,
+                "central_inventory_sale_block": 0
+            }
         return {
             "central_inventory_sale_stock": sale_sku_warehouse_central_inventory['stock'],
             "central_inventory_sale_block": sale_sku_warehouse_central_inventory['block']
@@ -130,8 +140,6 @@ class ImsController(RequestHandler):
                     AND target_warehouse_id %s
                 """ % (sale_sku_code, warehouse_id, temp_sql)
         goods_inventory_data = self.db.get_all(sql)
-        if not goods_inventory_data:
-            return
         goods_inventory_dict = {
             'goods_inventory_purchase_on_way_stock': 0,
             'goods_inventory_purchase_on_way_block': 0,
@@ -140,6 +148,9 @@ class ImsController(RequestHandler):
             'goods_inventory_spot_goods_stock': 0,
             'goods_inventory_spot_goods_block': 0
         }
+        if not goods_inventory_data:
+            return goods_inventory_dict
+
         for inventory_data in goods_inventory_data:
             # 销售商品采购在途库存
             if inventory_data['type'] == 1:
@@ -195,34 +206,27 @@ class ImsController(RequestHandler):
                     )
                 else:
                     temp_ware_sku_inventory.update(
-                        {
-                            data['storage_location_id']: {'stock': data['stock'], 'block': data['block']}}
+                        {data['storage_location_id']: {'stock': data['stock'], 'block': data['block']}}
                     )
             all_ware_sku_inventory.update({
                 ware_sku_code: temp_ware_sku_inventory
             })
-
         return all_ware_sku_inventory
 
     # 获取良品库存
     def get_inventory(self, sale_sku_code, bom_version, warehouse_id, target_warehouse_id):
         current_inventory = dict()
         central_inventor = self.get_central_inventory(sale_sku_code)
-        if not target_warehouse_id:
-            # 发货仓、备货仓
-            sale_sku_central_inventory = self.get_warehouse_central_inventory(sale_sku_code, warehouse_id)
-        else:
-            # 中转仓
-            sale_sku_central_inventory = self.get_warehouse_central_inventory(sale_sku_code, target_warehouse_id)
-
+        central_warehouse_inventory = self.get_warehouse_central_inventory(sale_sku_code, warehouse_id,
+                                                                           target_warehouse_id)
         goods_inventory = self.get_goods_inventory(sale_sku_code, warehouse_id, target_warehouse_id)
         wares_inventory = self.get_wares_inventory(sale_sku_code, bom_version, warehouse_id, target_warehouse_id)
 
         # 库存字典数据合并
         if central_inventor:
             current_inventory.update(central_inventor)
-        if sale_sku_central_inventory:
-            current_inventory.update(sale_sku_central_inventory)
+        if central_warehouse_inventory:
+            current_inventory.update(central_warehouse_inventory)
         if goods_inventory:
             current_inventory.update(goods_inventory)
         if wares_inventory:

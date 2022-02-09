@@ -44,7 +44,7 @@ class WmsController(RequestHandler):
         """
         根据仓库id获取仓库编码
 
-        :param int warehouse_id:仓库id
+        :param int warehouse_id: 仓库id
         """
         if not warehouse_id:
             return
@@ -56,7 +56,7 @@ class WmsController(RequestHandler):
         """
         根据库位id获取库位编码
 
-        :param int kw_id:库位id
+        :param int kw_id: 库位id
         """
         sql = "select warehouse_location_code from base_warehouse_location where id=%s" % kw_id
         data = self.db.get_one(sql)
@@ -66,26 +66,27 @@ class WmsController(RequestHandler):
         """
         获取指定区域类型的仓库区域id
 
-        :param int warehouse_id:仓库id
-        :param int area_type:区域类型
+        :param int warehouse_id: 仓库id
+        :param int area_type: 区域类型
         """
         sql = "select id from base_warehouse_area where warehouse_id=%s and type =%s " % (warehouse_id, area_type)
         data = self.db.get_one(sql)
         return data['id']
 
-    def db_get_kw_ids(self, kw_type, num, warehouse_id, target_warehouse_id=None):
+    def db_get_kw(self, return_type, kw_type, num, warehouse_id, target_warehouse_id=None):
         """
         获取指定库位类型、指定目的仓、指定数量的仓库库位
 
-        :param int kw_type:库位类型
-        :param int num:获取的库位个数
-        :param int warehouse_id:库位的所属仓库id
-        :param int target_warehouse_id:库位的目的仓id
+        :param int return_type: 1-返回库位id；2-返回库位编码
+        :param int kw_type: 库位类型
+        :param int num: 获取的库位个数
+        :param int warehouse_id: 库位的所属仓库id
+        :param int target_warehouse_id: 库位的目的仓id
         """
-        temp_sql = " = %s" % target_warehouse_id if target_warehouse_id else "is NULL"
+        temp_sql = " = %s" % target_warehouse_id if target_warehouse_id and target_warehouse_id != warehouse_id else "is NULL"
         query_kw_id_sql = """
             SELECT 
-                id 
+                id,warehouse_location_code
             FROM 
                 base_warehouse_location 
             WHERE 
@@ -97,22 +98,26 @@ class WmsController(RequestHandler):
         """ % (kw_type, warehouse_id, temp_sql, num)
 
         location_data = self.db.get_all(query_kw_id_sql)
-        if not location_data:
-            return
-        elif len(location_data) == 1:
-            return location_data[0]['id']
-        elif len(location_data) < num:
+        # print('sql:%s' % query_kw_id_sql)
+        # print(location_data)
+        if len(location_data) < num:
             # 库位不够，则新建对应缺少的库位
             new_locations = self.create_location(num - len(location_data), kw_type, warehouse_id, target_warehouse_id)
             if not new_locations:
                 return
             # 创建完缺口个数的库位后，重新获取库位
             location_data = self.db.get_all(query_kw_id_sql)
-            kw_ids = [location['id'] for location in location_data]
-            return kw_ids
-        else:
-            kw_ids = [location['id'] for location in location_data]
-            return kw_ids
+
+        if return_type == 1:
+            if len(location_data) == 1:
+                return location_data[0]['id']
+            else:
+                return [location['id'] for location in location_data]
+        elif return_type == 2:
+            if len(location_data) == 1:
+                return location_data[0]['warehouse_location_code']
+            else:
+                return [location['warehouse_location_code'] for location in location_data]
 
     # 创建库位
     def create_location(self, num, kw_type, warehouse_id, target_warehouse_id=None) -> list or None:
@@ -121,13 +126,13 @@ class WmsController(RequestHandler):
 
         :param int kw_type:
             1:收货库位 area_type:5(容器库区)
-            2:质检库位 库区类型:5(容器库区)
-            3:托盘库位 库区类型:5(容器库区)
-            4:移库库位 库区类型:5(容器库区)
-            5:上架库位 库区类型:1(上架库区)
-            6:不良品库位 库区类型:2(不良品库区)
-            7:入库异常库位 库区类型:3(入库异常库区)
-            8:出库异常库位 库区类型:4(出库异常库区)
+            2:质检库位 area_type:5(容器库区)
+            3:托盘库位 area_type:5(容器库区)
+            4:移库库位 area_type:5(容器库区)
+            5:上架库位 area_type:1(上架库区)
+            6:不良品库位 area_type:2(不良品库区)
+            7:入库异常库位 area_type:3(入库异常库区)
+            8:出库异常库位 area_type:4(出库异常库区)
         :param int num: 新建的库位数
         :param int warehouse_id: 所属仓库id
         :param int target_warehouse_id: 目的仓id
@@ -164,12 +169,12 @@ class WmsController(RequestHandler):
             location_codes.append(wms_api_config['create_location']['data']['warehouseLocationCode'])
         return location_codes
 
-    def create_transfer_pick_order(self, demand_list, pick_type):
+    def transfer_out_create_pick_order(self, demand_list, pick_type):
         """
         创建调拨拣货单
 
         :param list demand_list: 调拨需求列表
-        :param int pick_type: 拣货方式：1-纸质；2-PDA
+        :param int pick_type: 拣货方式: 1-纸质；2-PDA
         """
         wms_api_config['create_transfer_pick_order']['data'].update(
             {
@@ -180,7 +185,7 @@ class WmsController(RequestHandler):
         create_transfer_pick_order_res = self.send_request(**wms_api_config['create_transfer_pick_order'])
         return create_transfer_pick_order_res
 
-    def transfer_pick_order_assign_pick_user(self, pick_order_list, pick_username, pick_userid):
+    def transfer_out_pick_order_assign(self, pick_order_list, pick_username, pick_userid):
         """
         分配调拨拣货人
 
@@ -198,7 +203,7 @@ class WmsController(RequestHandler):
         assign_pick_user_res = self.send_request(**wms_api_config['transfer_pick_order_assign_pick_user'])
         return assign_pick_user_res
 
-    def transfer_pick_order_detail(self, pick_order_code):
+    def transfer_out_pick_order_detail(self, pick_order_code):
         """
         调拨拣货单详情
 
@@ -215,7 +220,7 @@ class WmsController(RequestHandler):
         detail_res = self.send_request(**data)
         return detail_res['data']
 
-    def transfer_pick_order_confirm_pick(self, pick_order_details):
+    def transfer_out_confirm_pick(self, pick_order_details):
         """
         调拨拣货单确认拣货
 
@@ -239,7 +244,7 @@ class WmsController(RequestHandler):
         confirm_pick_res = self.send_request(**wms_api_config['transfer_confirm_pick'])
         return confirm_pick_res
 
-    def transfer_submit_tray(self, pick_order_details, tp_kw_ids):
+    def transfer_out_submit_tray(self, pick_order_details, tp_kw_ids):
         """
         调拨按需装托
 
@@ -247,10 +252,10 @@ class WmsController(RequestHandler):
         :param list tp_kw_ids: 托盘库位id列表
         """
         # 获取托盘编码
-        tp_location_codes = [self.db_kw_id_to_code(kw_id) for kw_id in tp_kw_ids]
+        tp_kw_codes = [self.db_kw_id_to_code(kw_id) for kw_id in tp_kw_ids]
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         tray_info_list = list()
-        for detail, code in zip(pick_order_details['details'], tp_location_codes):
+        for detail, code in zip(pick_order_details['details'], tp_kw_codes):
             tray_info_list.append(
                 {
                     'storageLocationCode': code,
@@ -265,3 +270,80 @@ class WmsController(RequestHandler):
         wms_api_config['transfer_submit_tray'].update({'data': tray_info_list})
         submit_tray_res = self.send_request(**wms_api_config['transfer_submit_tray'])
         return submit_tray_res
+
+    def transfer_out_pick_order_tray_detail(self, pick_order_no):
+        """
+        获取调拨拣货单装托明细
+
+        :param string pick_order_no: 拣货单号
+        """
+        data = deepcopy(wms_api_config['transfer_pick_order_tray_detail'])
+        data.update(
+            {'uri_path': wms_api_config['transfer_pick_order_tray_detail']['uri_path'] % pick_order_no}
+        )
+        tray_detail_res = self.send_request(**data)
+        return tray_detail_res
+
+    def transfer_out_finish_packing(self, pick_order_no, tray_list):
+        """
+        创建调拨出库单
+
+        :param string pick_order_no: 拣货单号
+        :param list tray_list: 托盘列表
+        """
+        wms_api_config['transfer_finish_packing']['data'].update(
+            {
+                'pickOrderNo': pick_order_no,
+                'storageLocationCodes': tray_list
+            }
+        )
+        finish_packing_res = self.send_request(**wms_api_config['transfer_finish_packing'])
+        return finish_packing_res
+
+    def transfer_out_order_detail(self, transfer_out_order_no):
+        data = deepcopy(wms_api_config['transfer_out_order_detail'])
+        data.update(
+            {'uri_path': wms_api_config['transfer_out_order_detail']['uri_path'] % transfer_out_order_no}
+        )
+        detail_res = self.send_request(**data)
+        return detail_res
+
+    def transfer_out_order_review(self, box_no, tray_code):
+        wms_api_config['transfer_out_order_review']['data'].update(
+            {
+                'boxNo': box_no,
+                'storageLocationCode': tray_code
+            }
+        )
+        review_res = self.send_request(**wms_api_config['transfer_out_order_review'])
+        return review_res
+
+    def transfer_out_box_bind(self, box_no, handover_no, receive_warehouse_code):
+        wms_api_config['transfer_box_bind']['data'].update(
+            {
+                "boxNo": box_no,
+                "handoverNo": handover_no,
+                "receiveWarehouseCode": receive_warehouse_code
+            }
+        )
+        bind_res = self.send_request(**wms_api_config['transfer_box_bind'])
+        return bind_res
+
+    def transfer_out_delivery(self, handover_no):
+        wms_api_config['transfer_delivery']['data'].update({"handoverNo": handover_no})
+        delivery_res = self.send_request(**wms_api_config['transfer_delivery'])
+        return delivery_res
+
+    def transfer_in_received(self, handover_no):
+        wms_api_config['transfer_in_received']['data'].update({"handoverNo": handover_no})
+        received_res = self.send_request(**wms_api_config['transfer_in_received'])
+        return received_res
+
+    def transfer_in_up_shelf(self, box_no, sj_kw_code):
+        wms_api_config['transfer_box_up_shelf']['data'].update(
+            {
+                "boxNo": box_no,
+                "storageLocationCode": sj_kw_code
+            })
+        up_shelf_res = self.send_request(**wms_api_config['transfer_box_up_shelf'])
+        return up_shelf_res

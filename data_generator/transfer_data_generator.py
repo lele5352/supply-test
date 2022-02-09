@@ -38,11 +38,11 @@ class WmsTransferDataGenerator:
                 sale_sku_code,
                 'A',
                 demand_qty,
-                self.wms.db_get_kw_ids(5, demand_qty, delivery_warehouse_id, delivery_target_warehouse_id),
+                self.wms.db_get_kw(1, 5, demand_qty, delivery_warehouse_id, delivery_target_warehouse_id),
                 delivery_warehouse_id,
                 delivery_target_warehouse_id)
         # 调用创建调拨需求接口
-        res = self.transfer.create_transfer_demand(
+        res = self.transfer.transfer_out_create_demand(
             self.wms.db_ck_id_to_code(delivery_warehouse_id),
             self.wms.db_ck_id_to_code(receive_warehouse_id),
             sale_sku_code,
@@ -78,7 +78,7 @@ class WmsTransferDataGenerator:
         if not demand_no:
             log.error('创建调拨需求失败,流程中断！')
             return
-        res = self.wms.create_transfer_pick_order([demand_no], 1)
+        res = self.wms.transfer_out_create_pick_order([demand_no], 1)
         barcode_generate(res['data'], 'transfer_pick_order')
         print('调拨拣货单号：%s' % res['data'])
         return res['data']
