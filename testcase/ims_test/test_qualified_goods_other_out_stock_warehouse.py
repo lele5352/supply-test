@@ -10,7 +10,7 @@ class TestQualifiedGoodsOtherOutStockWarehouse(object):
 
         self.sale_sku_count = 2
         self.sj_kw_ids = bsj_kw_ids
-        ims.delete_ims_data(sale_sku)
+        ims.delete_qualified_inventory(sale_sku)
         # 采购入库生成库存
         ims.add_stock_by_purchase_in(
             sale_sku, bom,

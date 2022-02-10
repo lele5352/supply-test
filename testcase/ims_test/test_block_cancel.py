@@ -14,7 +14,7 @@ class TestBlockCancel(object):
 
     def setup(self):
         self.delivery_code = 'CK' + str(int(time.time()))
-        ims.delete_ims_data(sale_sku)
+        ims.delete_qualified_inventory(sale_sku)
         time.sleep(1)
         # 采购入库生成销售sku现货库存
         ims.add_stock_by_purchase_in(

@@ -73,7 +73,7 @@ class WmsController(RequestHandler):
         data = self.db.get_one(sql)
         return data['id']
 
-    def db_get_kw(self, return_type, kw_type, num, warehouse_id, target_warehouse_id=None):
+    def db_get_kw(self, return_type, kw_type, num, warehouse_id, target_warehouse_id):
         """
         获取指定库位类型、指定目的仓、指定数量的仓库库位
 
@@ -81,7 +81,7 @@ class WmsController(RequestHandler):
         :param int kw_type: 库位类型
         :param int num: 获取的库位个数
         :param int warehouse_id: 库位的所属仓库id
-        :param int target_warehouse_id: 库位的目的仓id
+        :param target_warehouse_id: 库位的目的仓id
         """
         temp_sql = " = %s" % target_warehouse_id if target_warehouse_id and target_warehouse_id != warehouse_id else "is NULL"
         query_kw_id_sql = """

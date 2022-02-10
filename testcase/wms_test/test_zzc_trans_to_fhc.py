@@ -20,7 +20,7 @@ class TestZZCTransToFHC:
 
     def setup(self):
         wms.switch_default_warehouse(self.trans_out_id)
-        ims.delete_ims_data(sale_sku)
+        ims.delete_qualified_inventory(sale_sku)
         ims.add_stock_by_other_in(sale_sku, bom, self.trans_qty, self.trans_out_sj_kw_id, self.trans_out_id,
                                   self.trans_out_target_id)
         self.trans_out_expect_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)

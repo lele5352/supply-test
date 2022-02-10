@@ -9,7 +9,7 @@ class TestPurchaseIntoDeliveryWarehouse(object):
         self.target_warehouse_id = delivery_warehouse_id
         self.sale_sku_count = 3
         self.sj_kw_ids = fsj_kw_ids
-        ims.delete_ims_data(sale_sku)
+        ims.delete_qualified_inventory(sale_sku)
 
     def test_1_purchase_create_order(self):
         res = ims.purchase_create_order(

@@ -12,7 +12,7 @@ class TestPurchaseIntoStockWarehouse(object):
         self.bom_detail = bom_detail
         self.sale_sku_count = 3
         self.sj_location_ids = bsj_kw_ids
-        ims.delete_ims_data(self.sale_sku_code)
+        ims.delete_qualified_inventory(self.sale_sku_code)
 
     def test_1_purchase_create_order(self):
         res = ims.purchase_create_order(

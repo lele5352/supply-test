@@ -14,20 +14,20 @@ class ImsController(RequestHandler):
         super().__init__(self.prefix, self.service_headers)
         self.db = MysqlHandler(**env_config.get('mysql_info_ims'))
 
-    def delete_ims_data(self, sale_sku_code):
+    def delete_qualified_inventory(self, sale_sku_code):
         """
         删除销售sku对应的全部库存数据，包括中央库存、销售商品总库存、现货库存、仓库商品总库存、库位库存
 
         :param sale_sku_code: 销售sku编码
         """
-        del_central_inventory_sql = "delete from central_inventory where goods_sku_code='%s';" % sale_sku_code
-        del_goods_inventory_sql = "delete from goods_inventory where goods_sku_code='%s';" % sale_sku_code
-        del_wares_inventory_sql = "delete from wares_inventory where goods_sku_code='%s';" % sale_sku_code
+        del_central_inventory_sql = "delete from central_inventory where goods_sku_code='%s';"
+        del_goods_inventory_sql = "delete from goods_inventory where goods_sku_code='%s';"
+        del_wares_inventory_sql = "delete from wares_inventory where goods_sku_code='%s';"
         sql_list = [del_wares_inventory_sql, del_goods_inventory_sql, del_central_inventory_sql]
         for sql in sql_list:
-            self.db.execute(sql)
+            self.db.execute(sql % sale_sku_code)
 
-    def delete_unqualified_goods_inventory_data(self, sale_sku_code, bom_version, warehouse_id):
+    def delete_unqualified_inventory(self, sale_sku_code, bom_version, warehouse_id):
         """
         删除销售sku对应的全部次品库存数据
 
@@ -35,13 +35,13 @@ class ImsController(RequestHandler):
         :param bom_version: bom版本
         :param warehouse_id: 仓库id
         """
-        for ware_sku_code in self.get_bom_version_ware_sku(sale_sku_code, bom_version):
+        for ware_sku_code in self.db_get_bom_detail(sale_sku_code, bom_version).keys():
             del_sql = "delete from nogood_wares_inventory where ware_sku_code='%s' and warehouse_id = %s;" % (
                 ware_sku_code, warehouse_id)
             self.db.execute(del_sql)
 
     # 获取销售商品bom比例
-    def get_sale_sku_bom_detail(self, sale_sku_code, bom_version):
+    def db_get_bom_detail(self, sale_sku_code, bom_version):
         """
         返回销售sku的bom版本明细，格式如： {"ware_sku_code1":x,"ware_sku_code2":y,...}
 
@@ -69,17 +69,6 @@ class ImsController(RequestHandler):
                     ware_sku_detail['ware_sku_code']: ware_sku_detail['bom_qty']
                 })
         return sale_sku_bom_detail
-
-    def get_bom_version_ware_sku(self, sale_sku_code, bom_version):
-        """
-        :param sale_sku_code: string，销售sku
-        :param bom_version: string，bom版本
-
-        返回所传的销售sku、bom版本对应的仓库sku列表（不含比例）
-        """
-        bom_detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
-        ware_sku_list = bom_detail.keys()
-        return ware_sku_list
 
     # 销售商品中央总库存获取
     def get_central_inventory(self, sale_sku_code):
@@ -172,7 +161,7 @@ class ImsController(RequestHandler):
 
     # 获取仓库商品总库存
     def get_wares_inventory(self, sale_sku_code, bom_version, warehouse_id, target_warehouse_id):
-        ware_sku_code_list = self.get_bom_version_ware_sku(sale_sku_code, bom_version)
+        ware_sku_code_list = self.db_get_bom_detail(sale_sku_code, bom_version).keys()
         if not ware_sku_code_list:
             return
         all_ware_sku_inventory = dict()
@@ -236,7 +225,7 @@ class ImsController(RequestHandler):
     # 获取仓库商品总库存
     def get_unqualified_inventory(self, sale_sku_code, bom_version, warehouse_id):
         unqualified_goods_inventory = dict()
-        for ware_sku_code in self.get_bom_version_ware_sku(sale_sku_code, bom_version):
+        for ware_sku_code in self.db_get_bom_detail(sale_sku_code, bom_version).keys():
             sql = """
                     SELECT
                         storage_location_id,stock,block 
@@ -298,7 +287,7 @@ class ImsController(RequestHandler):
         # 构建上架明细数据
         ware_sku_list = list()
         up_shelves_list = list()
-        bom_detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
+        bom_detail = self.db_get_bom_detail(sale_sku_code, bom_version)
         for detail, location_id in zip(bom_detail.items(), sj_location_ids):
             ware_sku_list.append(
                 {
@@ -353,7 +342,7 @@ class ImsController(RequestHandler):
 
     # 分配库位库存
     def assign_location_stock(self, delivery_order_no, sale_sku_code, bom_version, count, warehouse_id):
-        bom_detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
+        bom_detail = self.db_get_bom_detail(sale_sku_code, bom_version)
         ware_sku_list = list()
         for ware_sku, qty in bom_detail.items():
             temp_ware_sku_dict = {
@@ -381,7 +370,7 @@ class ImsController(RequestHandler):
 
     # 发货
     def delivery_out(self, delivery_order_no, sale_sku_code, bom_version, count, warehouse_id, target_warehouse_id):
-        bom_detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
+        bom_detail = self.db_get_bom_detail(sale_sku_code, bom_version)
         ware_sku_list = list()
         for ware_sku, qty in bom_detail.items():
             temp_ware_sku_dict = {
@@ -414,7 +403,7 @@ class ImsController(RequestHandler):
 
     def cancel_block_after_pick(self, delivery_order_no, sale_sku_code, location_id, count, bom_version,
                                 warehouse_id):
-        bom_detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
+        bom_detail = self.db_get_bom_detail(sale_sku_code, bom_version)
         ware_sku_list = list()
         for detail in bom_detail.items():
             temp_ware_sku_dict = {
@@ -568,7 +557,7 @@ class ImsController(RequestHandler):
 
     def add_stock_by_other_in(self, sale_sku_code, bom_version, add_stock_count, location_id, warehouse_id,
                               target_warehouse_id):
-        detail = self.get_sale_sku_bom_detail(sale_sku_code, bom_version)
+        detail = self.db_get_bom_detail(sale_sku_code, bom_version)
         ware_sku_list = list()
         for ware_sku, qty in detail.items():
             ware_sku_list.append(
@@ -585,5 +574,5 @@ class ImsController(RequestHandler):
 
 if __name__ == '__main__':
     ims = ImsController()
-    ims.delete_ims_data('63203684930')
+    ims.delete_qualified_inventory('46638670690')
     # ims.delete_ims_data('20607392841')

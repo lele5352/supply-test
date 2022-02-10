@@ -13,7 +13,7 @@ class TestCancelUnqualifiedGoodsOtherOut(object):
         self.sj_kw_id = fsj_kw_ids[0]
         self.cp_kw_id = fcp_kw_id
 
-        ims.delete_unqualified_goods_inventory_data(sale_sku, bom, self.warehouse_id)
+        ims.delete_nogood_inventory_data(sale_sku, bom, self.warehouse_id)
         ims.add_unqualified_stock_by_other_in(
             ware_sku,
             self.sj_kw_id,

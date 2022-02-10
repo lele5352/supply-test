@@ -8,7 +8,7 @@ class TestTransferToSelf:
         pass
 
     def setup(self):
-        ims.delete_ims_data(sale_sku)
+        ims.delete_qualified_inventory(sale_sku)
 
     def test_1_delivery_warehouse_trans_to_itself(self):
         """测试调出仓和调入仓为同个发货仓"""

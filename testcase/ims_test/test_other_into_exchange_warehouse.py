@@ -10,7 +10,7 @@ class TestOtherIntoExchangeWarehouse(object):
         self.sj_wk_ids = zsj_kw_ids
 
     def setup(self):
-        ims.delete_ims_data(sale_sku)
+        ims.delete_qualified_inventory(sale_sku)
         self.expect_inventory = ims.get_inventory(
             sale_sku,
             bom,
