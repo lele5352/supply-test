@@ -99,7 +99,7 @@ class ImsController(RequestHandler):
         :param int target_warehouse_id: 目的仓库id
 
         if query stock data fail return None;
-        else return dict like {'central_inventory_sale_stock':x,'central_inventory_sale_block':y}
+        else return dict like {'central_warehouse_stock':x,'central_warehouse_block':y}
         """
         temp_sql = 'warehouse_id=%s' % target_warehouse_id if target_warehouse_id else 'warehouse_id=%s' % warehouse_id
         sql = "select stock,block from central_inventory where goods_sku_code ='%s' and %s" % (
@@ -107,12 +107,12 @@ class ImsController(RequestHandler):
         sale_sku_warehouse_central_inventory = self.db.get_one(sql)
         if not sale_sku_warehouse_central_inventory:
             return {
-                "central_inventory_sale_stock": 0,
-                "central_inventory_sale_block": 0
+                "central_warehouse_stock": 0,
+                "central_warehouse_block": 0
             }
         return {
-            "central_inventory_sale_stock": sale_sku_warehouse_central_inventory['stock'],
-            "central_inventory_sale_block": sale_sku_warehouse_central_inventory['block']
+            "central_warehouse_stock": sale_sku_warehouse_central_inventory['stock'],
+            "central_warehouse_block": sale_sku_warehouse_central_inventory['block']
         }
 
     # 销售商品分类库存获取
@@ -130,12 +130,12 @@ class ImsController(RequestHandler):
                 """ % (sale_sku_code, warehouse_id, temp_sql)
         goods_inventory_data = self.db.get_all(sql)
         goods_inventory_dict = {
-            'goods_inventory_purchase_on_way_stock': 0,
-            'goods_inventory_purchase_on_way_block': 0,
-            'goods_inventory_transfer_on_way_stock': 0,
-            'goods_inventory_transfer_on_way_block': 0,
-            'goods_inventory_spot_goods_stock': 0,
-            'goods_inventory_spot_goods_block': 0
+            'purchase_on_way_stock': 0,
+            'purchase_on_way_block': 0,
+            'transfer_on_way_stock': 0,
+            'transfer_on_way_block': 0,
+            'spot_goods_stock': 0,
+            'spot_goods_block': 0
         }
         if not goods_inventory_data:
             return goods_inventory_dict
@@ -144,18 +144,18 @@ class ImsController(RequestHandler):
             # 销售商品采购在途库存
             if inventory_data['type'] == 1:
                 goods_inventory_dict.update({
-                    'goods_inventory_purchase_on_way_stock': inventory_data['stock'],
-                    'goods_inventory_purchase_on_way_block': inventory_data['block']
+                    'purchase_on_way_stock': inventory_data['stock'],
+                    'purchase_on_way_block': inventory_data['block']
                 })
             elif inventory_data['type'] == 2:
                 goods_inventory_dict.update({
-                    'goods_inventory_transfer_on_way_stock': inventory_data['stock'],
-                    'goods_inventory_transfer_on_way_block': inventory_data['block']
+                    'transfer_on_way_stock': inventory_data['stock'],
+                    'transfer_on_way_block': inventory_data['block']
                 })
             elif inventory_data['type'] == 3:
                 goods_inventory_dict.update({
-                    'goods_inventory_spot_goods_stock': inventory_data['stock'],
-                    'goods_inventory_spot_goods_block': inventory_data['block']
+                    'spot_goods_stock': inventory_data['stock'],
+                    'spot_goods_block': inventory_data['block']
                 })
         return goods_inventory_dict
 

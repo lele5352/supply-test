@@ -89,17 +89,17 @@ class TestDeliveryPick(object):
         expect_central_inventory_dict = {
             "central_inventory_stock": self.sale_sku_count,
             "central_inventory_block": self.sale_sku_count,
-            "central_inventory_sale_stock": self.sale_sku_count,
-            "central_inventory_sale_block": self.sale_sku_count
+            "central_warehouse_stock": self.sale_sku_count,
+            "central_warehouse_block": self.sale_sku_count
         }
 
         expect_goods_inventory_dict = {
-            'goods_inventory_purchase_on_way_stock': 0,
-            'goods_inventory_purchase_on_way_block': 0,
-            'goods_inventory_transfer_on_way_stock': 0,
-            'goods_inventory_transfer_on_way_block': 0,
-            'goods_inventory_spot_goods_stock': self.sale_sku_count,
-            'goods_inventory_spot_goods_block': self.sale_sku_count,
+            'purchase_on_way_stock': 0,
+            'purchase_on_way_block': 0,
+            'transfer_on_way_stock': 0,
+            'transfer_on_way_block': 0,
+            'spot_goods_stock': self.sale_sku_count,
+            'spot_goods_block': self.sale_sku_count,
         }
 
         expect_after_pick_inventory = dict()
@@ -176,17 +176,17 @@ class TestDeliveryPick(object):
         expect_central_inventory_dict = {
             "central_inventory_stock": self.sale_sku_count,
             "central_inventory_block": self.sale_sku_count,
-            "central_inventory_sale_stock": self.sale_sku_count,
-            "central_inventory_sale_block": self.sale_sku_count
+            "central_warehouse_stock": self.sale_sku_count,
+            "central_warehouse_block": self.sale_sku_count
         }
 
         expect_goods_inventory_dict = {
-            'goods_inventory_purchase_on_way_stock': 0,
-            'goods_inventory_purchase_on_way_block': 0,
-            'goods_inventory_transfer_on_way_stock': 0,
-            'goods_inventory_transfer_on_way_block': 0,
-            'goods_inventory_spot_goods_stock': self.sale_sku_count,
-            'goods_inventory_spot_goods_block': self.sale_sku_count,
+            'purchase_on_way_stock': 0,
+            'purchase_on_way_block': 0,
+            'transfer_on_way_stock': 0,
+            'transfer_on_way_block': 0,
+            'spot_goods_stock': self.sale_sku_count,
+            'spot_goods_block': self.sale_sku_count,
         }
 
         expect_after_short_pick_inventory = dict()

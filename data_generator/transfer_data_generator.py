@@ -29,8 +29,8 @@ class WmsTransferDataGenerator:
         """
         central_inventory = self.ims.get_warehouse_central_inventory(sale_sku_code, trans_out_id, trans_out_to_id)
         # 可用库存不足，需要添加库存，分为2种情况：1-查询不到库存；2-查询到库存，block＞stock
-        if not central_inventory or central_inventory['central_inventory_sale_block'] >= central_inventory[
-            'central_inventory_sale_stock']:
+        if not central_inventory or central_inventory['central_warehouse_block'] >= central_inventory[
+            'central_warehouse_stock']:
             add_stock_res = self.ims.add_stock_by_other_in(
                 sale_sku_code,
                 'A',

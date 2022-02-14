@@ -27,14 +27,14 @@ class TestPurchaseIntoExchangeWarehouse(object):
         expect_ims_inventory_data = {
             "central_inventory_stock": self.sale_sku_count,
             "central_inventory_block": 0,
-            "central_inventory_sale_stock": self.sale_sku_count,
-            "central_inventory_sale_block": 0,
-            'goods_inventory_purchase_on_way_stock': self.sale_sku_count,
-            'goods_inventory_purchase_on_way_block': 0,
-            'goods_inventory_transfer_on_way_stock': 0,
-            'goods_inventory_transfer_on_way_block': 0,
-            'goods_inventory_spot_goods_stock': 0,
-            'goods_inventory_spot_goods_block': 0
+            "central_warehouse_stock": self.sale_sku_count,
+            "central_warehouse_block": 0,
+            'purchase_on_way_stock': self.sale_sku_count,
+            'purchase_on_way_block': 0,
+            'transfer_on_way_stock': 0,
+            'transfer_on_way_block': 0,
+            'spot_goods_stock': 0,
+            'spot_goods_block': 0
         }
 
         assert res['code'] == 200
@@ -59,14 +59,14 @@ class TestPurchaseIntoExchangeWarehouse(object):
         expect_ims_inventory_data = {
             "central_inventory_stock": self.sale_sku_count,
             "central_inventory_block": 0,
-            "central_inventory_sale_stock": self.sale_sku_count,
-            "central_inventory_sale_block": 0,
-            'goods_inventory_purchase_on_way_stock': 0,
-            'goods_inventory_purchase_on_way_block': 0,
-            'goods_inventory_transfer_on_way_stock': 0,
-            'goods_inventory_transfer_on_way_block': 0,
-            'goods_inventory_spot_goods_stock': self.sale_sku_count,
-            'goods_inventory_spot_goods_block': 0
+            "central_warehouse_stock": self.sale_sku_count,
+            "central_warehouse_block": 0,
+            'purchase_on_way_stock': 0,
+            'purchase_on_way_block': 0,
+            'transfer_on_way_stock': 0,
+            'transfer_on_way_block': 0,
+            'spot_goods_stock': self.sale_sku_count,
+            'spot_goods_block': 0
         }
         for location_id, detail in zip(self.sj_kw_ids, bom_detail.items()):
             # 构造仓库库存数据

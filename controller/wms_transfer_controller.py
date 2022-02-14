@@ -6,7 +6,7 @@ from utils.request_handler import RequestHandler
 from utils.mysql_handler import MysqlHandler
 
 
-class WmsTransferServiceController(RequestHandler):
+class WmsTransferController(RequestHandler):
     def __init__(self, ums):
         self.service_headers = ums.get_service_headers()
         self.prefix = env_config.get('transfer_service_prefix')

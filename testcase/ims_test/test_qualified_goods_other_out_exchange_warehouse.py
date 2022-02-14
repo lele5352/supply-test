@@ -63,8 +63,8 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
                     if out_count == 1:
                         # 如果是本套的第一件，则预占中央库存、销售商品总库存、现货库存、仓库商品总库存、库位库存
                         self.expect_inventory['central_inventory_block'] += 1
-                        self.expect_inventory['central_inventory_sale_block'] += 1
-                        self.expect_inventory['goods_inventory_spot_goods_block'] += 1
+                        self.expect_inventory['central_warehouse_block'] += 1
+                        self.expect_inventory['spot_goods_block'] += 1
                         self.expect_inventory[detail[0]][location_id]['block'] += 1
                         self.expect_inventory[detail[0]]['total']['block'] += 1
                     else:
@@ -88,10 +88,10 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
                     if out_count == 1:
                         self.expect_inventory['central_inventory_stock'] -= 1
                         self.expect_inventory['central_inventory_block'] -= 1
-                        self.expect_inventory['central_inventory_sale_stock'] -= 1
-                        self.expect_inventory['central_inventory_sale_block'] -= 1
-                        self.expect_inventory['goods_inventory_spot_goods_stock'] -= 1
-                        self.expect_inventory['goods_inventory_spot_goods_block'] -= 1
+                        self.expect_inventory['central_warehouse_stock'] -= 1
+                        self.expect_inventory['central_warehouse_block'] -= 1
+                        self.expect_inventory['spot_goods_stock'] -= 1
+                        self.expect_inventory['spot_goods_block'] -= 1
                         self.expect_inventory[detail[0]][location_id]['stock'] -= 1
                         self.expect_inventory[detail[0]][location_id]['block'] -= 1
                         self.expect_inventory[detail[0]]['total']['stock'] -= 1

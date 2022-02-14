@@ -9,7 +9,7 @@ from utils.mysql_handler import MysqlHandler
 from utils.log_handler import logger as log
 
 
-class WmsController(RequestHandler):
+class WmsAppController(RequestHandler):
     def __init__(self, ums):
         self.app_headers = ums.get_app_headers()
         self.prefix = env_config.get('app_prefix')

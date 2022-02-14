@@ -1,12 +1,12 @@
 from controller.ums_controller import UmsController
-from controller.wms_controller import WmsController
+from controller.wms_app_controller import WmsAppController
 from controller.ims_controller import ImsController
-from controller.wms_transfer_service_controller import WmsTransferServiceController
+from controller.wms_transfer_controller import WmsTransferController
 
 ums = UmsController()
 ims = ImsController()
-wms = WmsController(ums)
-transfer = WmsTransferServiceController(ums)
+wms = WmsAppController(ums)
+transfer = WmsTransferController(ums)
 
 # 160的测试数据
 sale_sku = '63203684930'

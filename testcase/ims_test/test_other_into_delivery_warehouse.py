@@ -50,16 +50,16 @@ class TestOtherIntoDeliveryWarehouse(object):
                 # 插入中央库存、销售商品总库存数据，stock、block都为0
                 "central_inventory_stock": 0,
                 "central_inventory_block": 0,
-                "central_inventory_sale_stock": 0,
-                "central_inventory_sale_block": 0,
+                "central_warehouse_stock": 0,
+                "central_warehouse_block": 0,
 
                 # 插入销售商品现货库存，stock、block都为0
-                'goods_inventory_purchase_on_way_block': 0,
-                'goods_inventory_purchase_on_way_stock': 0,
-                'goods_inventory_transfer_on_way_block': 0,
-                'goods_inventory_transfer_on_way_stock': 0,
-                "goods_inventory_spot_goods_stock": 0,
-                "goods_inventory_spot_goods_block": 0
+                'purchase_on_way_block': 0,
+                'purchase_on_way_stock': 0,
+                'transfer_on_way_block': 0,
+                'transfer_on_way_stock': 0,
+                "spot_goods_stock": 0,
+                "spot_goods_block": 0
             }
         )
         for ware_sku in ware_sku_list:
@@ -102,16 +102,16 @@ class TestOtherIntoDeliveryWarehouse(object):
                 # 插入中央库存、销售商品总库存数据，stock、block都为0
                 "central_inventory_stock": 1,
                 "central_inventory_block": 0,
-                "central_inventory_sale_stock": 1,
-                "central_inventory_sale_block": 0,
+                "central_warehouse_stock": 1,
+                "central_warehouse_block": 0,
 
                 # 插入销售商品现货库存，stock、block都为0
-                'goods_inventory_purchase_on_way_block': 0,
-                'goods_inventory_purchase_on_way_stock': 0,
-                'goods_inventory_transfer_on_way_block': 0,
-                'goods_inventory_transfer_on_way_stock': 0,
-                "goods_inventory_spot_goods_stock": 1,
-                "goods_inventory_spot_goods_block": 0
+                'purchase_on_way_block': 0,
+                'purchase_on_way_stock': 0,
+                'transfer_on_way_block': 0,
+                'transfer_on_way_stock': 0,
+                "spot_goods_stock": 1,
+                "spot_goods_block": 0
             }
         )
         for ware_sku in ware_sku_list:
@@ -164,16 +164,16 @@ class TestOtherIntoDeliveryWarehouse(object):
                 # 插入中央库存、销售商品总库存数据，stock、block都为0
                 "central_inventory_stock": set_num - 1,
                 "central_inventory_block": 0,
-                "central_inventory_sale_stock": set_num - 1,
-                "central_inventory_sale_block": 0,
+                "central_warehouse_stock": set_num - 1,
+                "central_warehouse_block": 0,
 
                 # 插入销售商品现货库存，stock、block都为0
-                'goods_inventory_purchase_on_way_block': 0,
-                'goods_inventory_purchase_on_way_stock': 0,
-                'goods_inventory_transfer_on_way_block': 0,
-                'goods_inventory_transfer_on_way_stock': 0,
-                "goods_inventory_spot_goods_stock": set_num - 1,
-                "goods_inventory_spot_goods_block": 0
+                'purchase_on_way_block': 0,
+                'purchase_on_way_stock': 0,
+                'transfer_on_way_block': 0,
+                'transfer_on_way_stock': 0,
+                "spot_goods_stock": set_num - 1,
+                "spot_goods_block": 0
             }
         )
         for ware_sku in ware_sku_list:
@@ -217,16 +217,16 @@ class TestOtherIntoDeliveryWarehouse(object):
                 # 插入中央库存、销售商品总库存数据，stock、block都为0
                 "central_inventory_stock": set_num,
                 "central_inventory_block": 0,
-                "central_inventory_sale_stock": set_num,
-                "central_inventory_sale_block": 0,
+                "central_warehouse_stock": set_num,
+                "central_warehouse_block": 0,
 
                 # 插入销售商品现货库存，stock、block都为0
-                'goods_inventory_purchase_on_way_block': 0,
-                'goods_inventory_purchase_on_way_stock': 0,
-                'goods_inventory_transfer_on_way_block': 0,
-                'goods_inventory_transfer_on_way_stock': 0,
-                "goods_inventory_spot_goods_stock": set_num,
-                "goods_inventory_spot_goods_block": 0
+                'purchase_on_way_block': 0,
+                'purchase_on_way_stock': 0,
+                'transfer_on_way_block': 0,
+                'transfer_on_way_stock': 0,
+                "spot_goods_stock": set_num,
+                "spot_goods_block": 0
             }
         )
         for ware_sku in ware_sku_list:
@@ -255,14 +255,14 @@ class TestOtherIntoDeliveryWarehouse(object):
         self.expect_inventory.update({
             "central_inventory_stock": 0,
             "central_inventory_block": 0,
-            "central_inventory_sale_stock": 0,
-            "central_inventory_sale_block": 0,
-            'goods_inventory_purchase_on_way_block': 0,
-            'goods_inventory_purchase_on_way_stock': 0,
-            'goods_inventory_transfer_on_way_block': 0,
-            'goods_inventory_transfer_on_way_stock': 0,
-            "goods_inventory_spot_goods_stock": 0,
-            "goods_inventory_spot_goods_block": 0
+            "central_warehouse_stock": 0,
+            "central_warehouse_block": 0,
+            'purchase_on_way_block': 0,
+            'purchase_on_way_stock': 0,
+            'transfer_on_way_block': 0,
+            'transfer_on_way_stock': 0,
+            "spot_goods_stock": 0,
+            "spot_goods_block": 0
         })
         # 构造入库仓库sku明细数据,刚好成1套的
         iter_time = 1
@@ -292,8 +292,8 @@ class TestOtherIntoDeliveryWarehouse(object):
                 self.expect_inventory.update(
                     {
                         "central_inventory_stock": 1,
-                        "central_inventory_sale_stock": 1,
-                        "goods_inventory_spot_goods_stock": 1,
+                        "central_warehouse_stock": 1,
+                        "spot_goods_stock": 1,
                     }
                 )
             iter_time += 1

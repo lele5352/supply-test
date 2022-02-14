@@ -43,7 +43,7 @@ class TestDeliveryOut(object):
         )
         # 预占中央库存、销售商品总库存
         self.expect_inventory["central_inventory_block"] += self.sale_sku_count
-        self.expect_inventory["central_inventory_sale_block"] += self.sale_sku_count
+        self.expect_inventory["central_warehouse_block"] += self.sale_sku_count
 
         assert res['code'] == 200
         assert current_inventory == self.expect_inventory
@@ -68,7 +68,7 @@ class TestDeliveryOut(object):
             # 预占仓库商品总库存
             self.expect_inventory[detail[0]]['total']['block'] += detail[1] * self.sale_sku_count
         # 预占现货库存
-        self.expect_inventory['goods_inventory_spot_goods_block'] += self.sale_sku_count
+        self.expect_inventory['spot_goods_block'] += self.sale_sku_count
 
         assert res['code'] == 200
         assert current_inventory == self.expect_inventory
@@ -156,11 +156,11 @@ class TestDeliveryOut(object):
         self.expect_inventory["central_inventory_stock"] -= self.sale_sku_count
         self.expect_inventory["central_inventory_block"] -= self.sale_sku_count
         # 释放销售商品总库存
-        self.expect_inventory["central_inventory_sale_stock"] -= self.sale_sku_count
-        self.expect_inventory["central_inventory_sale_block"] -= self.sale_sku_count
+        self.expect_inventory["central_warehouse_stock"] -= self.sale_sku_count
+        self.expect_inventory["central_warehouse_block"] -= self.sale_sku_count
         # 释放销售商品现货库存
-        self.expect_inventory["goods_inventory_spot_goods_stock"] -= self.sale_sku_count
-        self.expect_inventory["goods_inventory_spot_goods_block"] -= self.sale_sku_count
+        self.expect_inventory["spot_goods_stock"] -= self.sale_sku_count
+        self.expect_inventory["spot_goods_block"] -= self.sale_sku_count
 
         for detail in bom_detail.items():
             # 释放仓库商品总库存

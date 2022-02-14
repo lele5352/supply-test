@@ -3,18 +3,17 @@ import pytest
 from testcase import *
 
 
-class TestBHCTransToZZC:
+class TestFHCTransToZFC:
     def setup_class(self):
-        # 设定调出仓为备货仓，调入仓为中转仓
-        self.trans_out_id = stock_warehouse_id  # 调出仓id
-        self.trans_out_target_id = ''  # 调出仓的目的仓id
-        self.trans_in_id = exchange_warehouse_id  # 调入仓id
-        self.trans_in_target_id = delivery_warehouse_id  # 调入仓的目的仓id
-        self.trans_qty = 2  # 调拨的销售sku件数
+        # 设定调出仓为发货仓，调入仓为发货仓
+        self.trans_out_id = delivery_warehouse_id  # 调出仓id
+        self.trans_out_target_id = delivery_warehouse_id  # 调出仓的目的仓id
+        self.trans_in_id = straight_delivery_warehouse_id  # 调入仓id
+        self.trans_in_target_id = straight_delivery_warehouse_id  # 调入仓的目的仓id
 
+        self.trans_qty = 2  # 调拨的销售sku件数
         self.trans_out_sj_kw_id = wms.db_get_kw(1, 5, 1, self.trans_out_id, self.trans_out_target_id)
         self.trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(bom_detail), self.trans_out_id, self.trans_out_target_id)
-
         self.trans_in_sj_kw_id = wms.db_get_kw(1, 5, 1, self.trans_in_id, self.trans_in_target_id)
         self.trans_in_sj_kw_code = wms.db_get_kw(2, 5, 1, self.trans_in_id, self.trans_in_target_id)
 
@@ -40,8 +39,8 @@ class TestBHCTransToZZC:
         assert demand_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_inventory_sale_block"] += self.trans_qty
-        self.trans_out_expect_inventory["goods_inventory_spot_goods_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail in bom_detail.items():
             # 按各个仓库sku预占仓库商品总库存
             self.trans_out_expect_inventory[detail[0]]['total']['block'] += detail[1] * self.trans_qty
@@ -67,8 +66,8 @@ class TestBHCTransToZZC:
         assert pick_order_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_inventory_sale_block"] += self.trans_qty
-        self.trans_out_expect_inventory["goods_inventory_spot_goods_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail in bom_detail.items():
             # 按仓库sku预占仓库商品总库存、库位库存
             self.trans_out_expect_inventory[detail[0]]['total']['block'] += detail[1] * self.trans_qty
@@ -107,8 +106,8 @@ class TestBHCTransToZZC:
         assert confirm_pick_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_inventory_sale_block"] += self.trans_qty
-        self.trans_out_expect_inventory["goods_inventory_spot_goods_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail in bom_detail.items():
             # 预占仓库商品总库存,stock从库位移动到dock，需要减去库位上的stock
             self.trans_out_expect_inventory[detail[0]]['total']['block'] += detail[1] * self.trans_qty
@@ -156,8 +155,8 @@ class TestBHCTransToZZC:
         assert submit_tray_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_inventory_sale_block"] += self.trans_qty
-        self.trans_out_expect_inventory["goods_inventory_spot_goods_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
             self.trans_out_expect_inventory[detail[0]]['total']['block'] += detail[1] * self.trans_qty
@@ -217,8 +216,8 @@ class TestBHCTransToZZC:
         assert finish_packing_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_inventory_sale_block"] += self.trans_qty
-        self.trans_out_expect_inventory["goods_inventory_spot_goods_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
             self.trans_out_expect_inventory[detail[0]]['total']['block'] += detail[1] * self.trans_qty
@@ -290,8 +289,8 @@ class TestBHCTransToZZC:
             assert review_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_inventory_sale_block"] += self.trans_qty
-        self.trans_out_expect_inventory["goods_inventory_spot_goods_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
             self.trans_out_expect_inventory[detail[0]]['total']['block'] += detail[1] * self.trans_qty
@@ -372,8 +371,8 @@ class TestBHCTransToZZC:
         assert delivery_res['code'] == 200
 
         # 调出仓销售商品总库存、现货库存扣减；；
-        self.trans_out_expect_inventory["central_inventory_sale_stock"] -= self.trans_qty
-        self.trans_out_expect_inventory["goods_inventory_spot_goods_stock"] -= self.trans_qty
+        self.trans_out_expect_inventory["central_warehouse_stock"] -= self.trans_qty
+        self.trans_out_expect_inventory["spot_goods_stock"] -= self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
             self.trans_out_expect_inventory[detail[0]]['total']['stock'] -= detail[1] * self.trans_qty
@@ -387,8 +386,8 @@ class TestBHCTransToZZC:
                 }
             )
         # 调入仓销售商品总库存增加，调拨在途增加
-        self.trans_in_expect_inventory["central_inventory_sale_stock"] += self.trans_qty
-        self.trans_in_expect_inventory["goods_inventory_transfer_on_way_stock"] += self.trans_qty
+        self.trans_in_expect_inventory["central_warehouse_stock"] += self.trans_qty
+        self.trans_in_expect_inventory["transfer_on_way_stock"] += self.trans_qty
 
         # 获取当前最新库存数据，比对预期数据
         trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
@@ -467,8 +466,8 @@ class TestBHCTransToZZC:
         assert received_res['code'] == 200
 
         # 调出仓销售商品总库存、现货库存扣减；；
-        self.trans_out_expect_inventory["central_inventory_sale_stock"] -= self.trans_qty
-        self.trans_out_expect_inventory["goods_inventory_spot_goods_stock"] -= self.trans_qty
+        self.trans_out_expect_inventory["central_warehouse_stock"] -= self.trans_qty
+        self.trans_out_expect_inventory["spot_goods_stock"] -= self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
             self.trans_out_expect_inventory[detail[0]]['total']['stock'] -= detail[1] * self.trans_qty
@@ -482,8 +481,8 @@ class TestBHCTransToZZC:
                 }
             )
         # 调入仓销售商品总库存增加，调拨在途增加
-        self.trans_in_expect_inventory["central_inventory_sale_stock"] += self.trans_qty
-        self.trans_in_expect_inventory["goods_inventory_transfer_on_way_stock"] += self.trans_qty
+        self.trans_in_expect_inventory["central_warehouse_stock"] += self.trans_qty
+        self.trans_in_expect_inventory["transfer_on_way_stock"] += self.trans_qty
 
         # 获取当前最新库存数据，比对预期数据
         trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
@@ -567,11 +566,11 @@ class TestBHCTransToZZC:
             assert shelf_res['code'] == 200
 
         # 调出仓销售商品总库存、现货库存扣减；；
-        self.trans_out_expect_inventory["central_inventory_sale_stock"] -= self.trans_qty
-        self.trans_out_expect_inventory["goods_inventory_spot_goods_stock"] -= self.trans_qty
+        self.trans_out_expect_inventory["central_warehouse_stock"] -= self.trans_qty
+        self.trans_out_expect_inventory["spot_goods_stock"] -= self.trans_qty
         # 调入仓销售商品总库存增加，现货库存增加，仓库商品总库存增加，仓库库位库存增加
-        self.trans_in_expect_inventory["central_inventory_sale_stock"] += self.trans_qty
-        self.trans_in_expect_inventory["goods_inventory_spot_goods_stock"] += self.trans_qty
+        self.trans_in_expect_inventory["central_warehouse_stock"] += self.trans_qty
+        self.trans_in_expect_inventory["spot_goods_stock"] += self.trans_qty
 
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 调出仓扣除仓库商品总库存、库位库存

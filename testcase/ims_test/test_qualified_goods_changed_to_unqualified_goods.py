@@ -13,7 +13,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
         self.sj_kw_ids = fsj_kw_ids
         self.cp_kw_id = fcp_kw_id
         ims.delete_qualified_inventory(sale_sku)
-        ims.delete_nogood_inventory_data(sale_sku, bom, self.warehouse_id)
+        ims.delete_unqualified_inventory(sale_sku, bom, self.warehouse_id)
         ims.add_stock_by_purchase_in(
             sale_sku,
             bom,
@@ -62,8 +62,8 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
                     if changed_count == 1:
                         # 如果是本套的第一件，则中央库存、销售商品总库存、现货库存、仓库商品总库存、库位库存的stock都扣减1
                         self.expect_inventory['central_inventory_stock'] -= 1
-                        self.expect_inventory['central_inventory_sale_stock'] -= 1
-                        self.expect_inventory['goods_inventory_spot_goods_stock'] -= 1
+                        self.expect_inventory['central_warehouse_stock'] -= 1
+                        self.expect_inventory['spot_goods_stock'] -= 1
                         self.expect_inventory[detail[0]][location_id]['stock'] -= 1
                         self.expect_inventory[detail[0]]['total']['stock'] -= 1
                     else:
