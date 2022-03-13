@@ -13,9 +13,9 @@ class WmsTransferController(RequestHandler):
         self.db = MysqlHandler(**env_config.get('mysql_info_wms'))
         super().__init__(self.prefix, self.service_headers)
 
-    def transfer_out_create_demand(self, delivery_warehouse_code, receive_warehouse_code, sale_sku_code, demand_qty,
-                                   delivery_target_warehouse_code='', receive_target_warehouse_code='', demand_type=1,
-                                   customer_type=1, remark=''):
+    def transfer_out_create_demand(self, delivery_warehouse_code, delivery_target_warehouse_code,
+                                   receive_warehouse_code, receive_target_warehouse_code, sale_sku_code, demand_qty,
+                                   demand_type=1, customer_type=1, remark=''):
         """
         :param string delivery_warehouse_code: 调出仓库
         :param string receive_warehouse_code: 调入仓库

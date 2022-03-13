@@ -16,26 +16,31 @@ ims_api_config = {
             "warehouseId": 19
         }
     },
-
     "purchase_create_order": {
         "uri_path": "/ims/service/scm/business/goods/sku",
         "method": "post",
         "data": [
             {
                 "functionType": "26",
-                "goodsSkuList": [
+                "idempotentSign": "0",
+                "operateType": "1",
+                "operatorId": 0,
+                "sourceNo": "",
+                "targetWarehouseId": 0,
+                "wareSkuRequestBOS": [
                     {
-                        "goodsSkuCode": "P68687174",
-                        "qty": 4,
-                        "targetWarehouseId": "19"
+                        "qty": 0,
+                        "wareSkuCode": ""
                     }
                 ],
-                "operateType": "1",
-                "operatorId": 8,
-                "sourceNo": "CG21090310010",
-                "warehouseId": 19
+                "warehouseId": 0
             }
         ]
+    },
+    "cancel_purchase_order_delivery": {
+        "uri_path": "/ims/service/scm/business/finish/sku",
+        "method": "post",
+        "data": []
     },
     "purchase_into_warehouse": {
         "uri_path": "/ims/service/wms/business/purchase/into/warehouse",
@@ -45,7 +50,7 @@ ims_api_config = {
             "goodsSkuList": [
                 {
                     "bomVersion": "2",
-                    "goodsSkuCode": "P68687174",
+                    "goodsSkuCode": "",
                     "wareSkuList": [
                         {
                             "bomQty": 4,
@@ -53,13 +58,6 @@ ims_api_config = {
                             "storageLocationId": 743,
                             "storageLocationType": 5,
                             "wareSkuCode": "W03278514"
-                        },
-                        {
-                            "bomQty": 3,
-                            "qty": 12,
-                            "storageLocationId": 731,
-                            "storageLocationType": 5,
-                            "wareSkuCode": "W83173944"
                         }
                     ]
                 }
@@ -71,7 +69,7 @@ ims_api_config = {
             "warehouseId": 19
         }
     },
-    "other_into_warehouse": {
+    "qualified_goods_other_into_warehouse": {
         "uri_path": "/ims/service/wms/business/other/into/warehouse",
         "method": "post",
         "data": [
@@ -86,6 +84,28 @@ ims_api_config = {
                         "qty": 8,
                         "storageLocationId": 731,
                         "storageLocationType": 5,
+                        "wareSkuCode": "W03278514"
+                    }
+                ],
+                "warehouseId": 19
+            }
+        ]
+    },
+    "unqualified_goods_other_into_warehouse": {
+        "uri_path": "/ims/service/wms/business/bad/into/warehouse",
+        "method": "post",
+        "data": [
+            {
+                "functionType": "2",
+                "operateType": "1",
+                "operatorId": 8,
+                "sourceNo": "RK210906001",
+                "targetWarehouseId": "19",
+                "wareSkuList": [
+                    {
+                        "qty": 8,
+                        "storageLocationId": 731,
+                        "storageLocationType": 6,
                         "wareSkuCode": "W03278514"
                     }
                 ],
@@ -240,11 +260,10 @@ ims_api_config = {
                 "functionType": "5",
                 "operateType": "2",
                 "operatorId": 8,
-                "processType": 1,
+                "processType": 1,  # 1其他出库；2按需调拨
                 "sourceNo": "source210906002",
                 "targetWarehouseId": 19,
                 "wareSkuList": [
-
                     {
                         "qty": 3,
                         "storageLocationId": 731,

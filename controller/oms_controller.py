@@ -14,6 +14,13 @@ class OmsController(RequestHandler):
         self.db = MysqlHandler(**env_config.get('mysql_info_oms'))
         super().__init__(self.prefix, self.app_headers)
 
+    def sync_mall_order(self, sale_sku, qty):
+        oms_api_config['sync_mall_order']['data'].update(
+            {
+                "salesOrderNo": "USA" + str(int(time.time())),
+            }
+        )
+
 
 if __name__ == '__main__':
     ums = UmsController()

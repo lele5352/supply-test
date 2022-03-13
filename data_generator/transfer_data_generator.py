@@ -1,5 +1,5 @@
-from controller.wms_transfer_service_controller import WmsTransferServiceController
-from controller.wms_controller import WmsController
+from controller.wms_transfer_controller import WmsTransferController
+from controller.wms_app_controller import WmsAppController
 from controller.ims_controller import ImsController
 from data_generator import ums
 from utils.log_handler import logger as log
@@ -8,8 +8,7 @@ from utils.barcode_handler import barcode_generate
 
 class WmsTransferDataGenerator:
     def __init__(self):
-        self.wms = WmsController(ums)
-        self.transfer = WmsTransferServiceController(ums)
+        self.wms = WmsAppController(ums)
         self.ims = ImsController()
 
     def create_transfer_demand(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
@@ -27,11 +26,13 @@ class WmsTransferDataGenerator:
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         """
-        central_inventory = self.ims.get_warehouse_central_inventory(sale_sku_code, trans_out_id, trans_out_to_id)
+        self.wms.switch_default_warehouse(trans_out_id)
+
+        central_inventory = self.ims.get_central_inventory(sale_sku_code, trans_out_id, trans_out_to_id)
         # 可用库存不足，需要添加库存，分为2种情况：1-查询不到库存；2-查询到库存，block＞stock
-        if not central_inventory or central_inventory['central_warehouse_block'] >= central_inventory[
-            'central_warehouse_stock']:
-            add_stock_res = self.ims.add_stock_by_other_in(
+        if not central_inventory or central_inventory['central_block'] >= central_inventory[
+            'central_stock']:
+            add_stock_res = self.ims.add_qualified_stock_by_other_in(
                 sale_sku_code,
                 'A',
                 trans_qty,
@@ -42,13 +43,13 @@ class WmsTransferDataGenerator:
                 log.error('创建调拨需求失败：加库存失败！')
                 return
         # 调用创建调拨需求接口
-        create_demand_res = self.transfer.transfer_out_create_demand(
-            self.wms.db_ck_id_to_code(trans_out_id),
-            self.wms.db_ck_id_to_code(trans_in_id),
+        create_demand_res = self.wms.transfer_out_create_demand(
+            trans_out_id,
+            trans_out_to_id,
+            trans_in_id,
+            trans_in_to_id,
             sale_sku_code,
             trans_qty,
-            self.wms.db_ck_id_to_code(trans_out_to_id),
-            self.wms.db_ck_id_to_code(trans_in_to_id),
             demand_type,
             customer_type,
             remark)
@@ -98,8 +99,9 @@ class WmsTransferDataGenerator:
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         """
+
         # 生成调拨需求
-        demand_no = self.create_transfer_demand(
+        demand_no = self.wms.transfer_out_create_demand(
             trans_out_id,
             trans_out_to_id,
             trans_in_id,

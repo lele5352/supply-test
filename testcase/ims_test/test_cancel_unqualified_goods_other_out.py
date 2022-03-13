@@ -1,5 +1,3 @@
-import time
-
 import pytest
 
 from testcase import *
@@ -8,62 +6,109 @@ from testcase import *
 class TestCancelUnqualifiedGoodsOtherOut(object):
     def setup_class(self):
         self.warehouse_id = delivery_warehouse_id
-        self.target_warehouse_id = delivery_warehouse_id
-        self.ware_sku_count = 10
-        self.sj_kw_id = fsj_kw_ids[0]
-        self.cp_kw_id = fcp_kw_id
-
-        ims.delete_unqualified_inventory(sale_sku, bom, self.warehouse_id)
-        ims.add_unqualified_stock_by_other_in(
-            ware_sku,
-            self.sj_kw_id,
-            self.cp_kw_id,
-            self.ware_sku_count,
-            self.warehouse_id,
-            self.target_warehouse_id)
-        self.expect_inventory = ims.get_unqualified_inventory(
-            sale_sku,
-            bom,
-            self.warehouse_id)
+        self.to_warehouse_id = delivery_warehouse_id
 
     # @pytest.mark.skip(reason='test')
-    def test_1_unqualified_goods_other_out_delivery_warehouse(self):
+    def test_1_cancel_unqualified_goods_other_out_from_one_location(self):
         """
-        tips：销售sku不能是单品，单品会单件成套，不存在计算成套逻辑
-        测试场景：
-
+        先添加多个仓库sku的次品库存，放在1个库位上，然后循环预占再出库发货
         """
-        ware_sku_dict = {
-            "qty": self.ware_sku_count,
-            "storageLocationId": self.cp_kw_id,
-            "wareSkuCode": ware_sku
-        }
-        block_res = ims.unqualified_goods_other_out_block([ware_sku_dict], self.warehouse_id)
+        sale_sku = '63203684930'
+        cp_kw_id = wms.db_get_kw(1, 6, 1, self.warehouse_id, self.to_warehouse_id)
+        ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A01', 1), ('63203684930A02', 5), ('63203684930A02', 5)]
+        cp_kw_ids = [cp_kw_id for i in range(len(ware_sku_qty_list))]
 
-        self.expect_inventory[ware_sku][self.cp_kw_id]['block'] += self.ware_sku_count
-        self.expect_inventory[ware_sku]['total']['block'] += self.ware_sku_count
+        ims.delete_unqualified_inventory([sale_sku])
+        ims.unqualified_goods_other_in(ware_sku_qty_list, cp_kw_ids, self.warehouse_id, self.to_warehouse_id)
+        self.expect_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, 'A')
 
-        after_block_inventory = ims.get_unqualified_inventory(
-            sale_sku,
-            bom,
-            self.warehouse_id
-        )
+        for (ware_sku, qty), cp_kw_id in zip(ware_sku_qty_list, cp_kw_ids):
+            sub_ware_sku_qty_list = [(ware_sku, qty)]
+            sub_cp_kw_ids = [cp_kw_id]
+            block_res = ims.unqualified_goods_other_out_block(sub_ware_sku_qty_list, sub_cp_kw_ids, self.warehouse_id)
+            self.expect_inventory[ware_sku][cp_kw_id]['block'] += qty
+            self.expect_inventory[ware_sku]['total']['block'] += qty
+
+            after_block_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, bom)
+            assert block_res['code'] == 200
+            assert after_block_inventory == self.expect_inventory
+
+            source_no = block_res['data'][0]['sourceNo']
+            block_book_id = block_res['data'][0]['blockBookId']
+
+            cancel_res = ims.cancel_unqualified_goods_other_out_block(block_book_id, source_no)
+            self.expect_inventory[ware_sku][cp_kw_id]['block'] -= qty
+            self.expect_inventory[ware_sku]['total']['block'] -= qty
+            after_cancel_block_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, bom)
+
+            assert cancel_res['code'] == 200
+            assert after_cancel_block_inventory == self.expect_inventory
+
+    def test_2_unqualified_goods_other_out_from_several_locations(self):
+        """
+        先添加次品库存，放在多个不同库位，然后循环预占再出库发货
+        """
+        sale_sku = '63203684930'
+        ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A01', 1), ('63203684930A02', 5), ('63203684930A02', 5)]
+        cp_kw_ids = wms.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+
+        ims.delete_unqualified_inventory([sale_sku])
+        ims.unqualified_goods_other_in(ware_sku_qty_list, cp_kw_ids, self.warehouse_id, self.to_warehouse_id)
+        self.expect_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, 'A')
+
+        for (ware_sku, qty), cp_kw_id in zip(ware_sku_qty_list, cp_kw_ids):
+            sub_ware_sku_qty_list = [(ware_sku, qty)]
+            sub_cp_kw_ids = [cp_kw_id]
+            block_res = ims.unqualified_goods_other_out_block(sub_ware_sku_qty_list, sub_cp_kw_ids, self.warehouse_id)
+            self.expect_inventory[ware_sku][cp_kw_id]['block'] += qty
+            self.expect_inventory[ware_sku]['total']['block'] += qty
+
+            after_block_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, bom)
+            assert block_res['code'] == 200
+            assert after_block_inventory == self.expect_inventory
+
+            source_no = block_res['data'][0]['sourceNo']
+            block_book_id = block_res['data'][0]['blockBookId']
+
+            cancel_res = ims.cancel_unqualified_goods_other_out_block(block_book_id, source_no)
+            self.expect_inventory[ware_sku][cp_kw_id]['block'] -= qty
+            self.expect_inventory[ware_sku]['total']['block'] -= qty
+            after_cancel_block_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, bom)
+
+            assert cancel_res['code'] == 200
+            assert after_cancel_block_inventory == self.expect_inventory
+
+    def test_3_unqualified_goods_other_out_from_several_locations(self):
+        """
+        先添加次品库存，放在多个不同库位，然后一次性预占再出库发货
+        """
+        sale_sku = '63203684930'
+        ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A01', 1), ('63203684930A02', 5), ('63203684930A02', 5)]
+        cp_kw_ids = wms.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+
+        ims.delete_unqualified_inventory([sale_sku])
+        ims.unqualified_goods_other_in(ware_sku_qty_list, cp_kw_ids, self.warehouse_id, self.to_warehouse_id)
+        self.expect_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, 'A')
+
+        block_res = ims.unqualified_goods_other_out_block(ware_sku_qty_list, cp_kw_ids, self.warehouse_id)
+        for (ware_sku, qty), cp_kw_id in zip(ware_sku_qty_list, cp_kw_ids):
+            self.expect_inventory[ware_sku][cp_kw_id]['block'] += qty
+            self.expect_inventory[ware_sku]['total']['block'] += qty
+
+        after_block_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, bom)
         assert block_res['code'] == 200
         assert after_block_inventory == self.expect_inventory
 
         source_no = block_res['data'][0]['sourceNo']
         block_book_id = block_res['data'][0]['blockBookId']
-        # time.sleep(15)
-        cancel_block_res = ims.cancel_unqualified_goods_other_out_block(block_book_id, source_no)
-        after_cancel_block_inventory = ims.get_unqualified_inventory(
-            sale_sku,
-            bom,
-            self.warehouse_id
-        )
-        self.expect_inventory[ware_sku][self.cp_kw_id]['block'] -= self.ware_sku_count
-        self.expect_inventory[ware_sku]['total']['block'] -= self.ware_sku_count
 
-        assert cancel_block_res['code'] == 200
+        cancel_res = ims.cancel_unqualified_goods_other_out_block(block_book_id, source_no)
+        for (ware_sku, qty), cp_kw_id in zip(ware_sku_qty_list, cp_kw_ids):
+            self.expect_inventory[ware_sku][cp_kw_id]['block'] -= qty
+            self.expect_inventory[ware_sku]['total']['block'] -= qty
+        after_cancel_block_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, bom)
+
+        assert cancel_res['code'] == 200
         assert after_cancel_block_inventory == self.expect_inventory
 
 

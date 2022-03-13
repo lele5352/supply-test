@@ -87,6 +87,40 @@ class ScmDataGenerator:
         print('采购订单id：%s' % purchase_order_ids)
         return purchase_order_nos, purchase_order_ids
 
+    def create_wait_delivery_purchase_order(self, sale_sku_list, num, delivery_warehouse_code, target_warehouse_code):
+        """
+        生成采购订单，并批量发货生成分货单,最终推送WMS生成采购入库单
+
+        :param list sale_sku_list: 销售sku编码的数组
+        :param int num: 采购的套数
+        :param string delivery_warehouse_code: 收货仓库编码
+        :param string target_warehouse_code: 目的仓库编码
+        :return: list 分货单列表
+        """
+        purchase_order_nos, purchase_order_ids = self.create_purchase_order(
+            sale_sku_list,
+            num,
+            delivery_warehouse_code,
+            target_warehouse_code)
+        # 逐个采购订单编辑并提交审核
+        for purchase_order_id in purchase_order_ids:
+            purchase_order_detail = self.scm.get_purchase_order_detail(purchase_order_id)
+            update_and_submit_to_audit_res = self.scm.update_and_submit_purchase_order_to_audit(purchase_order_detail)
+            if not update_and_submit_to_audit_res:
+                log.error('采购订单编辑并提交审核失败')
+                return
+        # 采购订单批量审核
+        audit_res = self.scm.purchase_order_audit(purchase_order_ids)
+        if not audit_res:
+            log.error('采购订单批量审核失败:%s' % audit_res)
+            return
+        # 采购订单批量下单
+        purchase_order_buy_res = self.scm.purchase_order_batch_buy(purchase_order_ids)
+        if not purchase_order_buy_res:
+            log.error('采购订单批量下单失败:%s' % purchase_order_buy_res)
+            return
+        return purchase_order_nos, purchase_order_ids
+
     def create_distribute_order(self, sale_sku_list, num, delivery_warehouse_code, target_warehouse_code):
         """
         生成采购订单，并批量发货生成分货单,最终推送WMS生成采购入库单
@@ -148,4 +182,13 @@ class ScmDataGenerator:
 
 if __name__ == '__main__':
     scm = ScmDataGenerator()
-    scm.create_distribute_order(['44440672352'], 10, "GZZF", "GZZF")
+    # for i in range(500):
+    scm.create_wait_delivery_purchase_order(
+        ['72748504626', '26857713019', '22443744825', '72748504042', '22443744099', '64881504854', '80634182005',
+         '64881504083', '22443744738', '94561527146', '64881504379', '94561527911', '32109898828', '88717263281',
+         '72104473996', '72104473258', '72104473518', '88717263218', '32109898652', '32109898889', '32109898356',
+         '72104473452', '88717263228', '88717263564', '88717263202', '88717263226', '32109898550', '58300876874',
+         '58300876109', '88717263906', '32109898547', '58300876566', '58300876790', '58300876774', '59607775561',
+         '58300876075', '59607775860', '59607775829', '62517120252', '38989748864', '62517120751', '62517120049',
+         '62444605417', '62444605796', '06973779432', '38989748163', '06973779296', '06973779959', '06973779425',
+         '06973779338'], 10, "LI-FHC01", "LI-FHC01")

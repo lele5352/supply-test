@@ -6,7 +6,7 @@ from utils.mysql_handler import MysqlHandler
 from utils.log_handler import logger as log
 
 from config.sys_config import env_config
-from config.api_config.wms_app_api_config import wms_app_api_config
+from config.api_config.wms_api_config import wms_api_config
 
 
 class WmsDeliveryServiceController(RequestHandler):
@@ -15,7 +15,6 @@ class WmsDeliveryServiceController(RequestHandler):
         self.service_headers = ums.get_service_headers()
         self.db = MysqlHandler(**env_config.get('mysql_info_wms'))
         super().__init__(self.prefix, self.service_headers)
-
 
     # 创建出库单
     def front_label_delivery_order_create(self):
@@ -29,10 +28,10 @@ class WmsDeliveryServiceController(RequestHandler):
             "saleOrderId": suffix,
             "saleOrderCode": 'sale' + str(suffix)
         }
-        wms_app_api_config['front_label_delivery_order_create']['data'].update(temp_data)
+        wms_api_config['front_label_delivery_order_create']['data'].update(temp_data)
 
         service_delivery_order_create_res = self.send_request(
-            **wms_app_api_config['front_label_delivery_order_create'])
+            **wms_api_config['front_label_delivery_order_create'])
         if service_delivery_order_create_res['code'] != 200:
             log.error('出库单创建失败')
             return
@@ -51,14 +50,14 @@ class WmsDeliveryServiceController(RequestHandler):
             "saleOrderId": suffix,
             "saleOrderCode": 'sale' + str(suffix)
         }
-        wms_app_api_config['behind_label_delivery_order_create']['data'].update(temp_data)
+        wms_api_config['behind_label_delivery_order_create']['data'].update(temp_data)
 
         # 更新销售sku数量
-        for sku in wms_app_api_config['behind_label_delivery_order_create']['data']['skuInfo']:
+        for sku in wms_api_config['behind_label_delivery_order_create']['data']['skuInfo']:
             sku['saleSkuQty'] *= sale_sku_count
 
         service_delivery_order_create_res = self.send_request(
-            **wms_app_api_config['behind_label_delivery_order_create'])
+            **wms_api_config['behind_label_delivery_order_create'])
         if service_delivery_order_create_res['code'] != 200:
             log.error('出库单创建失败')
             return
@@ -66,11 +65,3 @@ class WmsDeliveryServiceController(RequestHandler):
         barcode_generate(delivery_order_code, 'delivery_order')
         return delivery_order_code
 
-
-if __name__ == '__main__':
-    dah = WmsDeliveryServiceController()
-    count = 3
-
-    # 生成后置面单出库单、分配库存并回调包裹方案
-    delivery_order_code = dah.behind_label_delivery_order_create(count)
-    print(delivery_order_code)

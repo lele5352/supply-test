@@ -1,12 +1,10 @@
 from controller.ums_controller import UmsController
 from controller.wms_app_controller import WmsAppController
 from controller.ims_controller import ImsController
-from controller.wms_transfer_controller import WmsTransferController
 
 ums = UmsController()
 ims = ImsController()
 wms = WmsAppController(ums)
-transfer = WmsTransferController(ums)
 
 # 160的测试数据
 sale_sku = '63203684930'
@@ -31,25 +29,28 @@ straight_delivery_warehouse_id = 514
 bom_detail = ims.db_get_bom_detail(sale_sku, bom)
 
 # 发货仓上架库位
-fsj_kw_ids = wms.db_get_kw(1, 5, len(bom_detail), delivery_warehouse_id, delivery_warehouse_id)
+fsj_kw_ids = wms.db_get_kw(1, 5, 2, delivery_warehouse_id, delivery_warehouse_id)
 
 # 中转仓上架库位
-zsj_kw_ids = wms.db_get_kw(1, 5, len(bom_detail), exchange_warehouse_id, delivery_warehouse_id)
+zsj_kw_ids = wms.db_get_kw(1, 5, 2, exchange_warehouse_id, delivery_warehouse_id)
 
 # 备货仓上架库位
-bsj_kw_ids = wms.db_get_kw(1, 5, len(bom_detail), stock_warehouse_id, '')
+bsj_kw_ids = wms.db_get_kw(1, 5, 2, stock_warehouse_id, '')
 
 # 发货仓托盘库位
-tp_kw_ids = wms.db_get_kw(1, 3, len(bom_detail), delivery_warehouse_id, delivery_warehouse_id)
+tp_kw_ids = wms.db_get_kw(1, 3, 2, delivery_warehouse_id, delivery_warehouse_id)
 
 # 中转仓托盘库位
-ztp_kw_ids = wms.db_get_kw(1, 3, len(bom_detail), exchange_warehouse_id, delivery_warehouse_id)
+ztp_kw_ids = wms.db_get_kw(1, 3, 2, exchange_warehouse_id, delivery_warehouse_id)
 
 # 备货仓托盘库位
-btp_kw_ids = wms.db_get_kw(1, 3, len(bom_detail), stock_warehouse_id, '')
+btp_kw_ids = wms.db_get_kw(1, 3, 2, stock_warehouse_id, '')
 
 # 发货仓次品库位
 fcp_kw_id = wms.db_get_kw(1, 6, 1, delivery_warehouse_id, delivery_warehouse_id)
+
+# 发货仓次品库位
+fcp_kw_ids = wms.db_get_kw(1, 6, 2, delivery_warehouse_id, delivery_warehouse_id)
 
 # 发货仓移库库位
 yk_kw_id = wms.db_get_kw(1, 4, 1, delivery_warehouse_id, delivery_warehouse_id)

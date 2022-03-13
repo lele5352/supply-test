@@ -11,6 +11,6 @@ url_prefix = {
     'receipt_service_160': 'http://10.0.0.160:8323',
     'delivery_service_160': 'http://10.0.0.160:8330',
     'transfer_service_160': 'http://10.0.0.160:8334',
-    'ims_service_160': 'http://10.0.0.160:28801',
-    'oms_service_160': 'http://10.0.9.3:28801'
+    'ims_service_160': 'http://10.0.0.160:28801'
+    # 'ims_service_160': 'http://10.0.8.233:28801'
 }

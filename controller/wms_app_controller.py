@@ -8,12 +8,16 @@ from utils.request_handler import RequestHandler
 from utils.mysql_handler import MysqlHandler
 from utils.log_handler import logger as log
 
+from controller.wms_transfer_controller import WmsTransferController
+from controller.ums_controller import UmsController
+
 
 class WmsAppController(RequestHandler):
     def __init__(self, ums):
         self.app_headers = ums.get_app_headers()
         self.prefix = env_config.get('app_prefix')
         self.db = MysqlHandler(**env_config.get('mysql_info_wms'))
+        self.transfer = WmsTransferController(ums)
         super().__init__(self.prefix, self.app_headers)
 
     def get_switch_warehouse_data_perm_id(self, warehouse_id):
@@ -70,6 +74,7 @@ class WmsAppController(RequestHandler):
         :param int area_type: 区域类型
         """
         sql = "select id from base_warehouse_area where warehouse_id=%s and type =%s " % (warehouse_id, area_type)
+        print(sql)
         data = self.db.get_one(sql)
         return data['id']
 
@@ -83,7 +88,7 @@ class WmsAppController(RequestHandler):
         :param int warehouse_id: 库位的所属仓库id
         :param target_warehouse_id: 库位的目的仓id
         """
-        temp_sql = " = %s" % target_warehouse_id if target_warehouse_id and target_warehouse_id != warehouse_id else "is NULL"
+        temp_sql = " = %s" % target_warehouse_id if target_warehouse_id and target_warehouse_id != warehouse_id and kw_type != 6 else "is NULL"
         query_kw_id_sql = """
             SELECT 
                 id,warehouse_location_code
@@ -99,7 +104,6 @@ class WmsAppController(RequestHandler):
 
         location_data = self.db.get_all(query_kw_id_sql)
         # print('sql:%s' % query_kw_id_sql)
-        # print(location_data)
         if len(location_data) < num:
             # 库位不够，则新建对应缺少的库位
             new_locations = self.create_location(num - len(location_data), kw_type, warehouse_id, target_warehouse_id)
@@ -159,7 +163,7 @@ class WmsAppController(RequestHandler):
                 'belongWarehouseAreaId': self.db_get_ck_area_id(warehouse_id, kw_maps[kw_type]['area_type']),
                 'warehouseAreaType': kw_maps[kw_type]['area_type'],
                 'belongWarehouseId': warehouse_id,
-                'destWarehouseId': target_warehouse_id
+                'destWarehouseId': target_warehouse_id if kw_type != 6 else ''
             }
             wms_api_config['create_location']['data'].update(location_info)
             location_create_res = self.send_request(**wms_api_config['create_location'])
@@ -168,6 +172,33 @@ class WmsAppController(RequestHandler):
                 return
             location_codes.append(wms_api_config['create_location']['data']['warehouseLocationCode'])
         return location_codes
+
+    def transfer_out_create_demand(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
+                                   trans_qty, demand_type=1, customer_type=1, remark=''):
+        """
+            创建调拨需求
+
+            :param int trans_out_id: 调出仓库id
+            :param int trans_in_id: 调入仓库id
+            :param int trans_out_to_id: 调出仓库的目的仓id
+            :param int trans_in_to_id: 调入仓库的目的仓id
+            :param string sale_sku_code: 调拨的商品的销售sku
+            :param int trans_qty: 调拨数量
+            :param int demand_type: 调拨类型
+            :param int customer_type: 客户类型：1-普通客户；2-大客户
+            :param string remark: 备注
+        """
+        create_demand_res = self.transfer.transfer_out_create_demand(
+            self.db_ck_id_to_code(trans_out_id),
+            self.db_ck_id_to_code(trans_out_to_id),
+            self.db_ck_id_to_code(trans_in_id),
+            self.db_ck_id_to_code(trans_in_to_id),
+            sale_sku_code,
+            trans_qty,
+            demand_type,
+            customer_type,
+            remark)
+        return create_demand_res
 
     def transfer_out_create_pick_order(self, demand_list, pick_type):
         """
@@ -347,3 +378,9 @@ class WmsAppController(RequestHandler):
             })
         up_shelf_res = self.send_request(**wms_api_config['transfer_box_up_shelf'])
         return up_shelf_res
+
+
+if __name__ == '__main__':
+    ums = UmsController()
+    wms = WmsAppController(ums)
+    print(wms.create_location(1, 5, 511, 513))

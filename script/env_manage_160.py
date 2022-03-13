@@ -15,7 +15,7 @@ class EnvManager160(SSHHandler):
 
         self.services = [
             'ec-gateway',
-            'es-authorization-service',
+            'ec-authorization-service',
             'ec-ums-api',
             'ec-base',
             'ec-pms',
@@ -36,6 +36,7 @@ class EnvManager160(SSHHandler):
             'ec-warehouse-transfer-service',
             'ec-stockoperation-api',
             'ec-wms-api',
+            'ec-pwms-api',
             'ec-ims-service'
         ]
 
@@ -78,4 +79,4 @@ class EnvManager160(SSHHandler):
 
 if __name__ == '__main__':
     env160 = EnvManager160()
-    env160.restart_service()
+    env160.restart_service('')

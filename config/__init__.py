@@ -25,7 +25,8 @@ env_configs = {
         'transfer_service_prefix': url_prefix.get('transfer_service_160'),
 
         'mysql_info_scm': {'mysql_info': mysql_config.get('test_160'), 'db': 'supply_scm'},
-        'mysql_info_ims': {'mysql_info': mysql_config.get('test_160'), 'db': 'supply_ims'},
+        'mysql_info_ims': {'mysql_info': mysql_config.get('test_160'), 'db': 'supply_ims_new'},
+        # 'mysql_info_ims': {'mysql_info': mysql_config.get('test_72'), 'db': 'ec-ims'},
         'mysql_info_oms': {'mysql_info': mysql_config.get('test_160'), 'db': 'supply_oms'},
         'mysql_info_wms': {'mysql_info': mysql_config.get('test_160'), 'db': 'supply_wms'},
         'mysql_info_auth': {'mysql_info': mysql_config.get('test_160'), 'db': 'supply_auth'}

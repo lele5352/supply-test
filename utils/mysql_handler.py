@@ -8,10 +8,10 @@ class MysqlHandler:
         mysql_info['db'] = db
 
         try:
-            self.conn = pymysql.connect(**mysql_info, charset='utf8', cursorclass=pymysql.cursors.DictCursor)
+            self.conn = pymysql.connect(**mysql_info, charset='utf8')
         except:
             log.error("connectDatabase failed")
-        self.cur = self.conn.cursor()
+        self.cur = self.conn.cursor(cursor=pymysql.cursors.DictCursor)
 
     # 关闭数据库
     def close(self):

@@ -7,58 +7,56 @@ class TestBHCTransToZZC:
     def setup_class(self):
         # 设定调出仓为备货仓，调入仓为中转仓
         self.trans_out_id = stock_warehouse_id  # 调出仓id
-        self.trans_out_target_id = ''  # 调出仓的目的仓id
+        self.trans_out_to_id = ''  # 调出仓的目的仓id
         self.trans_in_id = exchange_warehouse_id  # 调入仓id
-        self.trans_in_target_id = delivery_warehouse_id  # 调入仓的目的仓id
+        self.trans_in_to_id = delivery_warehouse_id  # 调入仓的目的仓id
         self.trans_qty = 2  # 调拨的销售sku件数
 
-        self.trans_out_sj_kw_id = wms.db_get_kw(1, 5, 1, self.trans_out_id, self.trans_out_target_id)
-        self.trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(bom_detail), self.trans_out_id, self.trans_out_target_id)
+        self.trans_out_sj_kw_id = wms.db_get_kw(1, 5, 1, self.trans_out_id, self.trans_out_to_id)
+        self.trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(bom_detail), self.trans_out_id, self.trans_out_to_id)
 
-        self.trans_in_sj_kw_id = wms.db_get_kw(1, 5, 1, self.trans_in_id, self.trans_in_target_id)
-        self.trans_in_sj_kw_code = wms.db_get_kw(2, 5, 1, self.trans_in_id, self.trans_in_target_id)
+        self.trans_in_sj_kw_id = wms.db_get_kw(1, 5, 1, self.trans_in_id, self.trans_in_to_id)
+        self.trans_in_sj_kw_code = wms.db_get_kw(2, 5, 1, self.trans_in_id, self.trans_in_to_id)
 
     def setup(self):
         wms.switch_default_warehouse(self.trans_out_id)
-        ims.delete_qualified_inventory(sale_sku)
-        ims.add_stock_by_other_in(sale_sku, bom, self.trans_qty, self.trans_out_sj_kw_id, self.trans_out_id,
-                                  self.trans_out_target_id)
-        self.trans_out_expect_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
-        self.trans_in_expect_inventory = ims.get_inventory(sale_sku, bom, self.trans_in_id, self.trans_in_target_id)
+        ims.delete_qualified_inventory([sale_sku])
+        ims.add_qualified_stock_by_other_in(sale_sku, bom, self.trans_qty, self.trans_out_sj_kw_id, self.trans_out_id,
+                                            self.trans_out_to_id)
+        self.trans_out_expect_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
+        self.trans_in_expect_inventory = ims.get_inventory(sale_sku, bom, self.trans_in_id, self.trans_in_to_id)
 
     def test_1_create_transfer_demand(self):
         """测试调拨流程执行到生成调拨需求"""
         # 生成调拨需求
-        demand_res = transfer.transfer_out_create_demand(
-            wms.db_ck_id_to_code(self.trans_out_id),
-            wms.db_ck_id_to_code(self.trans_in_id),
+        demand_res = wms.transfer_out_create_demand(
+            self.trans_out_id,
+            self.trans_out_to_id,
+            self.trans_in_id,
+            self.trans_in_to_id,
             sale_sku,
-            self.trans_qty,
-            wms.db_ck_id_to_code(self.trans_out_target_id),
-            wms.db_ck_id_to_code(self.trans_in_target_id)
-        )
+            self.trans_qty)
         assert demand_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_block"] += self.trans_qty
         self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail in bom_detail.items():
             # 按各个仓库sku预占仓库商品总库存
             self.trans_out_expect_inventory[detail[0]]['total']['block'] += detail[1] * self.trans_qty
-        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
+        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
         assert self.trans_out_expect_inventory == trans_out_inventory
 
     def test_2_create_transfer_pick_order(self):
         """测试调拨调拨流程执行到创建纸质拣货单"""
         # 生成调拨需求
-        demand_res = transfer.transfer_out_create_demand(
-            wms.db_ck_id_to_code(self.trans_out_id),
-            wms.db_ck_id_to_code(self.trans_in_id),
+        demand_res = wms.transfer_out_create_demand(
+            self.trans_out_id,
+            self.trans_out_to_id,
+            self.trans_in_id,
+            self.trans_in_to_id,
             sale_sku,
-            self.trans_qty,
-            wms.db_ck_id_to_code(self.trans_out_target_id),
-            wms.db_ck_id_to_code(self.trans_in_target_id)
-        )
+            self.trans_qty)
         assert demand_res['code'] == 200
         demand_no = demand_res['data']['demandCode']
 
@@ -67,26 +65,25 @@ class TestBHCTransToZZC:
         assert pick_order_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_block"] += self.trans_qty
         self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail in bom_detail.items():
             # 按仓库sku预占仓库商品总库存、库位库存
             self.trans_out_expect_inventory[detail[0]]['total']['block'] += detail[1] * self.trans_qty
             self.trans_out_expect_inventory[detail[0]][self.trans_out_sj_kw_id]['block'] += detail[1] * self.trans_qty
-        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
+        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
         assert self.trans_out_expect_inventory == trans_out_inventory
 
     def test_3_pick_order_confirm_pick(self):
         """测试调拨流程执行到确认拣货"""
         # 生成调拨需求
-        demand_res = transfer.transfer_out_create_demand(
-            wms.db_ck_id_to_code(self.trans_out_id),
-            wms.db_ck_id_to_code(self.trans_in_id),
+        demand_res = wms.transfer_out_create_demand(
+            self.trans_out_id,
+            self.trans_out_to_id,
+            self.trans_in_id,
+            self.trans_in_to_id,
             sale_sku,
-            self.trans_qty,
-            wms.db_ck_id_to_code(self.trans_out_target_id),
-            wms.db_ck_id_to_code(self.trans_in_target_id)
-        )
+            self.trans_qty)
         assert demand_res['code'] == 200
         demand_no = demand_res['data']['demandCode']
 
@@ -107,7 +104,7 @@ class TestBHCTransToZZC:
         assert confirm_pick_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_block"] += self.trans_qty
         self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail in bom_detail.items():
             # 预占仓库商品总库存,stock从库位移动到dock，需要减去库位上的stock
@@ -118,20 +115,19 @@ class TestBHCTransToZZC:
                     -self.trans_out_id: {'block': 0, 'stock': detail[1] * self.trans_qty}
                 }
             )
-        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
+        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
         assert self.trans_out_expect_inventory == trans_out_inventory
 
     def test_4_pick_order_submit_tray(self):
         """测试调拨流程执行到装托完成"""
         # 生成调拨需求
-        demand_res = transfer.transfer_out_create_demand(
-            wms.db_ck_id_to_code(self.trans_out_id),
-            wms.db_ck_id_to_code(self.trans_in_id),
+        demand_res = wms.transfer_out_create_demand(
+            self.trans_out_id,
+            self.trans_out_to_id,
+            self.trans_in_id,
+            self.trans_in_to_id,
             sale_sku,
-            self.trans_qty,
-            wms.db_ck_id_to_code(self.trans_out_target_id),
-            wms.db_ck_id_to_code(self.trans_in_target_id)
-        )
+            self.trans_qty)
         assert demand_res['code'] == 200
         demand_no = demand_res['data']['demandCode']
 
@@ -156,7 +152,7 @@ class TestBHCTransToZZC:
         assert submit_tray_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_block"] += self.trans_qty
         self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
@@ -170,20 +166,19 @@ class TestBHCTransToZZC:
                     tp_kw_id: {'block': 0, 'stock': detail[1] * self.trans_qty}
                 }
             )
-        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
+        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
         assert self.trans_out_expect_inventory == trans_out_inventory
 
     def test_5_pick_order_finish_packing(self):
         """测试调拨执行到生成调拨出库单"""
         # 生成调拨需求
-        demand_res = transfer.transfer_out_create_demand(
-            wms.db_ck_id_to_code(self.trans_out_id),
-            wms.db_ck_id_to_code(self.trans_in_id),
+        demand_res = wms.transfer_out_create_demand(
+            self.trans_out_id,
+            self.trans_out_to_id,
+            self.trans_in_id,
+            self.trans_in_to_id,
             sale_sku,
-            self.trans_qty,
-            wms.db_ck_id_to_code(self.trans_out_target_id),
-            wms.db_ck_id_to_code(self.trans_in_target_id)
-        )
+            self.trans_qty)
         assert demand_res['code'] == 200
         demand_no = demand_res['data']['demandCode']
 
@@ -217,7 +212,7 @@ class TestBHCTransToZZC:
         assert finish_packing_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_block"] += self.trans_qty
         self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
@@ -231,20 +226,19 @@ class TestBHCTransToZZC:
                     tp_kw_id: {'block': 0, 'stock': detail[1] * self.trans_qty}
                 }
             )
-        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
+        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
         assert self.trans_out_expect_inventory == trans_out_inventory
 
     def test_6_transfer_out_order_review(self):
         """测试调拨执行到完成调拨复核"""
         # 生成调拨需求
-        demand_res = transfer.transfer_out_create_demand(
-            wms.db_ck_id_to_code(self.trans_out_id),
-            wms.db_ck_id_to_code(self.trans_in_id),
+        demand_res = wms.transfer_out_create_demand(
+            self.trans_out_id,
+            self.trans_out_to_id,
+            self.trans_in_id,
+            self.trans_in_to_id,
             sale_sku,
-            self.trans_qty,
-            wms.db_ck_id_to_code(self.trans_out_target_id),
-            wms.db_ck_id_to_code(self.trans_in_target_id)
-        )
+            self.trans_qty)
         assert demand_res['code'] == 200
         demand_no = demand_res['data']['demandCode']
 
@@ -290,7 +284,7 @@ class TestBHCTransToZZC:
             assert review_res['code'] == 200
 
         # 预占销售商品总库存、现货库存
-        self.trans_out_expect_inventory["central_warehouse_block"] += self.trans_qty
+        self.trans_out_expect_inventory["central_block"] += self.trans_qty
         self.trans_out_expect_inventory["spot_goods_block"] += self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
@@ -304,20 +298,19 @@ class TestBHCTransToZZC:
                     tp_kw_id: {'block': 0, 'stock': detail[1] * self.trans_qty}
                 }
             )
-        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
+        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
         assert self.trans_out_expect_inventory == trans_out_inventory
 
     def test_7_transfer_delivery(self):
         """测试调拨流程执行到调拨出库发货交接完成"""
         # 生成调拨需求
-        demand_res = transfer.transfer_out_create_demand(
-            wms.db_ck_id_to_code(self.trans_out_id),
-            wms.db_ck_id_to_code(self.trans_in_id),
+        demand_res = wms.transfer_out_create_demand(
+            self.trans_out_id,
+            self.trans_out_to_id,
+            self.trans_in_id,
+            self.trans_in_to_id,
             sale_sku,
-            self.trans_qty,
-            wms.db_ck_id_to_code(self.trans_out_target_id),
-            wms.db_ck_id_to_code(self.trans_in_target_id)
-        )
+            self.trans_qty)
         assert demand_res['code'] == 200
         demand_no = demand_res['data']['demandCode']
 
@@ -372,7 +365,7 @@ class TestBHCTransToZZC:
         assert delivery_res['code'] == 200
 
         # 调出仓销售商品总库存、现货库存扣减；；
-        self.trans_out_expect_inventory["central_warehouse_stock"] -= self.trans_qty
+        self.trans_out_expect_inventory["central_stock"] -= self.trans_qty
         self.trans_out_expect_inventory["spot_goods_stock"] -= self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
@@ -387,26 +380,25 @@ class TestBHCTransToZZC:
                 }
             )
         # 调入仓销售商品总库存增加，调拨在途增加
-        self.trans_in_expect_inventory["central_warehouse_stock"] += self.trans_qty
+        self.trans_in_expect_inventory["central_stock"] += self.trans_qty
         self.trans_in_expect_inventory["transfer_on_way_stock"] += self.trans_qty
 
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
-        trans_in_inventory = ims.get_inventory(sale_sku, bom, self.trans_in_id, self.trans_in_target_id)
+        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims.get_inventory(sale_sku, bom, self.trans_in_id, self.trans_in_to_id)
         assert self.trans_out_expect_inventory == trans_out_inventory
         assert self.trans_in_expect_inventory == trans_in_inventory
 
     def test_8_transfer_in_received(self):
         """测试调拨流程执行到调拨入库收货"""
         # 生成调拨需求
-        demand_res = transfer.transfer_out_create_demand(
-            wms.db_ck_id_to_code(self.trans_out_id),
-            wms.db_ck_id_to_code(self.trans_in_id),
+        demand_res = wms.transfer_out_create_demand(
+            self.trans_out_id,
+            self.trans_out_to_id,
+            self.trans_in_id,
+            self.trans_in_to_id,
             sale_sku,
-            self.trans_qty,
-            wms.db_ck_id_to_code(self.trans_out_target_id),
-            wms.db_ck_id_to_code(self.trans_in_target_id)
-        )
+            self.trans_qty)
         assert demand_res['code'] == 200
         demand_no = demand_res['data']['demandCode']
 
@@ -467,7 +459,7 @@ class TestBHCTransToZZC:
         assert received_res['code'] == 200
 
         # 调出仓销售商品总库存、现货库存扣减；；
-        self.trans_out_expect_inventory["central_warehouse_stock"] -= self.trans_qty
+        self.trans_out_expect_inventory["central_stock"] -= self.trans_qty
         self.trans_out_expect_inventory["spot_goods_stock"] -= self.trans_qty
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
             # 按仓库sku预占仓库商品总库存；上架库位库存转移到dock，扣掉对应库存
@@ -482,26 +474,25 @@ class TestBHCTransToZZC:
                 }
             )
         # 调入仓销售商品总库存增加，调拨在途增加
-        self.trans_in_expect_inventory["central_warehouse_stock"] += self.trans_qty
+        self.trans_in_expect_inventory["central_stock"] += self.trans_qty
         self.trans_in_expect_inventory["transfer_on_way_stock"] += self.trans_qty
 
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
-        trans_in_inventory = ims.get_inventory(sale_sku, bom, self.trans_in_id, self.trans_in_target_id)
+        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims.get_inventory(sale_sku, bom, self.trans_in_id, self.trans_in_to_id)
         assert self.trans_out_expect_inventory == trans_out_inventory
         assert self.trans_in_expect_inventory == trans_in_inventory
 
     def test_9_transfer_in_up_shelf(self):
         """测试调拨流程执行到调拨入库收货"""
         # 生成调拨需求
-        demand_res = transfer.transfer_out_create_demand(
-            wms.db_ck_id_to_code(self.trans_out_id),
-            wms.db_ck_id_to_code(self.trans_in_id),
+        demand_res = wms.transfer_out_create_demand(
+            self.trans_out_id,
+            self.trans_out_to_id,
+            self.trans_in_id,
+            self.trans_in_to_id,
             sale_sku,
-            self.trans_qty,
-            wms.db_ck_id_to_code(self.trans_out_target_id),
-            wms.db_ck_id_to_code(self.trans_in_target_id)
-        )
+            self.trans_qty)
         assert demand_res['code'] == 200
         demand_no = demand_res['data']['demandCode']
 
@@ -567,10 +558,10 @@ class TestBHCTransToZZC:
             assert shelf_res['code'] == 200
 
         # 调出仓销售商品总库存、现货库存扣减；；
-        self.trans_out_expect_inventory["central_warehouse_stock"] -= self.trans_qty
+        self.trans_out_expect_inventory["central_stock"] -= self.trans_qty
         self.trans_out_expect_inventory["spot_goods_stock"] -= self.trans_qty
         # 调入仓销售商品总库存增加，现货库存增加，仓库商品总库存增加，仓库库位库存增加
-        self.trans_in_expect_inventory["central_warehouse_stock"] += self.trans_qty
+        self.trans_in_expect_inventory["central_stock"] += self.trans_qty
         self.trans_in_expect_inventory["spot_goods_stock"] += self.trans_qty
 
         for detail, tp_kw_id in zip(bom_detail.items(), self.trans_out_tp_kw_ids):
@@ -595,8 +586,8 @@ class TestBHCTransToZZC:
                 }
             )
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_target_id)
-        trans_in_inventory = ims.get_inventory(sale_sku, bom, self.trans_in_id, self.trans_in_target_id)
+        trans_out_inventory = ims.get_inventory(sale_sku, bom, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims.get_inventory(sale_sku, bom, self.trans_in_id, self.trans_in_to_id)
         assert self.trans_out_expect_inventory == trans_out_inventory
         assert self.trans_in_expect_inventory == trans_in_inventory
 

@@ -35,7 +35,7 @@ scm_api_config = {
         "method": "post",
         "data": {
             "pageNumber": 1,
-            "pageSize": 10,
+            "pageSize": 50,
             "total": 100,
             "status": "",
             "destinationWarehouse": [],
