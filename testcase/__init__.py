@@ -7,8 +7,9 @@ ims = ImsController()
 wms = WmsAppController(ums)
 
 # 160的测试数据
-sale_sku = '63203684930'
-bom = 'A'
+# sale_sku = '63203684930'
+sale_sku = '67330337129'
+bom = 'G'
 ware_sku = '63203684930A01'
 delivery_warehouse_id = 513
 delivery_warehouse_id2 = 568

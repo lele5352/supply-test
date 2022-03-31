@@ -56,6 +56,18 @@ class WmsAppController(RequestHandler):
         data = self.db.get_one(sql)
         return data['warehouse_code']
 
+    def db_ck_code_to_id(self, warehouse_code):
+        """
+        根据仓库编码获取仓库id
+
+        :param string warehouse_code: 仓库编码
+        """
+        if not warehouse_code:
+            return
+        sql = "select id from base_warehouse where warehouse_code='%s'" % warehouse_code
+        data = self.db.get_one(sql)
+        return data['id']
+
     def db_kw_id_to_code(self, kw_id):
         """
         根据库位id获取库位编码
@@ -66,6 +78,16 @@ class WmsAppController(RequestHandler):
         data = self.db.get_one(sql)
         return data['warehouse_location_code']
 
+    def db_kw_code_to_id(self, kw_code):
+        """
+        根据库位编码获取库位id
+
+        :param string kw_code: 库位编码
+        """
+        sql = "select id from base_warehouse_location where warehouse_location_code='%s'" % kw_code
+        data = self.db.get_one(sql)
+        return str(data['id'])
+
     def db_get_ck_area_id(self, warehouse_id, area_type):
         """
         获取指定区域类型的仓库区域id
@@ -74,9 +96,8 @@ class WmsAppController(RequestHandler):
         :param int area_type: 区域类型
         """
         sql = "select id from base_warehouse_area where warehouse_id=%s and type =%s " % (warehouse_id, area_type)
-        print(sql)
         data = self.db.get_one(sql)
-        return data['id']
+        return str(data['id'])
 
     def db_get_kw(self, return_type, kw_type, num, warehouse_id, target_warehouse_id):
         """
@@ -99,11 +120,11 @@ class WmsAppController(RequestHandler):
                 AND type = %s 
                 AND warehouse_id = %s 
                 AND dest_warehouse_id %s 
+                order by id
                 LIMIT %s 
         """ % (kw_type, warehouse_id, temp_sql, num)
 
         location_data = self.db.get_all(query_kw_id_sql)
-        # print('sql:%s' % query_kw_id_sql)
         if len(location_data) < num:
             # 库位不够，则新建对应缺少的库位
             new_locations = self.create_location(num - len(location_data), kw_type, warehouse_id, target_warehouse_id)
@@ -142,6 +163,9 @@ class WmsAppController(RequestHandler):
         :param int target_warehouse_id: 目的仓id
         :return: list 创建出来的库位列表
         """
+        if warehouse_id == target_warehouse_id:
+            target_warehouse_id = ''
+        self.switch_default_warehouse(warehouse_id)
         kw_maps = {
             1: {"area_type": 5, "code_prefix": "SH", "name_prefix": "SHN"},
             2: {"area_type": 5, "code_prefix": "ZJ", "name_prefix": "ZJN"},
@@ -251,7 +275,7 @@ class WmsAppController(RequestHandler):
         detail_res = self.send_request(**data)
         return detail_res['data']
 
-    def transfer_out_confirm_pick(self, pick_order_details):
+    def transfer_out_confirm_pick(self, pick_order_code, pick_order_details):
         """
         调拨拣货单确认拣货
 
@@ -259,7 +283,7 @@ class WmsAppController(RequestHandler):
         """
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         details = list()
-        for detail in pick_order_details['details']:
+        for detail in pick_order_details:
             details.append({
                 'id': detail['id'],
                 'goodsSkuCode': detail['goodsSkuCode'],
@@ -268,14 +292,14 @@ class WmsAppController(RequestHandler):
             })
         wms_api_config['transfer_confirm_pick']['data'].update(
             {
-                "pickOrderNo": pick_order_details['pickOrderNo'],
+                "pickOrderNo": pick_order_code,
                 "details": details
             }
         )
         confirm_pick_res = self.send_request(**wms_api_config['transfer_confirm_pick'])
         return confirm_pick_res
 
-    def transfer_out_submit_tray(self, pick_order_details, tp_kw_ids):
+    def transfer_out_submit_tray(self, pick_order_code, pick_order_details, tp_kw_ids):
         """
         调拨按需装托
 
@@ -286,11 +310,11 @@ class WmsAppController(RequestHandler):
         tp_kw_codes = [self.db_kw_id_to_code(kw_id) for kw_id in tp_kw_ids]
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         tray_info_list = list()
-        for detail, code in zip(pick_order_details['details'], tp_kw_codes):
+        for detail, code in zip(pick_order_details, tp_kw_codes):
             tray_info_list.append(
                 {
                     'storageLocationCode': code,
-                    'pickOrderNo': pick_order_details['pickOrderNo'],
+                    'pickOrderNo': pick_order_code,
                     'trayInfos': [{
                         'waresSkuCode': detail['waresSkuCode'],
                         'goodsSkuCode': detail['goodsSkuCode'],

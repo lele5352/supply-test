@@ -61,7 +61,8 @@ class ImsController(RequestHandler):
                        bom_detail 
                    WHERE
                        goods_sku_code = '%s' 
-                       and bom_version = '%s';
+                       and bom_version = '%s'
+                       order by id;
                    """ % (sale_sku_code, bom_version)
         bom_detail_data = self.db.get_all(get_bom_detail_sql)
 
@@ -78,9 +79,6 @@ class ImsController(RequestHandler):
 
         :param ware_sku_code: 销售sku
         """
-        # 最终要返回的数据
-        sale_sku_bom_detail = dict()
-
         # 获取bom明细数据，组装成{"仓库sku1":数量1,"仓库sku2":数量2}格式
         sql = """
                    SELECT
@@ -169,7 +167,7 @@ class ImsController(RequestHandler):
         return goods_inventory_dict
 
     # 获取仓库商品总库存
-    def get_wares_inventory(self, sale_sku_code, warehouse_id, to_warehouse_id, bom_version):
+    def get_wares_inventory(self, sale_sku_code, warehouse_id, to_warehouse_id, bom_version=''):
         if not bom_version:
             sql = """
                    SELECT
@@ -244,12 +242,119 @@ class ImsController(RequestHandler):
                     )
         return formatted_ware_sku_inventory
 
+    # 获取仓库商品总库存
+    def get_wares_inventory_by_target_warehouse_id(self, sale_sku_code, to_warehouse_id):
+        sql = """
+           SELECT
+               ware_sku_code,type,storage_location_id,stock,block 
+           FROM
+               wares_inventory 
+           WHERE
+               goods_sku_code = "%s"
+               AND target_warehouse_id = %s
+           ORDER BY
+               ware_sku_code;
+           """ % (sale_sku_code, to_warehouse_id if to_warehouse_id else 0)
+
+        ware_inventory = self.db.get_all(sql)
+        formatted_ware_sku_inventory = dict()
+        for data in ware_inventory:
+            # print(data)
+            if data['ware_sku_code'] not in formatted_ware_sku_inventory:
+                if data['type'] == 4:
+                    formatted_ware_sku_inventory.update({
+                        data['ware_sku_code']: {
+                            data['storage_location_id']: {'stock': data['stock'], 'block': 0}}
+                    })
+                else:
+                    formatted_ware_sku_inventory.update({
+                        data['ware_sku_code']: {
+                            data['type']: {'stock': data['stock'], 'block': 0}}
+                    })
+            elif data['type'] not in formatted_ware_sku_inventory[data['ware_sku_code']]:
+                if data['type'] == 4:
+                    formatted_ware_sku_inventory[data['ware_sku_code']].update({
+                        data['storage_location_id']: {'stock': data['stock'], 'block': 0}
+                    })
+                else:
+                    formatted_ware_sku_inventory[data['ware_sku_code']].update({
+                        data['type']: {'stock': data['stock'], 'block': 0}
+                    })
+            else:
+                formatted_ware_sku_inventory[data['ware_sku_code']][data['type']]['stock'] += data['stock']
+        return formatted_ware_sku_inventory
+
+    def get_wares_inventory_by_warehouse_id(self, sale_sku_code, warehouse_id):
+        sql = """
+           SELECT
+               ware_sku_code,type,storage_location_id as location_id,stock,block 
+           FROM
+               wares_inventory 
+           WHERE
+               goods_sku_code = "%s"
+               AND warehouse_id = %s
+           ORDER BY
+               ware_sku_code;
+           """ % (sale_sku_code, warehouse_id)
+
+        ware_inventory = self.db.get_all(sql)
+        formatted_ware_sku_inventory = dict()
+        for data in ware_inventory:
+            if formatted_ware_sku_inventory.get(data['ware_sku_code']):
+                if data['type'] == 0:
+                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
+                        {"0": {'stock': data['stock'], 'block': data['block']}}
+                    )
+                elif data['type'] == 1:
+                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
+                        {"1": {'stock': data['stock'], 'block': data['block']}}
+                    )
+                elif data['type'] == 2:
+                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
+                        {"2": {'stock': data['stock'], 'block': data['block']}}
+                    )
+                elif data['type'] == 3:
+                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
+                        {"3": {'stock': data['stock'], 'block': data['block']}}
+                    )
+                elif data['type'] == 4:
+                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
+                        {str(data['location_id']): {'stock': data['stock'], 'block': data['block']}}
+                    )
+            else:
+                if data['type'] == 0:
+                    formatted_ware_sku_inventory.update(
+                        {data['ware_sku_code']: {
+                            "0": {'stock': data['stock'], 'block': data['block']}}}
+                    )
+                elif data['type'] == 1:
+                    formatted_ware_sku_inventory.update(
+                        {data['ware_sku_code']: {
+                            "1": {'stock': data['stock'], 'block': data['block']}}}
+                    )
+                elif data['type'] == 2:
+                    formatted_ware_sku_inventory.update(
+                        {data['ware_sku_code']: {
+                            "2": {'stock': data['stock'], 'block': data['block']}}}
+                    )
+                elif data['type'] == 3:
+                    formatted_ware_sku_inventory.update(
+                        {data['ware_sku_code']: {
+                            "3": {'stock': data['stock'], 'block': data['block']}}}
+                    )
+                elif data['type'] == 4:
+                    formatted_ware_sku_inventory.update(
+                        {data['ware_sku_code']: {
+                            str(data["location_id"]): {'stock': data['stock'], 'block': data['block']}}}
+                    )
+        return formatted_ware_sku_inventory
+
     def calculate_sets(self, ware_sku_qty_list):
         sale_sku_dict = dict()
         result_sku_suites = dict()
         for ware_sku, qty in ware_sku_qty_list:
             sale_sku_info = self.db_get_bom_info_by_ware_sku(ware_sku)
-            if not sale_sku_dict.get(sale_sku_info['goods_sku_code']):
+            if sale_sku_info['goods_sku_code'] not in sale_sku_dict:
                 sale_sku_dict.update({
                     sale_sku_info['goods_sku_code']: {
                         sale_sku_info['bom_version']: {
@@ -257,13 +362,13 @@ class ImsController(RequestHandler):
                         }
                     }
                 })
-            elif not sale_sku_dict[sale_sku_info['goods_sku_code']].get(sale_sku_info['bom_version']):
+            elif sale_sku_info['bom_version'] not in sale_sku_dict[sale_sku_info['goods_sku_code']]:
                 sale_sku_dict[sale_sku_info['goods_sku_code']].update({
                     sale_sku_info['bom_version']: {
                         ware_sku: qty
                     }
                 })
-            elif not sale_sku_dict[sale_sku_info['goods_sku_code']][sale_sku_info['bom_version']].get(ware_sku):
+            elif ware_sku not in sale_sku_dict[sale_sku_info['goods_sku_code']][sale_sku_info['bom_version']]:
                 sale_sku_dict[sale_sku_info['goods_sku_code']][sale_sku_info['bom_version']].update({
                     ware_sku: qty
                 })
@@ -529,6 +634,7 @@ class ImsController(RequestHandler):
                         AND bom_version = '%s';
                     """ % (warehouse_id, sale_sku_code, bom_version)
         unqualified_inventory = self.db.get_all(sql)
+        # print(unqualified_inventory)
         if not unqualified_inventory:
             return
         temp_ware_sku_inventory = dict()
@@ -711,30 +817,15 @@ class ImsController(RequestHandler):
         return res
 
     # 分配库位库存
-    def assign_location_stock(self, delivery_order_no, sale_sku_code, bom_version, count, warehouse_id):
-        bom_detail = self.db_get_bom_detail(sale_sku_code, bom_version)
-        ware_sku_list = list()
-        for ware_sku, qty in bom_detail.items():
-            temp_ware_sku_dict = {
-                "qty": qty * count,
-                "wareSkuCode": ware_sku
-            }
-            ware_sku_list.append(temp_ware_sku_dict)
+    def assign_location_stock(self, delivery_order_no, ware_sku_list, warehouse_id):
+        temp_list = list()
+        for ware_sku, qty in ware_sku_list:
+            temp_list.append({
+                'qty': qty,
+                'wareSkuCode': ware_sku
+            })
         ims_api_config['assign_location_stock']['data'][0].update({
-            "wareSkuList": ware_sku_list,
-            "sourceNo": delivery_order_no,
-            "warehouseId": warehouse_id
-        })
-        res = self.send_request(**ims_api_config['assign_location_stock'])
-        return res
-
-    def assign_pj_location_stock(self, delivery_order_no, pj_sku_code, count, warehouse_id):
-        ware_sku_list = [{
-            "qty": count,
-            "wareSkuCode": pj_sku_code
-        }]
-        ims_api_config['assign_location_stock']['data'][0].update({
-            "wareSkuList": ware_sku_list,
+            "wareSkuList": temp_list,
             "sourceNo": delivery_order_no,
             "warehouseId": warehouse_id
         })
@@ -742,9 +833,13 @@ class ImsController(RequestHandler):
         return res
 
     # 确认拣货
-    def confirm_pick(self, delivery_order_no, ware_sku_list, warehouse_id):
+    def confirm_pick(self, delivery_order_no, pick_ware_sku_list, warehouse_id):
+        for pick_item in pick_ware_sku_list:
+            pick_item.update({
+                "storageLocationType": 5,
+            })
         ims_api_config['confirm_pick']['data'].update({
-            "wareSkuList": ware_sku_list,
+            "wareSkuList": pick_ware_sku_list,
             "sourceNo": delivery_order_no,
             "warehouseId": warehouse_id
         })
@@ -752,33 +847,15 @@ class ImsController(RequestHandler):
         return res
 
     # 发货
-    def delivery_out(self, delivery_order_no, sale_sku_code, bom_version, count, warehouse_id, to_warehouse_id):
-        bom_detail = self.db_get_bom_detail(sale_sku_code, bom_version)
+    def delivery_out(self, delivery_order_no, delivery_order_goods, warehouse_id, to_warehouse_id):
         ware_sku_list = list()
-        for ware_sku, qty in bom_detail.items():
+        for ware_sku, qty in delivery_order_goods:
             temp_ware_sku_dict = {
-                "qty": qty * count,
+                "qty": qty,
                 "wareSkuCode": ware_sku,
                 "storageLocationId": -warehouse_id
             }
             ware_sku_list.append(temp_ware_sku_dict)
-        ims_api_config['delivery_out']['data'][0].update({
-            "wareSkuList": ware_sku_list,
-            "sourceNo": delivery_order_no,
-            "warehouseId": warehouse_id,
-            "targetWarehouseId": to_warehouse_id
-        })
-        res = self.send_request(**ims_api_config['delivery_out'])
-        return res
-
-    def pj_delivery_out(self, delivery_order_no, pj_sku_code, count, warehouse_id, to_warehouse_id):
-        ware_sku_list = list()
-        temp_ware_sku_dict = {
-            "qty": count,
-            "wareSkuCode": pj_sku_code,
-            "storageLocationId": -warehouse_id
-        }
-        ware_sku_list.append(temp_ware_sku_dict)
         ims_api_config['delivery_out']['data'][0].update({
             "wareSkuList": ware_sku_list,
             "sourceNo": delivery_order_no,
@@ -796,23 +873,29 @@ class ImsController(RequestHandler):
         res = self.send_request(**ims_api_config['cancel_oms_order_block'])
         return res
 
-    def cancel_block_before_pick(self, delivery_order_no):
-        ims_api_config['cancel_block_before_pick']['data'].update({"sourceNo": delivery_order_no})
+    def cancel_block_before_pick(self, delivery_order_no, roll_back_type):
+        """
+        :param string delivery_order_no: 出库单号
+        :param int roll_back_type: 回滚类型：1，当前已分配库位库存；2，当前未分配库位库存
+        """
+        ims_api_config['cancel_block_before_pick']['data'].update({
+            "sourceNo": delivery_order_no,
+            "rollBackBlockType": roll_back_type
+
+        })
         res = self.send_request(**ims_api_config['cancel_block_before_pick'])
         return res
 
-    def cancel_block_after_pick(self, delivery_order_no, sale_sku_code, location_id, count, bom_version,
-                                warehouse_id):
-        bom_detail = self.db_get_bom_detail(sale_sku_code, bom_version)
+    def cancel_block_after_pick(self, delivery_order_no, pick_order_goods_list, location_id, warehouse_id):
         ware_sku_list = list()
-        for detail in bom_detail.items():
+        for ware_sku, qty in pick_order_goods_list:
             temp_ware_sku_dict = {
                 "fromStorageLocationId": -warehouse_id,
-                "qty": detail[1] * count,
+                "qty": qty,
                 "toStorageLocationId": location_id,
                 "toStorageLocationType": "4",
                 "toTargetWarehouseId": warehouse_id,
-                "wareSkuCode": detail[0],
+                "wareSkuCode": ware_sku
             }
             ware_sku_list.append(temp_ware_sku_dict)
         ims_api_config['cancel_block_after_pick']['data'].update(
@@ -823,7 +906,15 @@ class ImsController(RequestHandler):
         res = self.send_request(**ims_api_config['cancel_block_after_pick'])
         return res
 
-    def add_stock_by_purchase_in(self, ware_sku_qty_list, sj_location_ids, count, warehouse_id,
+    def only_cancel_location_block(self, block_book_id, source_no):
+        ims_api_config['only_cancel_location_block']['data'].update({
+            "blockBookId": block_book_id,
+            "sourceNo": source_no
+        })
+        res = self.send_request(**ims_api_config['only_cancel_location_block'])
+        return res
+
+    def add_stock_by_purchase_in(self, ware_sku_qty_list, sj_location_ids, warehouse_id,
                                  to_warehouse_id):
         purchase_create_order_res = self.purchase_create_order(
             ware_sku_qty_list,
@@ -954,13 +1045,40 @@ class ImsController(RequestHandler):
         res = self.qualified_goods_other_in(ware_sku_qty_list, location_ids, warehouse_id, to_warehouse_id)
         return res
 
+    def get_combined_block_result_list(self, block_result_list):
+        ware_sku_list = list()
+        temp_dict = dict()
+        for result in block_result_list:
+            ware_sku = result["wareSkuCode"]
+            qty = result["qty"]
+            if ware_sku in temp_dict:
+                temp_dict[ware_sku] += qty
+            else:
+                temp_dict.update({
+                    ware_sku: qty
+                })
+        for ware_sku, total_qty in temp_dict.items():
+            ware_sku_list.append(
+                (ware_sku, total_qty)
+            )
+        return sorted(ware_sku_list, key=lambda s: s[0])
+
+    def get_import_stock_excel_data(self, excel):
+        files = {'file': open(excel, 'rb')}
+        excel_data = self.send_request(**ims_api_config['get_import_stock_excel_data'], files=files)
+        return excel_data
+
+    def import_stock_excel_data(self, excel):
+        files = {'file': open(excel, 'rb')}
+        res = self.send_request(**ims_api_config['import_stock_excel_data'], files=files)
+        return res
+
 
 if __name__ == '__main__':
     ims = ImsController()
-    ims.delete_qualified_inventory(['63203684930'])
+    # ims.delete_qualified_inventory(['24577870414'])
     # ims.add_stock_by_other_in('63203684930', 'A', 10, [1496,1505], 513, 513)
-    # ims.add_stock_by_other_in('44440672352', 'A', 100, [1664], 520, 520)
-
+    ims.qualified_goods_other_in([('J06ZWJ000252WG', 1)], [2451], 539, 539)
     # ims.delete_ims_data('20607392841')
     # data = ims.get_central_inventory('63203684930', 520, 520)
     # data2 = ims.get_goods_inventory('63203684930', 520, 520)

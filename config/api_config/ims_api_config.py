@@ -220,6 +220,7 @@ ims_api_config = {
         "data": {
             "functionType": "8",
             "operateType": "2",
+            "rollBackBlockType": "",  # 1已分配过库位库存，2未分配过库位库存
             "operatorId": 8,
             "sourceNo": "CK2109040006"
         }
@@ -273,6 +274,19 @@ ims_api_config = {
                 "warehouseId": 19
             }
         ],
+    },
+    "only_cancel_location_block": {
+        "uri_path": "/ims/service/wms/business/rollback/location/block",
+        "method": "post",
+        "data":
+            {
+                "blockBookId": "",
+                "functionType": "5",
+                "operateType": "2",
+                "operatorId": 8,
+                "sourceNo": "source210906002",
+
+            }
     },
     "unqualified_goods_other_out_block": {
         "uri_path": "/ims/service/wms/business/distribute/bad/block",
@@ -338,6 +352,16 @@ ims_api_config = {
                 "warehouseId": 19
             }
         ]
+    },
+    "get_import_stock_excel_data": {
+        "uri_path": "/ims/service/init/data/parsing/excel/instock",
+        "method": "post",
+        "data": ""
+    },
+    "import_stock_excel_data": {
+        "uri_path": "/ims/service/init/data/import/ware/sku/stock",
+        "method": "post",
+        "data": ""
     },
     "cancel_unqualified_goods_other_out_block": {
         "uri_path": "/ims/service/wms/business/rollback/bad/block",

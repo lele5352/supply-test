@@ -25,7 +25,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
             bom,
             self.warehouse_id)
 
-    # @pytest.mark.skip(reason='test')
+    @pytest.mark.skip(reason='test')
     def test_1_unqualified_goods_other_out_delivery_warehouse(self):
         """
         tips：销售sku不能是单品，单品会单件成套，不存在计算成套逻辑

@@ -14,11 +14,11 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
         self.cp_kw_id = fcp_kw_id
         ims.delete_qualified_inventory([sale_sku])
         ims.delete_unqualified_inventory(sale_sku)
-        ims.add_stock_by_purchase_in(
+        ims.add_qualified_stock_by_other_in(
             sale_sku,
             bom,
-            self.sj_kw_ids,
             self.sale_sku_count,
+            self.sj_kw_ids,
             self.warehouse_id,
             self.target_warehouse_id
         )
@@ -33,7 +33,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
             self.warehouse_id
         )
 
-    # @pytest.mark.skip(reason='test')
+    @pytest.mark.skip(reason='test')
     def test_1_qualified_goods_changed_to_unqualified_goods(self):
         """
         tips：销售sku不能是单品，单品会单件成套，不存在计算成套逻辑
@@ -60,7 +60,6 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
                     # 构造期望库存
                     if changed_count == 1:
                         # 如果是本套的第一件，则中央库存、销售商品总库存、现货库存、仓库商品总库存、库位库存的stock都扣减1
-                        self.expect_inventory['central_inventory_stock'] -= 1
                         self.expect_inventory['central_stock'] -= 1
                         self.expect_inventory['spot_goods_stock'] -= 1
                         self.expect_inventory[detail[0]][location_id]['stock'] -= 1

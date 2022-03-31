@@ -7,7 +7,7 @@ class TestPurchaseIntoDeliveryWarehouse(object):
     def setup_class(self):
         self.warehouse_id = delivery_warehouse_id
         self.to_warehouse_id = delivery_warehouse_id
-        self.ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5)]
+        self.ware_sku_qty_list = [('67330337129G01', 1), ('67330337129G02', 2), ('67330337129G03', 3)]
         self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
         self.sj_kw_ids = wms.db_get_kw(1, 5, len(self.ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 

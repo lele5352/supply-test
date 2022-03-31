@@ -16,6 +16,20 @@ env_configs = {
         'mysql_info_wms': {'mysql_info': mysql_config.get('test_163'), 'db': 'supply_wms'},
         'mysql_info_auth': {'mysql_info': mysql_config.get('test_163'), 'db': 'supply_auth'}
     },
+    # 25环境配置
+    'test25': {
+        'ims_service_prefix': url_prefix.get('ims_service_25'),
+        'app_prefix': url_prefix.get('app_25'),
+        'delivery_service_prefix': url_prefix.get('delivery_service_25'),
+        'receipt_service_prefix': url_prefix.get('receipt_service_25'),
+        'transfer_service_prefix': url_prefix.get('transfer_service_25'),
+
+        'mysql_info_scm': {'mysql_info': mysql_config.get('test_26'), 'db': 'homary_scm'},
+        'mysql_info_ims': {'mysql_info': mysql_config.get('test_26'), 'db': 'supply_ims_formal'},
+        'mysql_info_oms': {'mysql_info': mysql_config.get('test_26'), 'db': 'ec_oms_26'},
+        'mysql_info_wms': {'mysql_info': mysql_config.get('test_26'), 'db': 'supply_wms'},
+        'mysql_info_auth': {'mysql_info': mysql_config.get('test_26'), 'db': 'supply_auth'}
+    },
     # 160环境配置
     'test160': {
         'ims_service_prefix': url_prefix.get('ims_service_160'),

@@ -7,10 +7,10 @@ from testcase import *
 class TestDeliveryPick(object):
     def setup_class(self):
         self.warehouse_id = delivery_warehouse_id
-        self.target_warehouse_id = delivery_warehouse_id
+        self.to_warehouse_id = delivery_warehouse_id
 
-        self.sale_sku_info = [(sale_sku, 2)]
-        self.sj_kw_ids = fsj_kw_ids
+        self.order_info = [(sale_sku, 2)]
+        self.sj_kw_ids = wms.db_get_kw(1, 2, len(sale_sku), self.warehouse_id, self.to_warehouse_id)
 
     def setup(self):
         # 这里踩过坑，单据号不能放在setupclass里面，否则每次单据号都一样，会触发幂等，导致结果不正确
@@ -22,57 +22,59 @@ class TestDeliveryPick(object):
         ims.add_qualified_stock_by_other_in(
             sale_sku,
             bom,
-            self.sale_sku_info[0][1],
+            self.order_info[0][1],
             self.sj_kw_ids,
             self.warehouse_id,
-            self.target_warehouse_id
+            self.to_warehouse_id
         )
+        self.expect_qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
 
     # @pytest.mark.skip(reason='test')
     def test_1_completely_pick(self):
         oms_order_block_res = ims.oms_order_block(
-            self.sale_sku_info,
+            self.order_info,
             self.warehouse_id,
         )
         # 下发销售出库单预占仓库商品总库存、销售sku现货库存
         delivery_order_block_res = ims.delivery_order_block(
             self.delivery_code,
-            self.sale_sku_info,
+            self.order_info,
             self.warehouse_id,
-            self.target_warehouse_id
+            self.to_warehouse_id
         )
+        # 销售出库单预占分配库存的结果列表
+        block_result_list = delivery_order_block_res['data']['wareSkuList']
+
+        # 把分配库存的预占结果按仓库sku维度聚合
+        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        print(combined_block_result_list)
         # 分配库位库存，预占库位库存
         assign_location_stock_res = ims.assign_location_stock(
             self.delivery_code,
-            sale_sku,
-            bom,
-            self.sale_sku_info[0][1],
+            combined_block_result_list,
             self.warehouse_id
         )
         ware_sku_list = list()
-        expect_ware_sku_inventory_dict = dict()
-
         # 构造拣货sku明细数据，此处为完整拣货，非短拣
-        for location_id, detail in zip(self.sj_kw_ids, bom_detail.items()):
-            pick_qty = detail[1] * self.sale_sku_info[0][1]
+        self.expect_qualified_inventory['spot_goods_remain'] -= self.order_info[0][1]
+        self.expect_qualified_inventory['central_remain'] -= self.order_info[0][1]
+        for location_id, (ware_sku, qty) in zip(self.sj_kw_ids, combined_block_result_list):
             temp_dict = {
-                "qty": pick_qty,
+                "qty": qty,
                 "storageLocationId": location_id,
                 "storageLocationType": 5,
-                "wareSkuCode": detail[0]
+                "wareSkuCode": ware_sku
             }
             ware_sku_list.append(temp_dict)
-
-            # 根据拣货数据构造拣货后期望的仓库库存数据
-            expect_ware_sku_inventory_dict[detail[0]] = {
-                location_id: {'block': detail[1] * self.sale_sku_info[0][1] - pick_qty,
-                              'stock': detail[1] * self.sale_sku_info[0][1] - pick_qty},
-                'warehouse_total': {'block': detail[1] * self.sale_sku_info[0][1],
-                                    'stock': detail[1] * self.sale_sku_info[0][1]},
-                'location_total': {'block': detail[1] * self.sale_sku_info[0][1],
-                                   'stock': detail[1] * self.sale_sku_info[0][1]},
-                -self.warehouse_id: {'block': 0, 'stock': pick_qty}
-            }
+            # 释放库位库存
+            self.expect_qualified_inventory[ware_sku]['warehouse_total']['block'] += qty
+            self.expect_qualified_inventory[ware_sku]['location_total']['block'] += qty
+            self.expect_qualified_inventory[ware_sku][location_id]['stock'] -= qty
+            self.expect_qualified_inventory[ware_sku].update(
+                {
+                    -self.warehouse_id: {'block': 0, 'stock': qty}
+                }
+            )
 
         confirm_pick_res = ims.confirm_pick(
             self.delivery_code,
@@ -83,82 +85,66 @@ class TestDeliveryPick(object):
         after_pick_inventory = ims.get_qualified_inventory(
             sale_sku,
             self.warehouse_id,
-            self.target_warehouse_id
+            self.to_warehouse_id
         )
-
-        expect_central_inventory_dict = {
-            "central_stock": self.sale_sku_info[0][1],
-            "central_block": 0,
-            "central_remain": 0
-        }
-
-        expect_goods_inventory_dict = {
-            'purchase_on_way_stock': 0,
-            'purchase_on_way_remain': 0,
-            'transfer_on_way_stock': 0,
-            'transfer_on_way_remain': 0,
-            'spot_goods_stock': self.sale_sku_info[0][1],
-            'spot_goods_remain': 0,
-        }
-
-        expect_after_pick_inventory = dict()
-        expect_after_pick_inventory.update(expect_central_inventory_dict)
-        expect_after_pick_inventory.update(expect_goods_inventory_dict)
-        expect_after_pick_inventory.update(expect_ware_sku_inventory_dict)
+        # 根据拣货数据构造拣货后期望的仓库库存数据
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200
         assert assign_location_stock_res['code'] == 200
         assert confirm_pick_res['code'] == 200
-        assert expect_after_pick_inventory == after_pick_inventory
+        assert self.expect_qualified_inventory == after_pick_inventory
 
     # @pytest.mark.skip(reason='test')
     def test_2_short_pick(self):
         oms_order_block_res = ims.oms_order_block(
-            self.sale_sku_info,
+            self.order_info,
             self.warehouse_id,
         )
         # 下发销售出库单预占仓库商品总库存、销售sku现货库存
         delivery_order_block_res = ims.delivery_order_block(
             self.delivery_code,
-            self.sale_sku_info,
+            self.order_info,
             self.warehouse_id,
-            self.target_warehouse_id
+            self.to_warehouse_id
         )
+        # 销售出库单预占分配库存的结果列表
+        block_result_list = delivery_order_block_res['data']['wareSkuList']
+
+        # 把分配库存的预占结果按仓库sku维度聚合
+        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        print(combined_block_result_list)
         # 分配库位库存，预占库位库存
         assign_location_stock_res = ims.assign_location_stock(
             self.delivery_code,
-            sale_sku,
-            bom,
-            self.sale_sku_info[0][1],
+            combined_block_result_list,
             self.warehouse_id
         )
         ware_sku_list = list()
-        expect_ware_sku_inventory_dict = dict()
-        actual_pick_num = 0
+        # 构造拣货sku明细数据，此处为完整拣货，非短拣
 
-        # 构造拣货sku明细数据，此处为短拣
-        for location_id, detail in zip(self.sj_kw_ids, bom_detail.items()):
-            pick_qty = detail[1] * self.sale_sku_info[0][1] - 1
+        self.expect_qualified_inventory['spot_goods_remain'] -= self.order_info[0][1]
+        self.expect_qualified_inventory['central_remain'] -= self.order_info[0][1]
+        for location_id, (ware_sku, qty) in zip(self.sj_kw_ids, combined_block_result_list):
+            pick_loss_num = 1
             temp_dict = {
-                "qty": pick_qty,
+                "qty": qty - pick_loss_num,
                 "storageLocationId": location_id,
                 "storageLocationType": 5,
-                "wareSkuCode": detail[0]
+                "wareSkuCode": ware_sku
             }
             ware_sku_list.append(temp_dict)
-            # 实拣数累加
+            # 释放库位库存
+            self.expect_qualified_inventory[ware_sku]['warehouse_total']['block'] += qty
+            self.expect_qualified_inventory[ware_sku]['location_total']['block'] += qty
+            self.expect_qualified_inventory[ware_sku][location_id]['stock'] = pick_loss_num
+            self.expect_qualified_inventory[ware_sku][location_id]['block'] = pick_loss_num
 
-            # 根据拣货数据构造拣货后期望的仓库库存数据
-            expect_ware_sku_inventory_dict[detail[0]] = {
-                location_id: {'block': detail[1] * self.sale_sku_info[0][1] - pick_qty,
-                              'stock': detail[1] * self.sale_sku_info[0][1] - pick_qty},
-                'warehouse_total': {'block': detail[1] * self.sale_sku_info[0][1],
-                                    'stock': detail[1] * self.sale_sku_info[0][1]},
-                'location_total': {'block': detail[1] * self.sale_sku_info[0][1],
-                                   'stock': detail[1] * self.sale_sku_info[0][1]},
-                -self.warehouse_id: {'block': 0, 'stock': pick_qty}
-            }
+            self.expect_qualified_inventory[ware_sku].update(
+                {
+                    -self.warehouse_id: {'block': 0, 'stock': qty - pick_loss_num}
+                }
+            )
 
         confirm_pick_res = ims.confirm_pick(
             self.delivery_code,
@@ -166,36 +152,18 @@ class TestDeliveryPick(object):
             self.warehouse_id
         )
 
-        after_short_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = ims.get_qualified_inventory(
             sale_sku,
             self.warehouse_id,
-            self.target_warehouse_id
+            self.to_warehouse_id
         )
-        expect_central_inventory_dict = {
-            "central_stock": self.sale_sku_info[0][1],
-            "central_block": 0,
-            "central_remain": 0
-        }
-
-        expect_goods_inventory_dict = {
-            'purchase_on_way_stock': 0,
-            'purchase_on_way_remain': 0,
-            'transfer_on_way_stock': 0,
-            'transfer_on_way_remain': 0,
-            'spot_goods_stock': self.sale_sku_info[0][1],
-            'spot_goods_remain': 0,
-        }
-
-        expect_after_short_pick_inventory = dict()
-        expect_after_short_pick_inventory.update(expect_central_inventory_dict)
-        expect_after_short_pick_inventory.update(expect_goods_inventory_dict)
-        expect_after_short_pick_inventory.update(expect_ware_sku_inventory_dict)
+        # 根据拣货数据构造拣货后期望的仓库库存数据
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200
         assert assign_location_stock_res['code'] == 200
         assert confirm_pick_res['code'] == 200
-        assert expect_after_short_pick_inventory == after_short_pick_inventory
+        assert self.expect_qualified_inventory == after_pick_inventory
 
 
 if __name__ == '__main__':
