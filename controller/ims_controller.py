@@ -81,13 +81,12 @@ class ImsController(RequestHandler):
         """
         # 获取bom明细数据，组装成{"仓库sku1":数量1,"仓库sku2":数量2}格式
         sql = """
-                   SELECT
-                       goods_sku_code,bom_version,bom_qty 
-                   FROM
-                       bom_detail 
-                   WHERE
-                       ware_sku_code  = '%s' ;
-                   """ % (ware_sku_code)
+               SELECT
+                   goods_sku_code,bom_version,bom_qty 
+               FROM
+                   bom_detail 
+               WHERE
+                   ware_sku_code  = '%s' ;""" % ware_sku_code
         sale_sku_and_bom_data = self.db.get_one(sql)
         return sale_sku_and_bom_data
 
@@ -101,7 +100,14 @@ class ImsController(RequestHandler):
         :param any to_warehouse_id: 目的仓库id
         """
         temp_sql = 'warehouse_id=%s' % to_warehouse_id if to_warehouse_id else 'warehouse_id=%s' % warehouse_id
-        sql = "select goods_sku_code, warehouse_id, stock,block,remain from central_inventory where goods_sku_code ='%s' and %s" % (
+        sql = """
+        SELECT
+            goods_sku_code,warehouse_id,stock,block,remain 
+        FROM
+            central_inventory 
+        WHERE
+            goods_sku_code = '%s' 
+            AND %s""" % (
             sale_sku_code, temp_sql)
         central_inventory = self.db.get_one(sql)
         if not central_inventory:
@@ -1076,10 +1082,9 @@ class ImsController(RequestHandler):
 
 if __name__ == '__main__':
     ims = ImsController()
-    # ims.delete_qualified_inventory(['24577870414'])
+    ims.delete_qualified_inventory(['63203684930'])
     # ims.add_stock_by_other_in('63203684930', 'A', 10, [1496,1505], 513, 513)
-    ims.qualified_goods_other_in([('J06ZWJ000252WG', 1)], [2451], 539, 539)
-    # ims.delete_ims_data('20607392841')
+    # ims.qualified_goods_other_in([('J06ZWJ000252WG', 1)], [2451], 539, 539)
     # data = ims.get_central_inventory('63203684930', 520, 520)
     # data2 = ims.get_goods_inventory('63203684930', 520, 520)
     # data3 = ims.get_wares_inventory('63203684930', 'A', 520, 520)

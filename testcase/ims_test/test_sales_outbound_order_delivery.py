@@ -46,10 +46,9 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        print(after_oms_block_inventory)
         # 补发单生成只预占仓库商品总库存，更新remain
-        for ware_sku, qty in delivery_order_goods_list:
-            self.expect_inventory[ware_sku.replace('BP', '')]["warehouse_total"]['block'] += qty
+        for sku, qty in delivery_order_goods_list:
+            self.expect_inventory[sku.replace('BP', '')]["warehouse_total"]['block'] += qty
         self.expect_inventory['central_remain'] -= 1
 
         assert res['code'] == 200
