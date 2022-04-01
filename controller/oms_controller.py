@@ -9,7 +9,7 @@ from config.sys_config import env_config
 
 class OmsController(RequestHandler):
     def __init__(self, ums):
-        self.app_headers = ums.get_app_headers()
+        self.app_headers = ums.app_header
         self.prefix = env_config.get('app_prefix')
         self.db = MysqlHandler(**env_config.get('mysql_info_oms'))
         super().__init__(self.prefix, self.app_headers)

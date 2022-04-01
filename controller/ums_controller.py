@@ -15,11 +15,7 @@ class UmsController(RequestHandler):
         self.headers = {'Content-Type': 'application/json;charset=UTF-8'}
         self.db = MysqlHandler(**env_config.get('mysql_info_auth'))
         super().__init__(self.prefix, self.headers)
-
-    def get_app_headers(self):
-        authorization = self.ums_login()
-        headers = {'Content-Type': 'application/json;charset=UTF-8', "Authorization": authorization}
-        return headers
+        self.app_header = self.ums_login()
 
     def get_service_headers(self):
         username = user['username']
@@ -78,7 +74,8 @@ class UmsController(RequestHandler):
         try:
             res = self.send_request(**ums_api_config['login'])
             authorization_str = res['data']['tokenHead'] + ' ' + res['data']['token']
-            return authorization_str
+            headers = {'Content-Type': 'application/json;charset=UTF-8', "Authorization": authorization_str}
+            return headers
         except:
             print('账号登录失败！')
             return None

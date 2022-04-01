@@ -14,7 +14,7 @@ from controller.ums_controller import UmsController
 
 class WmsAppController(RequestHandler):
     def __init__(self, ums):
-        self.app_headers = ums.get_app_headers()
+        self.app_headers = ums.app_header
         self.prefix = env_config.get('app_prefix')
         self.db = MysqlHandler(**env_config.get('mysql_info_wms'))
         self.transfer = WmsTransferController(ums)
