@@ -3,14 +3,12 @@ import time
 from config.sys_config import env_config
 from config.api_config.wms_api_config import wms_api_config
 from utils.request_handler import RequestHandler
-from utils.mysql_handler import MysqlHandler
 
 
 class WmsTransferController(RequestHandler):
     def __init__(self, ums):
         self.service_headers = ums.get_service_headers()
         self.prefix = env_config.get('transfer_service_prefix')
-        self.db = MysqlHandler(**env_config.get('mysql_info_wms'))
         super().__init__(self.prefix, self.service_headers)
 
     def transfer_out_create_demand(self, delivery_warehouse_code, delivery_target_warehouse_code,

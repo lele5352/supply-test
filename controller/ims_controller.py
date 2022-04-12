@@ -1,8 +1,6 @@
 import time
 
 from utils.request_handler import RequestHandler
-from utils.mysql_handler import MysqlHandler
-
 from config.api_config.ims_api_config import ims_api_config
 from config.sys_config import env_config
 from db_operator.ims_db_operate import IMSDBOperator

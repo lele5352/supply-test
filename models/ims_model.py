@@ -1,6 +1,6 @@
 from peewee import *
 
-from models import db_config
+from config.sys_config import db_config
 
 database = MySQLDatabase('supply_ims_new', **db_config)
 

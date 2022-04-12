@@ -11,7 +11,6 @@ class ScmController(RequestHandler):
     def __init__(self, ums):
         self.app_headers = ums.app_header
         self.prefix = env_config.get('app_prefix')
-        self.db = MysqlHandler(**env_config.get('mysql_info_scm'))
         super().__init__(self.prefix, self.app_headers)
 
     def get_sku_info(self, sale_sku_code):

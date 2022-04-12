@@ -5,7 +5,7 @@ from copy import deepcopy
 from config.sys_config import env_config
 from config.api_config.wms_api_config import wms_api_config
 from utils.request_handler import RequestHandler
-from utils.mysql_handler import MysqlHandler
+from db_operator.wms_db_operate import WMSDBOperator
 from utils.log_handler import logger as log
 
 from controller.wms_transfer_controller import WmsTransferController
@@ -16,7 +16,6 @@ class WmsAppController(RequestHandler):
     def __init__(self, ums):
         self.app_headers = ums.app_header
         self.prefix = env_config.get('app_prefix')
-        self.db = MysqlHandler(**env_config.get('mysql_info_wms'))
         self.transfer = WmsTransferController(ums)
         super().__init__(self.prefix, self.app_headers)
 
@@ -52,9 +51,8 @@ class WmsAppController(RequestHandler):
         """
         if not warehouse_id:
             return
-        sql = "select warehouse_code from base_warehouse where id=%s" % warehouse_id
-        data = self.db.get_one(sql)
-        return data['warehouse_code']
+        data = WMSDBOperator.query_warehouse_info_by_id(warehouse_id)
+        return data.get('warehouse_code')
 
     def db_ck_code_to_id(self, warehouse_code):
         """
@@ -64,9 +62,8 @@ class WmsAppController(RequestHandler):
         """
         if not warehouse_code:
             return
-        sql = "select id from base_warehouse where warehouse_code='%s'" % warehouse_code
-        data = self.db.get_one(sql)
-        return data['id']
+        data = WMSDBOperator.query_warehouse_info_by_code(warehouse_code)
+        return data.get('id')
 
     def db_kw_id_to_code(self, kw_id):
         """
@@ -74,9 +71,8 @@ class WmsAppController(RequestHandler):
 
         :param int kw_id: 库位id
         """
-        sql = "select warehouse_location_code from base_warehouse_location where id=%s" % kw_id
-        data = self.db.get_one(sql)
-        return data['warehouse_location_code']
+        data = WMSDBOperator.query_warehouse_location_info_by_id(kw_id)
+        return data.get('warehouse_location_code')
 
     def db_kw_code_to_id(self, kw_code):
         """
@@ -84,9 +80,8 @@ class WmsAppController(RequestHandler):
 
         :param string kw_code: 库位编码
         """
-        sql = "select id from base_warehouse_location where warehouse_location_code='%s'" % kw_code
-        data = self.db.get_one(sql)
-        return str(data['id'])
+        data = WMSDBOperator.query_warehouse_location_info_by_code(kw_code)
+        return data.get('id')
 
     def db_get_ck_area_id(self, warehouse_id, area_type):
         """
@@ -95,9 +90,8 @@ class WmsAppController(RequestHandler):
         :param int warehouse_id: 仓库id
         :param int area_type: 区域类型
         """
-        sql = "select id from base_warehouse_area where warehouse_id=%s and type =%s " % (warehouse_id, area_type)
-        data = self.db.get_one(sql)
-        return str(data['id'])
+        data = WMSDBOperator.query_warehouse_area_info_by_type(warehouse_id, area_type)
+        return str(data.get('id'))
 
     def db_get_kw(self, return_type, kw_type, num, warehouse_id, target_warehouse_id):
         """
@@ -109,30 +103,15 @@ class WmsAppController(RequestHandler):
         :param int warehouse_id: 库位的所属仓库id
         :param target_warehouse_id: 库位的目的仓id
         """
-        temp_sql = " = %s" % target_warehouse_id if target_warehouse_id and target_warehouse_id != warehouse_id and kw_type != 6 else "is NULL"
-        query_kw_id_sql = """
-            SELECT 
-                id,warehouse_location_code
-            FROM 
-                base_warehouse_location 
-            WHERE 
-                state = 0 
-                AND type = %s 
-                AND warehouse_id = %s 
-                AND dest_warehouse_id %s 
-                order by id
-                LIMIT %s 
-        """ % (kw_type, warehouse_id, temp_sql, num)
-
-        location_data = self.db.get_all(query_kw_id_sql)
+        location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, warehouse_id, target_warehouse_id)
         if len(location_data) < num:
             # 库位不够，则新建对应缺少的库位
             new_locations = self.create_location(num - len(location_data), kw_type, warehouse_id, target_warehouse_id)
             if not new_locations:
                 return
             # 创建完缺口个数的库位后，重新获取库位
-            location_data = self.db.get_all(query_kw_id_sql)
-
+            location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, warehouse_id, target_warehouse_id)
+        # print(location_data)
         if return_type == 1:
             if len(location_data) == 1:
                 return location_data[0]['id']
@@ -407,4 +386,4 @@ class WmsAppController(RequestHandler):
 if __name__ == '__main__':
     ums = UmsController()
     wms = WmsAppController(ums)
-    print(wms.create_location(1, 5, 511, 513))
+    print(wms.db_get_kw(1, 5, 2, 513, 513))

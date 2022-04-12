@@ -30,4 +30,4 @@
 
 model生成：
     接入了ORM框架peewee，使用下面命令将现有数据库表反向生成model
-    python -m pwiz -e mysql -H 192.168.0.111 -p 8080 -u root -P usersystem > usersystem_model.py
+    python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_auth > models/ums_model.py
