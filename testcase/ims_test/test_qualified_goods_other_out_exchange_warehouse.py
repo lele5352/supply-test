@@ -13,9 +13,9 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
         self.sale_sku_count = 2
         self.sale_sku = '67330337129'
         self.bom_version = 'G'
-        self.bom_detail = ims.db_get_bom_detail(self.sale_sku, self.bom_version)
+        self.bom_detail = IMSDBOperator.query_bom_detail(self.sale_sku, self.bom_version)
         self.sj_kw_ids = wms.db_get_kw(1, 5, len(self.bom_detail.items()), self.warehouse_id, self.target_warehouse_id)
-        ims.delete_qualified_inventory([self.sale_sku])
+        IMSDBOperator.delete_qualified_inventory([self.sale_sku])
         # 其他入库生成库存
         ims.add_qualified_stock_by_other_in(
             self.sale_sku,
@@ -25,7 +25,7 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
             self.warehouse_id,
             self.target_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.target_warehouse_id)
@@ -59,7 +59,7 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
                         self.warehouse_id,
                         self.target_warehouse_id)
                     # 调用其他出库预占库存接口后获取库存数据，用于与构造的期望库存数据进行比对
-                    after_block_inventory = ims.get_qualified_inventory(
+                    after_block_inventory = IMSDBOperator.query_qualified_inventory(
                         self.sale_sku,
                         self.warehouse_id,
                         self.target_warehouse_id)
@@ -87,7 +87,7 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
                         self.warehouse_id,
                         self.target_warehouse_id
                     )
-                    after_delivered_inventory = ims.get_qualified_inventory(
+                    after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
                         self.sale_sku,
                         self.warehouse_id,
                         self.target_warehouse_id)

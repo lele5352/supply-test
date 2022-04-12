@@ -12,7 +12,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
         self.ware_sku_count = 10
         self.sj_kw_id = fsj_kw_ids[0]
         self.cp_kw_id = fcp_kw_id
-        ims.delete_unqualified_inventory(sale_sku)
+        IMSDBOperator.delete_unqualified_inventory(sale_sku)
         ims.add_unqualified_stock_by_other_in(
             ware_sku,
             self.sj_kw_id,
@@ -20,7 +20,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
             self.ware_sku_count,
             self.warehouse_id,
             self.target_warehouse_id)
-        self.expect_inventory = ims.get_unqualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_unqualified_inventory(
             sale_sku,
             bom,
             self.warehouse_id)
@@ -44,7 +44,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
             self.expect_inventory[ware_sku][self.cp_kw_id]['block'] += 1
             self.expect_inventory[ware_sku]['total']['block'] += 1
 
-            after_block_inventory = ims.get_unqualified_inventory(
+            after_block_inventory = IMSDBOperator.query_unqualified_inventory(
                 sale_sku,
                 bom,
                 self.warehouse_id
@@ -58,7 +58,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
             self.expect_inventory[ware_sku][self.cp_kw_id]['stock'] -= 1
             self.expect_inventory[ware_sku]['total']['stock'] -= 1
 
-            after_delivered_inventory = ims.get_unqualified_inventory(
+            after_delivered_inventory = IMSDBOperator.query_unqualified_inventory(
                 sale_sku,
                 bom,
                 self.warehouse_id

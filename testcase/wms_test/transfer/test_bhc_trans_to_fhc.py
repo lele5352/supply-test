@@ -19,7 +19,7 @@ class TestBHCTransToFHC:
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3)]
         transfer_demand_goods_list = [('BP63203684930A01', 1)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -29,8 +29,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -145,12 +147,17 @@ class TestBHCTransToFHC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 0
-        expect_trans_in_inventory['central_remain'] = 0
-        expect_trans_in_inventory["spot_goods_stock"] = 0
-        expect_trans_in_inventory["spot_goods_remain"] = 0
-
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 0,
+            "central_block": 0,
+            "central_remain": 0,
+            "spot_goods_stock": 0,
+            "spot_goods_remain": 0,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
                 expect_trans_in_inventory.update(
@@ -170,8 +177,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -180,7 +187,7 @@ class TestBHCTransToFHC:
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         transfer_demand_goods_list = [('BP63203684930A01', 1)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -190,8 +197,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -306,12 +315,17 @@ class TestBHCTransToFHC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 0
-        expect_trans_in_inventory['central_remain'] = 0
-        expect_trans_in_inventory["spot_goods_stock"] = 0
-        expect_trans_in_inventory["spot_goods_remain"] = 0
-
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 0,
+            "central_block": 0,
+            "central_remain": 0,
+            "spot_goods_stock": 0,
+            "spot_goods_remain": 0,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
                 expect_trans_in_inventory.update(
@@ -331,8 +345,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -341,7 +355,7 @@ class TestBHCTransToFHC:
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         transfer_demand_goods_list = [('BP63203684930A01', 2)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -351,8 +365,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -467,11 +483,17 @@ class TestBHCTransToFHC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 0
-        expect_trans_in_inventory['central_remain'] = 0
-        expect_trans_in_inventory["spot_goods_stock"] = 0
-        expect_trans_in_inventory["spot_goods_remain"] = 0
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 0,
+            "central_block": 0,
+            "central_remain": 0,
+            "spot_goods_stock": 0,
+            "spot_goods_remain": 0,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -492,8 +514,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -503,7 +525,7 @@ class TestBHCTransToFHC:
                             ('63203684930B01', 2), ('63203684930B02', 10)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -513,8 +535,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -630,10 +654,17 @@ class TestBHCTransToFHC:
             )
         # --------------------------------调入仓库存更新--------------------------------#
         # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 1
-        expect_trans_in_inventory['central_remain'] = 1
-        expect_trans_in_inventory["spot_goods_stock"] = 1
-        expect_trans_in_inventory["spot_goods_remain"] = 1
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 1,
+            "central_block": 0,
+            "central_remain": 1,
+            "spot_goods_stock": 1,
+            "spot_goods_remain": 1,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -654,8 +685,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -665,7 +696,7 @@ class TestBHCTransToFHC:
                             ('63203684930B02', 5)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 1)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -675,8 +706,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -790,12 +823,19 @@ class TestBHCTransToFHC:
                     tp_kw_id: {'block': 0, 'stock': 0}
                 }
             )
-        # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 2
-        expect_trans_in_inventory['central_remain'] = 2
-        expect_trans_in_inventory["spot_goods_stock"] = 2
-        expect_trans_in_inventory["spot_goods_remain"] = 2
+            # --------------------------------调入仓库存更新--------------------------------#
+            # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
+            # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+            expect_trans_in_inventory.update({
+                "central_stock": 2,
+                "central_block": 0,
+                "central_remain": 2,
+                "spot_goods_stock": 2,
+                "spot_goods_remain": 2,
+                "transfer_on_way_stock": 0,
+                "transfer_on_way_remain": 0
+            })
+            # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -816,8 +856,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -827,7 +867,7 @@ class TestBHCTransToFHC:
                             ('63203684930B02', 10)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 2)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -837,8 +877,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -952,12 +994,19 @@ class TestBHCTransToFHC:
                     tp_kw_id: {'block': 0, 'stock': 0}
                 }
             )
-        # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
+            # --------------------------------调入仓库存更新--------------------------------#
+            # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
+            # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+            expect_trans_in_inventory.update({
+                "central_stock": 3,
+                "central_block": 0,
+                "central_remain": 3,
+                "spot_goods_stock": 3,
+                "spot_goods_remain": 3,
+                "transfer_on_way_stock": 0,
+                "transfer_on_way_remain": 0
+            })
+            # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -978,8 +1027,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -988,7 +1037,7 @@ class TestBHCTransToFHC:
         origin_inventory = [('63203684930A01', 1), ('63203684930B01', 1), ('63203684930B02', 5)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('63203684930', 1)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -998,8 +1047,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1115,10 +1166,17 @@ class TestBHCTransToFHC:
             )
         # --------------------------------调入仓库存更新--------------------------------#
         # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 1
-        expect_trans_in_inventory['central_remain'] = 1
-        expect_trans_in_inventory["spot_goods_stock"] = 1
-        expect_trans_in_inventory["spot_goods_remain"] = 1
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 1,
+            "central_block": 0,
+            "central_remain": 1,
+            "spot_goods_stock": 1,
+            "spot_goods_remain": 1,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -1139,8 +1197,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1149,7 +1207,7 @@ class TestBHCTransToFHC:
         origin_inventory = [('63203684930A01', 3), ('63203684930A02', 6), ('63203684930A02', 9)]
         transfer_demand_goods_list = [('63203684930', 3)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -1159,8 +1217,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1276,10 +1336,17 @@ class TestBHCTransToFHC:
             )
         # --------------------------------调入仓库存更新--------------------------------#
         # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
+            # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+            expect_trans_in_inventory.update({
+                "central_stock": 3,
+                "central_block": 0,
+                "central_remain": 3,
+                "spot_goods_stock": 3,
+                "spot_goods_remain": 3,
+                "transfer_on_way_stock": 0,
+                "transfer_on_way_remain": 0
+            })
+            # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -1300,8 +1367,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1311,7 +1378,7 @@ class TestBHCTransToFHC:
                             ('63203684930B02', 5)]
         transfer_demand_goods_list = [('63203684930', 3)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -1321,8 +1388,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1437,12 +1506,17 @@ class TestBHCTransToFHC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
-
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 3,
+            "central_block": 0,
+            "central_remain": 3,
+            "spot_goods_stock": 3,
+            "spot_goods_remain": 3,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
                 expect_trans_in_inventory.update(
@@ -1462,8 +1536,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1472,7 +1546,7 @@ class TestBHCTransToFHC:
         origin_inventory = [('53170041592A01', 3), ]
         transfer_demand_goods_list = [('53170041592', 2), ('BP53170041592A01', 1)]
         sale_sku = '53170041592'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = [wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
@@ -1482,8 +1556,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1599,10 +1675,17 @@ class TestBHCTransToFHC:
             )
         # --------------------------------调入仓库存更新--------------------------------#
         # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
+            # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+            expect_trans_in_inventory.update({
+                "central_stock": 3,
+                "central_block": 0,
+                "central_remain": 3,
+                "spot_goods_stock": 3,
+                "spot_goods_remain": 3,
+                "transfer_on_way_stock": 0,
+                "transfer_on_way_remain": 0
+            })
+            # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -1623,8 +1706,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1633,7 +1716,7 @@ class TestBHCTransToFHC:
         origin_inventory = [('53170041592A01', 3), ]
         transfer_demand_goods_list = [('53170041592', 3)]
         sale_sku = '53170041592'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = [wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
@@ -1643,8 +1726,10 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id,
+                                                                             self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id,
+                                                                            self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1759,12 +1844,17 @@ class TestBHCTransToFHC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
-
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 3,
+            "central_block": 0,
+            "central_remain": 3,
+            "spot_goods_stock": 3,
+            "spot_goods_remain": 3,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
                 expect_trans_in_inventory.update(
@@ -1784,8 +1874,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 

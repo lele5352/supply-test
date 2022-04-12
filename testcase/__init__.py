@@ -1,6 +1,7 @@
 from controller.ums_controller import UmsController
 from controller.wms_app_controller import WmsAppController
 from controller.ims_controller import ImsController
+from db_operator.ims_db_operate import IMSDBOperator
 
 ums = UmsController()
 ims = ImsController()
@@ -27,7 +28,7 @@ straight_delivery_warehouse_id = 514
 # exchange_warehouse_id = 29
 # stock_warehouse_id = 30
 
-bom_detail = ims.db_get_bom_detail(sale_sku, bom)
+bom_detail = IMSDBOperator.query_bom_detail(sale_sku, bom)
 
 # 发货仓上架库位
 fsj_kw_ids = wms.db_get_kw(1, 5, 2, delivery_warehouse_id, delivery_warehouse_id)

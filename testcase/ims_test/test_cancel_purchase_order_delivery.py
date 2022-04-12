@@ -14,7 +14,8 @@ class TestCancelPurchaseOrderDelivery(object):
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5)]
         self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
-        ims.delete_qualified_inventory(self.sale_sku_suite_dict.keys())
+        sale_sku_list = [i for i in self.sale_sku_suite_dict]
+        IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = delivery_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
@@ -28,11 +29,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims.get_qualified_inventory(
+            after_create_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims.get_unqualified_inventory(
+            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -41,10 +42,10 @@ class TestCancelPurchaseOrderDelivery(object):
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory is None
+            assert current_unqualified_inventory  == {}
 
             cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = ims.get_qualified_inventory(
+            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -65,7 +66,8 @@ class TestCancelPurchaseOrderDelivery(object):
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5)]
         self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
-        ims.delete_qualified_inventory(self.sale_sku_suite_dict.keys())
+        sale_sku_list = [i for i in self.sale_sku_suite_dict]
+        IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = exchange_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
@@ -79,11 +81,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims.get_qualified_inventory(
+            after_create_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims.get_unqualified_inventory(
+            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -92,10 +94,10 @@ class TestCancelPurchaseOrderDelivery(object):
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory is None
+            assert current_unqualified_inventory  == {}
 
             cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = ims.get_qualified_inventory(
+            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -116,7 +118,8 @@ class TestCancelPurchaseOrderDelivery(object):
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5)]
         self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
-        ims.delete_qualified_inventory(self.sale_sku_suite_dict.keys())
+        sale_sku_list = [i for i in self.sale_sku_suite_dict]
+        IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = stock_warehouse_id
         to_warehouse_id = ''
 
@@ -130,11 +133,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims.get_qualified_inventory(
+            after_create_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims.get_unqualified_inventory(
+            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -143,10 +146,10 @@ class TestCancelPurchaseOrderDelivery(object):
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory is None
+            assert current_unqualified_inventory  == {}
 
             cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = ims.get_qualified_inventory(
+            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -167,7 +170,8 @@ class TestCancelPurchaseOrderDelivery(object):
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4)]
         self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
-        ims.delete_qualified_inventory(self.sale_sku_suite_dict.keys())
+        sale_sku_list = [i for i in self.sale_sku_suite_dict]
+        IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = delivery_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
@@ -181,11 +185,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims.get_qualified_inventory(
+            after_create_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims.get_unqualified_inventory(
+            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -194,10 +198,10 @@ class TestCancelPurchaseOrderDelivery(object):
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory is None
+            assert current_unqualified_inventory  == {}
 
             cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = ims.get_qualified_inventory(
+            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -218,7 +222,8 @@ class TestCancelPurchaseOrderDelivery(object):
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4)]
         self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
-        ims.delete_qualified_inventory(self.sale_sku_suite_dict.keys())
+        sale_sku_list = [i for i in self.sale_sku_suite_dict]
+        IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = exchange_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
@@ -232,11 +237,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims.get_qualified_inventory(
+            after_create_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims.get_unqualified_inventory(
+            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -245,10 +250,10 @@ class TestCancelPurchaseOrderDelivery(object):
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory is None
+            assert current_unqualified_inventory  == {}
 
             cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = ims.get_qualified_inventory(
+            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -269,7 +274,8 @@ class TestCancelPurchaseOrderDelivery(object):
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4)]
         self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
-        ims.delete_qualified_inventory(self.sale_sku_suite_dict.keys())
+        sale_sku_list = [i for i in self.sale_sku_suite_dict]
+        IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = stock_warehouse_id
         to_warehouse_id = ''
 
@@ -283,11 +289,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims.get_qualified_inventory(
+            after_create_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims.get_unqualified_inventory(
+            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -296,10 +302,10 @@ class TestCancelPurchaseOrderDelivery(object):
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory is None
+            assert current_unqualified_inventory  == {}
 
             cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = ims.get_qualified_inventory(
+            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)

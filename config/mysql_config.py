@@ -19,7 +19,7 @@ mysql_config = {
     },
     'test_160': {
         'user': 'erp',
-        'passwd': 'sd)*(YSHDG;l)D_FKds:D#&y}',
+        'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
         'host': '10.0.0.127',
         'port': 3306
     },

@@ -16,7 +16,7 @@ class TestDeliveryPick(object):
         # 这里踩过坑，单据号不能放在setupclass里面，否则每次单据号都一样，会触发幂等，导致结果不正确
         self.delivery_code = 'CK' + str(int(time.time()))
         # 清掉测试的销售sku库存数据
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         time.sleep(1)
         # 采购入库生成销售sku现货库存
         ims.add_qualified_stock_by_other_in(
@@ -27,7 +27,7 @@ class TestDeliveryPick(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+        self.expect_qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
 
     # @pytest.mark.skip(reason='test')
     def test_1_completely_pick(self):
@@ -82,7 +82,7 @@ class TestDeliveryPick(object):
             self.warehouse_id
         )
 
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -152,7 +152,7 @@ class TestDeliveryPick(object):
             self.warehouse_id
         )
 
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id

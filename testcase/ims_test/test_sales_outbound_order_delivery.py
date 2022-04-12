@@ -22,7 +22,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -30,7 +30,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -41,7 +41,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -67,7 +67,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -92,7 +92,7 @@ class TestSalesOutboundOrderDelivery(object):
         assigned_sku_list = assign_location_stock_res['data'][0]['wareSkuList']
 
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -130,7 +130,7 @@ class TestSalesOutboundOrderDelivery(object):
                 }
             )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -146,7 +146,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -178,7 +178,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -186,7 +186,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -197,7 +197,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -223,7 +223,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -248,7 +248,7 @@ class TestSalesOutboundOrderDelivery(object):
         assigned_sku_list = assign_location_stock_res['data'][0]['wareSkuList']
 
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -286,7 +286,7 @@ class TestSalesOutboundOrderDelivery(object):
                 }
             )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -302,7 +302,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -334,7 +334,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -342,7 +342,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -353,7 +353,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -379,7 +379,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -404,7 +404,7 @@ class TestSalesOutboundOrderDelivery(object):
         assigned_sku_list = assign_location_stock_res['data'][0]['wareSkuList']
 
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -442,7 +442,7 @@ class TestSalesOutboundOrderDelivery(object):
                 }
             )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -458,7 +458,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -490,7 +490,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -498,7 +498,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -509,7 +509,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -538,7 +538,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -563,7 +563,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -604,7 +604,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -620,7 +620,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -653,7 +653,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -661,7 +661,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -672,7 +672,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -702,7 +702,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -727,7 +727,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -768,7 +768,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -784,7 +784,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -817,7 +817,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -825,7 +825,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -836,7 +836,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -866,7 +866,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -891,7 +891,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -932,7 +932,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -948,7 +948,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -982,7 +982,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -990,7 +990,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -1001,7 +1001,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1031,7 +1031,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1056,7 +1056,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1097,7 +1097,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1113,7 +1113,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1145,7 +1145,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -1153,7 +1153,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -1164,7 +1164,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1193,7 +1193,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1218,7 +1218,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1259,7 +1259,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1275,7 +1275,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1307,7 +1307,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -1315,7 +1315,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -1326,7 +1326,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1355,7 +1355,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1380,7 +1380,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1421,7 +1421,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1437,7 +1437,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1469,7 +1469,7 @@ class TestSalesOutboundOrderDelivery(object):
         sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims.qualified_goods_other_in(
             origin_inventory,
@@ -1477,7 +1477,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims.get_qualified_inventory(
+        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -1488,7 +1488,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims.get_qualified_inventory(
+        after_oms_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1517,7 +1517,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims.get_qualified_inventory(
+        after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1542,7 +1542,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims.get_qualified_inventory(
+        after_assign_stock_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1583,7 +1583,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims.get_qualified_inventory(
+        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1599,7 +1599,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims.get_qualified_inventory(
+        after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id

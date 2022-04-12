@@ -27,3 +27,7 @@
     2.在controller文件夹下增加或需改系统接口控制器，添加对应的接口调用逻辑
     3.在testcase或script中编写对应的controller引用，实现对应测试用例或脚本功能
     
+
+model生成：
+    接入了ORM框架peewee，使用下面命令将现有数据库表反向生成model
+    python -m pwiz -e mysql -H 192.168.0.111 -p 8080 -u root -P usersystem > usersystem_model.py

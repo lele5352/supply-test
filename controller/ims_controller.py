@@ -5,6 +5,7 @@ from utils.mysql_handler import MysqlHandler
 
 from config.api_config.ims_api_config import ims_api_config
 from config.sys_config import env_config
+from db_operator.ims_db_operate import IMSDBOperator
 
 
 class ImsController(RequestHandler):
@@ -12,241 +13,6 @@ class ImsController(RequestHandler):
         self.prefix = env_config.get('ims_service_prefix')
         self.service_headers = {"serviceName": "ec-warehouse-delivery-service"}
         super().__init__(self.prefix, self.service_headers)
-        self.db = MysqlHandler(**env_config.get('mysql_info_ims'))
-
-    def delete_qualified_inventory(self, sale_sku_codes):
-        """
-        删除销售sku对应的全部库存数据，包括中央库存、销售商品总库存、现货库存、仓库商品总库存、库位库存
-
-        :param list sale_sku_codes: 销售sku编码
-        """
-        for sale_sku_code in sale_sku_codes:
-            del_central_inventory_sql = "delete from central_inventory where goods_sku_code='%s';"
-            del_goods_inventory_sql = "delete from goods_inventory where goods_sku_code='%s';"
-            del_wares_inventory_sql = "delete from wares_inventory where goods_sku_code='%s';"
-            sql_list = [del_wares_inventory_sql, del_goods_inventory_sql, del_central_inventory_sql]
-            for sql in sql_list:
-                self.db.execute(sql % sale_sku_code)
-
-    def delete_unqualified_inventory(self, sale_sku_codes):
-        """
-        删除销售sku对应的全部次品库存数据
-
-        :param list sale_sku_codes: 销售sku编码
-        """
-        for sale_sku_code in sale_sku_codes:
-            del_sql = """DELETE 
-                        FROM
-                            nogood_wares_inventory 
-                        WHERE
-                            goods_sku_code = '%s' ;""" % sale_sku_code
-            self.db.execute(del_sql)
-
-    # 获取销售商品bom比例
-    def db_get_bom_detail(self, sale_sku_code, bom_version):
-        """
-        返回销售sku的bom版本明细，格式如： {"ware_sku_code1":x,"ware_sku_code2":y,...}
-
-        :param sale_sku_code: 销售sku
-        :param bom_version: bom版本
-        """
-        # 最终要返回的数据
-        sale_sku_bom_detail = dict()
-
-        # 获取bom明细数据，组装成{"仓库sku1":数量1,"仓库sku2":数量2}格式
-        get_bom_detail_sql = """
-                   SELECT
-                       ware_sku_code,bom_qty 
-                   FROM
-                       bom_detail 
-                   WHERE
-                       goods_sku_code = '%s' 
-                       and bom_version = '%s'
-                       order by id;
-                   """ % (sale_sku_code, bom_version)
-        bom_detail_data = self.db.get_all(get_bom_detail_sql)
-
-        for ware_sku_detail in bom_detail_data:
-            sale_sku_bom_detail.update(
-                {
-                    ware_sku_detail['ware_sku_code']: ware_sku_detail['bom_qty']
-                })
-        return sale_sku_bom_detail
-
-    def db_get_bom_info_by_ware_sku(self, ware_sku_code):
-        """
-        返回仓库sku的bom版本和对应的销售sku
-
-        :param ware_sku_code: 销售sku
-        """
-        # 获取bom明细数据，组装成{"仓库sku1":数量1,"仓库sku2":数量2}格式
-        sql = """
-               SELECT
-                   goods_sku_code,bom_version,bom_qty 
-               FROM
-                   bom_detail 
-               WHERE
-                   ware_sku_code  = '%s' ;""" % ware_sku_code
-        sale_sku_and_bom_data = self.db.get_one(sql)
-        return sale_sku_and_bom_data
-
-    # 销售商品仓库总库存获取
-    def get_central_inventory(self, sale_sku_code, warehouse_id, to_warehouse_id) -> dict or None:
-        """
-        获取销售商品总库存
-
-        :param string sale_sku_code: 销售sku编码
-        :param int warehouse_id: 仓库id
-        :param any to_warehouse_id: 目的仓库id
-        """
-        temp_sql = 'warehouse_id=%s' % to_warehouse_id if to_warehouse_id else 'warehouse_id=%s' % warehouse_id
-        sql = """
-        SELECT
-            goods_sku_code,warehouse_id,stock,block,remain 
-        FROM
-            central_inventory 
-        WHERE
-            goods_sku_code = '%s' 
-            AND %s""" % (
-            sale_sku_code, temp_sql)
-        central_inventory = self.db.get_one(sql)
-        if not central_inventory:
-            return {
-                "central_stock": 0,
-                "central_block": 0,
-                "central_remain": 0
-            }
-        return {
-            "central_stock": central_inventory['stock'],
-            "central_block": central_inventory['block'],
-            "central_remain": central_inventory['remain'],
-        }
-
-    # 销售商品分类库存获取
-    def get_goods_inventory(self, sale_sku_code, warehouse_id, to_warehouse_id):
-        """
-        获取销售商品库存
-
-        :param string sale_sku_code: 销售sku编码
-        :param int warehouse_id: 仓库id
-        :param any to_warehouse_id: 目的仓库id
-        """
-        sql = """
-                SELECT 
-                    goods_sku_code,current_warehouse_id,type,stock,remain 
-                FROM
-                    goods_inventory 
-                WHERE
-                    goods_sku_code = '%s' 
-                    AND current_warehouse_id = %s 
-                    AND target_warehouse_id = %s
-                """ % (sale_sku_code, warehouse_id, to_warehouse_id if to_warehouse_id else 0)
-        goods_inventory = self.db.get_all(sql)
-        goods_inventory_dict = {
-            'purchase_on_way_stock': 0,
-            'purchase_on_way_remain': 0,
-            'transfer_on_way_stock': 0,
-            'transfer_on_way_remain': 0,
-            'spot_goods_stock': 0,
-            'spot_goods_remain': 0
-        }
-        if not goods_inventory:
-            return goods_inventory_dict
-
-        for inventory_data in goods_inventory:
-            # 销售商品采购在途库存
-            if inventory_data['type'] == 1:
-                goods_inventory_dict.update({
-                    'purchase_on_way_stock': inventory_data['stock'],
-                    'purchase_on_way_remain': inventory_data['remain']
-                })
-            elif inventory_data['type'] == 2:
-                goods_inventory_dict.update({
-                    'transfer_on_way_stock': inventory_data['stock'],
-                    'transfer_on_way_remain': inventory_data['remain']
-                })
-            elif inventory_data['type'] == 3:
-                goods_inventory_dict.update({
-                    'spot_goods_stock': inventory_data['stock'],
-                    'spot_goods_remain': inventory_data['remain']
-                })
-        return goods_inventory_dict
-
-    # 获取仓库商品总库存
-    def get_wares_inventory(self, sale_sku_code, warehouse_id, to_warehouse_id, bom_version=''):
-        if not bom_version:
-            sql = """
-                   SELECT
-                       ware_sku_code,type,storage_location_id as location_id,stock,block 
-                   FROM
-                       wares_inventory 
-                   WHERE
-                       goods_sku_code = "%s"
-                       AND warehouse_id = %s
-                       AND target_warehouse_id = %s
-                   ORDER BY
-                       ware_sku_code;
-                   """ % (sale_sku_code, warehouse_id, to_warehouse_id if to_warehouse_id else 0)
-        else:
-            sql = """
-               SELECT
-                   ware_sku_code,type,storage_location_id as location_id,stock,block 
-               FROM
-                   wares_inventory 
-               WHERE
-                   goods_sku_code = "%s"
-                   AND warehouse_id = %s
-                   AND target_warehouse_id = %s
-                   AND bom_version = '%s'
-               ORDER BY
-                   ware_sku_code;
-               """ % (sale_sku_code, warehouse_id, to_warehouse_id if to_warehouse_id else 0, bom_version)
-        ware_inventory = self.db.get_all(sql)
-        formatted_ware_sku_inventory = dict()
-        for data in ware_inventory:
-            if formatted_ware_sku_inventory.get(data['ware_sku_code']):
-                if data['type'] == 0:
-                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
-                        {"warehouse_total": {'stock': data['stock'], 'block': data['block']}}
-                    )
-                elif data['type'] == 1:
-                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
-                        {"purchase_on_way": {'stock': data['stock'], 'block': data['block']}}
-                    )
-                elif data['type'] == 2:
-                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
-                        {"transfer_on_way": {'stock': data['stock'], 'block': data['block']}}
-                    )
-                elif data['type'] == 3:
-                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
-                        {"location_total": {'stock': data['stock'], 'block': data['block']}}
-                    )
-                elif data['type'] == 4:
-                    formatted_ware_sku_inventory[data['ware_sku_code']].update(
-                        {data['location_id']: {'stock': data['stock'], 'block': data['block']}}
-                    )
-            else:
-                if data['type'] == 0:
-                    formatted_ware_sku_inventory.update(
-                        {data['ware_sku_code']: {"warehouse_total": {'stock': data['stock'], 'block': data['block']}}}
-                    )
-                elif data['type'] == 1:
-                    formatted_ware_sku_inventory.update(
-                        {data['ware_sku_code']: {"purchase_on_way": {'stock': data['stock'], 'block': data['block']}}}
-                    )
-                elif data['type'] == 2:
-                    formatted_ware_sku_inventory.update(
-                        {data['ware_sku_code']: {"transfer_on_way": {'stock': data['stock'], 'block': data['block']}}}
-                    )
-                elif data['type'] == 3:
-                    formatted_ware_sku_inventory.update(
-                        {data['ware_sku_code']: {"location_total": {'stock': data['stock'], 'block': data['block']}}}
-                    )
-                elif data['type'] == 4:
-                    formatted_ware_sku_inventory.update(
-                        {data['ware_sku_code']: {data["location_id"]: {'stock': data['stock'], 'block': data['block']}}}
-                    )
-        return formatted_ware_sku_inventory
 
     # 获取仓库商品总库存
     def get_wares_inventory_by_target_warehouse_id(self, sale_sku_code, to_warehouse_id):
@@ -359,7 +125,7 @@ class ImsController(RequestHandler):
         sale_sku_dict = dict()
         result_sku_suites = dict()
         for ware_sku, qty in ware_sku_qty_list:
-            sale_sku_info = self.db_get_bom_info_by_ware_sku(ware_sku)
+            sale_sku_info = IMSDBOperator.query_bom_detail_by_ware_sku_code(ware_sku)
             if sale_sku_info['goods_sku_code'] not in sale_sku_dict:
                 sale_sku_dict.update({
                     sale_sku_info['goods_sku_code']: {
@@ -382,7 +148,7 @@ class ImsController(RequestHandler):
                 sale_sku_dict[sale_sku_info['goods_sku_code']][sale_sku_info['bom_version']][ware_sku] += qty
         for sale_sku in sale_sku_dict:
             for bom in sale_sku_dict[sale_sku]:
-                bom_detail = self.db_get_bom_detail(sale_sku, bom)
+                bom_detail = IMSDBOperator.query_bom_detail(sale_sku, bom)
                 if len(sale_sku_dict[sale_sku][bom]) < len(bom_detail):
                     result_sku_suites.update(
                         {sale_sku: 0}
@@ -390,7 +156,7 @@ class ImsController(RequestHandler):
                 else:
                     result_suites = list()
                     for ware_sku, qty in sale_sku_dict[sale_sku][bom].items():
-                        suites = qty // self.db_get_bom_detail(sale_sku, bom)[ware_sku]
+                        suites = qty // IMSDBOperator.query_bom_detail(sale_sku, bom)[ware_sku]
                         result_suites.append(suites)
                     min_suites = min(result_suites)
                     if result_sku_suites.get(sale_sku):
@@ -412,16 +178,12 @@ class ImsController(RequestHandler):
                 'central_stock': sale_sku_suites_dict[sale_sku],
                 'central_block': 0,
                 'central_remain': sale_sku_suites_dict[sale_sku],
-                'purchase_on_way_stock': 0,
-                'purchase_on_way_remain': 0,
-                'transfer_on_way_stock': 0,
-                'transfer_on_way_remain': 0,
                 'spot_goods_stock': sale_sku_suites_dict[sale_sku],
                 'spot_goods_remain': sale_sku_suites_dict[sale_sku]
             })
             # 构造库位期望库存，更新到temp_ware_dict中
             for (ware_sku, qty), sj_location_id in zip(ware_sku_qty_list, location_list):
-                if self.db_get_bom_info_by_ware_sku(ware_sku)['goods_sku_code'] != sale_sku:
+                if IMSDBOperator.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
                     continue
                 if expect_qualified_inventory.get(ware_sku):
                     if expect_qualified_inventory[ware_sku].get(sj_location_id):
@@ -463,7 +225,7 @@ class ImsController(RequestHandler):
             # 构造库位期望库存，更新到temp_ware_dict中
             expect_unqualified_inventory = dict()
             for (ware_sku, qty), cp_location_id in zip(ware_sku_qty_list, location_list):
-                if self.db_get_bom_info_by_ware_sku(ware_sku)['goods_sku_code'] != sale_sku:
+                if IMSDBOperator.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
                     continue
                 if expect_unqualified_inventory.get(ware_sku):
                     if expect_unqualified_inventory[ware_sku].get(cp_location_id):
@@ -504,14 +266,12 @@ class ImsController(RequestHandler):
                 'central_remain': sale_sku_suites_dict[sale_sku],
                 'purchase_on_way_stock': 0,
                 'purchase_on_way_remain': 0,
-                'transfer_on_way_stock': 0,
-                'transfer_on_way_remain': 0,
                 'spot_goods_stock': sale_sku_suites_dict[sale_sku],
                 'spot_goods_remain': sale_sku_suites_dict[sale_sku]
             })
             # 构造库位期望库存，更新到temp_ware_dict中
             for (ware_sku, qty), sj_location_id in zip(ware_sku_qty_list, location_list):
-                if self.db_get_bom_info_by_ware_sku(ware_sku)['goods_sku_code'] != sale_sku:
+                if IMSDBOperator.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
                     continue
                 if expect_qualified_inventory.get(ware_sku):
                     if expect_qualified_inventory[ware_sku].get(sj_location_id):
@@ -562,18 +322,15 @@ class ImsController(RequestHandler):
             # 更新销售商品总库存
             expect_qualified_inventory.update({
                 'central_stock': sale_sku_suites_dict[sale_sku],
-                'central_block': 0,
                 'central_remain': sale_sku_suites_dict[sale_sku],
+                'central_block': 0,
                 'purchase_on_way_stock': sale_sku_suites_dict[sale_sku],
-                'purchase_on_way_remain': sale_sku_suites_dict[sale_sku],
-                'transfer_on_way_stock': 0,
-                'transfer_on_way_remain': 0,
-                'spot_goods_stock': 0,
-                'spot_goods_remain': 0
+                'purchase_on_way_remain': sale_sku_suites_dict[sale_sku]
+
             })
             # 构造库位期望库存，更新到temp_ware_dict中
             for ware_sku, qty in ware_sku_qty_list:
-                if self.db_get_bom_info_by_ware_sku(ware_sku)['goods_sku_code'] != sale_sku:
+                if IMSDBOperator.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
                     continue
                 if expect_qualified_inventory.get(ware_sku):
                     if expect_qualified_inventory[ware_sku].get('warehouse_total'):
@@ -600,71 +357,6 @@ class ImsController(RequestHandler):
                 sale_sku: expect_qualified_inventory
             })
         return result_dict
-
-    def get_qualified_inventory(self, sale_sku_code, warehouse_id, to_warehouse_id, bom_version=''):
-        central_inventory = self.get_central_inventory(sale_sku_code, warehouse_id, to_warehouse_id)
-        goods_inventory = self.get_goods_inventory(sale_sku_code, warehouse_id, to_warehouse_id)
-        wares_inventory = self.get_wares_inventory(sale_sku_code, warehouse_id, to_warehouse_id, bom_version)
-
-        qualified_inventory = dict()
-
-        if central_inventory:
-            qualified_inventory.update(central_inventory)
-        if goods_inventory:
-            qualified_inventory.update(goods_inventory)
-        if wares_inventory:
-            qualified_inventory.update(wares_inventory)
-        return qualified_inventory
-
-    # 获取仓库次品库存
-    def get_unqualified_inventory(self, sale_sku_code, warehouse_id, bom_version=''):
-        if not bom_version:
-            sql = """
-                    SELECT
-                        ware_sku_code,storage_location_id,stock,block 
-                    FROM
-                        nogood_wares_inventory 
-                    WHERE
-                        warehouse_id = %s
-                        AND goods_sku_code = '%s';
-                """ % (warehouse_id, sale_sku_code)
-        else:
-            sql = """
-                    SELECT
-                        ware_sku_code,storage_location_id,stock,block 
-                    FROM
-                        nogood_wares_inventory 
-                    WHERE
-                        warehouse_id = %s
-                        AND goods_sku_code = '%s'
-                        AND bom_version = '%s';
-                    """ % (warehouse_id, sale_sku_code, bom_version)
-        unqualified_inventory = self.db.get_all(sql)
-        # print(unqualified_inventory)
-        if not unqualified_inventory:
-            return
-        temp_ware_sku_inventory = dict()
-        for data in unqualified_inventory:
-            if temp_ware_sku_inventory.get(data['ware_sku_code']):
-                if data['storage_location_id'] == 0:
-                    temp_ware_sku_inventory[data['ware_sku_code']].update(
-                        {"total": {'stock': data['stock'], 'block': data['block']}}
-                    )
-                elif data['storage_location_id'] > 0:
-                    temp_ware_sku_inventory[data['ware_sku_code']].update(
-                        {data['storage_location_id']: {'stock': data['stock'], 'block': data['block']}}
-                    )
-            else:
-                if data['storage_location_id'] == 0:
-                    temp_ware_sku_inventory.update({
-                        data['ware_sku_code']: {"total": {'stock': data['stock'], 'block': data['block']}}
-                    })
-                elif data['storage_location_id'] > 0:
-                    temp_ware_sku_inventory.update({
-                        data['ware_sku_code']: {
-                            data['storage_location_id']: {'stock': data['stock'], 'block': data['block']}}
-                    })
-        return temp_ware_sku_inventory
 
     # OMS下单预占中央库存、销售商品总库存
     def oms_order_block(self, sale_sku_info, warehouse_id):
@@ -725,7 +417,7 @@ class ImsController(RequestHandler):
         # 构造 销售sku+bom的唯一键，用来下面聚合同个销售sku同个bom的仓库sku
         temp_list = list()
         for i in ware_sku_qty_list:
-            bom_info = self.db_get_bom_info_by_ware_sku(i[0])
+            bom_info = IMSDBOperator.query_bom_detail_by_ware_sku_code(i[0])
             if bom_info not in temp_list:
                 temp_list.append(bom_info)
 
@@ -733,7 +425,7 @@ class ImsController(RequestHandler):
         for temp in temp_list:
             ware_sku_list = list()
             for (ware_sku, qty), location_id in zip(ware_sku_qty_list, sj_location_ids):
-                sale_sku_bom = self.db_get_bom_info_by_ware_sku(ware_sku)
+                sale_sku_bom = IMSDBOperator.query_bom_detail_by_ware_sku_code(ware_sku)
                 if temp == sale_sku_bom:
                     ware_sku_list.append(
                         {
@@ -1034,7 +726,7 @@ class ImsController(RequestHandler):
 
     def add_unqualified_stock_by_other_in(self, sale_sku_code, bom_version, add_stock_count, cp_location_ids,
                                           warehouse_id, to_warehouse_id):
-        details = self.db_get_bom_detail(sale_sku_code, bom_version)
+        details = IMSDBOperator.query_bom_detail(sale_sku_code, bom_version)
         ware_sku_qty_list = list()
         for ware_sku, qty in details.items():
             ware_sku_qty_list.append((ware_sku, qty * add_stock_count))
@@ -1044,7 +736,7 @@ class ImsController(RequestHandler):
 
     def add_qualified_stock_by_other_in(self, sale_sku_code, bom_version, add_stock_count, location_ids, warehouse_id,
                                         to_warehouse_id):
-        details = self.db_get_bom_detail(sale_sku_code, bom_version)
+        details = IMSDBOperator.query_bom_detail(sale_sku_code, bom_version)
         ware_sku_qty_list = list()
         for ware_sku, qty in details.items():
             ware_sku_qty_list.append((ware_sku, qty * add_stock_count))
@@ -1082,8 +774,8 @@ class ImsController(RequestHandler):
 
 if __name__ == '__main__':
     ims = ImsController()
-    ims.delete_qualified_inventory(['63203684930'])
-    # ims.add_stock_by_other_in('63203684930', 'A', 10, [1496,1505], 513, 513)
+    IMSDBOperator.delete_qualified_inventory(['63203684930'])
+    ims.add_qualified_stock_by_other_in('63203684930', 'A', 10, [1496, 1505], 513, 513)
     # ims.qualified_goods_other_in([('J06ZWJ000252WG', 1)], [2451], 539, 539)
     # data = ims.get_central_inventory('63203684930', 520, 520)
     # data2 = ims.get_goods_inventory('63203684930', 520, 520)
@@ -1091,7 +783,7 @@ if __name__ == '__main__':
     # print(data)
     # print(data2)
     # print(data3)
-    # print(ims.get_unqualified_inventory('63203684930', 520, 520))
+    # print(IMSDBOperator.query_unqualified_inventory('63203684930', 520, 520))
     # print(ims.get_expect_inventory([('63203684930A01', 1), ('63203684930A02', 4), ('63203684930A02', 1)]))
-    # print(ims.get_qualified_inventory('63203684930', 513, 513))
-    # print(ims.get_unqualified_inventory('16338527895', 513, 513))
+    # print(IMSDBOperator.query_qualified_inventory('63203684930', 513, 513))
+    # print(IMSDBOperator.query_unqualified_inventory('16338527895', 513, 513))

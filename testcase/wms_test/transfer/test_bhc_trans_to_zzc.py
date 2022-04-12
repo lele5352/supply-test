@@ -19,7 +19,7 @@ class TestBHCTransToZZC:
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3)]
         transfer_demand_goods_list = [('BP63203684930A01', 1)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -29,8 +29,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -170,8 +170,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -180,7 +180,7 @@ class TestBHCTransToZZC:
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         transfer_demand_goods_list = [('BP63203684930A01', 1)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -190,8 +190,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -331,8 +331,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -341,7 +341,7 @@ class TestBHCTransToZZC:
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         transfer_demand_goods_list = [('BP63203684930A01', 2)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -351,8 +351,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -492,8 +492,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -503,7 +503,7 @@ class TestBHCTransToZZC:
                             ('63203684930B01', 2), ('63203684930B02', 10)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -513,8 +513,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -654,8 +654,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -665,7 +665,7 @@ class TestBHCTransToZZC:
                             ('63203684930B02', 5)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 1)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -675,8 +675,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -816,8 +816,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -827,7 +827,7 @@ class TestBHCTransToZZC:
                             ('63203684930B02', 10)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 2)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -837,8 +837,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -978,8 +978,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -988,7 +988,7 @@ class TestBHCTransToZZC:
         origin_inventory = [('63203684930A01', 1), ('63203684930B01', 1), ('63203684930B02', 5)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('63203684930', 1)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -998,8 +998,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1139,8 +1139,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1149,7 +1149,7 @@ class TestBHCTransToZZC:
         origin_inventory = [('63203684930A01', 3), ('63203684930A02', 6), ('63203684930A02', 9)]
         transfer_demand_goods_list = [('63203684930', 3)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -1159,8 +1159,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1300,8 +1300,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1311,7 +1311,7 @@ class TestBHCTransToZZC:
                             ('63203684930B02', 5)]
         transfer_demand_goods_list = [('63203684930', 3)]
         sale_sku = '63203684930'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
@@ -1321,8 +1321,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1462,8 +1462,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1472,7 +1472,7 @@ class TestBHCTransToZZC:
         origin_inventory = [('53170041592A01', 3), ]
         transfer_demand_goods_list = [('53170041592', 2), ('BP53170041592A01', 1)]
         sale_sku = '53170041592'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = [wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
@@ -1482,8 +1482,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1623,8 +1623,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1633,7 +1633,7 @@ class TestBHCTransToZZC:
         origin_inventory = [('53170041592A01', 3), ]
         transfer_demand_goods_list = [('53170041592', 3)]
         sale_sku = '53170041592'
-        ims.delete_qualified_inventory([sale_sku])
+        IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = [wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
@@ -1643,8 +1643,8 @@ class TestBHCTransToZZC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1784,8 +1784,8 @@ class TestBHCTransToZZC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims.get_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims.get_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 

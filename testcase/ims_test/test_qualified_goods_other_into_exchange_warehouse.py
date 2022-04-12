@@ -20,20 +20,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('16338527895A01', 1)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
             assert expect_qualified_inventory == qualified_inventory
 
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            assert unqualified_inventory is None
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            assert unqualified_inventory  == {}
 
     def test_2_up_shelf_many_single_goods_to_one_location(self):
         """
@@ -46,20 +46,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('16338527895A01', 2), ('16338527895A01', 3)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
             assert expect_qualified_inventory == qualified_inventory
 
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            assert unqualified_inventory is None
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            assert unqualified_inventory  == {}
 
     def test_3_up_shelf_many_single_goods_to_several_locations(self):
         """
@@ -72,20 +72,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('16338527895A01', 2), ('16338527895A01', 3)]
         sj_location_ids = wms.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
             assert expect_qualified_inventory == qualified_inventory
 
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            assert unqualified_inventory is None
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            assert unqualified_inventory  == {}
 
     def test_4_up_shelf_one_multiple_goods_to_one_location(self):
         """
@@ -98,20 +98,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('63203684930A01', 1)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
             assert expect_qualified_inventory == qualified_inventory
 
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            assert unqualified_inventory is None
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            assert unqualified_inventory  == {}
 
     def test_5_up_shelf_many_multiple_goods_to_one_location(self):
         """
@@ -124,20 +124,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('63203684930A01', 2), ('63203684930A01', 3)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
             assert expect_qualified_inventory == qualified_inventory
 
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            assert unqualified_inventory is None
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            assert unqualified_inventory  == {}
 
     def test_6_up_shelf_many_multiple_goods_to_several_locations(self):
         """
@@ -150,20 +150,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('63203684930A01', 2), ('63203684930A01', 3)]
         sj_location_ids = wms.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
             assert expect_qualified_inventory == qualified_inventory
 
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            assert unqualified_inventory is None
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            assert unqualified_inventory  == {}
 
     def test_7_up_shelf_different_single_goods_to_one_location(self):
         """
@@ -177,20 +177,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
                              ('20537964151A01', 2)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
             assert expect_qualified_inventory == qualified_inventory
 
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            assert unqualified_inventory is None
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            assert unqualified_inventory  == {}
 
     def test_8_up_shelf_different_single_goods_to_several_locations(self):
         """
@@ -204,20 +204,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
                              ('20537964151A01', 2)]
         sj_location_ids = wms.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
             assert expect_qualified_inventory == qualified_inventory
 
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            assert unqualified_inventory is None
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            assert unqualified_inventory  == {}
 
     def test_9_up_shelf_multiple_goods_less_than_one_set_to_one_location(self):
         """
@@ -230,8 +230,8 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
@@ -239,12 +239,12 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         for sale_sku in sale_skus:
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
-            expect_unqualified_inventory = None
+            
 
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_qualified_inventory == qualified_inventory
-            assert expect_unqualified_inventory == unqualified_inventory
+            assert unqualified_inventory == {}
 
     def test_10_up_shelf_multiple_goods_one_set_to_one_location(self):
         """
@@ -257,20 +257,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
-            expect_unqualified_inventory = None
+            
 
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_qualified_inventory == qualified_inventory
-            assert expect_unqualified_inventory == unqualified_inventory
+            assert unqualified_inventory == {}
 
     def test_11_up_shelf_multiple_goods_less_than_two_set_to_one_location(self):
         """
@@ -283,20 +283,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('63203684930A01', 2), ('63203684930A02', 9)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
-            expect_unqualified_inventory = None
+            
 
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_qualified_inventory == qualified_inventory
-            assert expect_unqualified_inventory == unqualified_inventory
+            assert unqualified_inventory == {}
 
     def test_12_up_shelf_multiple_goods_two_set_to_one_location(self):
         """
@@ -309,19 +309,19 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('63203684930A01', 2), ('63203684930A02', 10)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
-            expect_unqualified_inventory = None
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_qualified_inventory == qualified_inventory
-            assert expect_unqualified_inventory == unqualified_inventory
+            assert unqualified_inventory == {}
 
     def test_13_up_shelf_different_bom_multiple_goods_two_set_to_one_location(self):
         """
@@ -337,20 +337,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
                              ('63203684930B02', 5)]
         sj_location_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
-            expect_unqualified_inventory = None
+            
 
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_qualified_inventory == qualified_inventory
-            assert expect_unqualified_inventory == unqualified_inventory
+            assert unqualified_inventory == {}
 
     def test_14_up_shelf_different_bom_multiple_goods_two_set_to_several_locations(self):
         """
@@ -364,20 +364,20 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
                              ('63203684930B02', 5)]
         sj_location_ids = wms.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims.qualified_goods_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
                                            self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
-            expect_unqualified_inventory = None
+            
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
 
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_qualified_inventory == qualified_inventory
-            assert expect_unqualified_inventory == unqualified_inventory
+            assert unqualified_inventory == {}
 
     def test_15_up_shelf_multiple_goods_one_set_to_several_locations_by_times(self):
         """
@@ -389,8 +389,8 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4), ('63203684930A02', 1)]
         sj_location_ids = wms.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
-        ims.delete_qualified_inventory(sale_skus)
-        ims.delete_unqualified_inventory(sale_skus)
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+        IMSDBOperator.delete_unqualified_inventory(sale_skus)
 
         # 构造入库仓库sku明细数据
         for (ware_sku, qty), sj_location_id in zip(ware_sku_qty_list, sj_location_ids):
@@ -402,10 +402,10 @@ class TestQualifiedGoodsOtherIntoExchangeWarehouse(object):
         for sale_sku in sale_skus:
             expect_qualified_inventory = ims.get_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
-            qualified_inventory = ims.get_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims.get_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            unqualified_inventory = IMSDBOperator.query_unqualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_qualified_inventory == qualified_inventory
-            assert unqualified_inventory is None
+            assert unqualified_inventory  == {}
 
 if __name__ == '__main__':
     pytest.main()
