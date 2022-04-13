@@ -15,7 +15,7 @@ class TestCancelOtherOutCP(object):
         """
         sale_sku = '63203684930'
 
-        cp_kw_id = wms_logics.db_get_kw(1, 6, 1, self.warehouse_id, self.to_warehouse_id)
+        cp_kw_id = wms_logics.get_kw(1, 6, 1, self.warehouse_id, self.to_warehouse_id)
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A01', 1), ('63203684930A02', 5), ('63203684930A02', 5)]
         cp_kw_ids = [cp_kw_id for i in range(len(ware_sku_qty_list))]
 
@@ -52,7 +52,7 @@ class TestCancelOtherOutCP(object):
         """
         sale_sku = '63203684930'
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A01', 1), ('63203684930A02', 5), ('63203684930A02', 5)]
-        cp_kw_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_kw_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_unqualified_inventory([sale_sku])
         ims_request.cp_other_in(ware_sku_qty_list, cp_kw_ids, self.warehouse_id, self.to_warehouse_id)
@@ -87,7 +87,7 @@ class TestCancelOtherOutCP(object):
         """
         sale_sku = '63203684930'
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A01', 1), ('63203684930A02', 5), ('63203684930A02', 5)]
-        cp_kw_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_kw_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_unqualified_inventory([sale_sku])
         ims_request.cp_other_in(ware_sku_qty_list, cp_kw_ids, self.warehouse_id, self.to_warehouse_id)

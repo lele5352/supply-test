@@ -9,8 +9,8 @@ class TestFHCPurchaseIn(object):
         self.to_warehouse_id = delivery_warehouse_id
         self.ware_sku_qty_list = [('67330337129G01', 1), ('67330337129G02', 2), ('67330337129G03', 3)]
         self.sale_sku_suite_dict = ims_logics.calculate_sets(self.ware_sku_qty_list)
-        self.sj_kw_ids = wms_logics.db_get_kw(1, 5, len(self.ware_sku_qty_list), self.warehouse_id,
-                                               self.to_warehouse_id)
+        self.sj_kw_ids = wms_logics.get_kw(1, 5, len(self.ware_sku_qty_list), self.warehouse_id,
+                                           self.to_warehouse_id)
 
     def test_1_purchase_create_order(self):
         sale_sku_list = [i for i in self.sale_sku_suite_dict]

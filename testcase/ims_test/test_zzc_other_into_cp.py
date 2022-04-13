@@ -18,7 +18,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['16338527895']
         ware_sku_qty_list = [('16338527895A01', 1)]
-        cp_location_ids = [wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)]
+        cp_location_ids = [wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)]
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -44,7 +44,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['16338527895']
         ware_sku_qty_list = [('16338527895A01', 2), ('16338527895A01', 3)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -70,7 +70,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['16338527895']
         ware_sku_qty_list = [('16338527895A01', 2), ('16338527895A01', 3)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -96,7 +96,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 1)]
-        cp_location_ids = [wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)]
+        cp_location_ids = [wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)]
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -122,7 +122,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 2), ('63203684930A01', 3)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -148,7 +148,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 2), ('63203684930A01', 3)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -174,7 +174,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['16338527895', '20537964151']
         ware_sku_qty_list = [('16338527895A01', 2), ('16338527895A01', 3), ('20537964151A01', 1), ('20537964151A01', 2)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -200,7 +200,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['16338527895', '20537964151']
         ware_sku_qty_list = [('16338527895A01', 2), ('16338527895A01', 3), ('20537964151A01', 1), ('20537964151A01', 2)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -226,7 +226,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -252,7 +252,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -278,7 +278,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 2), ('63203684930A02', 9)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -304,7 +304,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 2), ('63203684930A02', 10)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -332,7 +332,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5), ('63203684930B01', 1), ('63203684930B02', 5)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -358,7 +358,7 @@ class TestZZCOtherIntoCP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5), ('63203684930B01', 1), ('63203684930B02', 5)]
-        cp_location_ids = wms_logics.db_get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        cp_location_ids = wms_logics.get_kw(1, 6, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)

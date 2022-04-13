@@ -24,8 +24,8 @@ def get_format_excel_data(excel):
     for data in excel_data:
         if data['status'] != '良品':
             continue
-        warehouse_id = wms.db_ck_code_to_id(data['warehouseCode'])
-        location_id = wms.db_kw_code_to_id(data['storageLocationCode'])
+        warehouse_id = wms.ck_code_to_id(data['warehouseCode'])
+        location_id = wms.kw_code_to_id(data['storageLocationCode'])
 
         if warehouse_id not in result_dict:
             result_dict.update({

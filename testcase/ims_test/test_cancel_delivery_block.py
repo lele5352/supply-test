@@ -11,8 +11,8 @@ class TestCancelDeliveryBlock(object):
         self.sale_sku_count = 2
         self.sale_sku = '67330337129'
         self.component_sku = 'BP67330337129G01'
-        self.sj_kw_ids = wms_logics.db_get_kw(1, 5, len(self.sale_sku), self.warehouse_id, self.to_warehouse_id)
-        self.yk_kw_id = wms_logics.db_get_kw(1, 4, 1, self.warehouse_id, self.to_warehouse_id)
+        self.sj_kw_ids = wms_logics.get_kw(1, 5, len(self.sale_sku), self.warehouse_id, self.to_warehouse_id)
+        self.yk_kw_id = wms_logics.get_kw(1, 4, 1, self.warehouse_id, self.to_warehouse_id)
 
     def setup(self):
         IMSDBOperator.delete_qualified_inventory([self.sale_sku])

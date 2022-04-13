@@ -35,7 +35,7 @@ class WmsTransferDataGenerator:
                 sale_sku_code,
                 'A',
                 trans_qty,
-                self.wms_logics.db_get_kw(1, 5, 1, trans_out_id, trans_out_to_id),
+                self.wms_logics.get_kw(1, 5, 1, trans_out_id, trans_out_to_id),
                 trans_out_id,
                 trans_out_to_id)
             if not add_stock_res:
@@ -134,7 +134,7 @@ class WmsTransferDataGenerator:
             log.error('创建调拨出库单失败：确认拣货异常！')
             return
         # 调拨拣货单按需装托提交
-        trans_out_tp_kw_ids = self.wms_logics.db_get_kw(1, 3, demand_qty, trans_out_id, trans_out_to_id)
+        trans_out_tp_kw_ids = self.wms_logics.get_kw(1, 3, demand_qty, trans_out_id, trans_out_to_id)
         submit_tray_res = self.wms_request.transfer_out_submit_tray(pick_order_details, trans_out_tp_kw_ids)
         if not submit_tray_res:
             log.error('创建调拨出库单失败：装托完成异常！')

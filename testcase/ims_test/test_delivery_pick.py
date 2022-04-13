@@ -10,7 +10,7 @@ class TestDeliveryPick(object):
         self.to_warehouse_id = delivery_warehouse_id
 
         self.order_info = [(sale_sku, 2)]
-        self.sj_kw_ids = wms_logics.db_get_kw(1, 2, len(sale_sku), self.warehouse_id, self.to_warehouse_id)
+        self.sj_kw_ids = wms_logics.get_kw(1, 2, len(sale_sku), self.warehouse_id, self.to_warehouse_id)
 
     def setup(self):
         # 这里踩过坑，单据号不能放在setupclass里面，否则每次单据号都一样，会触发幂等，导致结果不正确
