@@ -3,7 +3,7 @@ import time
 from utils.request_handler import RequestHandler
 from config.api_config.ims_api_config import ims_api_config
 from config.sys_config import env_config
-from db_operator.ims_db_operate import IMSDBOperator
+from db_operator.ims_db_operator import IMSDBOperator
 
 
 class ImsRequest(RequestHandler):

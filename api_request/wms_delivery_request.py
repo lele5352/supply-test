@@ -2,7 +2,6 @@ import time
 
 from utils.barcode_handler import barcode_generate
 from utils.request_handler import RequestHandler
-from utils.mysql_handler import MysqlHandler
 from utils.log_handler import logger as log
 
 from config.sys_config import env_config
@@ -13,7 +12,6 @@ class WmsDeliveryServiceRequest(RequestHandler):
     def __init__(self, ums):
         self.prefix = env_config.get('delivery_service_prefix')
         self.service_headers = ums.get_service_headers()
-        self.db = MysqlHandler(**env_config.get('mysql_info_wms'))
         super().__init__(self.prefix, self.service_headers)
 
     # 创建出库单

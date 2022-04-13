@@ -1,7 +1,7 @@
 import json
 
 from config.sys_config import user
-from db_operator.ums_db_operate import UMSDBOperator
+from db_operator.ums_db_operator import UMSDBOperator
 from logics import ums_request
 
 

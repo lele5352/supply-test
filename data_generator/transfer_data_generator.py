@@ -1,13 +1,12 @@
-from api_request.wms_app_request import WmsAppRequest
 from data_generator import *
 from utils.log_handler import logger as log
 from utils.barcode_handler import barcode_generate
-from db_operator.ims_db_operate import IMSDBOperator
+from db_operator.ims_db_operator import IMSDBOperator
 
 
 class WmsTransferDataGenerator:
     def __init__(self):
-        self.wms_request = WmsAppRequest(app_headers, service_headers)
+        self.wms_request = wms_request
         self.ims_logics = ims_logics
 
     def create_transfer_demand(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,

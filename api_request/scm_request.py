@@ -7,10 +7,9 @@ from utils.log_handler import logger as log
 
 
 class ScmRequest(RequestHandler):
-    def __init__(self, ums):
-        self.app_headers = ums.app_header
+    def __init__(self, app_headers):
         self.prefix = env_config.get('app_prefix')
-        super().__init__(self.prefix, self.app_headers)
+        super().__init__(self.prefix, app_headers)
 
     def get_sku_info(self, sale_sku_code):
         """获取供应商产品信息"""

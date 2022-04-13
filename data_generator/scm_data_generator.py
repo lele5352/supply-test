@@ -1,14 +1,13 @@
 import time
 
-from controller.scm_controller import ScmController
-from data_generator import ums
+from data_generator import scm_request
 from utils.log_handler import logger as log
 from utils.barcode_handler import barcode_generate
 
 
 class ScmDataGenerator:
     def __init__(self):
-        self.scm = ScmController(ums)
+        self.scm_request = scm_request
 
     def create_stock_plan(self, sale_sku_list, num, delivery_warehouse_code, target_warehouse_code):
         """
@@ -20,7 +19,7 @@ class ScmDataGenerator:
         :param string target_warehouse_code: 目的仓库编码
         :return: 备货计划id、备货计划单号
         """
-        plan_res = self.scm.stock_plan_submit(sale_sku_list, num, delivery_warehouse_code, target_warehouse_code)
+        plan_res = self.scm_request.stock_plan_submit(sale_sku_list, num, delivery_warehouse_code, target_warehouse_code)
         if not plan_res or plan_res['code'] != 200:
             log.error('创建备货计划失败：%s' % plan_res)
             return
@@ -43,14 +42,14 @@ class ScmDataGenerator:
         # 创建备货计划
         plan_id, plan_no = self.create_stock_plan(sale_sku_list, num, delivery_warehouse_code, target_warehouse_code)
         # 执行审核
-        audit_res = self.scm.stock_plan_batch_audit(plan_id)
+        audit_res = self.scm_request.stock_plan_batch_audit(plan_id)
         if not audit_res or audit_res['code'] != 200:
             log.error('备货计划审核失败：%s' % audit_res)
             return
         # 备货计划生成采购需求是异步的，可能存在延迟
         time.sleep(1)
         # 获取生成的采购需求id
-        demand_ids = self.scm.get_stock_plan_purchase_demand_id(plan_no)
+        demand_ids = self.scm_request.get_stock_plan_purchase_demand_id(plan_no)
         if not demand_ids:
             log.error('查询不到创建的备货计划的采购需求id')
             return
@@ -75,12 +74,12 @@ class ScmDataGenerator:
             log.error('查询不到创建的备货计划的采购需求id')
             return
         # 根据采购需求id批量确认并生单
-        confirm_and_buy_res = self.scm.confirm_and_generate_purchase_order(demand_ids)
+        confirm_and_buy_res = self.scm_request.confirm_and_generate_purchase_order(demand_ids)
         if not confirm_and_buy_res:
             log.error("采购需求确认并生单失败：%s" % confirm_and_buy_res)
         # 采购需求下单是异步，可能有延迟
         time.sleep(1)
-        purchase_order_nos, purchase_order_ids = self.scm.get_purchase_order_page(plan_no)
+        purchase_order_nos, purchase_order_ids = self.scm_request.get_purchase_order_page(plan_no)
         if not (purchase_order_ids and purchase_order_nos):
             log.error("根据备货计划单号查询采购单号失败")
         print('采购订单单号：%s' % purchase_order_nos)
@@ -104,18 +103,18 @@ class ScmDataGenerator:
             target_warehouse_code)
         # 逐个采购订单编辑并提交审核
         for purchase_order_id in purchase_order_ids:
-            purchase_order_detail = self.scm.get_purchase_order_detail(purchase_order_id)
-            update_and_submit_to_audit_res = self.scm.update_and_submit_purchase_order_to_audit(purchase_order_detail)
+            purchase_order_detail = self.scm_request.get_purchase_order_detail(purchase_order_id)
+            update_and_submit_to_audit_res = self.scm_request.update_and_submit_purchase_order_to_audit(purchase_order_detail)
             if not update_and_submit_to_audit_res:
                 log.error('采购订单编辑并提交审核失败')
                 return
         # 采购订单批量审核
-        audit_res = self.scm.purchase_order_audit(purchase_order_ids)
+        audit_res = self.scm_request.purchase_order_audit(purchase_order_ids)
         if not audit_res:
             log.error('采购订单批量审核失败:%s' % audit_res)
             return
         # 采购订单批量下单
-        purchase_order_buy_res = self.scm.purchase_order_batch_buy(purchase_order_ids)
+        purchase_order_buy_res = self.scm_request.purchase_order_batch_buy(purchase_order_ids)
         if not purchase_order_buy_res:
             log.error('采购订单批量下单失败:%s' % purchase_order_buy_res)
             return
@@ -138,42 +137,42 @@ class ScmDataGenerator:
             target_warehouse_code)
         # 逐个采购订单编辑并提交审核
         for purchase_order_id in purchase_order_ids:
-            purchase_order_detail = self.scm.get_purchase_order_detail(purchase_order_id)
-            update_and_submit_to_audit_res = self.scm.update_and_submit_purchase_order_to_audit(purchase_order_detail)
+            purchase_order_detail = self.scm_request.get_purchase_order_detail(purchase_order_id)
+            update_and_submit_to_audit_res = self.scm_request.update_and_submit_purchase_order_to_audit(purchase_order_detail)
             if not update_and_submit_to_audit_res:
                 log.error('采购订单编辑并提交审核失败')
                 return
         # 采购订单批量审核
-        audit_res = self.scm.purchase_order_audit(purchase_order_ids)
+        audit_res = self.scm_request.purchase_order_audit(purchase_order_ids)
         if not audit_res:
             log.error('采购订单批量审核失败:%s' % audit_res)
             return
         # 采购订单批量下单
-        purchase_order_buy_res = self.scm.purchase_order_batch_buy(purchase_order_ids)
+        purchase_order_buy_res = self.scm_request.purchase_order_batch_buy(purchase_order_ids)
         if not purchase_order_buy_res:
             log.error('采购订单批量下单失败:%s' % purchase_order_buy_res)
             return
         # 采购订单批量发货
         for purchase_order_id in purchase_order_ids:
             # 获取采购订单发货明细
-            purchase_order_delivery_detail = self.scm.get_purchase_order_delivery_detail(purchase_order_id)
+            purchase_order_delivery_detail = self.scm_request.get_purchase_order_delivery_detail(purchase_order_id)
             if not purchase_order_delivery_detail:
                 log.error('获取采购单发货详情失败')
                 return
             # 根据采购订单发货明细生成分货单信息
-            distribute_order_info = self.scm.generate_distribute_order(purchase_order_delivery_detail,
-                                                                       delivery_warehouse_code)
+            distribute_order_info = self.scm_request.generate_distribute_order(purchase_order_delivery_detail,
+                                                                               delivery_warehouse_code)
             if not distribute_order_info:
                 log.error('根据采购单发货详情生成分货单信息失败')
                 return
             # 采购订单发货
-            delivery_res = self.scm.purchase_order_delivery(distribute_order_info)
+            delivery_res = self.scm_request.purchase_order_delivery(distribute_order_info)
             if not delivery_res:
                 log.error("采购订单发货失败：%s" % delivery_res)
                 return
         time.sleep(1)
         # 获取分货单号
-        distribute_order_nos = self.scm.get_distribute_order_page(purchase_order_nos)
+        distribute_order_nos = self.scm_request.get_distribute_order_page(purchase_order_nos)
         for code in distribute_order_nos:
             barcode_generate(code, 'entry_order')
         print('分货单号：%s' % distribute_order_nos)

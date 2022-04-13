@@ -1,5 +1,6 @@
-from db_operator.ims_db_operate import IMSDBOperator
-from logics import  ims_request
+from db_operator.ims_db_operator import IMSDBOperator
+from logics import ims_request
+
 
 class ImsLogics:
     def __init__(self):
