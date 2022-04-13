@@ -31,7 +31,7 @@ class WmsTransferDataGenerator:
         # 可用库存不足，需要添加库存，分为2种情况：1-查询不到库存；2-查询到库存，block＞stock
         if not central_inventory or central_inventory['central_block'] >= central_inventory[
             'central_stock']:
-            add_stock_res = self.ims_logics.add_qualified_stock_by_other_in(
+            add_stock_res = self.ims_logics.add_lp_stock_by_other_in(
                 sale_sku_code,
                 'A',
                 trans_qty,

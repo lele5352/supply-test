@@ -7,8 +7,7 @@ class WMSDBOperator:
     def query_warehouse_info_by_id(cls, warehouse_id):
         """
         :param int warehouse_id: 仓库id
-
-        :return dict: 查询结果数据，字典格式
+        :return: 查询结果数据，字典格式
         """
 
         item = BaseWarehouse.get_or_none(BaseWarehouse.id == warehouse_id)
@@ -20,8 +19,7 @@ class WMSDBOperator:
     def query_warehouse_info_by_code(cls, warehouse_code):
         """
         :param str warehouse_code: 仓库编码
-
-        :return dict: 查询结果数据，字典格式
+        :return: 查询结果数据，字典格式
         """
         item = BaseWarehouse.get_or_none(BaseWarehouse.warehouse_code == warehouse_code)
         if not item:
@@ -32,8 +30,7 @@ class WMSDBOperator:
     def query_warehouse_location_info_by_id(cls, location_id):
         """
         :param int location_id: 库位id
-
-        :return dict: 查询结果数据，字典格式
+        :return: 查询结果数据，字典格式
         """
 
         item = BaseWarehouseLocation.get_or_none(BaseWarehouseLocation.id == location_id)
@@ -45,8 +42,7 @@ class WMSDBOperator:
     def query_warehouse_location_info_by_code(cls, location_code):
         """
         :param str location_code: 库位编码
-
-        :return dict: 查询结果数据，字典格式
+        :return: 查询结果数据，字典格式
         """
         item = BaseWarehouseLocation.get_or_none(BaseWarehouseLocation.warehouse_location_code == location_code)
         if not item:
@@ -60,8 +56,7 @@ class WMSDBOperator:
         :param int num: 库位个数
         :param int warehouse_id: 仓库id
         :param int to_warehouse_id: 目的仓库id
-
-        :return dict: 查询结果数据，字典格式
+        :return: 查询结果数据，字典格式
         """
         if not to_warehouse_id or to_warehouse_id == warehouse_id or kw_type == 6:
             items = BaseWarehouseLocation.select().where(BaseWarehouseLocation.warehouse_id == warehouse_id,
@@ -81,8 +76,7 @@ class WMSDBOperator:
         """
         :param int warehouse_id: 仓库id
         :param int area_type: 库区类型
-
-        :return dict: 查询结果数据，字典格式
+        :return: 查询结果数据，字典格式
         """
         item = BaseWarehouseArea.get_or_none(BaseWarehouseArea.warehouse_id == warehouse_id,
                                              BaseWarehouseArea.type == area_type)

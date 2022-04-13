@@ -19,7 +19,7 @@ class TestDeliveryPick(object):
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         time.sleep(1)
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             sale_sku,
             bom,
             self.order_info[0][1],
@@ -27,7 +27,8 @@ class TestDeliveryPick(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_qualified_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+        self.expect_lp_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id,
+                                                                 self.to_warehouse_id)
 
     # @pytest.mark.skip(reason='test')
     def test_1_completely_pick(self):
@@ -47,17 +48,16 @@ class TestDeliveryPick(object):
 
         # 把分配库存的预占结果按仓库sku维度聚合
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
-        print(combined_block_result_list)
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims_request.assign_location_stock(
+        assign_stock_res = ims_request.assign_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
         )
         ware_sku_list = list()
         # 构造拣货sku明细数据，此处为完整拣货，非短拣
-        self.expect_qualified_inventory['spot_goods_remain'] -= self.order_info[0][1]
-        self.expect_qualified_inventory['central_remain'] -= self.order_info[0][1]
+        self.expect_lp_inventory['spot_goods_remain'] -= self.order_info[0][1]
+        self.expect_lp_inventory['central_remain'] -= self.order_info[0][1]
         for location_id, (ware_sku, qty) in zip(self.sj_kw_ids, combined_block_result_list):
             temp_dict = {
                 "qty": qty,
@@ -67,10 +67,10 @@ class TestDeliveryPick(object):
             }
             ware_sku_list.append(temp_dict)
             # 释放库位库存
-            self.expect_qualified_inventory[ware_sku]['warehouse_total']['block'] += qty
-            self.expect_qualified_inventory[ware_sku]['location_total']['block'] += qty
-            self.expect_qualified_inventory[ware_sku][location_id]['stock'] -= qty
-            self.expect_qualified_inventory[ware_sku].update(
+            self.expect_lp_inventory[ware_sku]['warehouse_total']['block'] += qty
+            self.expect_lp_inventory[ware_sku]['location_total']['block'] += qty
+            self.expect_lp_inventory[ware_sku][location_id]['stock'] -= qty
+            self.expect_lp_inventory[ware_sku].update(
                 {
                     -self.warehouse_id: {'block': 0, 'stock': qty}
                 }
@@ -82,18 +82,17 @@ class TestDeliveryPick(object):
             self.warehouse_id
         )
 
-        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        after_pick_inventory = ims_logics.query_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
         )
-        # 根据拣货数据构造拣货后期望的仓库库存数据
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200
-        assert assign_location_stock_res['code'] == 200
+        assert assign_stock_res['code'] == 200
         assert confirm_pick_res['code'] == 200
-        assert self.expect_qualified_inventory == after_pick_inventory
+        assert self.expect_lp_inventory == after_pick_inventory
 
     # @pytest.mark.skip(reason='test')
     def test_2_short_pick(self):
@@ -113,18 +112,17 @@ class TestDeliveryPick(object):
 
         # 把分配库存的预占结果按仓库sku维度聚合
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
-        print(combined_block_result_list)
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims_request.assign_location_stock(
+        assign_stock_res = ims_request.assign_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
         )
         ware_sku_list = list()
-        # 构造拣货sku明细数据，此处为完整拣货，非短拣
 
-        self.expect_qualified_inventory['spot_goods_remain'] -= self.order_info[0][1]
-        self.expect_qualified_inventory['central_remain'] -= self.order_info[0][1]
+        # 构造拣货sku明细数据，此处为完整拣货，非短拣
+        self.expect_lp_inventory['spot_goods_remain'] -= self.order_info[0][1]
+        self.expect_lp_inventory['central_remain'] -= self.order_info[0][1]
         for location_id, (ware_sku, qty) in zip(self.sj_kw_ids, combined_block_result_list):
             pick_loss_num = 1
             temp_dict = {
@@ -135,12 +133,12 @@ class TestDeliveryPick(object):
             }
             ware_sku_list.append(temp_dict)
             # 释放库位库存
-            self.expect_qualified_inventory[ware_sku]['warehouse_total']['block'] += qty
-            self.expect_qualified_inventory[ware_sku]['location_total']['block'] += qty
-            self.expect_qualified_inventory[ware_sku][location_id]['stock'] = pick_loss_num
-            self.expect_qualified_inventory[ware_sku][location_id]['block'] = pick_loss_num
+            self.expect_lp_inventory[ware_sku]['warehouse_total']['block'] += qty
+            self.expect_lp_inventory[ware_sku]['location_total']['block'] += qty
+            self.expect_lp_inventory[ware_sku][location_id]['stock'] = pick_loss_num
+            self.expect_lp_inventory[ware_sku][location_id]['block'] = pick_loss_num
 
-            self.expect_qualified_inventory[ware_sku].update(
+            self.expect_lp_inventory[ware_sku].update(
                 {
                     -self.warehouse_id: {'block': 0, 'stock': qty - pick_loss_num}
                 }
@@ -152,18 +150,17 @@ class TestDeliveryPick(object):
             self.warehouse_id
         )
 
-        after_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        after_pick_inventory = ims_logics.query_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
         )
-        # 根据拣货数据构造拣货后期望的仓库库存数据
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200
-        assert assign_location_stock_res['code'] == 200
+        assert assign_stock_res['code'] == 200
         assert confirm_pick_res['code'] == 200
-        assert self.expect_qualified_inventory == after_pick_inventory
+        assert self.expect_lp_inventory == after_pick_inventory
 
 
 if __name__ == '__main__':

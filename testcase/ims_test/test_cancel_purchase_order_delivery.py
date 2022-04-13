@@ -29,36 +29,38 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = IMSDBOperator.query_qualified_inventory(
+            after_create_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
+            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_lp_inventory = ims_logics.get_purchase_create_order_expect_inventory(
+                self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
-            assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory  == {}
+            assert expect_lp_inventory == after_create_inventory
+            assert current_unqualified_inventory == {}
 
-            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
+                                                                    to_warehouse_id)
+            after_cancel_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            expect_qualified_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
             for (ware_sku, qty), sj_kw_id in zip(cancel_ware_sku_qty_list, self.sj_kw_ids):
-                expect_qualified_inventory[ware_sku]['warehouse_total']['stock'] -= qty
-                expect_qualified_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['warehouse_total']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
 
             assert cancel_res['code'] == 200
-            assert after_cancel_inventory == expect_qualified_inventory
+            assert after_cancel_inventory == expect_lp_inventory
 
     def test_2_cancel_exchange_warehouse_purchase_order_delivery(self):
         """
@@ -81,36 +83,38 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = IMSDBOperator.query_qualified_inventory(
+            after_create_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
+            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_lp_inventory = ims_logics.get_purchase_create_order_expect_inventory(
+                self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
-            assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory  == {}
+            assert expect_lp_inventory == after_create_inventory
+            assert current_unqualified_inventory == {}
 
-            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
+                                                                    to_warehouse_id)
+            after_cancel_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            expect_qualified_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
             for (ware_sku, qty), sj_kw_id in zip(cancel_ware_sku_qty_list, self.sj_kw_ids):
-                expect_qualified_inventory[ware_sku]['warehouse_total']['stock'] -= qty
-                expect_qualified_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['warehouse_total']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
 
             assert cancel_res['code'] == 200
-            assert after_cancel_inventory == expect_qualified_inventory
+            assert after_cancel_inventory == expect_lp_inventory
 
     def test_3_cancel_exchange_warehouse_purchase_order_delivery(self):
         """
@@ -133,36 +137,38 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = IMSDBOperator.query_qualified_inventory(
+            after_create_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
+            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_lp_inventory = ims_logics.get_purchase_create_order_expect_inventory(
+                self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
-            assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory  == {}
+            assert expect_lp_inventory == after_create_inventory
+            assert current_unqualified_inventory == {}
 
-            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
+                                                                    to_warehouse_id)
+            after_cancel_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            expect_qualified_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
             for (ware_sku, qty), sj_kw_id in zip(cancel_ware_sku_qty_list, self.sj_kw_ids):
-                expect_qualified_inventory[ware_sku]['warehouse_total']['stock'] -= qty
-                expect_qualified_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['warehouse_total']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
 
             assert cancel_res['code'] == 200
-            assert after_cancel_inventory == expect_qualified_inventory
+            assert after_cancel_inventory == expect_lp_inventory
 
     def test_4_cancel_delivery_warehouse_purchase_order_delivery_partly(self):
         """
@@ -185,36 +191,38 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = IMSDBOperator.query_qualified_inventory(
+            after_create_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
+            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_lp_inventory = ims_logics.get_purchase_create_order_expect_inventory(
+                self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
-            assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory  == {}
+            assert expect_lp_inventory == after_create_inventory
+            assert current_unqualified_inventory == {}
 
-            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
+                                                                    to_warehouse_id)
+            after_cancel_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            expect_qualified_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
             for (ware_sku, qty), sj_kw_id in zip(cancel_ware_sku_qty_list, self.sj_kw_ids):
-                expect_qualified_inventory[ware_sku]['warehouse_total']['stock'] -= qty
-                expect_qualified_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['warehouse_total']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
 
             assert cancel_res['code'] == 200
-            assert after_cancel_inventory == expect_qualified_inventory
+            assert after_cancel_inventory == expect_lp_inventory
 
     def test_5_cancel_exchange_warehouse_purchase_create_delivery_partly(self):
         """
@@ -237,36 +245,38 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = IMSDBOperator.query_qualified_inventory(
+            after_create_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
+            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_lp_inventory = ims_logics.get_purchase_create_order_expect_inventory(
+                self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
-            assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory  == {}
+            assert expect_lp_inventory == after_create_inventory
+            assert current_unqualified_inventory == {}
 
-            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
+                                                                    to_warehouse_id)
+            after_cancel_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            expect_qualified_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
             for (ware_sku, qty), sj_kw_id in zip(cancel_ware_sku_qty_list, self.sj_kw_ids):
-                expect_qualified_inventory[ware_sku]['warehouse_total']['stock'] -= qty
-                expect_qualified_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['warehouse_total']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
 
             assert cancel_res['code'] == 200
-            assert after_cancel_inventory == expect_qualified_inventory
+            assert after_cancel_inventory == expect_lp_inventory
 
     def test_6_cancel_stock_warehouse_purchase_create_delivery_partly(self):
         """
@@ -289,36 +299,38 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = IMSDBOperator.query_qualified_inventory(
+            after_create_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
+            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_lp_inventory = ims_logics.get_purchase_create_order_expect_inventory(
+                self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
-            assert expect_qualified_inventory == after_create_inventory
-            assert current_unqualified_inventory  == {}
+            assert expect_lp_inventory == after_create_inventory
+            assert current_unqualified_inventory == {}
 
-            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
-            after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
+                                                                    to_warehouse_id)
+            after_cancel_inventory = ims_logics.query_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            expect_qualified_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
-            expect_qualified_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['central_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_stock'] -= self.sale_sku_suite_dict.get(sale_sku)
+            expect_lp_inventory['purchase_on_way_remain'] -= self.sale_sku_suite_dict.get(sale_sku)
             for (ware_sku, qty), sj_kw_id in zip(cancel_ware_sku_qty_list, self.sj_kw_ids):
-                expect_qualified_inventory[ware_sku]['warehouse_total']['stock'] -= qty
-                expect_qualified_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['warehouse_total']['stock'] -= qty
+                expect_lp_inventory[ware_sku]['purchase_on_way']['stock'] -= qty
 
             assert cancel_res['code'] == 200
-            assert after_cancel_inventory == expect_qualified_inventory
+            assert after_cancel_inventory == expect_lp_inventory
 
 
 if __name__ == '__main__':

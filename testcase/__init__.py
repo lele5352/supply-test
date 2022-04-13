@@ -1,14 +1,19 @@
 from logics.ums_logics import UmsLogics
-from db_operator.ims_db_operate import IMSDBOperator
+from db_operator.ims_db_operator import IMSDBOperator
+from api_request.ims_request import ImsRequest
+from api_request.ums_request import UmsRequest
 from api_request.wms_app_request import WmsAppRequest
 from logics.ims_logics import ImsLogics
 
-ums_logics = UmsLogics()
-ims_logics = ImsLogics()
+ims_request = ImsRequest()
+ums_request = UmsRequest()
+
+ums_logics = UmsLogics(ums_request)
+ims_logics = ImsLogics(ims_request)
+
 app_headers = ums_logics.get_app_headers()
 service_headers = ums_logics.get_service_headers()
 
-ims_request = ims_logics.ims_request
 
 wms_request = WmsAppRequest(app_headers, service_headers)
 

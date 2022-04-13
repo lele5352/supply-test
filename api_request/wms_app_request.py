@@ -5,7 +5,7 @@ from copy import deepcopy
 from config.sys_config import env_config
 from config.api_config.wms_api_config import wms_api_config
 from utils.request_handler import RequestHandler
-from db_operator.wms_db_operate import WMSDBOperator
+from db_operator.wms_db_operator import WMSDBOperator
 from utils.log_handler import logger as log
 
 from api_request.wms_transfer_request import WmsTransferRequest

@@ -25,13 +25,13 @@ class TestCancelDeliveryBlock(object):
         取消oms订单预占：只包含销售sku
         """
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku, bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -48,7 +48,7 @@ class TestCancelDeliveryBlock(object):
         cancel_oms_order_block_res = ims_request.cancel_oms_order_block(
             oms_order_order_block_book_id, oms_order_order_block_source_no
         )
-        cancel_oms_order_block_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_oms_order_block_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -61,14 +61,14 @@ class TestCancelDeliveryBlock(object):
     def test_2_cancel_only_sale_sku_delivery_order_block_before_assign_stock(self):
         """只包含销售sku的出库单下发后，当前未分配库位库存，取消出库单"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -87,7 +87,7 @@ class TestCancelDeliveryBlock(object):
         )
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -102,14 +102,14 @@ class TestCancelDeliveryBlock(object):
     def test_3_cancel_only_sale_sku_delivery_order_block_before_assign_stock_ever_assigned(self):
         """只包含销售sku的出库单下发后，分配过库位库存又取消分配库位库存的拣货前取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -130,12 +130,12 @@ class TestCancelDeliveryBlock(object):
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
         block_ware_sku_list = ims_logics.get_combined_block_result_list(block_result_list)
-        assign_stock_block_res = ims_request.assign_location_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
-        block_book_id = assign_stock_block_res['data'][0]['blockBookId']
+        assign_stock_res = ims_request.assign_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
+        block_book_id = assign_stock_res['data'][0]['blockBookId']
         cancel_location_block = ims_request.only_cancel_location_block(block_book_id, self.delivery_code)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -143,7 +143,7 @@ class TestCancelDeliveryBlock(object):
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200
-        assert assign_stock_block_res['code'] == 200
+        assert assign_stock_res['code'] == 200
         assert cancel_location_block['code'] == 200
         assert cancel_block_before_pick_res['code'] == 200
         assert cancel_block_before_pick_inventory == self.expect_inventory
@@ -151,14 +151,14 @@ class TestCancelDeliveryBlock(object):
     def test_4_cancel_only_sale_sku_delivery_order_block_after_assign_stock(self):
         """只包含销售sku的出库单下发后，分配过库位库存又取消分配库位库存的拣货前取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -179,10 +179,10 @@ class TestCancelDeliveryBlock(object):
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
         block_ware_sku_list = ims_logics.get_combined_block_result_list(block_result_list)
-        assign_stock_block_res = ims_request.assign_location_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
+        assign_stock_res = ims_request.assign_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 1)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -190,21 +190,21 @@ class TestCancelDeliveryBlock(object):
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200
-        assert assign_stock_block_res['code'] == 200
+        assert assign_stock_res['code'] == 200
         assert cancel_block_before_pick_res['code'] == 200
         assert cancel_block_before_pick_inventory == self.expect_inventory
 
     def test_5_cancel_only_sale_sku_delivery_order_block_after_pick(self):
         """只包含销售sku的出库单下发后，拣货后取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -227,7 +227,7 @@ class TestCancelDeliveryBlock(object):
         # 把分配库存的预占结果按仓库sku维度聚合
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims_request.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -255,7 +255,7 @@ class TestCancelDeliveryBlock(object):
             self.warehouse_id
         )
 
-        cancel_block_after_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_after_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -288,13 +288,13 @@ class TestCancelDeliveryBlock(object):
         取消oms订单预占：只包含销售sku
         """
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku, bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -310,7 +310,7 @@ class TestCancelDeliveryBlock(object):
         cancel_oms_order_block_res = ims_request.cancel_oms_order_block(
             oms_order_order_block_book_id, oms_order_order_block_source_no
         )
-        cancel_oms_order_block_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_oms_order_block_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -323,14 +323,14 @@ class TestCancelDeliveryBlock(object):
     def test_3_cancel_only_sale_sku_delivery_order_block_before_pick_never_block_location(self):
         """只包含销售sku的出库单下发后，从未分配过库位库存的拣货前取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -349,7 +349,7 @@ class TestCancelDeliveryBlock(object):
         )
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -364,14 +364,14 @@ class TestCancelDeliveryBlock(object):
     def test_7_cancel_delivery_order_block_include_component_and_sale_sku_oms_order_before_assign_stock(self):
         """包含配件sku和销售sku的出库单下发后，拣货前取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -390,7 +390,7 @@ class TestCancelDeliveryBlock(object):
         )
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -405,14 +405,14 @@ class TestCancelDeliveryBlock(object):
             self):
         """包含配件sku和销售sku的出库单下发后，拣货前取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -433,12 +433,12 @@ class TestCancelDeliveryBlock(object):
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
         block_ware_sku_list = ims_logics.get_combined_block_result_list(block_result_list)
-        assign_stock_block_res = ims_request.assign_location_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
-        block_book_id = assign_stock_block_res['data'][0]['blockBookId']
+        assign_stock_res = ims_request.assign_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
+        block_book_id = assign_stock_res['data'][0]['blockBookId']
         cancel_location_block = ims_request.only_cancel_location_block(block_book_id, self.delivery_code)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -447,21 +447,21 @@ class TestCancelDeliveryBlock(object):
         assert oms_order_block_res['code'] == 200
         assert cancel_location_block['code'] == 200
         assert delivery_order_block_res['code'] == 200
-        assert assign_stock_block_res['code'] == 200
+        assert assign_stock_res['code'] == 200
         assert cancel_block_before_pick_res['code'] == 200
         assert cancel_block_before_pick_inventory == self.expect_inventory
 
     def test_9_cancel_delivery_order_block_include_component_and_sale_sku_oms_order_after_assign_stock(self):
         """包含配件sku和销售sku的出库单下发后，拣货前取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -482,10 +482,10 @@ class TestCancelDeliveryBlock(object):
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
         block_ware_sku_list = ims_logics.get_combined_block_result_list(block_result_list)
-        assign_stock_block_res = ims_request.assign_location_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
+        assign_stock_res = ims_request.assign_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 1)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -493,21 +493,21 @@ class TestCancelDeliveryBlock(object):
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200
-        assert assign_stock_block_res['code'] == 200
+        assert assign_stock_res['code'] == 200
         assert cancel_block_before_pick_res['code'] == 200
         assert cancel_block_before_pick_inventory == self.expect_inventory
 
     def test_10_cancel_include_component_and_sale_sku_delivery_order_block_after_pick(self):
         """包含销售sku和部件sku的出库单下发后，拣货后取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -530,7 +530,7 @@ class TestCancelDeliveryBlock(object):
         # 把分配库存的预占结果按仓库sku维度聚合
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims_request.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -559,7 +559,7 @@ class TestCancelDeliveryBlock(object):
             self.warehouse_id
         )
 
-        cancel_block_after_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_after_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -591,9 +591,11 @@ class TestCancelDeliveryBlock(object):
         取消oms订单预占：只包含销售sku
         """
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(self.sale_sku, bom, self.sale_sku_count, self.sj_kw_ids, self.warehouse_id,
-                                                    self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(self.sale_sku, self.warehouse_id, self.to_warehouse_id)
+        ims_logics.add_lp_stock_by_other_in(self.sale_sku, bom, self.sale_sku_count, self.sj_kw_ids,
+                                            self.warehouse_id,
+                                            self.to_warehouse_id)
+        self.expect_inventory = ims_logics.query_lp_inventory(self.sale_sku, self.warehouse_id,
+                                                              self.to_warehouse_id)
         order_info = [(self.component_sku, 1)]
         oms_order_block_res = ims_request.oms_order_block(
             order_info,
@@ -606,7 +608,7 @@ class TestCancelDeliveryBlock(object):
         cancel_oms_order_block_res = ims_request.cancel_oms_order_block(
             oms_order_order_block_book_id, oms_order_order_block_source_no
         )
-        cancel_oms_order_block_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_oms_order_block_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -619,14 +621,14 @@ class TestCancelDeliveryBlock(object):
     def test_12_cancel_delivery_order_block_only_component_oms_order_before_assign_stock(self):
         """包含配件sku和销售sku的出库单下发后，拣货前取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -645,7 +647,7 @@ class TestCancelDeliveryBlock(object):
         )
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -659,14 +661,14 @@ class TestCancelDeliveryBlock(object):
     def test_13_cancel_delivery_order_block_only_component_oms_order_before_assign_stock_ever_assigned(self):
         """包含配件sku和销售sku的出库单下发后，拣货前取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -686,12 +688,12 @@ class TestCancelDeliveryBlock(object):
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
         block_ware_sku_list = ims_logics.get_combined_block_result_list(block_result_list)
-        assign_stock_block_res = ims_request.assign_location_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
-        block_book_id = assign_stock_block_res['data'][0]['blockBookId']
+        assign_stock_res = ims_request.assign_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
+        block_book_id = assign_stock_res['data'][0]['blockBookId']
         cancel_location_block = ims_request.only_cancel_location_block(block_book_id, self.delivery_code)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -699,7 +701,7 @@ class TestCancelDeliveryBlock(object):
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200
-        assert assign_stock_block_res['code'] == 200
+        assert assign_stock_res['code'] == 200
         assert cancel_location_block['code'] == 200
         assert cancel_block_before_pick_res['code'] == 200
         assert cancel_block_before_pick_inventory == self.expect_inventory
@@ -707,14 +709,14 @@ class TestCancelDeliveryBlock(object):
     def test_14_cancel_delivery_order_block_only_component_oms_order_after_assign_stock(self):
         """包含配件sku和销售sku的出库单下发后，拣货前取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -735,10 +737,10 @@ class TestCancelDeliveryBlock(object):
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
         block_ware_sku_list = ims_logics.get_combined_block_result_list(block_result_list)
-        assign_stock_block_res = ims_request.assign_location_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
+        assign_stock_res = ims_request.assign_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 1)
 
-        cancel_block_before_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -746,21 +748,21 @@ class TestCancelDeliveryBlock(object):
 
         assert oms_order_block_res['code'] == 200
         assert delivery_order_block_res['code'] == 200
-        assert assign_stock_block_res['code'] == 200
+        assert assign_stock_res['code'] == 200
         assert cancel_block_before_pick_res['code'] == 200
         assert cancel_block_before_pick_inventory == self.expect_inventory
 
     def test_15_cancel_only_component_delivery_order_block_after_pick(self):
         """只包含部件sku的出库单下发后，拣货后取消"""
         # 采购入库生成销售sku现货库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             bom,
             self.sale_sku_count,
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -783,7 +785,7 @@ class TestCancelDeliveryBlock(object):
         # 把分配库存的预占结果按仓库sku维度聚合
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims_request.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -812,7 +814,7 @@ class TestCancelDeliveryBlock(object):
             self.warehouse_id
         )
 
-        cancel_block_after_pick_inventory = IMSDBOperator.query_qualified_inventory(
+        cancel_block_after_pick_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id

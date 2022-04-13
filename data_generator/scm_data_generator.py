@@ -19,7 +19,8 @@ class ScmDataGenerator:
         :param string target_warehouse_code: 目的仓库编码
         :return: 备货计划id、备货计划单号
         """
-        plan_res = self.scm_request.stock_plan_submit(sale_sku_list, num, delivery_warehouse_code, target_warehouse_code)
+        plan_res = self.scm_request.stock_plan_submit(sale_sku_list, num, delivery_warehouse_code,
+                                                      target_warehouse_code)
         if not plan_res or plan_res['code'] != 200:
             log.error('创建备货计划失败：%s' % plan_res)
             return
@@ -104,7 +105,8 @@ class ScmDataGenerator:
         # 逐个采购订单编辑并提交审核
         for purchase_order_id in purchase_order_ids:
             purchase_order_detail = self.scm_request.get_purchase_order_detail(purchase_order_id)
-            update_and_submit_to_audit_res = self.scm_request.update_and_submit_purchase_order_to_audit(purchase_order_detail)
+            update_and_submit_to_audit_res = self.scm_request.update_and_submit_purchase_order_to_audit(
+                purchase_order_detail)
             if not update_and_submit_to_audit_res:
                 log.error('采购订单编辑并提交审核失败')
                 return
@@ -138,7 +140,8 @@ class ScmDataGenerator:
         # 逐个采购订单编辑并提交审核
         for purchase_order_id in purchase_order_ids:
             purchase_order_detail = self.scm_request.get_purchase_order_detail(purchase_order_id)
-            update_and_submit_to_audit_res = self.scm_request.update_and_submit_purchase_order_to_audit(purchase_order_detail)
+            update_and_submit_to_audit_res = self.scm_request.update_and_submit_purchase_order_to_audit(
+                purchase_order_detail)
             if not update_and_submit_to_audit_res:
                 log.error('采购订单编辑并提交审核失败')
                 return

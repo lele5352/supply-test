@@ -3,7 +3,7 @@ import pytest
 from testcase import *
 
 
-class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
+class TestLPChangedToCP(object):
     """库内管理-库内转次"""
 
     def setup_class(self):
@@ -14,7 +14,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
         self.cp_kw_id = fcp_kw_id
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         IMSDBOperator.delete_unqualified_inventory(sale_sku)
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             sale_sku,
             bom,
             self.sale_sku_count,
@@ -22,12 +22,12 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
             self.warehouse_id,
             self.target_warehouse_id
         )
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.target_warehouse_id
         )
-        self.expect_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
+        self.expect_cp_inventory = ims_logics.query_format_cp_inventory(
             sale_sku,
             bom,
             self.warehouse_id
@@ -48,7 +48,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
             for location_id, detail in mix_list:
                 for count in range(detail[1]):
                     changed_count += 1
-                    turn_to_unqualified_goods_res = ims_request.turn_to_unqualified_goods(
+                    turn_to_unqualified_goods_res = ims_request.turn_to_cp(
                         detail[0],
                         location_id,
                         self.cp_kw_id,
@@ -70,8 +70,8 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
                         self.expect_inventory[detail[0]]['total']['stock'] -= 1
                     # 转次后仓库sku的次品库存对应增加
 
-                    if not self.expect_unqualified_inventory.get(detail[0]):
-                        self.expect_unqualified_inventory.update(
+                    if not self.expect_cp_inventory.get(detail[0]):
+                        self.expect_cp_inventory.update(
                             {
                                 detail[0]: {
                                     self.cp_kw_id: {'stock': 1, 'block': 0},
@@ -80,8 +80,8 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
                             }
                         )
                     else:
-                        self.expect_unqualified_inventory[detail[0]][self.cp_kw_id]['stock'] += 1
-                        self.expect_unqualified_inventory[detail[0]]['total']['stock'] += 1
+                        self.expect_cp_inventory[detail[0]][self.cp_kw_id]['stock'] += 1
+                        self.expect_cp_inventory[detail[0]]['total']['stock'] += 1
 
                     # 获取转次后的良品库存
                     current_inventory = ims_request.get_inventory(
@@ -89,14 +89,14 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
                         bom,
                         self.warehouse_id,
                         self.target_warehouse_id)
-                    current_unqualified_inventory = IMSDBOperator.query_unqualified_inventory(
+                    current_unqualified_inventory = ims_logics.query_format_cp_inventory(
                         sale_sku,
                         bom,
                         self.warehouse_id
                     )
                     assert turn_to_unqualified_goods_res['code'] == 200
                     assert self.expect_inventory == current_inventory
-                    assert self.expect_unqualified_inventory == current_unqualified_inventory
+                    assert self.expect_cp_inventory == current_unqualified_inventory
 
 
 if __name__ == '__main__':

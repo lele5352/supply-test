@@ -20,8 +20,8 @@ class TestTransferToSelf:
 
         trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
         wms_request.switch_default_warehouse(trans_out_id)
-        ims_logics.add_qualified_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
-        trans_out_expect_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
+        ims_logics.add_lp_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
+        trans_out_expect_inventory = ims_logics.query_lp_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
 
         # 生成调拨需求
         demand_res = wms_request.transfer_out_create_demand(
@@ -36,7 +36,7 @@ class TestTransferToSelf:
         assert demand_res['data'] is None
 
         # 调拨需求下发失败，库存不变
-        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
+        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
         assert trans_out_expect_inventory == trans_out_inventory
 
     def test_2_stock_warehouse_trans_to_itself(self):
@@ -49,8 +49,8 @@ class TestTransferToSelf:
         trans_qty = 2  # 调拨的销售sku件数
         trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
         wms_request.switch_default_warehouse(trans_out_id)
-        ims_logics.add_qualified_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
-        trans_out_expect_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
+        ims_logics.add_lp_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
+        trans_out_expect_inventory = ims_logics.query_lp_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
 
         # 生成调拨需求
         demand_res = wms_request.transfer_out_create_demand(
@@ -65,7 +65,7 @@ class TestTransferToSelf:
         assert demand_res['data'] is None
 
         # 调拨需求下发失败，库存不变
-        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
+        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
         assert trans_out_expect_inventory == trans_out_inventory
 
     def test_3_exchange_warehouse_trans_to_itself(self):
@@ -78,8 +78,8 @@ class TestTransferToSelf:
         trans_qty = 2  # 调拨的销售sku件数
         trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
         wms_request.switch_default_warehouse(trans_out_id)
-        ims_logics.add_qualified_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
-        trans_out_expect_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
+        ims_logics.add_lp_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
+        trans_out_expect_inventory = ims_logics.query_lp_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
 
         # 生成调拨需求
         demand_res = wms_request.transfer_out_create_demand(
@@ -94,7 +94,7 @@ class TestTransferToSelf:
         assert demand_res['data'] is None
 
         # 调拨需求下发失败，库存不变
-        trans_out_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
+        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
         assert trans_out_expect_inventory == trans_out_inventory
 
 

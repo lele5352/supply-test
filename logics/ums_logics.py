@@ -2,11 +2,10 @@ import json
 
 from config.sys_config import user
 from db_operator.ums_db_operator import UMSDBOperator
-from logics import ums_request
 
 
 class UmsLogics():
-    def __init__(self):
+    def __init__(self,ums_request):
         self.ums_request = ums_request
 
     @classmethod

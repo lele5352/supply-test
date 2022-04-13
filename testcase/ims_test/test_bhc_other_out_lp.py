@@ -5,11 +5,10 @@ import pytest
 from testcase import *
 
 
-class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
+class TestBHCOtherOutLP(object):
     def setup_class(self):
-        self.warehouse_id = exchange_warehouse_id
-        self.target_warehouse_id = delivery_warehouse_id
-
+        self.warehouse_id = stock_warehouse_id
+        self.target_warehouse_id = ''
         self.sale_sku_count = 2
         self.sale_sku = '67330337129'
         self.bom_version = 'G'
@@ -17,7 +16,7 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
         self.sj_kw_ids = wms_request.db_get_kw(1, 5, len(self.bom_detail.items()), self.warehouse_id, self.target_warehouse_id)
         IMSDBOperator.delete_qualified_inventory([self.sale_sku])
         # 其他入库生成库存
-        ims_logics.add_qualified_stock_by_other_in(
+        ims_logics.add_lp_stock_by_other_in(
             self.sale_sku,
             self.bom_version,
             self.sale_sku_count,
@@ -25,7 +24,7 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
             self.warehouse_id,
             self.target_warehouse_id
         )
-        self.expect_inventory = IMSDBOperator.query_qualified_inventory(
+        self.expect_inventory = ims_logics.query_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.target_warehouse_id)
@@ -54,16 +53,15 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
                         "storageLocationId": location_id,
                         "wareSkuCode": detail[0]
                     }]
-                    block_res = ims_request.qualified_goods_other_out_block(
+                    block_res = ims_request.lp_other_out_block(
                         ware_sku_list,
                         self.warehouse_id,
                         self.target_warehouse_id)
                     # 调用其他出库预占库存接口后获取库存数据，用于与构造的期望库存数据进行比对
-                    after_block_inventory = IMSDBOperator.query_qualified_inventory(
+                    after_block_inventory = ims_logics.query_lp_inventory(
                         self.sale_sku,
                         self.warehouse_id,
                         self.target_warehouse_id)
-                    print(after_block_inventory)
                     # 构造期望库存
                     if out_count == 1:
                         # 如果是本套的第一件，则销售商品总库存、现货库存、仓库商品总库存、库位总库存、库位库存
@@ -82,12 +80,12 @@ class TestQualifiedGoodsOtherOutExchangeWarehouse(object):
                     assert block_res['code'] == 200
                     assert after_block_inventory == self.expect_inventory
 
-                    delivery_out_res = ims_request.qualified_goods_other_out_delivered(
+                    delivery_out_res = ims_request.lp_other_out_delivered(
                         ware_sku_list,
                         self.warehouse_id,
                         self.target_warehouse_id
                     )
-                    after_delivered_inventory = IMSDBOperator.query_qualified_inventory(
+                    after_delivered_inventory = ims_logics.query_lp_inventory(
                         self.sale_sku,
                         self.warehouse_id,
                         self.target_warehouse_id)

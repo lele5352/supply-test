@@ -119,7 +119,7 @@ class ImsRequest(RequestHandler):
     #                 )
     #     return formatted_ware_sku_inventory
 
-    # OMS下单预占中央库存、销售商品总库存
+    # OMS下单
     def oms_order_block(self, sale_sku_info, warehouse_id):
         goods_sku_list = list()
         for sale_sku_code, qty in sale_sku_info:
@@ -215,7 +215,7 @@ class ImsRequest(RequestHandler):
         return res
 
     # 其他入库-良品
-    def qualified_goods_other_in(self, ware_sku_qty_list, sj_location_ids, warehouse_id, to_warehouse_id):
+    def lp_other_in(self, ware_sku_qty_list, sj_location_ids, warehouse_id, to_warehouse_id):
         ware_sku_list = list()
         # 构造入库仓库sku明细数据
         for (ware_sku, qty), sj_location_id in zip(ware_sku_qty_list, sj_location_ids):
@@ -237,7 +237,7 @@ class ImsRequest(RequestHandler):
         return res
 
     # 其他入库-良品
-    def unqualified_goods_other_in(self, ware_sku_qty_list, cp_location_ids, warehouse_id, to_warehouse_id):
+    def cp_other_in(self, ware_sku_qty_list, cp_location_ids, warehouse_id, to_warehouse_id):
         ware_sku_list = list()
         # 构造入库仓库sku明细数据
         for (ware_sku, qty), cp_location_id in zip(ware_sku_qty_list, cp_location_ids):
@@ -276,7 +276,7 @@ class ImsRequest(RequestHandler):
         return res
 
     # 分配库位库存
-    def assign_location_stock(self, delivery_order_no, ware_sku_list, warehouse_id):
+    def assign_stock(self, delivery_order_no, ware_sku_list, warehouse_id):
         temp_list = list()
         for ware_sku, qty in ware_sku_list:
             temp_list.append({
@@ -388,7 +388,7 @@ class ImsRequest(RequestHandler):
             to_warehouse_id)
         return purchase_into_warehouse_res
 
-    def qualified_goods_other_out_block(self, ware_sku_list, warehouse_id, to_warehouse_id):
+    def lp_other_out_block(self, ware_sku_list, warehouse_id, to_warehouse_id):
         ims_api_config['qualified_goods_other_out_block']['data'][0].update(
             {
                 "sourceNo": "CK" + str(int(time.time() * 1000)),
@@ -400,7 +400,7 @@ class ImsRequest(RequestHandler):
         qualified_goods_other_out_block_res = self.send_request(**ims_api_config['qualified_goods_other_out_block'])
         return qualified_goods_other_out_block_res
 
-    def cancel_qualified_goods_other_out_block(self, block_book_id, source_no):
+    def cancel_lp_other_out_block(self, block_book_id, source_no):
         ims_api_config['cancel_qualified_goods_other_out_block']['data'].update(
             {
                 "sourceNo": source_no,
@@ -410,7 +410,7 @@ class ImsRequest(RequestHandler):
         cancel_block_res = self.send_request(**ims_api_config['cancel_qualified_goods_other_out_block'])
         return cancel_block_res
 
-    def cancel_unqualified_goods_other_out_block(self, block_book_id, source_no):
+    def cancel_cp_other_out_block(self, block_book_id, source_no):
         ims_api_config['cancel_unqualified_goods_other_out_block']['data'].update(
             {
                 "sourceNo": source_no,
@@ -420,7 +420,7 @@ class ImsRequest(RequestHandler):
         cancel_block_res = self.send_request(**ims_api_config['cancel_unqualified_goods_other_out_block'])
         return cancel_block_res
 
-    def unqualified_goods_other_out_block(self, ware_sku_qty_list, cp_location_ids, warehouse_id):
+    def cp_other_out_block(self, ware_sku_qty_list, cp_location_ids, warehouse_id):
         temp_list = list()
         for (ware_sku, qty), cp_location_id in zip(ware_sku_qty_list, cp_location_ids):
             temp_list.append({
@@ -438,7 +438,7 @@ class ImsRequest(RequestHandler):
         unqualified_goods_other_out_block_res = self.send_request(**ims_api_config['unqualified_goods_other_out_block'])
         return unqualified_goods_other_out_block_res
 
-    def qualified_goods_other_out_delivered(self, ware_sku_list, warehouse_id, to_warehouse_id):
+    def lp_other_out_delivered(self, ware_sku_list, warehouse_id, to_warehouse_id):
         ims_api_config['qualified_goods_other_out_delivery_goods']['data'][0].update(
             {
                 "sourceNo": "CK" + str(int(time.time() * 1000)),
@@ -451,7 +451,7 @@ class ImsRequest(RequestHandler):
             **ims_api_config['qualified_goods_other_out_delivery_goods'])
         return qualified_goods_other_out_block_res
 
-    def unqualified_goods_other_out_delivered(self, ware_sku_qty_list, cp_location_ids, warehouse_id):
+    def cp_other_out_delivered(self, ware_sku_qty_list, cp_location_ids, warehouse_id):
         temp_list = list()
         for (ware_sku, qty), cp_location_id in zip(ware_sku_qty_list, cp_location_ids):
             temp_list.append({
@@ -470,7 +470,7 @@ class ImsRequest(RequestHandler):
             **ims_api_config['unqualified_goods_other_out_delivery_goods'])
         return unqualified_goods_other_out_block_res
 
-    def turn_to_unqualified_goods(self, ware_sku, from_location_id, to_location_id, qty, warehouse_id, to_warehouse_id):
+    def turn_to_cp(self, ware_sku, from_location_id, to_location_id, qty, warehouse_id, to_warehouse_id):
         ims_api_config['turn_to_unqualified_goods']['data'].update(
             {
                 "sourceNo": "LZC" + str(int(time.time() * 1000)),

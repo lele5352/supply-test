@@ -4,7 +4,7 @@ from playhouse.shortcuts import model_to_dict
 
 class IMSDBOperator:
     @classmethod
-    def query_wares_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id, bom_version=''):
+    def query_wares_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id, bom_version='') -> list:
         """
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
@@ -25,57 +25,12 @@ class IMSDBOperator:
                 WaresInventory.warehouse_id == warehouse_id,
                 WaresInventory.target_warehouse_id == to_warehouse_id)
         if not items:
-            return
+            return []
         items = [model_to_dict(item) for item in items]
-        formatted_ware_sku_inventory = dict()
-        for item in items:
-            if formatted_ware_sku_inventory.get(item['ware_sku_code']):
-                if item['type'] == 0:
-                    formatted_ware_sku_inventory[item['ware_sku_code']].update(
-                        {"warehouse_total": {'stock': item['stock'], 'block': item['block']}}
-                    )
-                elif item['type'] == 1:
-                    formatted_ware_sku_inventory[item['ware_sku_code']].update(
-                        {"purchase_on_way": {'stock': item['stock'], 'block': item['block']}}
-                    )
-                elif item['type'] == 2:
-                    formatted_ware_sku_inventory[item['ware_sku_code']].update(
-                        {"transfer_on_way": {'stock': item['stock'], 'block': item['block']}}
-                    )
-                elif item['type'] == 3:
-                    formatted_ware_sku_inventory[item['ware_sku_code']].update(
-                        {"location_total": {'stock': item['stock'], 'block': item['block']}}
-                    )
-                elif item['type'] == 4:
-                    formatted_ware_sku_inventory[item['ware_sku_code']].update(
-                        {item['storage_location_id']: {'stock': item['stock'], 'block': item['block']}}
-                    )
-            else:
-                if item['type'] == 0:
-                    formatted_ware_sku_inventory.update(
-                        {item['ware_sku_code']: {"warehouse_total": {'stock': item['stock'], 'block': item['block']}}}
-                    )
-                elif item['type'] == 1:
-                    formatted_ware_sku_inventory.update(
-                        {item['ware_sku_code']: {"purchase_on_way": {'stock': item['stock'], 'block': item['block']}}}
-                    )
-                elif item['type'] == 2:
-                    formatted_ware_sku_inventory.update(
-                        {item['ware_sku_code']: {"transfer_on_way": {'stock': item['stock'], 'block': item['block']}}}
-                    )
-                elif item['type'] == 3:
-                    formatted_ware_sku_inventory.update(
-                        {item['ware_sku_code']: {"location_total": {'stock': item['stock'], 'block': item['block']}}}
-                    )
-                elif item['type'] == 4:
-                    formatted_ware_sku_inventory.update(
-                        {item['ware_sku_code']: {
-                            item["storage_location_id"]: {'stock': item['stock'], 'block': item['block']}}}
-                    )
-        return formatted_ware_sku_inventory
+        return items
 
     @classmethod
-    def query_goods_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id):
+    def query_goods_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id) -> list:
         """
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
@@ -89,30 +44,12 @@ class IMSDBOperator:
             GoodsInventory.current_warehouse_id == warehouse_id,
             GoodsInventory.target_warehouse_id == to_warehouse_id)
         if not items:
-            return
+            return []
         items = [model_to_dict(item) for item in items]
-        goods_inventory_dict = dict()
-        for item in items:
-            # 销售商品采购在途库存
-            if item['type'] == 1:
-                goods_inventory_dict.update({
-                    'purchase_on_way_stock': item['stock'],
-                    'purchase_on_way_remain': item['remain']
-                })
-            elif item['type'] == 2:
-                goods_inventory_dict.update({
-                    'transfer_on_way_stock': item['stock'],
-                    'transfer_on_way_remain': item['remain']
-                })
-            elif item['type'] == 3:
-                goods_inventory_dict.update({
-                    'spot_goods_stock': item['stock'],
-                    'spot_goods_remain': item['remain']
-                })
-        return goods_inventory_dict
+        return items
 
     @classmethod
-    def query_central_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id):
+    def query_central_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id) -> dict:
         """
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
@@ -124,13 +61,9 @@ class IMSDBOperator:
         item = CentralInventory.get_or_none(CentralInventory.goods_sku_code == sale_sku_code,
                                             CentralInventory.warehouse_id == warehouse_id)
         if not item:
-            return
+            return {}
         item = model_to_dict(item)
-        return {
-            "central_stock": item['stock'],
-            "central_block": item['block'],
-            "central_remain": item['remain']
-        }
+        return item
 
     @classmethod
     def delete_wares_inventory_by_goods_sku_codes(cls, goods_sku_codes) -> None:
@@ -161,7 +94,7 @@ class IMSDBOperator:
         NogoodWaresInventory.delete().where(NogoodWaresInventory.goods_sku_code << goods_sku_codes).execute()
 
     @classmethod
-    def delete_qualified_inventory(cls, goods_sku_codes):
+    def delete_qualified_inventory(cls, goods_sku_codes) -> None:
         """
         :param list goods_sku_codes: 销售sku编码列表
         """
@@ -198,29 +131,7 @@ class IMSDBOperator:
         return model_to_dict(item)
 
     @classmethod
-    def query_qualified_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id, bom_version='') -> dict:
-        """
-        :param string sale_sku_code: 销售sku编码
-        :param int warehouse_id: 仓库id
-        :param int to_warehouse_id: 目的仓库id
-        :param string bom_version: bom版本
-        :return: bom版本仓库sku明细字典
-        """
-        central_inventory = cls.query_central_inventory(sale_sku_code, warehouse_id, to_warehouse_id)
-        goods_inventory = cls.query_goods_inventory(sale_sku_code, warehouse_id, to_warehouse_id)
-        wares_inventory = cls.query_wares_inventory(sale_sku_code, warehouse_id, to_warehouse_id, bom_version)
-
-        qualified_inventory = dict()
-        if central_inventory:
-            qualified_inventory.update(central_inventory)
-        if goods_inventory:
-            qualified_inventory.update(goods_inventory)
-        if wares_inventory:
-            qualified_inventory.update(wares_inventory)
-        return qualified_inventory
-
-    @classmethod
-    def query_unqualified_inventory(cls, sale_sku_code, warehouse_id, bom_version='') -> dict:
+    def query_unqualified_inventory(cls, sale_sku_code, warehouse_id, bom_version='') -> list:
         """
         :param string sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
@@ -237,27 +148,4 @@ class IMSDBOperator:
                 NogoodWaresInventory.goods_sku_code == sale_sku_code,
                 NogoodWaresInventory.warehouse_id == warehouse_id)
         items = [model_to_dict(item) for item in items]
-
-        temp_ware_sku_inventory = dict()
-        for item in items:
-            if temp_ware_sku_inventory.get(item['ware_sku_code']):
-                if item['storage_location_id'] == 0:
-                    temp_ware_sku_inventory[item['ware_sku_code']].update(
-                        {"total": {'stock': item['stock'], 'block': item['block']}}
-                    )
-                elif item['storage_location_id'] > 0:
-                    temp_ware_sku_inventory[item['ware_sku_code']].update(
-                        {item['storage_location_id']: {'stock': item['stock'], 'block': item['block']}}
-                    )
-            else:
-                if item['storage_location_id'] == 0:
-                    temp_ware_sku_inventory.update({
-                        item['ware_sku_code']: {"total": {'stock': item['stock'], 'block': item['block']}}
-                    })
-                elif item['storage_location_id'] > 0:
-                    temp_ware_sku_inventory.update({
-                        item['ware_sku_code']: {
-                            item['storage_location_id']: {'stock': item['stock'], 'block': item['block']}}
-                    })
-        return temp_ware_sku_inventory
-
+        return items
