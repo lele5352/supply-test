@@ -5,11 +5,10 @@ from config.api_config.wms_api_config import wms_api_config
 from utils.request_handler import RequestHandler
 
 
-class WmsTransferController(RequestHandler):
-    def __init__(self, ums):
-        self.service_headers = ums.get_service_headers()
+class WmsTransferRequest(RequestHandler):
+    def __init__(self, service_headers):
         self.prefix = env_config.get('transfer_service_prefix')
-        super().__init__(self.prefix, self.service_headers)
+        super().__init__(self.prefix, service_headers)
 
     def transfer_out_create_demand(self, delivery_warehouse_code, delivery_target_warehouse_code,
                                    receive_warehouse_code, receive_target_warehouse_code, sale_sku_code, demand_qty,

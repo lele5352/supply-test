@@ -3,11 +3,10 @@ import copy
 from config.sys_config import env_config
 from config.api_config.scm_api_config import scm_api_config
 from utils.request_handler import RequestHandler
-from utils.mysql_handler import MysqlHandler
 from utils.log_handler import logger as log
 
 
-class ScmController(RequestHandler):
+class ScmRequest(RequestHandler):
     def __init__(self, ums):
         self.app_headers = ums.app_header
         self.prefix = env_config.get('app_prefix')

@@ -13,15 +13,15 @@ class TestCancelPurchaseOrderDelivery(object):
         测试发货仓全部采购单商品终止来货
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5)]
-        self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
+        self.sale_sku_suite_dict = ims_logics.calculate_sets(self.ware_sku_qty_list)
         sale_sku_list = [i for i in self.sale_sku_suite_dict]
         IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = delivery_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
-        self.sj_kw_ids = wms.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_request.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
-        create_res = ims.purchase_create_order(
+        create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
             warehouse_id,
             to_warehouse_id
@@ -38,13 +38,13 @@ class TestCancelPurchaseOrderDelivery(object):
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
             assert current_unqualified_inventory  == {}
 
-            cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
             after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
@@ -65,15 +65,15 @@ class TestCancelPurchaseOrderDelivery(object):
         测试中转仓全部采购单商品终止来货
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5)]
-        self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
+        self.sale_sku_suite_dict = ims_logics.calculate_sets(self.ware_sku_qty_list)
         sale_sku_list = [i for i in self.sale_sku_suite_dict]
         IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = exchange_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
-        self.sj_kw_ids = wms.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_request.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
-        create_res = ims.purchase_create_order(
+        create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
             warehouse_id,
             to_warehouse_id
@@ -90,13 +90,13 @@ class TestCancelPurchaseOrderDelivery(object):
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
             assert current_unqualified_inventory  == {}
 
-            cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
             after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
@@ -117,15 +117,15 @@ class TestCancelPurchaseOrderDelivery(object):
         测试备货仓全部采购单商品终止来货
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5)]
-        self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
+        self.sale_sku_suite_dict = ims_logics.calculate_sets(self.ware_sku_qty_list)
         sale_sku_list = [i for i in self.sale_sku_suite_dict]
         IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = stock_warehouse_id
         to_warehouse_id = ''
 
-        self.sj_kw_ids = wms.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_request.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
-        create_res = ims.purchase_create_order(
+        create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
             warehouse_id,
             to_warehouse_id
@@ -142,13 +142,13 @@ class TestCancelPurchaseOrderDelivery(object):
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
             assert current_unqualified_inventory  == {}
 
-            cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
             after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
@@ -169,15 +169,15 @@ class TestCancelPurchaseOrderDelivery(object):
         测试发货仓部分采购单商品终止来货，只留一件
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4)]
-        self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
+        self.sale_sku_suite_dict = ims_logics.calculate_sets(self.ware_sku_qty_list)
         sale_sku_list = [i for i in self.sale_sku_suite_dict]
         IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = delivery_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
-        self.sj_kw_ids = wms.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_request.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
-        create_res = ims.purchase_create_order(
+        create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
             warehouse_id,
             to_warehouse_id
@@ -194,13 +194,13 @@ class TestCancelPurchaseOrderDelivery(object):
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
             assert current_unqualified_inventory  == {}
 
-            cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
             after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
@@ -221,15 +221,15 @@ class TestCancelPurchaseOrderDelivery(object):
         测试中转仓部分采购单商品终止来货，只留一件
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4)]
-        self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
+        self.sale_sku_suite_dict = ims_logics.calculate_sets(self.ware_sku_qty_list)
         sale_sku_list = [i for i in self.sale_sku_suite_dict]
         IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = exchange_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
-        self.sj_kw_ids = wms.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_request.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
-        create_res = ims.purchase_create_order(
+        create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
             warehouse_id,
             to_warehouse_id
@@ -246,13 +246,13 @@ class TestCancelPurchaseOrderDelivery(object):
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
             assert current_unqualified_inventory  == {}
 
-            cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
             after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,
@@ -273,15 +273,15 @@ class TestCancelPurchaseOrderDelivery(object):
         测试中转仓部分采购单商品终止来货，只留一件
         """
         cancel_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4)]
-        self.sale_sku_suite_dict = ims.calculate_sets(self.ware_sku_qty_list)
+        self.sale_sku_suite_dict = ims_logics.calculate_sets(self.ware_sku_qty_list)
         sale_sku_list = [i for i in self.sale_sku_suite_dict]
         IMSDBOperator.delete_qualified_inventory(sale_sku_list)
         warehouse_id = stock_warehouse_id
         to_warehouse_id = ''
 
-        self.sj_kw_ids = wms.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_request.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
-        create_res = ims.purchase_create_order(
+        create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
             warehouse_id,
             to_warehouse_id
@@ -298,13 +298,13 @@ class TestCancelPurchaseOrderDelivery(object):
                 warehouse_id,
                 to_warehouse_id
             )
-            expect_qualified_inventory = ims.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
+            expect_qualified_inventory = ims_logics.get_purchase_create_order_expect_inventory(self.ware_sku_qty_list).get(
                 sale_sku)
             assert create_res['code'] == 200
             assert expect_qualified_inventory == after_create_inventory
             assert current_unqualified_inventory  == {}
 
-            cancel_res = ims.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
+            cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id, to_warehouse_id)
             after_cancel_inventory = IMSDBOperator.query_qualified_inventory(
                 sale_sku,
                 warehouse_id,

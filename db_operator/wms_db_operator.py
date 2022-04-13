@@ -84,7 +84,6 @@ class WMSDBOperator:
 
         :return dict: 查询结果数据，字典格式
         """
-
         item = BaseWarehouseArea.get_or_none(BaseWarehouseArea.warehouse_id == warehouse_id,
                                              BaseWarehouseArea.type == area_type)
         if not item:

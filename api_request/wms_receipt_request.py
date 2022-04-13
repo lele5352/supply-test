@@ -9,7 +9,7 @@ from config.sys_config import env_config
 from config.api_config.wms_app_api_config import wms_app_api_config
 
 
-class WmsReceiptServiceController(RequestHandler):
+class WmsReceiptServiceRequest(RequestHandler):
     def __init__(self, ums):
         self.prefix = env_config.get('receipt_service_prefix')
         self.service_headers = ums.get_service_headers()
@@ -50,6 +50,6 @@ class WmsReceiptServiceController(RequestHandler):
 
 
 if __name__ == '__main__':
-    pa = WmsReceiptServiceController()
+    pa = WmsReceiptServiceRequest()
     entry_order_code = pa.entry_order_create(2)
     print(entry_order_code)

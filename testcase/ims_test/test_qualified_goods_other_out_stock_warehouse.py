@@ -13,10 +13,10 @@ class TestQualifiedGoodsOtherOutStockWarehouse(object):
         self.sale_sku = '67330337129'
         self.bom_version = 'G'
         self.bom_detail = IMSDBOperator.query_bom_detail(self.sale_sku, self.bom_version)
-        self.sj_kw_ids = wms.db_get_kw(1, 5, len(self.bom_detail.items()), self.warehouse_id, self.target_warehouse_id)
+        self.sj_kw_ids = wms_request.db_get_kw(1, 5, len(self.bom_detail.items()), self.warehouse_id, self.target_warehouse_id)
         IMSDBOperator.delete_qualified_inventory([self.sale_sku])
         # 其他入库生成库存
-        ims.add_qualified_stock_by_other_in(
+        ims_logics.add_qualified_stock_by_other_in(
             self.sale_sku,
             self.bom_version,
             self.sale_sku_count,
@@ -53,7 +53,7 @@ class TestQualifiedGoodsOtherOutStockWarehouse(object):
                         "storageLocationId": location_id,
                         "wareSkuCode": detail[0]
                     }]
-                    block_res = ims.qualified_goods_other_out_block(
+                    block_res = ims_request.qualified_goods_other_out_block(
                         ware_sku_list,
                         self.warehouse_id,
                         self.target_warehouse_id)
@@ -81,7 +81,7 @@ class TestQualifiedGoodsOtherOutStockWarehouse(object):
                     assert block_res['code'] == 200
                     assert after_block_inventory == self.expect_inventory
 
-                    delivery_out_res = ims.qualified_goods_other_out_delivered(
+                    delivery_out_res = ims_request.qualified_goods_other_out_delivered(
                         ware_sku_list,
                         self.warehouse_id,
                         self.target_warehouse_id

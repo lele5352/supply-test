@@ -14,7 +14,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
         self.cp_kw_id = fcp_kw_id
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         IMSDBOperator.delete_unqualified_inventory(sale_sku)
-        ims.add_qualified_stock_by_other_in(
+        ims_logics.add_qualified_stock_by_other_in(
             sale_sku,
             bom,
             self.sale_sku_count,
@@ -48,7 +48,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
             for location_id, detail in mix_list:
                 for count in range(detail[1]):
                     changed_count += 1
-                    turn_to_unqualified_goods_res = ims.turn_to_unqualified_goods(
+                    turn_to_unqualified_goods_res = ims_request.turn_to_unqualified_goods(
                         detail[0],
                         location_id,
                         self.cp_kw_id,
@@ -84,7 +84,7 @@ class TestUnqualifiedGoodsChangedToQualifiedGoods(object):
                         self.expect_unqualified_inventory[detail[0]]['total']['stock'] += 1
 
                     # 获取转次后的良品库存
-                    current_inventory = ims.get_inventory(
+                    current_inventory = ims_request.get_inventory(
                         sale_sku,
                         bom,
                         self.warehouse_id,

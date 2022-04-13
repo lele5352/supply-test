@@ -8,16 +8,14 @@ from utils.request_handler import RequestHandler
 from db_operator.wms_db_operate import WMSDBOperator
 from utils.log_handler import logger as log
 
-from controller.wms_transfer_controller import WmsTransferController
-from controller.ums_controller import UmsController
+from api_request.wms_transfer_request import WmsTransferRequest
 
 
-class WmsAppController(RequestHandler):
-    def __init__(self, ums):
-        self.app_headers = ums.app_header
+class WmsAppRequest(RequestHandler):
+    def __init__(self, app_headers, service_headers):
         self.prefix = env_config.get('app_prefix')
-        self.transfer = WmsTransferController(ums)
-        super().__init__(self.prefix, self.app_headers)
+        self.transfer = WmsTransferRequest(service_headers)
+        super().__init__(self.prefix, app_headers)
 
     def get_switch_warehouse_data_perm_id(self, warehouse_id):
         wms_api_config['get_switch_warehouse_list']['data'].update({
@@ -385,5 +383,5 @@ class WmsAppController(RequestHandler):
 
 if __name__ == '__main__':
     ums = UmsController()
-    wms = WmsAppController(ums)
+    wms = WmsAppRequest(ums)
     print(wms.db_get_kw(1, 5, 2, 513, 513))

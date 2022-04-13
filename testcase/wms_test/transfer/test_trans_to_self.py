@@ -18,13 +18,13 @@ class TestTransferToSelf:
         trans_in_to_id = delivery_warehouse_id  # 调入仓的目的仓id
         trans_qty = 2  # 调拨的销售sku件数
 
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
-        wms.switch_default_warehouse(trans_out_id)
-        ims.add_qualified_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
+        wms_request.switch_default_warehouse(trans_out_id)
+        ims_logics.add_qualified_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
         trans_out_expect_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
 
         # 生成调拨需求
-        demand_res = wms.transfer_out_create_demand(
+        demand_res = wms_request.transfer_out_create_demand(
             trans_out_id,
             trans_out_to_id,
             trans_in_id,
@@ -47,13 +47,13 @@ class TestTransferToSelf:
         trans_in_to_id = ''  # 调入仓的目的仓id
 
         trans_qty = 2  # 调拨的销售sku件数
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
-        wms.switch_default_warehouse(trans_out_id)
-        ims.add_qualified_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
+        wms_request.switch_default_warehouse(trans_out_id)
+        ims_logics.add_qualified_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
         trans_out_expect_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
 
         # 生成调拨需求
-        demand_res = wms.transfer_out_create_demand(
+        demand_res = wms_request.transfer_out_create_demand(
             trans_out_id,
             trans_out_to_id,
             trans_in_id,
@@ -76,13 +76,13 @@ class TestTransferToSelf:
         trans_in_to_id = delivery_warehouse_id  # 调入仓的目的仓id
 
         trans_qty = 2  # 调拨的销售sku件数
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
-        wms.switch_default_warehouse(trans_out_id)
-        ims.add_qualified_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
+        wms_request.switch_default_warehouse(trans_out_id)
+        ims_logics.add_qualified_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
         trans_out_expect_inventory = IMSDBOperator.query_qualified_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
 
         # 生成调拨需求
-        demand_res = wms.transfer_out_create_demand(
+        demand_res = wms_request.transfer_out_create_demand(
             trans_out_id,
             trans_out_to_id,
             trans_in_id,

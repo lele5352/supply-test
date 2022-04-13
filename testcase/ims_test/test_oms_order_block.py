@@ -23,7 +23,7 @@ class TestOMSOrderBlock(object):
             self.to_warehouse_id)
 
         # oms销售订单预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -57,7 +57,7 @@ class TestOMSOrderBlock(object):
             self.to_warehouse_id)
 
         # oms销售订单预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -96,7 +96,7 @@ class TestOMSOrderBlock(object):
             self.to_warehouse_id)
 
         # oms销售订单预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -137,7 +137,7 @@ class TestOMSOrderBlock(object):
             self.to_warehouse_id)
 
         # oms销售订单预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -178,7 +178,7 @@ class TestOMSOrderBlock(object):
             self.to_warehouse_id)
 
         # oms销售订单预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -219,7 +219,7 @@ class TestOMSOrderBlock(object):
             self.to_warehouse_id)
 
         # oms销售订单预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )

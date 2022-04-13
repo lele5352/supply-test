@@ -12,7 +12,7 @@ class TestBHCTransToZZC:
         self.trans_in_to_id = delivery_warehouse_id  # 调入仓的目的仓id
 
     def setup(self):
-        wms.switch_default_warehouse(self.trans_out_id)
+        wms_request.switch_default_warehouse(self.trans_out_id)
 
     def test_1_trans_multiple_goods_components_break_up_suite(self):
         """测试成套的库存，调拨出库配件后，导致库存不成套场景"""
@@ -20,10 +20,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('BP63203684930A01', 1)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -35,7 +35,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -47,16 +47,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -66,19 +66,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -87,44 +87,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -181,10 +181,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('BP63203684930A01', 1)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -196,7 +196,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -208,16 +208,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -227,19 +227,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -248,44 +248,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -342,10 +342,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('BP63203684930A01', 2)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -357,7 +357,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -369,16 +369,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -388,19 +388,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -409,44 +409,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -504,10 +504,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -519,7 +519,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -531,16 +531,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -550,19 +550,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -571,44 +571,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -666,10 +666,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 1)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -681,7 +681,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -693,16 +693,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -712,19 +712,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -733,44 +733,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -828,10 +828,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 2)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -843,7 +843,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -855,16 +855,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -874,19 +874,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -895,44 +895,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -989,10 +989,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('63203684930', 1)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -1004,7 +1004,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -1016,16 +1016,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -1035,19 +1035,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -1056,44 +1056,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -1150,10 +1150,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('63203684930', 3)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -1165,7 +1165,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -1177,16 +1177,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -1196,19 +1196,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -1217,44 +1217,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -1312,10 +1312,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('63203684930', 3)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -1327,7 +1327,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -1339,16 +1339,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -1358,19 +1358,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -1379,44 +1379,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -1473,10 +1473,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('53170041592', 2), ('BP53170041592A01', 1)]
         sale_sku = '53170041592'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = [wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
+        trans_out_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -1488,7 +1488,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -1500,16 +1500,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -1519,19 +1519,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -1540,44 +1540,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减
@@ -1634,10 +1634,10 @@ class TestBHCTransToZZC:
         transfer_demand_goods_list = [('53170041592', 3)]
         sale_sku = '53170041592'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = [wms.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
+        trans_out_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             trans_out_sj_kw_ids,
             self.trans_out_id,
@@ -1649,7 +1649,7 @@ class TestBHCTransToZZC:
         # 生成调拨需求
         demand_list = list()
         for sku, qty in transfer_demand_goods_list:
-            demand_res = wms.transfer_out_create_demand(
+            demand_res = wms_request.transfer_out_create_demand(
                 self.trans_out_id,
                 self.trans_out_to_id,
                 self.trans_in_id,
@@ -1661,16 +1661,16 @@ class TestBHCTransToZZC:
             demand_list.append(demand_no)
 
         # 创建调拨拣货单
-        pick_order_res = wms.transfer_out_create_pick_order(demand_list, 1)
+        pick_order_res = wms_request.transfer_out_create_pick_order(demand_list, 1)
         assert pick_order_res['code'] == 200
         pick_order_code = pick_order_res['data']
 
         # 分配调拨拣货人
-        assign_pick_user_res = wms.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+        assign_pick_user_res = wms_request.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
         assert assign_pick_user_res['code'] == 200
 
         # 获取调拨拣货单详情数据
-        pick_order_details = wms.transfer_out_pick_order_detail(pick_order_code)['details']
+        pick_order_details = wms_request.transfer_out_pick_order_detail(pick_order_code)['details']
 
         pick_sku_list = list()
         for detail in pick_order_details:
@@ -1680,19 +1680,19 @@ class TestBHCTransToZZC:
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
 
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = wms.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+        confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [wms_request.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
-        submit_tray_res = wms.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
         assert submit_tray_res['code'] == 200
 
         # 查看整单获取已装托的托盘
-        tray_detail_res = wms.transfer_out_pick_order_tray_detail(pick_order_code)
+        tray_detail_res = wms_request.transfer_out_pick_order_tray_detail(pick_order_code)
         assert tray_detail_res['code'] == 200
 
         tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_res['data']]
@@ -1701,44 +1701,44 @@ class TestBHCTransToZZC:
         tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
         sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
-        finish_packing_res = wms.transfer_out_finish_packing(pick_order_code, tray_code_list)
+        finish_packing_res = wms_request.transfer_out_finish_packing(pick_order_code, tray_code_list)
         assert finish_packing_res['code'] == 200
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
 
-        transfer_out_order_detail_res = wms.transfer_out_order_detail(transfer_out_order_no)
+        transfer_out_order_detail_res = wms_request.transfer_out_order_detail(transfer_out_order_no)
         assert transfer_out_order_detail_res['code'] == 200
         # 提取箱单和库位编码对应关系
         details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail_res['data']['details']]
         sorted_details = sorted(details, key=lambda a: a[1])
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            review_res = wms.transfer_out_order_review(box_no, tray_code)
+            review_res = wms_request.transfer_out_order_review(box_no, tray_code)
             assert review_res['code'] == 200
 
         # 调拨发货绑定交接单和箱单
         for detail in details:
-            bind_res = wms.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+            bind_res = wms_request.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
             assert bind_res['code'] == 200
             handover_no = bind_res['data']['handoverNo']
 
-        delivery_res = wms.transfer_out_delivery(handover_no)
+        delivery_res = wms_request.transfer_out_delivery(handover_no)
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms.switch_default_warehouse(self.trans_in_id)
+        wms_request.switch_default_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_request.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_request.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
-        received_res = wms.transfer_in_received(handover_no)
+        received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
 
         # 调拨入库按箱单逐个整箱上架
         for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-            shelf_res = wms.transfer_in_up_shelf(detail[0], sj_kw_code)
+            shelf_res = wms_request.transfer_in_up_shelf(detail[0], sj_kw_code)
             assert shelf_res['code'] == 200
         # --------------------------------调出仓库存更新--------------------------------#
         # 预占销售商品总库存、现货库存remain扣减

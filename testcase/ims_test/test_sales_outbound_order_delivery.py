@@ -19,12 +19,12 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('BP63203684930A01', 1)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -36,7 +36,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -55,7 +55,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_oms_block_inventory
 
         # 补发单的销售出库单生成，预占现货和库位现货
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -64,7 +64,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -82,7 +82,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_delivery_order_block_inventory
 
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -111,7 +111,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -139,7 +139,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
@@ -175,12 +175,12 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('BP63203684930A01', 1)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -192,7 +192,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -211,7 +211,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_oms_block_inventory
 
         # 补发单的销售出库单生成，预占现货和库位现货
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -220,7 +220,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -238,7 +238,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_delivery_order_block_inventory
 
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -267,7 +267,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -295,7 +295,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
@@ -331,12 +331,12 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 1)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -348,7 +348,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -367,7 +367,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_oms_block_inventory
 
         # 补发单的销售出库单生成，预占现货和库位现货
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -376,7 +376,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -394,7 +394,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_delivery_order_block_inventory
 
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -423,7 +423,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -451,7 +451,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
@@ -487,12 +487,12 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('63203684930', 1), ('BP63203684930A01', 1)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -504,7 +504,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -526,7 +526,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_oms_block_inventory
 
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -535,7 +535,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -557,7 +557,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_delivery_order_block_inventory
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -582,7 +582,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -613,7 +613,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
@@ -650,12 +650,12 @@ class TestSalesOutboundOrderDelivery(object):
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3), ('63203684930B01', 1),
                             ('63203684930B02', 5)]
         delivery_order_goods_list = [('63203684930', 1), ('BP63203684930B01', 1), ('BP63203684930B02', 5)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -667,7 +667,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -690,7 +690,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_oms_block_inventory
 
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -699,7 +699,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -721,7 +721,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_delivery_order_block_inventory
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -746,7 +746,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -777,7 +777,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
@@ -814,12 +814,12 @@ class TestSalesOutboundOrderDelivery(object):
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3), ('63203684930B01', 2),
                             ('63203684930B02', 10)]
         delivery_order_goods_list = [('63203684930', 2), ('BP63203684930B01', 1), ('BP63203684930B02', 5)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -831,7 +831,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -854,7 +854,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_oms_block_inventory
 
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -863,7 +863,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -885,7 +885,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_delivery_order_block_inventory
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -910,7 +910,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -941,7 +941,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
@@ -979,12 +979,12 @@ class TestSalesOutboundOrderDelivery(object):
                             ('63203684930B02', 10)]
         delivery_order_goods_list = [('63203684930', 1), ('BP63203684930B01', 1), ('BP63203684930B02', 5),
                                      ('BP63203684930A01', 1), ('BP63203684930A02', 5)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -996,7 +996,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -1019,7 +1019,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_oms_block_inventory
 
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -1028,7 +1028,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -1050,7 +1050,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_delivery_order_block_inventory
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -1075,7 +1075,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -1106,7 +1106,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
@@ -1142,12 +1142,12 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('63203684930', 1)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -1159,7 +1159,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -1181,7 +1181,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_oms_block_inventory
 
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -1190,7 +1190,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -1212,7 +1212,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_delivery_order_block_inventory
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -1237,7 +1237,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -1268,7 +1268,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
@@ -1304,12 +1304,12 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '53170041592'  # 单品销售sku
         origin_inventory = [('53170041592A01', 1), ('53170041592A01', 2), ('53170041592A01', 3)]
         delivery_order_goods_list = [('53170041592', 6)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -1321,7 +1321,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -1343,7 +1343,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_oms_block_inventory
 
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -1352,7 +1352,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -1374,7 +1374,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_delivery_order_block_inventory
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -1399,7 +1399,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -1430,7 +1430,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
@@ -1466,12 +1466,12 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '53170041592'  # 单品销售sku
         origin_inventory = [('53170041592A01', 1), ('53170041592A01', 2), ('53170041592A01', 3)]
         delivery_order_goods_list = [('53170041592', 2), ('BP53170041592A01', 4)]
-        sj_kw_ids = wms.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
-        ims.qualified_goods_other_in(
+        ims_request.qualified_goods_other_in(
             origin_inventory,
             sj_kw_ids,
             self.warehouse_id,
@@ -1483,7 +1483,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id)
 
         # oms补发订单生成，预占
-        res = ims.oms_order_block(
+        res = ims_request.oms_order_block(
             delivery_order_goods_list,
             self.warehouse_id,
         )
@@ -1505,7 +1505,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_oms_block_inventory
 
-        delivery_order_block_res = ims.delivery_order_block(
+        delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,
             delivery_order_goods_list,
             self.warehouse_id,
@@ -1514,7 +1514,7 @@ class TestSalesOutboundOrderDelivery(object):
         # 销售出库单预占分配库存的结果列表
         block_result_list = delivery_order_block_res['data']['wareSkuList']
         # 把分配库存的预占结果按仓库sku维度聚合
-        combined_block_result_list = ims.get_combined_block_result_list(block_result_list)
+        combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
         after_delivery_order_block_inventory = IMSDBOperator.query_qualified_inventory(
@@ -1536,7 +1536,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_delivery_order_block_inventory
         # 分配库位库存，预占库位库存
-        assign_location_stock_res = ims.assign_location_stock(
+        assign_location_stock_res = ims_request.assign_location_stock(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id
@@ -1561,7 +1561,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims.confirm_pick(
+        confirm_pick_res = ims_request.confirm_pick(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -1592,7 +1592,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert self.expect_inventory == after_pick_inventory
 
         # 执行发货
-        delivery_res = ims.delivery_out(
+        delivery_res = ims_request.delivery_out(
             self.delivery_code,
             combined_block_result_list,
             self.warehouse_id,
