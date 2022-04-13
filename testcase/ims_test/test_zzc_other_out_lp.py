@@ -14,7 +14,7 @@ class TestZZCOtherOutLP(object):
         self.sale_sku = '67330337129'
         self.bom_version = 'G'
         self.bom_detail = IMSDBOperator.query_bom_detail(self.sale_sku, self.bom_version)
-        self.sj_kw_ids = wms_request.db_get_kw(1, 5, len(self.bom_detail.items()), self.warehouse_id,
+        self.sj_kw_ids = wms_logics.db_get_kw(1, 5, len(self.bom_detail.items()), self.warehouse_id,
                                                self.target_warehouse_id)
         IMSDBOperator.delete_qualified_inventory([self.sale_sku])
         # 其他入库生成库存

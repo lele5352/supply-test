@@ -19,7 +19,7 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('BP63203684930A01', 1)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
@@ -175,7 +175,7 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('BP63203684930A01', 1)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
@@ -331,7 +331,7 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 1)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
@@ -487,7 +487,7 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 2), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('63203684930', 1), ('BP63203684930A01', 1)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
@@ -650,7 +650,7 @@ class TestSalesOutboundOrderDelivery(object):
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3), ('63203684930B01', 1),
                             ('63203684930B02', 5)]
         delivery_order_goods_list = [('63203684930', 1), ('BP63203684930B01', 1), ('BP63203684930B02', 5)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
@@ -814,7 +814,7 @@ class TestSalesOutboundOrderDelivery(object):
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3), ('63203684930B01', 2),
                             ('63203684930B02', 10)]
         delivery_order_goods_list = [('63203684930', 2), ('BP63203684930B01', 1), ('BP63203684930B02', 5)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
@@ -979,7 +979,7 @@ class TestSalesOutboundOrderDelivery(object):
                             ('63203684930B02', 10)]
         delivery_order_goods_list = [('63203684930', 1), ('BP63203684930B01', 1), ('BP63203684930B02', 5),
                                      ('BP63203684930A01', 1), ('BP63203684930A02', 5)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
@@ -1142,7 +1142,7 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '63203684930'
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('63203684930', 1)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
@@ -1304,7 +1304,7 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '53170041592'  # 单品销售sku
         origin_inventory = [('53170041592A01', 1), ('53170041592A01', 2), ('53170041592A01', 3)]
         delivery_order_goods_list = [('53170041592', 6)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
@@ -1466,7 +1466,7 @@ class TestSalesOutboundOrderDelivery(object):
         sale_sku = '53170041592'  # 单品销售sku
         origin_inventory = [('53170041592A01', 1), ('53170041592A01', 2), ('53170041592A01', 3)]
         delivery_order_goods_list = [('53170041592', 2), ('BP53170041592A01', 4)]
-        sj_kw_ids = wms_request.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
+        sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])

@@ -26,14 +26,13 @@ class TestZZCOtherIntoLP(object):
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id,
-                                                                self.to_warehouse_id)
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
             assert expect_lp_inventory == qualified_inventory
 
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert unqualified_inventory == {}
 
     def test_2_up_shelf_many_single_goods_to_one_location(self):
@@ -49,19 +48,17 @@ class TestZZCOtherIntoLP(object):
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
-                                      self.to_warehouse_id)
+        res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id,
-                                                                self.to_warehouse_id)
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
             assert expect_lp_inventory == qualified_inventory
 
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert unqualified_inventory == {}
 
     def test_3_up_shelf_many_single_goods_to_several_locations(self):
@@ -73,7 +70,7 @@ class TestZZCOtherIntoLP(object):
         """
         sale_skus = ['16338527895']
         ware_sku_qty_list = [('16338527895A01', 2), ('16338527895A01', 3)]
-        sj_location_ids = wms_request.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        sj_location_ids = wms_logics.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -81,15 +78,13 @@ class TestZZCOtherIntoLP(object):
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id,
-                                                                self.to_warehouse_id)
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list,
-                                                                              sj_location_ids).get(
-                sale_sku)
+            qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
             assert expect_lp_inventory == qualified_inventory
 
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert unqualified_inventory == {}
 
     def test_4_up_shelf_one_multiple_goods_to_one_location(self):
@@ -110,12 +105,12 @@ class TestZZCOtherIntoLP(object):
 
         for sale_sku in sale_skus:
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
             assert expect_lp_inventory == qualified_inventory
 
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert unqualified_inventory == {}
 
     def test_5_up_shelf_many_multiple_goods_to_one_location(self):
@@ -131,18 +126,17 @@ class TestZZCOtherIntoLP(object):
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
-                                      self.to_warehouse_id)
+        res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
             assert expect_lp_inventory == qualified_inventory
 
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert unqualified_inventory == {}
 
     def test_6_up_shelf_many_multiple_goods_to_several_locations(self):
@@ -154,7 +148,7 @@ class TestZZCOtherIntoLP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 2), ('63203684930A01', 3)]
-        sj_location_ids = wms_request.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        sj_location_ids = wms_logics.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -163,12 +157,12 @@ class TestZZCOtherIntoLP(object):
 
         for sale_sku in sale_skus:
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
             assert expect_lp_inventory == qualified_inventory
 
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert unqualified_inventory == {}
 
     def test_7_up_shelf_different_single_goods_to_one_location(self):
@@ -185,18 +179,17 @@ class TestZZCOtherIntoLP(object):
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
-                                      self.to_warehouse_id)
+        res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
             assert expect_lp_inventory == qualified_inventory
 
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert unqualified_inventory == {}
 
     def test_8_up_shelf_different_single_goods_to_several_locations(self):
@@ -209,22 +202,21 @@ class TestZZCOtherIntoLP(object):
         sale_skus = ['16338527895', '20537964151']
         ware_sku_qty_list = [('16338527895A01', 2), ('16338527895A01', 3), ('20537964151A01', 1),
                              ('20537964151A01', 2)]
-        sj_location_ids = wms_request.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        sj_location_ids = wms_logics.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id,
-                                      self.to_warehouse_id)
+        res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
             assert expect_lp_inventory == qualified_inventory
 
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert unqualified_inventory == {}
 
     def test_9_up_shelf_multiple_goods_less_than_one_set_to_one_location(self):
@@ -244,12 +236,12 @@ class TestZZCOtherIntoLP(object):
         assert res['code'] == 200
 
         for sale_sku in sale_skus:
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
 
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_lp_inventory == qualified_inventory
             assert unqualified_inventory == {}
 
@@ -269,12 +261,12 @@ class TestZZCOtherIntoLP(object):
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
 
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_lp_inventory == qualified_inventory
             assert unqualified_inventory == {}
 
@@ -294,12 +286,12 @@ class TestZZCOtherIntoLP(object):
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
 
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_lp_inventory == qualified_inventory
             assert unqualified_inventory == {}
 
@@ -319,12 +311,12 @@ class TestZZCOtherIntoLP(object):
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
 
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_lp_inventory == qualified_inventory
             assert unqualified_inventory == {}
 
@@ -347,12 +339,12 @@ class TestZZCOtherIntoLP(object):
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
 
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_lp_inventory == qualified_inventory
             assert unqualified_inventory == {}
 
@@ -366,19 +358,19 @@ class TestZZCOtherIntoLP(object):
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5), ('63203684930B01', 1),
                              ('63203684930B02', 5)]
-        sj_location_ids = wms_request.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        sj_location_ids = wms_logics.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
         assert res['code'] == 200
         for sale_sku in sale_skus:
-            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
-                sale_sku)
+            expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(
+                ware_sku_qty_list, sj_location_ids).get(sale_sku)
 
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_lp_inventory == qualified_inventory
             assert unqualified_inventory == {}
 
@@ -390,7 +382,7 @@ class TestZZCOtherIntoLP(object):
         """
         sale_skus = ['63203684930']
         ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 4), ('63203684930A02', 1)]
-        sj_location_ids = wms_request.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+        sj_location_ids = wms_logics.db_get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
 
         IMSDBOperator.delete_qualified_inventory(sale_skus)
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
@@ -406,8 +398,8 @@ class TestZZCOtherIntoLP(object):
             expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
                 sale_sku)
             qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
-            unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id,
-                                                                         self.to_warehouse_id)
+            unqualified_inventory = ims_logics.query_format_cp_inventory(
+                sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_lp_inventory == qualified_inventory
             assert unqualified_inventory == {}
 

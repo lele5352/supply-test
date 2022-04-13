@@ -41,86 +41,6 @@ class WmsAppRequest(RequestHandler):
             return
         return True
 
-    def db_ck_id_to_code(self, warehouse_id):
-        """
-        根据仓库id获取仓库编码
-
-        :param int warehouse_id: 仓库id
-        """
-        if not warehouse_id:
-            return
-        data = WMSDBOperator.query_warehouse_info_by_id(warehouse_id)
-        return data.get('warehouse_code')
-
-    def db_ck_code_to_id(self, warehouse_code):
-        """
-        根据仓库编码获取仓库id
-
-        :param string warehouse_code: 仓库编码
-        """
-        if not warehouse_code:
-            return
-        data = WMSDBOperator.query_warehouse_info_by_code(warehouse_code)
-        return data.get('id')
-
-    def db_kw_id_to_code(self, kw_id):
-        """
-        根据库位id获取库位编码
-
-        :param int kw_id: 库位id
-        """
-        data = WMSDBOperator.query_warehouse_location_info_by_id(kw_id)
-        return data.get('warehouse_location_code')
-
-    def db_kw_code_to_id(self, kw_code):
-        """
-        根据库位编码获取库位id
-
-        :param string kw_code: 库位编码
-        """
-        data = WMSDBOperator.query_warehouse_location_info_by_code(kw_code)
-        return data.get('id')
-
-    def db_get_ck_area_id(self, warehouse_id, area_type):
-        """
-        获取指定区域类型的仓库区域id
-
-        :param int warehouse_id: 仓库id
-        :param int area_type: 区域类型
-        """
-        data = WMSDBOperator.query_warehouse_area_info_by_type(warehouse_id, area_type)
-        return str(data.get('id'))
-
-    def db_get_kw(self, return_type, kw_type, num, warehouse_id, target_warehouse_id):
-        """
-        获取指定库位类型、指定目的仓、指定数量的仓库库位
-
-        :param int return_type: 1-返回库位id；2-返回库位编码
-        :param int kw_type: 库位类型
-        :param int num: 获取的库位个数
-        :param int warehouse_id: 库位的所属仓库id
-        :param target_warehouse_id: 库位的目的仓id
-        """
-        location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, warehouse_id, target_warehouse_id)
-        if len(location_data) < num:
-            # 库位不够，则新建对应缺少的库位
-            new_locations = self.create_location(num - len(location_data), kw_type, warehouse_id, target_warehouse_id)
-            if not new_locations:
-                return
-            # 创建完缺口个数的库位后，重新获取库位
-            location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, warehouse_id, target_warehouse_id)
-        # print(location_data)
-        if return_type == 1:
-            if len(location_data) == 1:
-                return location_data[0]['id']
-            else:
-                return [location['id'] for location in location_data]
-        elif return_type == 2:
-            if len(location_data) == 1:
-                return location_data[0]['warehouse_location_code']
-            else:
-                return [location['warehouse_location_code'] for location in location_data]
-
     # 创建库位
     def create_location(self, num, kw_type, warehouse_id, target_warehouse_id=None) -> list or None:
         """
@@ -161,7 +81,9 @@ class WmsAppRequest(RequestHandler):
                 'warehouseLocationCode': kw_maps[kw_type]['code_prefix'] + now,
                 'warehouseLocationName': kw_maps[kw_type]['name_prefix'] + now,
                 'warehouseLocationType': kw_type,
-                'belongWarehouseAreaId': self.db_get_ck_area_id(warehouse_id, kw_maps[kw_type]['area_type']),
+                'belongWarehouseAreaId': WMSDBOperator.query_warehouse_area_info_by_type(warehouse_id, kw_maps[kw_type][
+                    'area_type']).get('id'),
+
                 'warehouseAreaType': kw_maps[kw_type]['area_type'],
                 'belongWarehouseId': warehouse_id,
                 'destWarehouseId': target_warehouse_id if kw_type != 6 else ''
@@ -190,10 +112,10 @@ class WmsAppRequest(RequestHandler):
             :param string remark: 备注
         """
         create_demand_res = self.transfer.transfer_out_create_demand(
-            self.db_ck_id_to_code(trans_out_id),
-            self.db_ck_id_to_code(trans_out_to_id),
-            self.db_ck_id_to_code(trans_in_id),
-            self.db_ck_id_to_code(trans_in_to_id),
+            WMSDBOperator.query_warehouse_info_by_id(trans_out_id).get('warehouse_code'),
+            WMSDBOperator.query_warehouse_info_by_id(trans_out_to_id).get('warehouse_code'),
+            WMSDBOperator.query_warehouse_info_by_id(trans_in_id).get('warehouse_code'),
+            WMSDBOperator.query_warehouse_info_by_id(trans_in_to_id).get('warehouse_code'),
             sale_sku_code,
             trans_qty,
             demand_type,
@@ -255,7 +177,7 @@ class WmsAppRequest(RequestHandler):
     def transfer_out_confirm_pick(self, pick_order_code, pick_order_details):
         """
         调拨拣货单确认拣货
-
+        :param str pick_order_code: 拣货单号
         :param dict pick_order_details: 拣货单详情
         """
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
@@ -280,11 +202,13 @@ class WmsAppRequest(RequestHandler):
         """
         调拨按需装托
 
+        :param str pick_order_code: 拣货单号
         :param dict pick_order_details: 拣货单详情数据
         :param list tp_kw_ids: 托盘库位id列表
         """
         # 获取托盘编码
-        tp_kw_codes = [self.db_kw_id_to_code(kw_id) for kw_id in tp_kw_ids]
+        tp_kw_codes = [WMSDBOperator.query_warehouse_location_info_by_id(kw_id).get('warehouse_location_code') for kw_id
+                       in tp_kw_ids]
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         tray_info_list = list()
         for detail, code in zip(pick_order_details, tp_kw_codes):
@@ -380,8 +304,3 @@ class WmsAppRequest(RequestHandler):
         up_shelf_res = self.send_request(**wms_api_config['transfer_box_up_shelf'])
         return up_shelf_res
 
-
-if __name__ == '__main__':
-    ums = UmsController()
-    wms = WmsAppRequest(ums)
-    print(wms.db_get_kw(1, 5, 2, 513, 513))
