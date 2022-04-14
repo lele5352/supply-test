@@ -1,14 +1,17 @@
 import pytest
+import allure
 
 from testcase import *
 
 
+@allure.feature("测试备货仓-次品-其他入库")
 class TestBHCOtherIntoCP(object):
     def setup_class(self):
         self.warehouse_id = stock_warehouse_id
         self.to_warehouse_id = ''
         wms_request.switch_default_warehouse(self.warehouse_id)
 
+    @allure.story("测试场景：1个单品上架到1个上架库位")
     def test_1_up_shelf_one_single_goods_to_one_location(self):
         """
         测试场景：1种单品，数量1个，上架到1个上架库位
