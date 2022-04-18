@@ -113,9 +113,9 @@ class WmsAppRequest(RequestHandler):
         """
         create_demand_res = self.transfer.transfer_out_create_demand(
             WMSDBOperator.query_warehouse_info_by_id(trans_out_id).get('warehouse_code'),
-            WMSDBOperator.query_warehouse_info_by_id(trans_out_to_id).get('warehouse_code'),
+            WMSDBOperator.query_warehouse_info_by_id(trans_out_to_id).get('warehouse_code') if trans_out_to_id else '',
             WMSDBOperator.query_warehouse_info_by_id(trans_in_id).get('warehouse_code'),
-            WMSDBOperator.query_warehouse_info_by_id(trans_in_to_id).get('warehouse_code'),
+            WMSDBOperator.query_warehouse_info_by_id(trans_in_to_id).get('warehouse_code') if trans_in_to_id else '',
             sale_sku_code,
             trans_qty,
             demand_type,

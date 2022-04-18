@@ -8,5 +8,5 @@ db_config = mysql_config.get(env)
 
 user = {
     'username': 'xuhongwei@popicorns.com',
-    'password': '123456'
+    'password': 'hw123456'
 }

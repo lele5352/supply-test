@@ -118,7 +118,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -227,7 +227,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -286,7 +285,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -395,7 +394,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -454,7 +452,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -565,7 +563,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -624,7 +621,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -736,7 +733,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -795,7 +791,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -907,7 +903,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -966,7 +961,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1077,7 +1072,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1136,7 +1130,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1247,7 +1241,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1306,7 +1299,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1418,7 +1411,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1477,7 +1469,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1587,7 +1579,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1646,7 +1637,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1758,7 +1749,6 @@ class TestBHCTransToFHC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1817,7 +1807,7 @@ class TestBHCTransToFHC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200

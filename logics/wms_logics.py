@@ -71,7 +71,7 @@ class WmsLogics:
         :param to_warehouse_id: 库位的目的仓id
         """
         location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, warehouse_id, to_warehouse_id)
-        if len(location_data) < num:
+        if not location_data or len(location_data) < num:
             # 库位不够，则新建对应缺少的库位
             new_locations = self.wms_app_request.create_location(num - len(location_data), kw_type, warehouse_id,
                                                                  to_warehouse_id)

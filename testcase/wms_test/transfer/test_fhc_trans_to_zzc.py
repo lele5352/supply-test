@@ -60,7 +60,6 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -69,9 +68,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -117,7 +118,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -145,12 +146,17 @@ class TestFHCTransToZZC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 0
-        expect_trans_in_inventory['central_remain'] = 0
-        expect_trans_in_inventory["spot_goods_stock"] = 0
-        expect_trans_in_inventory["spot_goods_remain"] = 0
-
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 0,
+            "central_block": 0,
+            "central_remain": 0,
+            "spot_goods_stock": 0,
+            "spot_goods_remain": 0,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
                 expect_trans_in_inventory.update(
@@ -221,7 +227,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -230,9 +236,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -278,7 +286,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -306,12 +314,17 @@ class TestFHCTransToZZC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 0
-        expect_trans_in_inventory['central_remain'] = 0
-        expect_trans_in_inventory["spot_goods_stock"] = 0
-        expect_trans_in_inventory["spot_goods_remain"] = 0
-
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 0,
+            "central_block": 0,
+            "central_remain": 0,
+            "spot_goods_stock": 0,
+            "spot_goods_remain": 0,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
                 expect_trans_in_inventory.update(
@@ -382,7 +395,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -391,9 +404,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -439,7 +454,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -467,11 +482,17 @@ class TestFHCTransToZZC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 0
-        expect_trans_in_inventory['central_remain'] = 0
-        expect_trans_in_inventory["spot_goods_stock"] = 0
-        expect_trans_in_inventory["spot_goods_remain"] = 0
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 0,
+            "central_block": 0,
+            "central_remain": 0,
+            "spot_goods_stock": 0,
+            "spot_goods_remain": 0,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -544,7 +565,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -553,9 +574,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -601,7 +624,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -630,10 +653,17 @@ class TestFHCTransToZZC:
             )
         # --------------------------------调入仓库存更新--------------------------------#
         # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 1
-        expect_trans_in_inventory['central_remain'] = 1
-        expect_trans_in_inventory["spot_goods_stock"] = 1
-        expect_trans_in_inventory["spot_goods_remain"] = 1
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 1,
+            "central_block": 0,
+            "central_remain": 1,
+            "spot_goods_stock": 1,
+            "spot_goods_remain": 1,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -661,8 +691,7 @@ class TestFHCTransToZZC:
 
     def test_5_trans_multiple_goods_one_set_components_and_one_suite_with_different_bom_stock(self):
         """测试多bom库存，调拨成套的配件和销售sku场景，其中部件对应的bom版本库存等于部件成套库存"""
-        origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3),
-                            ('63203684930B01', 1),
+        origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3), ('63203684930B01', 1),
                             ('63203684930B02', 5)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 1)]
         sale_sku = '63203684930'
@@ -707,7 +736,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -716,9 +745,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -764,7 +795,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -791,12 +822,19 @@ class TestFHCTransToZZC:
                     tp_kw_id: {'block': 0, 'stock': 0}
                 }
             )
-        # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 2
-        expect_trans_in_inventory['central_remain'] = 2
-        expect_trans_in_inventory["spot_goods_stock"] = 2
-        expect_trans_in_inventory["spot_goods_remain"] = 2
+            # --------------------------------调入仓库存更新--------------------------------#
+            # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
+            # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+            expect_trans_in_inventory.update({
+                "central_stock": 2,
+                "central_block": 0,
+                "central_remain": 2,
+                "spot_goods_stock": 2,
+                "spot_goods_remain": 2,
+                "transfer_on_way_stock": 0,
+                "transfer_on_way_remain": 0
+            })
+            # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -824,8 +862,7 @@ class TestFHCTransToZZC:
 
     def test_6_trans_multiple_goods_one_set_components_and_two_suite_with_different_bom_stock(self):
         """测试多bom库存，调拨成套的配件和销售sku场景，其中部件对应的bom版本库存大于部件成套库存"""
-        origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3),
-                            ('63203684930B01', 2),
+        origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3), ('63203684930B01', 2),
                             ('63203684930B02', 10)]
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 2)]
         sale_sku = '63203684930'
@@ -870,7 +907,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -879,9 +916,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -927,7 +966,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -954,12 +993,19 @@ class TestFHCTransToZZC:
                     tp_kw_id: {'block': 0, 'stock': 0}
                 }
             )
-        # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
+            # --------------------------------调入仓库存更新--------------------------------#
+            # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
+            # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+            expect_trans_in_inventory.update({
+                "central_stock": 3,
+                "central_block": 0,
+                "central_remain": 3,
+                "spot_goods_stock": 3,
+                "spot_goods_remain": 3,
+                "transfer_on_way_stock": 0,
+                "transfer_on_way_remain": 0
+            })
+            # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -1031,7 +1077,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1040,9 +1086,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1088,7 +1136,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1117,10 +1165,17 @@ class TestFHCTransToZZC:
             )
         # --------------------------------调入仓库存更新--------------------------------#
         # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 1
-        expect_trans_in_inventory['central_remain'] = 1
-        expect_trans_in_inventory["spot_goods_stock"] = 1
-        expect_trans_in_inventory["spot_goods_remain"] = 1
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 1,
+            "central_block": 0,
+            "central_remain": 1,
+            "spot_goods_stock": 1,
+            "spot_goods_remain": 1,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -1192,7 +1247,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1201,9 +1256,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1249,7 +1306,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1276,12 +1333,19 @@ class TestFHCTransToZZC:
                     tp_kw_id: {'block': 0, 'stock': 0}
                 }
             )
-        # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
+            # --------------------------------调入仓库存更新--------------------------------#
+            # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
+            # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+            expect_trans_in_inventory.update({
+                "central_stock": 3,
+                "central_block": 0,
+                "central_remain": 3,
+                "spot_goods_stock": 3,
+                "spot_goods_remain": 3,
+                "transfer_on_way_stock": 0,
+                "transfer_on_way_remain": 0
+            })
+            # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -1309,8 +1373,7 @@ class TestFHCTransToZZC:
 
     def test_9_trans_multiple_goods_three_suites_with_two_bom_stock(self):
         """测试调拨多品多个bom库存"""
-        origin_inventory = [('63203684930A01', 2), ('63203684930A02', 4), ('63203684930A02', 6),
-                            ('63203684930B01', 1),
+        origin_inventory = [('63203684930A01', 2), ('63203684930A02', 4), ('63203684930A02', 6), ('63203684930B01', 1),
                             ('63203684930B02', 5)]
         transfer_demand_goods_list = [('63203684930', 3)]
         sale_sku = '63203684930'
@@ -1355,7 +1418,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1364,9 +1427,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1412,7 +1477,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1440,12 +1505,17 @@ class TestFHCTransToZZC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
-
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 3,
+            "central_block": 0,
+            "central_remain": 3,
+            "spot_goods_stock": 3,
+            "spot_goods_remain": 3,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
                 expect_trans_in_inventory.update(
@@ -1476,7 +1546,8 @@ class TestFHCTransToZZC:
         transfer_demand_goods_list = [('53170041592', 2), ('BP53170041592A01', 1)]
         sale_sku = '53170041592'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = [wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
+        trans_out_sj_kw_ids = [
+            wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -1516,7 +1587,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1525,9 +1596,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1573,7 +1646,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1600,12 +1673,19 @@ class TestFHCTransToZZC:
                     tp_kw_id: {'block': 0, 'stock': 0}
                 }
             )
-        # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
+            # --------------------------------调入仓库存更新--------------------------------#
+            # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
+            # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+            expect_trans_in_inventory.update({
+                "central_stock": 3,
+                "central_block": 0,
+                "central_remain": 3,
+                "spot_goods_stock": 3,
+                "spot_goods_remain": 3,
+                "transfer_on_way_stock": 0,
+                "transfer_on_way_remain": 0
+            })
+            # 调入仓wares_inventory表插入库位库存数据
 
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
@@ -1637,7 +1717,8 @@ class TestFHCTransToZZC:
         transfer_demand_goods_list = [('53170041592', 3)]
         sale_sku = '53170041592'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = [wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
+        trans_out_sj_kw_ids = [
+            wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -1677,7 +1758,7 @@ class TestFHCTransToZZC:
 
         pick_sku_list = list()
         for detail in pick_order_details:
-            #     for location_id, qty in pick_sku_dict[ware_sku].items():
+            
             pick_sku_list.append(
                 (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
@@ -1686,9 +1767,11 @@ class TestFHCTransToZZC:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                    self.trans_out_to_id)
         else:
-            trans_out_tp_kw_ids = [wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+            trans_out_tp_kw_ids = [
+                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1734,7 +1817,7 @@ class TestFHCTransToZZC:
             trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
             trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_request.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1762,12 +1845,17 @@ class TestFHCTransToZZC:
                 }
             )
         # --------------------------------调入仓库存更新--------------------------------#
-        # 调入仓销售商品总库存增加，库位总库存增加、库位库存增加，block为0
-        expect_trans_in_inventory["central_stock"] = 3
-        expect_trans_in_inventory['central_remain'] = 3
-        expect_trans_in_inventory["spot_goods_stock"] = 3
-        expect_trans_in_inventory["spot_goods_remain"] = 3
-
+        # 调入仓central_inventory/goods_inventory表插入为0数据，因为不成套
+        expect_trans_in_inventory.update({
+            "central_stock": 3,
+            "central_block": 0,
+            "central_remain": 3,
+            "spot_goods_stock": 3,
+            "spot_goods_remain": 3,
+            "transfer_on_way_stock": 0,
+            "transfer_on_way_remain": 0
+        })
+        # 调入仓wares_inventory表插入库位库存数据
         for detail, in_sj_kw_id in zip(sorted_tray_sku_list, trans_in_sj_kw_ids):
             if detail['waresSkuCode'] not in expect_trans_in_inventory:
                 expect_trans_in_inventory.update(

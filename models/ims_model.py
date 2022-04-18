@@ -2,7 +2,7 @@ from peewee import *
 
 from config.sys_config import db_config
 
-database = MySQLDatabase('supply_ims_new', **db_config)
+database = MySQLDatabase('supply_ims', **db_config)
 
 
 class UnknownField(object):
