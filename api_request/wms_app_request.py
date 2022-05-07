@@ -2,7 +2,7 @@ import json
 import time
 from copy import deepcopy
 
-from config.sys_config import env_config
+from config.sys_config import env_prefix_config
 from config.api_config.wms_api_config import wms_api_config
 from utils.request_handler import RequestHandler
 from db_operator.wms_db_operator import WMSDBOperator
@@ -13,7 +13,7 @@ from api_request.wms_transfer_request import WmsTransferRequest
 
 class WmsAppRequest(RequestHandler):
     def __init__(self, app_headers, service_headers):
-        self.prefix = env_config.get('app_prefix')
+        self.prefix = env_prefix_config.get('app_prefix')
         self.transfer = WmsTransferRequest(service_headers)
         super().__init__(self.prefix, app_headers)
 
@@ -304,3 +304,16 @@ class WmsAppRequest(RequestHandler):
         up_shelf_res = self.send_request(**wms_api_config['transfer_box_up_shelf'])
         return up_shelf_res
 
+    def label_callback(self, delivery_order_code, order_list):
+        """
+        :param string delivery_order_code: 出库单号
+        :param list order_list: 出库单下的包裹物流单信息列表
+
+        """
+        wms_api_config['label_callback']['data'].update(
+            {
+                "deliveryNo": delivery_order_code,
+                "orderList": order_list
+            })
+        callback_res = self.send_request(**wms_api_config['label_callback'])
+        return callback_res

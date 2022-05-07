@@ -6,6 +6,7 @@ from testcase import *
 class TestZZCOtherIntoLP(object):
     def setup_class(self):
         self.warehouse_id = exchange_warehouse_id
+        self.warehouse_id2 = exchange_warehouse_id2
         self.to_warehouse_id = delivery_warehouse_id
         wms_request.switch_default_warehouse(self.warehouse_id)
 
@@ -402,6 +403,44 @@ class TestZZCOtherIntoLP(object):
                 sale_sku, self.warehouse_id, self.to_warehouse_id)
             assert expect_lp_inventory == qualified_inventory
             assert unqualified_inventory == {}
+    #
+    # def test_16_up_shelf_multiple_goods_one_set_to_two_zzc(self):
+    #     """
+    #     测试场景：多品够2套，2个bom，在2个不同中转仓（相同目的仓）入库上架；期望：central凑够2套，goods2个中转仓都不够1套；
+    #     销售sku：63203684930
+    #     bom:A 63203684930A01:63203684930A02 => 1:5
+    #     """
+    #     sale_sku = '63203684930'
+    #     ware_sku_qty_list = [('63203684930A01', 1), ('63203684930B02', 5)]
+    #     ware_sku_qty_list2 = [('63203684930B01', 1), ('63203684930A02', 5)]
+    #     total_ware_sku_qty_list = [('63203684930A01', 1), ('63203684930A02', 5),
+    #                                ('63203684930B01', 1), ('63203684930B02', 5)]
+    #
+    #     sj_location_ids = wms_logics.get_kw(1, 5, len(ware_sku_qty_list), self.warehouse_id, self.to_warehouse_id)
+    #     sj_location_ids2 = wms_logics.get_kw(1, 5, len(ware_sku_qty_list2), self.warehouse_id2, self.to_warehouse_id)
+    #
+    #     IMSDBOperator.delete_qualified_inventory([sale_sku])
+    #     IMSDBOperator.delete_unqualified_inventory([sale_sku])
+    #
+    #     # 先入中转仓1
+    #     res = ims_request.lp_other_in(ware_sku_qty_list, sj_location_ids, self.warehouse_id, self.to_warehouse_id)
+    #     assert res['code'] == 200
+    #     expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(ware_sku_qty_list, sj_location_ids).get(
+    #         sale_sku)
+    #     qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+    #     assert expect_lp_inventory == qualified_inventory
+    #     unqualified_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+    #     assert unqualified_inventory == {}
+    #
+    #     # 构造入库仓库sku明细数据
+    #     res = ims_request.lp_other_in(ware_sku_qty_list2, sj_location_ids2, self.warehouse_id2, self.to_warehouse_id)
+    #     assert res['code'] == 200
+    #
+    #     for sale_sku in sale_skus:
+    #         expect_lp_inventory = ims_logics.get_lp_other_in_expect_inventory(total_ware_sku_qty_list,
+    #                                                                           sj_location_ids).get(sale_sku)
+    #         qualified_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+    #
 
 
 if __name__ == '__main__':

@@ -185,4 +185,4 @@ class ScmDataGenerator:
 if __name__ == '__main__':
     scm = ScmDataGenerator()
     # for i in range(500):
-    scm.create_distribute_order(["63203684930"], 1, 'ESZZ', 'ESFH')
+    scm.create_distribute_order(["67330337129"], 1, 'ESZZ', 'ESFH')

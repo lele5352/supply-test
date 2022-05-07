@@ -75,7 +75,7 @@ class TestDeliveryPick(object):
                 }
             )
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             ware_sku_list,
             self.warehouse_id
@@ -143,7 +143,7 @@ class TestDeliveryPick(object):
                 }
             )
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             ware_sku_list,
             self.warehouse_id

@@ -138,6 +138,7 @@ ims_api_config = {
             {
                 "functionType": "4",
                 "operateType": "2",
+                "idempotentSign": "",
                 "operatorId": 8,
                 "sourceNo": "CK2109040073",
                 "wareSkuList": [
@@ -401,6 +402,28 @@ ims_api_config = {
                 "toStorageLocationType": 6,
                 "wareSkuCode": "11471839197A01",
                 "warehouseId": 31
+            }
+    },
+    "move_stock": {
+        "uri_path": "/ims/service/common/move/stock",
+        "method": "post",
+        "data":
+            {
+                "functionType": "6",
+                "idempotentSign": "",
+                "needBlockEmpty": True,
+                "operateType": "19",
+                "sourceNo": "",
+                "wareSkuList": [
+                    {
+                        "fromStorageLocationId": 0,
+                        "qty": 0,
+                        "toStorageLocationId": 0,
+                        "toStorageLocationType": "",
+                        "toTargetWarehouseId": 0,
+                        "wareSkuCode": ""
+                    }
+                ]
             }
     }
 }

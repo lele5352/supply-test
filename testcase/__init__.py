@@ -15,10 +15,8 @@ service_headers = ums_logics.get_service_headers()
 ims_request = ImsRequest()
 ims_logics = ImsLogics(ims_request)
 
-wms_app_request = WmsAppRequest(app_headers, service_headers)
-wms_logics = WmsLogics(wms_app_request)
-
 wms_request = WmsAppRequest(app_headers, service_headers)
+wms_logics = WmsLogics(wms_request)
 
 # 160的测试数据
 # sale_sku = '63203684930'

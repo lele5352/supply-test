@@ -1,3 +1,7 @@
+import time
+from copy import deepcopy
+
+from config.api_config.wms_api_config import wms_api_config
 from db_operator.wms_db_operator import WMSDBOperator
 
 
@@ -90,3 +94,35 @@ class WmsLogics:
                 return location_data[0]['warehouse_location_code']
             else:
                 return [location['warehouse_location_code'] for location in location_data]
+
+    def mock_express_label_callback(self, delivery_order_code, package_list):
+        """
+        :param string delivery_order_code: 出库单号
+        :param list package_list: 包裹列表
+
+        """
+        order_list = list()
+        count = 0
+        for package in package_list:
+            count += 1
+            temp_order_info = deepcopy(wms_api_config['label_callback']['data']['orderList'][0])
+            temp_order_info.update({
+                "deliveryNo": delivery_order_code,
+                "packageNoList": [package],
+                "logistyNo": "logistyNo" + str(int(time.time() * 1000 + count)),
+                "barCode": "barCode" + str(int(time.time() * 1000 + count)),
+                "turnOrderNo": str(int(time.time() * 1000)),
+                "drawOrderNo": str(int(time.time() * 1000))
+            })
+            order_list.append(temp_order_info)
+        res = self.wms_app_request.label_callback(delivery_order_code, order_list)
+        if res['code'] == 200:
+            return True
+        else:
+            return False
+
+    @classmethod
+    def query_delivery_order_package_list(cls, delivery_order_code):
+        data = WMSDBOperator.query_delivery_order_package_info(delivery_order_code)
+        package_no_list = [package['package_code'] for package in data]
+        return package_no_list

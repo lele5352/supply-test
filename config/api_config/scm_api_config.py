@@ -73,7 +73,7 @@ scm_api_config = {
             "pageNumber": 1,
             "pageSize": 10,
             "total": 100,
-            "status": "",
+            "status": [],
             "destinationWarehouse": "",
             "deliveryWarehouse": "",
             "qualityInspectionType": -1,
@@ -83,7 +83,8 @@ scm_api_config = {
             "supplierAcceptStatus": -1,
             "tracerId": "",
             "isExportImage": True,
-            "stockOrderNos": []
+            "stockOrderNos": [],
+            "isFirstOrder": ""
         }
     },
     "purchase_order_update": {

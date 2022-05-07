@@ -1,6 +1,6 @@
 import copy
 
-from config.sys_config import env_config
+from config.sys_config import env_prefix_config
 from config.api_config.scm_api_config import scm_api_config
 from utils.request_handler import RequestHandler
 from utils.log_handler import logger as log
@@ -8,7 +8,7 @@ from utils.log_handler import logger as log
 
 class ScmRequest(RequestHandler):
     def __init__(self, app_headers):
-        self.prefix = env_config.get('app_prefix')
+        self.prefix = env_prefix_config.get('app_prefix')
         super().__init__(self.prefix, app_headers)
 
     def get_sku_info(self, sale_sku_code):

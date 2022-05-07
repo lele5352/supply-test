@@ -1,9 +1,10 @@
-from config import env_configs, mysql_config
+from config.env_prefix_config import env_prefix_configs
+from config.mysql_config import mysql_config
 
-# env = 'test26'
+# env:'test160'/'test25'/'test26'
 env = 'test160'
-# env = 'test25'
-env_config = env_configs.get(env)
+
+env_prefix_config = env_prefix_configs.get(env)
 db_config = mysql_config.get(env)
 
 user = {

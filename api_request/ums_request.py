@@ -4,12 +4,12 @@ from utils.rsa_handler import encrypt_data
 from utils.request_handler import RequestHandler
 
 from config.api_config.ums_api_config import ums_api_config
-from config.sys_config import env_config, user
+from config.sys_config import env_prefix_config, user
 
 
 class UmsRequest(RequestHandler):
     def __init__(self):
-        self.prefix = env_config.get('app_prefix')
+        self.prefix = env_prefix_config.get('app_prefix')
         self.headers = {'Content-Type': 'application/json;charset=UTF-8'}
         super().__init__(self.prefix, self.headers)
 

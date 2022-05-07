@@ -1,13 +1,13 @@
 import time
 
-from config.sys_config import env_config
+from config.sys_config import env_prefix_config
 from config.api_config.wms_api_config import wms_api_config
 from utils.request_handler import RequestHandler
 
 
 class WmsTransferRequest(RequestHandler):
     def __init__(self, service_headers):
-        self.prefix = env_config.get('transfer_service_prefix')
+        self.prefix = env_prefix_config.get('transfer_service_prefix')
         super().__init__(self.prefix, service_headers)
 
     def transfer_out_create_demand(self, delivery_warehouse_code, delivery_target_warehouse_code,

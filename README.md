@@ -8,18 +8,23 @@
 模块说明：
 
     - supply-test 根目录
-        - barcodes 条形码生成文件夹
-        - config 配置文件
-            - api_config 接口配置文件夹，存放各系统接口配置文件
-            - mysql_config 数据库配置文件
-            - sys_config 系统配置文件，用于配置全局变量
-            - __init__ 维护多套环境的环境配置
-        
-        - controller 控制层，封装各系统接口调用
-        - logs 日志文件夹
-        - script 脚本文件夹，存放脚本
-        - testcase 测试用例文件夹，存放接口测试用例
-        - utils 通用工具模块
+    - config 配置文件
+        - api_config 接口配置文件夹，存放各系统接口配置文件
+        - sys_config 系统配置文件，用于配置全局变量
+        - __init__ 域名配置和数据库配置
+    - testcase 测试用例,基于api_request编排测试场景
+    - data_generator 基于api_request编排业务流程，生成业务数据
+    - script 脚本文件夹，存放脚本
+
+    - logics 逻辑层，基于api_request编排业务逻辑
+    - db_operator 各系统数据库操作
+    - api_request 各系统接口原子封装
+
+    - utils 通用工具模块
+    - models 数据库表模型
+    - barcodes 条形码生成文件夹
+    - logs 日志文件夹
+
 
 拓展说明：
 
@@ -29,5 +34,6 @@
     
 
 model生成：
+
     接入了ORM框架peewee，使用下面命令将现有数据库表反向生成model
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_auth > models/ums_model.py

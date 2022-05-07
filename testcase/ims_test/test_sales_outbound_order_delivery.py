@@ -111,7 +111,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -267,7 +267,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -423,7 +423,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -582,7 +582,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -746,7 +746,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -910,7 +910,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -1075,7 +1075,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -1237,7 +1237,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -1399,7 +1399,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id
@@ -1561,7 +1561,7 @@ class TestSalesOutboundOrderDelivery(object):
         assert res['code'] == 200
         assert self.expect_inventory == after_assign_stock_inventory
 
-        confirm_pick_res = ims_request.confirm_pick(
+        confirm_pick_res = ims_logics.confirm_all_picked(
             self.delivery_code,
             assigned_sku_list,
             self.warehouse_id

@@ -410,6 +410,14 @@ class ImsLogics:
 
     def add_cp_stock_by_other_in(self, sale_sku_code, bom_version, add_stock_count, cp_location_ids,
                                  warehouse_id, to_warehouse_id):
+        """
+        :param str sale_sku_code: 销售sku编码
+        :param str bom_version: bom版本
+        :param int add_stock_count: 销售sku件数
+        :param list cp_location_ids: 次品库位列表
+        :param int warehouse_id: 仓库id
+        :param int to_warehouse_id: 目的仓库id
+        """
         details = IMSDBOperator.query_bom_detail(sale_sku_code, bom_version)
         ware_sku_qty_list = list()
         for ware_sku, qty in details.items():
@@ -419,6 +427,14 @@ class ImsLogics:
 
     def add_lp_stock_by_other_in(self, sale_sku_code, bom_version, add_stock_count, location_ids, warehouse_id,
                                  to_warehouse_id):
+        """
+        :param str sale_sku_code: 销售sku编码
+        :param str bom_version: bom版本
+        :param int add_stock_count: 销售sku件数
+        :param list location_ids: 库位列表
+        :param int warehouse_id: 仓库id
+        :param int to_warehouse_id: 目的仓库id
+        """
         details = IMSDBOperator.query_bom_detail(sale_sku_code, bom_version)
         ware_sku_qty_list = list()
         for ware_sku, qty in details.items():
@@ -444,3 +460,33 @@ class ImsLogics:
                 (ware_sku, total_qty)
             )
         return sorted(ware_sku_list, key=lambda s: s[0])
+
+    def move_dock_to_sj_kw(self, warehouse_id, source_no, ware_sku_qty_list, sj_kw_ids):
+        """
+        :param str source_no: 来源单号
+        :param list sj_kw_ids: 上架库位id列表
+        :param list ware_sku_qty_list: 仓库sku及件数关系，格式：[(ware_sku_code，qty),...]
+        :param int warehouse_id: 仓库id
+
+        :return dict: 查询结果数据，字典格式
+        """
+        ware_sku_list = list()
+        for (ware_sku, qty), sj_kw_id in zip(ware_sku_qty_list, sj_kw_ids):
+            ware_sku_list.append({
+                "fromStorageLocationId": -warehouse_id,
+                "qty": qty,
+                "toStorageLocationId": sj_kw_id,
+                "toStorageLocationType": "5",
+                "toTargetWarehouseId": warehouse_id,
+                "wareSkuCode": ware_sku
+            })
+        move_res = self.ims_request.move_stock(source_no, ware_sku_list)
+        return move_res
+
+    # 确认拣货
+    def confirm_all_picked(self, delivery_order_no, block_ware_list, warehouse_id):
+        pick_res = self.ims_request.confirm_pick(delivery_order_no, block_ware_list, warehouse_id)
+        return pick_res
+
+    # 基于当前wares_inventory计算期望wares_inventory,同个仓，同个销售sku维度
+    # def expect_wares_inventory(self, before_wares_inventory, ):

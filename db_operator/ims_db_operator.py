@@ -30,6 +30,23 @@ class IMSDBOperator:
         return items
 
     @classmethod
+    def query_wares_inventory_by_target_warehouse_id(cls, ware_sku_code, to_warehouse_id) -> list:
+        """
+        :param str ware_sku_code: 仓库sku编码
+        :param int to_warehouse_id: 目的仓id
+
+        :return dict: 查询结果数据，字典格式
+        """
+
+        items = WaresInventory.select().order_by(WaresInventory.warehouse_id, WaresInventory.type).where(
+            WaresInventory.ware_sku_code == ware_sku_code,
+            WaresInventory.target_warehouse_id == to_warehouse_id)
+        if not items:
+            return []
+        items = [model_to_dict(item) for item in items]
+        return items
+
+    @classmethod
     def query_goods_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id) -> list:
         """
         :param str sale_sku_code: 销售sku编码
@@ -149,3 +166,10 @@ class IMSDBOperator:
                 NogoodWaresInventory.warehouse_id == warehouse_id)
         items = [model_to_dict(item) for item in items]
         return items
+
+
+if __name__ == '__main__':
+    IMSDBOperator.delete_qualified_inventory(['67330337129'])
+    # data = IMSDBOperator.query_wares_inventory_by_target_warehouse_id('67330337129G01', 513)
+    # print(data, '\n', len(data))
+

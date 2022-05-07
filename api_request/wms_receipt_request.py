@@ -4,13 +4,13 @@ from utils.barcode_handler import barcode_generate
 from utils.request_handler import RequestHandler
 from utils.log_handler import logger as log
 
-from config.sys_config import env_config
+from config.sys_config import env_prefix_config
 from config.api_config.wms_api_config import wms_api_config
 
 
 class WmsReceiptServiceRequest(RequestHandler):
     def __init__(self, ums):
-        self.prefix = env_config.get('receipt_service_prefix')
+        self.prefix = env_prefix_config.get('receipt_service_prefix')
         self.service_headers = ums.get_service_headers()
         super().__init__(self.prefix, self.service_headers)
 

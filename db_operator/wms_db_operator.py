@@ -83,3 +83,16 @@ class WMSDBOperator:
         if not item:
             return
         return model_to_dict(item)
+
+    @classmethod
+    def query_delivery_order_package_info(cls, delivery_order_code):
+        """
+        :param string delivery_order_code: 销售出库单号
+        :return: 查询结果数据，字典格式
+        """
+        items = TdoDeliveryPackage.select().where(TdoDeliveryPackage.delivery_order_code == delivery_order_code,
+                                                  TdoDeliveryPackage.del_flag == 0)
+        if not items:
+            return
+        items = [model_to_dict(item) for item in items]
+        return items

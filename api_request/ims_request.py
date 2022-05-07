@@ -2,13 +2,13 @@ import time
 
 from utils.request_handler import RequestHandler
 from config.api_config.ims_api_config import ims_api_config
-from config.sys_config import env_config
+from config.sys_config import env_prefix_config
 from db_operator.ims_db_operator import IMSDBOperator
 
 
 class ImsRequest(RequestHandler):
     def __init__(self):
-        self.prefix = env_config.get('ims_service_prefix')
+        self.prefix = env_prefix_config.get('ims_service_prefix')
         self.service_headers = {"serviceName": "ec-warehouse-delivery-service"}
         super().__init__(self.prefix, self.service_headers)
 
@@ -285,18 +285,15 @@ class ImsRequest(RequestHandler):
             })
         ims_api_config['assign_location_stock']['data'][0].update({
             "wareSkuList": temp_list,
+            'idempotentSign': str(int(time.time() * 1000)),
             "sourceNo": delivery_order_no,
-            "warehouseId": warehouse_id
+            "warehouseId": warehouse_id,
         })
         res = self.send_request(**ims_api_config['assign_location_stock'])
         return res
 
     # 确认拣货
     def confirm_pick(self, delivery_order_no, pick_ware_sku_list, warehouse_id):
-        for pick_item in pick_ware_sku_list:
-            pick_item.update({
-                "storageLocationType": 5,
-            })
         ims_api_config['confirm_pick']['data'].update({
             "wareSkuList": pick_ware_sku_list,
             "sourceNo": delivery_order_no,
@@ -494,6 +491,17 @@ class ImsRequest(RequestHandler):
         files = {'file': open(excel, 'rb')}
         res = self.send_request(**ims_api_config['import_stock_excel_data'], files=files)
         return res
+
+    def move_stock(self,source_no, ware_sku_list):
+        ims_api_config['move_stock']['data'].update(
+            {
+                "sourceNo": source_no,
+                "wareSkuList": ware_sku_list,
+                "idempotentSign": str(int(time.time() * 1000))
+            }
+        )
+        move_stock_res = self.send_request(**ims_api_config['move_stock'])
+        return move_stock_res
 
 
 if __name__ == '__main__':

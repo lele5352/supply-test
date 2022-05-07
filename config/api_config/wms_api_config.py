@@ -167,5 +167,41 @@ wms_api_config = {
             "sourceCode": "aaaaaaaaaaaaaaa",
             "demandType": 1  # 1:按需调拨需求 2：备货调拨需求
         }
+    },
+    "label_callback": {
+        "uri_path": "/api/ec-wms-api/delivery-order-api/push-express-order/v2",
+        "method": "post",
+        "data": {
+            "deliveryNo": "PRE-CK2205050011",
+            "orderList": [
+                {
+                    "expressChangeFlag": 0,
+                    "expressChangeVersion": "1",
+                    "deliveryNo": "PRE-CK2205050011",
+                    "packageNoList": [
+                        "PRE-BG2205050039"
+                    ],
+                    "logistyNo": "64324234152-119900",
+                    "barCode": "534574353214234-119900",
+                    "serviceName": "正式-Postpony",
+                    "serviceCode": "prod-PostPony",
+                    "channelName": "正式-PostPony-PostPony",
+                    "channelCode": "UspsFirstClassMail",
+                    "fileList": [
+                        {
+                            "filePath": "https://img.popicorns.com/dev/file/2022/02/28/f8a138a6a3e5447cad33a9ab9cc800fa.pdf",
+                            "fileType": "pdf",
+                            "fileCategory": "1",
+                            "fileScale": "10*10",
+                            "fileCopies": "1",
+                            "filePrintDirection": "0"
+                        }
+                    ],
+                    "extInfo": "{\"logisticsMerchant\": \"UPS1\", \"turnOrderNo\": \"转运单号123123\"}",
+                    "turnOrderNo": "543255",
+                    "drawOrderNo": "7879096854"
+                }
+            ]
+        }
     }
 }
