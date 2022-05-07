@@ -6,12 +6,13 @@ class IMSDBOperator:
     @classmethod
     def query_wares_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id, bom_version='') -> list:
         """
+        查询wares_inventory表指定条件数据
+
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
         :param int to_warehouse_id: 目的仓id
         :param any bom_version: bom版本
-
-        :return dict: 查询结果数据，字典格式
+        :return: 查询结果数据list
         """
         if bom_version:
             items = WaresInventory.select().order_by(WaresInventory.ware_sku_code).where(
@@ -32,10 +33,11 @@ class IMSDBOperator:
     @classmethod
     def query_wares_inventory_by_target_warehouse_id(cls, ware_sku_code, to_warehouse_id) -> list:
         """
+        根据目的仓查询wares_inventory表指定仓库sku的数据
+
         :param str ware_sku_code: 仓库sku编码
         :param int to_warehouse_id: 目的仓id
-
-        :return dict: 查询结果数据，字典格式
+        :return : 查询结果数据list
         """
 
         items = WaresInventory.select().order_by(WaresInventory.warehouse_id, WaresInventory.type).where(
@@ -49,11 +51,12 @@ class IMSDBOperator:
     @classmethod
     def query_goods_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id) -> list:
         """
+        查询goods_inventory表指定条件数据
+
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
         :param int to_warehouse_id: 目的仓id
-
-        :return dict: 查询结果数据，字典格式
+        :return: 查询结果数据list
         """
         to_warehouse_id = to_warehouse_id if to_warehouse_id else 0
         items = GoodsInventory.select().where(
@@ -68,6 +71,8 @@ class IMSDBOperator:
     @classmethod
     def query_central_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id) -> dict:
         """
+        查询central_inventory表指定条件数据
+
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
         :param int to_warehouse_id: 目的仓id
@@ -85,6 +90,8 @@ class IMSDBOperator:
     @classmethod
     def delete_wares_inventory_by_goods_sku_codes(cls, goods_sku_codes) -> None:
         """
+        删除wares_inventory表指定销售sku的全部数据
+
         :param list goods_sku_codes: 销售sku编码列表
         """
         WaresInventory.delete().where(WaresInventory.goods_sku_code << goods_sku_codes).execute()
@@ -92,6 +99,8 @@ class IMSDBOperator:
     @classmethod
     def delete_goods_inventory_by_goods_sku_codes(cls, goods_sku_codes) -> None:
         """
+        删除goods_inventory表指定销售sku的全部数据
+
         :param list goods_sku_codes: 销售sku编码列表
         """
         GoodsInventory.delete().where(GoodsInventory.goods_sku_code << goods_sku_codes).execute()
@@ -99,6 +108,8 @@ class IMSDBOperator:
     @classmethod
     def delete_central_inventory_by_goods_sku_codes(cls, goods_sku_codes) -> None:
         """
+        删除central_inventory表指定销售sku的全部数据
+
         :param list goods_sku_codes: 销售sku编码列表
         """
         CentralInventory.delete().where(CentralInventory.goods_sku_code << goods_sku_codes).execute()
@@ -106,6 +117,8 @@ class IMSDBOperator:
     @classmethod
     def delete_unqualified_inventory(cls, goods_sku_codes) -> None:
         """
+        删除nogood_wares_inventory表指定销售sku的全部数据
+
         :param list goods_sku_codes: 销售sku编码列表
         """
         NogoodWaresInventory.delete().where(NogoodWaresInventory.goods_sku_code << goods_sku_codes).execute()
@@ -113,6 +126,8 @@ class IMSDBOperator:
     @classmethod
     def delete_qualified_inventory(cls, goods_sku_codes) -> None:
         """
+        删除指定销售sku的全部良品库存数据，包括central_inventory、goods_inventory、central_inventory三个表
+
         :param list goods_sku_codes: 销售sku编码列表
         """
         cls.delete_central_inventory_by_goods_sku_codes(goods_sku_codes)
@@ -122,6 +137,8 @@ class IMSDBOperator:
     @classmethod
     def query_bom_detail(cls, sale_sku_code, bom_version) -> dict:
         """
+        查询指定销售sku的bom明细数据，并格式化为：{ware_sku1:bom_qty1,ware_sku2:bom_qty2}
+
         :param string sale_sku_code: 销售sku编码
         :param string bom_version: bom版本
         :return: bom版本仓库sku明细字典
@@ -133,14 +150,14 @@ class IMSDBOperator:
         sale_sku_bom_detail = dict()
         for item in items:
             sale_sku_bom_detail.update(
-                {
-                    item['ware_sku_code']: item['bom_qty']
-                })
+                {item['ware_sku_code']: item['bom_qty']})
         return sale_sku_bom_detail
 
     @classmethod
     def query_bom_detail_by_ware_sku_code(cls, ware_sku_code) -> dict:
         """
+        查询指定仓库sku的bom明细数据
+
         :param string ware_sku_code: 仓库sku编码
         :return: 仓库sku的对应的bom明细
         """
@@ -150,6 +167,8 @@ class IMSDBOperator:
     @classmethod
     def query_unqualified_inventory(cls, sale_sku_code, warehouse_id, bom_version='') -> list:
         """
+        查询指定销售sku的次品库存数据
+
         :param string sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
         :param string bom_version: bom版本
@@ -166,10 +185,3 @@ class IMSDBOperator:
                 NogoodWaresInventory.warehouse_id == warehouse_id)
         items = [model_to_dict(item) for item in items]
         return items
-
-
-if __name__ == '__main__':
-    IMSDBOperator.delete_qualified_inventory(['67330337129'])
-    # data = IMSDBOperator.query_wares_inventory_by_target_warehouse_id('67330337129G01', 513)
-    # print(data, '\n', len(data))
-

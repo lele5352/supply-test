@@ -386,15 +386,11 @@ class ImsLogics:
                     if expect_lp_inventory[ware_sku].get('warehouse_total'):
                         expect_lp_inventory[ware_sku]['warehouse_total']['stock'] += qty
                     else:
-                        expect_lp_inventory[ware_sku].update({
-                            'warehouse_total': {'stock': qty, 'block': 0}
-                        })
+                        expect_lp_inventory[ware_sku].update({'warehouse_total': {'stock': qty, 'block': 0}})
                     if expect_lp_inventory[ware_sku].get('purchase_on_way'):
                         expect_lp_inventory[ware_sku]['purchase_on_way']['stock'] += qty
                     else:
-                        expect_lp_inventory[ware_sku].update({
-                            'purchase_on_way': {'stock': qty, 'block': 0}
-                        })
+                        expect_lp_inventory[ware_sku].update({'purchase_on_way': {'stock': qty, 'block': 0}})
                 else:
                     # 更新temp_ware_dict写入库位总库存和仓库总库存
                     expect_lp_inventory.update({
