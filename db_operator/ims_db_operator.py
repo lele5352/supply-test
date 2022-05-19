@@ -4,45 +4,32 @@ from playhouse.shortcuts import model_to_dict
 
 class IMSDBOperator:
     @classmethod
-    def query_wares_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id, bom_version='') -> list:
+    def query_wares_inventory(cls, sale_sku_code, ck_id, to_ck_id, data_type=1) -> list:
         """
         查询wares_inventory表指定条件数据
 
         :param str sale_sku_code: 销售sku编码
-        :param int warehouse_id: 仓库id
-        :param int to_warehouse_id: 目的仓id
-        :param any bom_version: bom版本
+        :param int ck_id: 所属仓库id
+        :param int to_ck_id: 目的仓库id
+        :param int data_type: 返回类型，1-只返回本仓数据；2-返回全部该销售sku对应的全部wares_inventory数据
         :return: 查询结果数据list
         """
-        if bom_version:
+        if data_type == 1:
             items = WaresInventory.select().order_by(WaresInventory.ware_sku_code).where(
                 WaresInventory.goods_sku_code == sale_sku_code,
-                WaresInventory.bom_version == bom_version,
-                WaresInventory.warehouse_id == warehouse_id,
-                WaresInventory.target_warehouse_id == to_warehouse_id)
+                WaresInventory.warehouse_id == ck_id,
+                WaresInventory.target_warehouse_id == to_ck_id)
         else:
-            items = WaresInventory.select().order_by(WaresInventory.ware_sku_code).where(
-                WaresInventory.goods_sku_code == sale_sku_code,
-                WaresInventory.warehouse_id == warehouse_id,
-                WaresInventory.target_warehouse_id == to_warehouse_id)
-        if not items:
-            return []
-        items = [model_to_dict(item) for item in items]
-        return items
-
-    @classmethod
-    def query_wares_inventory_by_target_warehouse_id(cls, ware_sku_code, to_warehouse_id) -> list:
-        """
-        根据目的仓查询wares_inventory表指定仓库sku的数据
-
-        :param str ware_sku_code: 仓库sku编码
-        :param int to_warehouse_id: 目的仓id
-        :return : 查询结果数据list
-        """
-
-        items = WaresInventory.select().order_by(WaresInventory.warehouse_id, WaresInventory.type).where(
-            WaresInventory.ware_sku_code == ware_sku_code,
-            WaresInventory.target_warehouse_id == to_warehouse_id)
+            # 发货仓和中转，需要查库存为该销售sku在发货仓和中转仓的库存合集，按目的仓查即可
+            if to_ck_id and to_ck_id != 0:
+                items = WaresInventory.select().order_by(WaresInventory.ware_sku_code).where(
+                    WaresInventory.goods_sku_code == sale_sku_code,
+                    WaresInventory.target_warehouse_id == to_ck_id)
+            # 备货仓,按所属仓库id查询即可
+            else:
+                items = WaresInventory.select().order_by(WaresInventory.ware_sku_code).where(
+                    WaresInventory.goods_sku_code == sale_sku_code,
+                    WaresInventory.warehouse_id == ck_id)
         if not items:
             return []
         items = [model_to_dict(item) for item in items]
@@ -183,5 +170,5 @@ class IMSDBOperator:
             items = NogoodWaresInventory.select().order_by(NogoodWaresInventory.ware_sku_code).where(
                 NogoodWaresInventory.goods_sku_code == sale_sku_code,
                 NogoodWaresInventory.warehouse_id == warehouse_id)
-        items = [model_to_dict(item) for item in items]
-        return items
+        data = [model_to_dict(item) for item in items]
+        return data

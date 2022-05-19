@@ -83,7 +83,6 @@ class WmsLogics:
                 return
             # 创建完缺口个数的库位后，重新获取库位
             location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, warehouse_id, to_warehouse_id)
-        # print(location_data)
         if return_type == 1:
             if len(location_data) == 1:
                 return location_data[0]['id']
