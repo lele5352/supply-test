@@ -386,7 +386,7 @@ class ImsLogics:
         return result_dict
 
     @classmethod
-    def get_expect_wares_inventory(cls, ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id, data_type, with_bom=True):
+    def get_expect_wares_inventory(cls, ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id, data_type):
         result_dict = dict()
 
         change_inventory = cls.format_ware_sku_qty_list_for_expect_inventory(ware_sku_qty_list, kw_ids_list)
@@ -456,14 +456,6 @@ class ImsLogics:
             result_dict.update({
                 sale_sku: temp_dict
             })
-        if not with_bom:
-            without_bom_dict = dict()
-            for sale_sku in result_dict:
-                for item in result_dict[sale_sku].values():
-                    without_bom_dict.update(item)
-                result_dict.update({
-                    sale_sku: without_bom_dict
-                })
         return result_dict
 
     @classmethod
