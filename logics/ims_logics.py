@@ -8,8 +8,9 @@ class ImsLogics:
         self.ims_request = ims_request
 
     @classmethod
-    def format_wares_inventory(cls, wares_inventory):
+    def format_wares_inventory(cls, wares_inventory) -> dict:
         """
+        把查库获取到的wares_inventory数据格式化为库存统一数据结构
         :param list wares_inventory: wares_inventory库存数据
         :return dict: 查询结果数据，字典格式
         """
@@ -107,8 +108,7 @@ class ImsLogics:
     @classmethod
     def query_format_wares_inventory_self(cls, sale_sku_code, ck_id, to_ck_id):
         """
-        仅返回指定销售sku在指定所属仓+目的仓的单个仓库数据
-
+        仅查询指定销售sku在指定所属仓+目的仓的单个仓库数据,并格式化为统一库存结构进行返回
         :param str sale_sku_code: 销售sku编码
         :param int ck_id: 仓库id
         :param int to_ck_id: 目的仓id
@@ -120,8 +120,7 @@ class ImsLogics:
     @classmethod
     def query_format_wares_inventory_all(cls, sale_sku_code, ck_id, to_ck_id):
         """
-        返回指定销售sku在全部相关仓库的数据
-
+        查询指定销售sku在全部相关仓库的数据,并格式化为统一库存结构进行返回
         :param str sale_sku_code: 销售sku编码
         :param int ck_id: 仓库id
         :param int to_ck_id: 目的仓id
@@ -133,6 +132,7 @@ class ImsLogics:
     @classmethod
     def query_format_goods_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id):
         """
+        查询指定销售sku的goods_inventory数据，并格式化为库存统一结构进行返回
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
         :param int to_warehouse_id: 目的仓id
@@ -162,10 +162,10 @@ class ImsLogics:
     @classmethod
     def query_format_central_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id):
         """
+        查询指定销售sku的central_inventory数据，并格式化为库存统一结构进行返回
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
         :param int to_warehouse_id: 目的仓id
-
         :return dict: 查询结果数据，字典格式
         """
         central_inventory = IMSDBO.query_central_inventory(sale_sku_code, warehouse_id, to_warehouse_id)
@@ -181,7 +181,8 @@ class ImsLogics:
     @classmethod
     def query_lp_inventories(cls, sale_sku_list, warehouse_id, to_warehouse_id) -> dict:
         """
-        :param list sale_sku_list: 销售sku编码列表,格式[(sale_sku,bom),...]
+        查询销售sku列表中各销售sku的库存数据，并全部格式化为库存统一格式进行返回
+        :param list sale_sku_list: 销售sku编码列表
         :param int warehouse_id: 仓库id
         :param int to_warehouse_id: 目的仓库id
         :return: 格式化后的良品库存数据
@@ -204,7 +205,11 @@ class ImsLogics:
         return result
 
     @classmethod
-    def get_sale_skus(cls, ware_sku_qty_list):
+    def get_sale_skus(cls, ware_sku_qty_list) -> list:
+        """
+        根据ware_sku_qty_list计算出对应的销售sku列表
+        :param list ware_sku_qty_list: 变更的仓库sku及数量列表，格式[(ware_sku,qty),...]
+        """
         sale_sku_list = list()
         ware_sku_list = [_[0] for _ in cls.combine_ware_sku_qty_list(ware_sku_qty_list)]
         for ware_sku in ware_sku_list:
@@ -295,6 +300,7 @@ class ImsLogics:
     @classmethod
     def calc_suites(cls, sale_sku, bom, wares_inventory, level):
         """
+        根据格式化好的期望wares_inventory库存数据，匹配bom版本明细计算各销售成套数
         :param string sale_sku: 销售sku编码
         :param string bom: bom版本
         :param dict wares_inventory: 销售sku对应bom的wares_inventory库存数据
@@ -323,7 +329,11 @@ class ImsLogics:
         return min_stock, max_block, remain
 
     @classmethod
-    def combine_ware_sku_qty_list(cls, ware_sku_qty_list):
+    def combine_ware_sku_qty_list(cls, ware_sku_qty_list) -> list:
+        """
+        把ware_sku_qty_list去重合且累加数量
+        :param list ware_sku_qty_list: 变动的ware_sku、qty列表，格式[(ware_sku,qty),...]
+        """
         ware_sku_list = list()
         temp_dict = dict()
         for ware_sku, qty in ware_sku_qty_list:
@@ -336,11 +346,11 @@ class ImsLogics:
         return sorted(ware_sku_list, key=lambda s: s[0])
 
     @classmethod
-    def format_ware_sku_qty_list_for_expect_inventory(cls, ware_sku_qty_list, kw_ids_list=None):
+    def get_add_stock_change_inventory(cls, ware_sku_qty_list, kw_ids_list=None) -> dict:
         """
+        把ware_sku_qty_list格式化库存统一格式
         :param list ware_sku_qty_list: 变动的ware_sku、qty列表，格式[(ware_sku,qty),...]
         :param list optional kw_ids_list: 库位id列表
-
         """
         result_dict = dict()
         if kw_ids_list:
@@ -386,10 +396,49 @@ class ImsLogics:
         return result_dict
 
     @classmethod
-    def get_expect_wares_inventory(cls, ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id, data_type):
+    def get_deduct_kw_stock_change_inventory(cls, ware_sku_kw_qty_list) -> dict:
+        """
+        把ware_sku_qty_list格式化库存统一格式
+        :param list ware_sku_kw_qty_list: 变动的ware_sku、qty列表，格式[(ware_sku,qty),...]
+        """
         result_dict = dict()
 
-        change_inventory = cls.format_ware_sku_qty_list_for_expect_inventory(ware_sku_qty_list, kw_ids_list)
+        for ware_sku, qty, kw_id in ware_sku_kw_qty_list:
+            bom_detail_info = IMSDBO.query_bom_detail_by_ware_sku_code(ware_sku)
+            sale_sku, bom = bom_detail_info['goods_sku_code'], bom_detail_info['bom_version']
+            if sale_sku not in result_dict:
+                result_dict.update({
+                    sale_sku: {bom: {ware_sku: {kw_id: qty}}}
+                })
+            elif bom not in result_dict[sale_sku]:
+                result_dict[sale_sku].update({
+                    bom: {ware_sku: {kw_id: qty}}
+                })
+            elif ware_sku not in result_dict[sale_sku][bom]:
+                result_dict[sale_sku][bom].update(
+                    {ware_sku: {kw_id: qty}}
+                )
+            elif kw_id not in result_dict[sale_sku][bom][ware_sku]:
+                result_dict[sale_sku][bom][ware_sku].update(
+                    {kw_id: qty}
+                )
+            else:
+                result_dict[sale_sku][bom][ware_sku][kw_id] += qty
+        return result_dict
+
+    @classmethod
+    def get_add_kw_stock_expect_wares_inventory(cls, ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id, data_type):
+        """
+        根据变更的仓库sku及数量列表计算加库位库存后期望wares_inventory库存数据，按库存数据统一结构返回
+        :param list ware_sku_qty_list: 变动的ware_sku、qty列表，格式[(ware_sku,qty),...]
+        :param list kw_ids_list: 库位id列表
+        :param int ck_id: 所属仓库id
+        :param int to_ck_id: 目的仓库id
+        :param int data_type: 数据范围，1:仅查询本仓数据；2:查询全部相关数据
+        """
+        result_dict = dict()
+
+        change_inventory = cls.get_add_stock_change_inventory(ware_sku_qty_list, kw_ids_list)
         for sale_sku in change_inventory:
             if data_type == 1:
                 wares_inventory = cls.query_format_wares_inventory_self(sale_sku, ck_id, to_ck_id)
@@ -397,17 +446,17 @@ class ImsLogics:
                 wares_inventory = cls.query_format_wares_inventory_all(sale_sku, ck_id, to_ck_id)
             temp_dict = dict()
             for bom in change_inventory[sale_sku]:
-
                 for ware_sku in change_inventory[sale_sku][bom]:
                     for kw_id, qty in change_inventory[sale_sku][bom][ware_sku].items():
                         # 如果查到库存数据，根据仓库sku是否在库存数据中存在处理库存数据
                         if wares_inventory:
                             if bom not in wares_inventory:
                                 wares_inventory.update(
-                                    {bom: {ware_sku: {
-                                        kw_id: {'stock': qty, 'block': 0},
-                                        'warehouse_total': {'stock': qty, 'block': 0},
-                                        'location_total': {'stock': qty, 'block': 0}}}}
+                                    {bom: {
+                                        ware_sku: {
+                                            kw_id: {'stock': qty, 'block': 0},
+                                            'warehouse_total': {'stock': qty, 'block': 0},
+                                            'location_total': {'stock': qty, 'block': 0}}}}
                                 )
                             elif ware_sku not in wares_inventory[bom]:
                                 wares_inventory[bom].update({
@@ -459,7 +508,94 @@ class ImsLogics:
         return result_dict
 
     @classmethod
-    def get_expect_goods_inventory(cls, wares_inventory, warehouse_id, to_warehouse_id):
+    def get_deduct_kw_stock_expect_wares_inventory(cls, ware_sku_kw_qty_list, kw_ids_list, ck_id, to_ck_id, data_type):
+        """
+        根据变更的仓库sku、库位和数量列表计算加库位库存后期望wares_inventory库存数据，按库存数据统一结构返回
+        :param list ware_sku_kw_qty_list: 变动的ware_sku、qty列表，格式[(ware_sku,qty),...]
+        :param list kw_ids_list: 库位id列表
+        :param int ck_id: 所属仓库id
+        :param int to_ck_id: 目的仓库id
+        :param int data_type: 数据范围，1:仅查询本仓数据；2:查询全部相关数据
+        """
+        result_dict = dict()
+
+        change_inventory = cls.get_add_stock_change_inventory(ware_sku_kw_qty_list)
+        for sale_sku in change_inventory:
+            if data_type == 1:
+                wares_inventory = cls.query_format_wares_inventory_self(sale_sku, ck_id, to_ck_id)
+            else:
+                wares_inventory = cls.query_format_wares_inventory_all(sale_sku, ck_id, to_ck_id)
+            temp_dict = dict()
+            for bom in change_inventory[sale_sku]:
+                for ware_sku in change_inventory[sale_sku][bom]:
+                    for kw_id, qty in change_inventory[sale_sku][bom][ware_sku].items():
+                        # 如果查到库存数据，根据仓库sku是否在库存数据中存在处理库存数据
+                        if wares_inventory:
+                            if bom not in wares_inventory:
+                                wares_inventory.update(
+                                    {bom: {
+                                        ware_sku: {
+                                            kw_id: {'stock': qty, 'block': 0},
+                                            'warehouse_total': {'stock': qty, 'block': 0},
+                                            'location_total': {'stock': qty, 'block': 0}}}}
+                                )
+                            elif ware_sku not in wares_inventory[bom]:
+                                wares_inventory[bom].update({
+                                    ware_sku: {
+                                        kw_id: {'stock': qty, 'block': 0},
+                                        'warehouse_total': {'stock': qty, 'block': 0},
+                                        'location_total': {'stock': qty, 'block': 0}
+                                    }
+                                })
+                            elif kw_id not in wares_inventory[bom][ware_sku]:
+                                wares_inventory[bom][ware_sku].update({
+                                    kw_id: {'stock': qty, 'block': 0}
+                                })
+                                wares_inventory[bom][ware_sku]['warehouse_total']['stock'] += qty
+                                wares_inventory[bom][ware_sku]['location_total']['stock'] += qty
+                            else:
+                                wares_inventory[bom][ware_sku][kw_id]['stock'] += qty
+                                wares_inventory[bom][ware_sku]['warehouse_total']['stock'] += qty
+                                wares_inventory[bom][ware_sku]['location_total']['stock'] += qty
+                            temp_dict.update(wares_inventory)
+                        else:
+                            if bom not in temp_dict:
+                                temp_dict.update({
+                                    bom: {
+                                        ware_sku: {kw_id: {'stock': qty, 'block': 0},
+                                                   'warehouse_total': {'stock': qty, 'block': 0},
+                                                   'location_total': {'stock': qty, 'block': 0}}}
+                                })
+                            elif ware_sku not in temp_dict[bom]:
+                                temp_dict[bom].update({
+                                    ware_sku: {
+                                        kw_id: {'stock': qty, 'block': 0},
+                                        'warehouse_total': {'stock': qty, 'block': 0},
+                                        'location_total': {'stock': qty, 'block': 0}}
+                                })
+                            elif kw_id not in temp_dict[bom][ware_sku]:
+                                temp_dict[bom][ware_sku].update({
+                                    kw_id: {'stock': qty, 'block': 0}
+                                })
+                                temp_dict[bom][ware_sku]['warehouse_total']['stock'] += qty
+                                temp_dict[bom][ware_sku]['location_total']['stock'] += qty
+                            else:
+                                temp_dict[bom][ware_sku][kw_id]['stock'] += qty
+                                temp_dict[bom][ware_sku]['warehouse_total']['stock'] += qty
+                                temp_dict[bom][ware_sku]['location_total']['stock'] += qty
+            result_dict.update({
+                sale_sku: temp_dict
+            })
+        return result_dict
+
+    @classmethod
+    def get_expect_goods_inventory(cls, wares_inventory, ck_id, to_ck_id):
+        """
+        根据wares_inventory生成goods_inventory期望库存，并格式化为统一库存格式返回
+        :param dict wares_inventory: 格式化为统一库存结构的wares_inventory数据
+        :param int ck_id: 所属仓库id
+        :param int to_ck_id: 目的仓库id
+        """
         result_dict = dict()
         for sale_sku in wares_inventory:
             total_stock = 0
@@ -469,7 +605,7 @@ class ImsLogics:
                 stock, block, remain = cls.calc_suites(sale_sku, bom, inventory, 'location_total')
                 total_stock += stock
                 total_remain += remain
-            goods_inventory = cls.query_format_goods_inventory(sale_sku, warehouse_id, to_warehouse_id)
+            goods_inventory = cls.query_format_goods_inventory(sale_sku, ck_id, to_ck_id)
             if goods_inventory:
                 goods_inventory['spot_goods_stock'] = total_stock
                 goods_inventory['spot_goods_remain'] = total_remain
@@ -484,7 +620,13 @@ class ImsLogics:
         return result_dict
 
     @classmethod
-    def get_expect_central_inventory(cls, wares_inventory, warehouse_id, to_warehouse_id):
+    def get_expect_central_inventory(cls, wares_inventory, ck_id, to_ck_id):
+        """
+        根据wares_inventory生成central_inventory期望库存，并格式化为统一库存格式返回
+        :param dict wares_inventory: 格式化为统一库存结构的wares_inventory数据
+        :param int ck_id: 所属仓库id
+        :param int to_ck_id: 目的仓库id
+        """
         result_dict = dict()
         for sale_sku in wares_inventory:
             total_stock = 0
@@ -494,7 +636,7 @@ class ImsLogics:
                 stock, block, remain = cls.calc_suites(sale_sku, bom, inventory, 'warehouse_total')
                 total_stock += stock
                 total_remain += remain
-            central_inventory = cls.query_format_central_inventory(sale_sku, warehouse_id, to_warehouse_id)
+            central_inventory = cls.query_format_central_inventory(sale_sku, ck_id, to_ck_id)
             if central_inventory:
                 central_inventory['central_stock'] = total_stock
                 central_inventory['central_remain'] = total_remain
@@ -510,10 +652,20 @@ class ImsLogics:
         return result_dict
 
     @classmethod
-    def get_expect_inventory_with_kws(cls, ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id):
-        wares_inventory_for_goods = cls.get_expect_wares_inventory(ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id, 1)
-        wares_inventory_for_central = cls.get_expect_wares_inventory(ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id, 2)
-        wares_inventory = cls.get_expect_wares_inventory(ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id, 1)
+    def get_add_kw_stock_expect_inventory(cls, ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id):
+        """
+        计算带库位的库存变动后的期望库存
+        :param list ware_sku_qty_list: 变动的ware_sku、qty列表，格式[(ware_sku,qty),...]
+        :param list kw_ids_list: 库位id列表
+        :param int ck_id: 所属仓库id
+        :param int to_ck_id: 目的仓库id
+        """
+        wares_inventory_for_goods = cls.get_add_kw_stock_expect_wares_inventory(ware_sku_qty_list, kw_ids_list, ck_id,
+                                                                                to_ck_id, 1)
+        wares_inventory_for_central = cls.get_add_kw_stock_expect_wares_inventory(ware_sku_qty_list, kw_ids_list, ck_id,
+                                                                                  to_ck_id, 2)
+        wares_inventory = cls.get_add_kw_stock_expect_wares_inventory(ware_sku_qty_list, kw_ids_list, ck_id, to_ck_id,
+                                                                      1)
 
         expect_goods_inventory = cls.get_expect_goods_inventory(wares_inventory_for_goods, ck_id, to_ck_id)
         expect_central_inventory = cls.get_expect_central_inventory(wares_inventory_for_central, ck_id, to_ck_id)

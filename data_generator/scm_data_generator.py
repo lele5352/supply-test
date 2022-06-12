@@ -184,5 +184,7 @@ class ScmDataGenerator:
 
 if __name__ == '__main__':
     scm = ScmDataGenerator()
-    # for i in range(500):
-    scm.create_distribute_order(["67330337129"], 1, 'ESZZ', 'ESFH')
+
+    # scm.create_distribute_order(["67330337129"], 1, 'ESZZ', 'ESFH')
+    # scm.create_stock_plan(['67330337129'], 1, 'ESZZ', 'ESFH')
+    scm.create_purchase_demand(['67330337129'], 1, 'ESZZ', 'ESFH')

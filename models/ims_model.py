@@ -15,13 +15,13 @@ class BaseModel(Model):
 
 
 class BlockBook(BaseModel):
-    block_book_id = CharField()
+    block_book_id = CharField(index=True)
     bom_version = CharField(null=True)
     book_state = IntegerField()
     change_qty = IntegerField()
     change_type = IntegerField(null=True)
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
-    event_code = CharField()
+    event_code = CharField(index=True)
     event_desc = CharField()
     from_block_qty = IntegerField()
     from_location_qty = IntegerField()
@@ -33,7 +33,7 @@ class BlockBook(BaseModel):
     operate_log_id = BigIntegerField()
     relation_table_id = BigIntegerField()
     relation_table_name = CharField()
-    source_no = CharField()
+    source_no = CharField(index=True)
     storage_location_id = BigIntegerField(null=True)
     system_code = CharField()
     target_warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -59,7 +59,7 @@ class BomDetail(BaseModel):
     is_deleted = IntegerField(constraints=[SQL("DEFAULT 0")])
     trace_id = CharField(null=True)
     version = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    ware_sku_code = CharField()
+    ware_sku_code = CharField(index=True)
 
     class Meta:
         table_name = 'bom_detail'
@@ -126,24 +126,6 @@ class IdempotentResult(BaseModel):
         )
 
 
-class NoSuitCheckRecord(BaseModel):
-    all_stock = IntegerField(constraints=[SQL("DEFAULT 0")])
-    bom_version = CharField()
-    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
-    goods_sku_code = CharField()
-    id = BigAutoField()
-    is_deleted = IntegerField(constraints=[SQL("DEFAULT 0")])
-    no_suit_stock = IntegerField(constraints=[SQL("DEFAULT 0")])
-    target_warehouse_id = BigIntegerField(null=True)
-    trace_id = CharField(null=True)
-    version = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    ware_sku_code = CharField()
-    warehouse_id = BigIntegerField()
-
-    class Meta:
-        table_name = 'no_suit_check_record'
-
-
 class NogoodWaresInventory(BaseModel):
     block = IntegerField(constraints=[SQL("DEFAULT 0")])
     bom_version = CharField(null=True)
@@ -189,7 +171,7 @@ class StockBook(BaseModel):
     change_remain = IntegerField(null=True)
     change_type = IntegerField(null=True)
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
-    event_code = CharField(null=True)
+    event_code = CharField(index=True, null=True)
     event_desc = CharField(null=True)
     from_block_qty = IntegerField(null=True)
     from_location_qty = IntegerField()
@@ -202,8 +184,8 @@ class StockBook(BaseModel):
     operate_log_id = BigIntegerField()
     relation_table_id = BigIntegerField()
     relation_table_name = CharField()
-    source_no = CharField()
-    stock_book_id = CharField()
+    source_no = CharField(index=True)
+    stock_book_id = CharField(index=True)
     storage_location_id = BigIntegerField(null=True)
     system_code = CharField()
     target_warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -225,14 +207,14 @@ class StockBook(BaseModel):
 class StockCheckRecord(BaseModel):
     change_qty = IntegerField()
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
-    current_warehouse_id = BigIntegerField(null=True)
+    current_warehouse_id = BigIntegerField()
     from_qty = IntegerField(null=True)
     goods_sku_code = CharField()
     id = BigAutoField()
     is_deleted = IntegerField(constraints=[SQL("DEFAULT 0")])
     stock_remain = IntegerField(constraints=[SQL("DEFAULT 0")])
     table_id = BigIntegerField(null=True)
-    table_name = CharField(constraints=[SQL("DEFAULT 'goods_inventory'")], index=True)
+    table_name = CharField(constraints=[SQL("DEFAULT 'goods_inventory'")])
     target_warehouse_id = BigIntegerField(null=True)
     to_qty = IntegerField(null=True)
     trace_id = CharField(null=True)
@@ -280,6 +262,5 @@ class WaresInventory(BaseModel):
     class Meta:
         table_name = 'wares_inventory'
         indexes = (
-            (('goods_sku_code', 'bom_version'), False),
             (('ware_sku_code', 'warehouse_id', 'storage_location_id', 'target_warehouse_id', 'type'), True),
         )

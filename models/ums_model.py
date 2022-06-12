@@ -14,6 +14,28 @@ class BaseModel(Model):
         database = database
 
 
+class ExcelImportTask(BaseModel):
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    create_user_id = BigIntegerField()
+    create_user_name = CharField()
+    fail_num = IntegerField(null=True)
+    finish_time = DateTimeField(null=True)
+    id = BigAutoField()
+    import_result = UnknownField(null=True)  # json
+    import_status = IntegerField()
+    import_type = IntegerField()
+    is_deleted = IntegerField(constraints=[SQL("DEFAULT 0")])
+    success_num = IntegerField(null=True)
+    trace_id = CharField(null=True)
+    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    update_user_id = BigIntegerField(null=True)
+    update_user_name = CharField(null=True)
+    version = IntegerField(null=True)
+
+    class Meta:
+        table_name = 'excel_import_task'
+
+
 class OauthClientDetails(BaseModel):
     access_token_validity = IntegerField(null=True)
     additional_information = CharField(null=True)
@@ -104,30 +126,6 @@ class SysResource(BaseModel):
         table_name = 'sys_resource'
 
 
-class SysResourceCopy1(BaseModel):
-    component = CharField(null=True)
-    create_time = DateTimeField(null=True)
-    create_user = BigIntegerField(null=True)
-    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    icon = CharField(null=True)
-    id = BigAutoField()
-    keep_alive = IntegerField(null=True)
-    parent_id = BigIntegerField(null=True)
-    path = CharField(null=True)
-    permission = CharField(null=True)
-    resource_code = CharField(constraints=[SQL("DEFAULT ''")])
-    resource_name = CharField(null=True)
-    sort = IntegerField(constraints=[SQL("DEFAULT 1")], null=True)
-    state = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    sys_type = IntegerField(constraints=[SQL("DEFAULT 1")])
-    type = IntegerField(null=True)
-    update_time = DateTimeField(null=True)
-    update_user = BigIntegerField(null=True)
-
-    class Meta:
-        table_name = 'sys_resource_copy1'
-
-
 class SysResourceUrl(BaseModel):
     create_time = DateTimeField(null=True)
     create_user = BigIntegerField(null=True)
@@ -135,7 +133,7 @@ class SysResourceUrl(BaseModel):
     id = BigAutoField()
     operate_type = IntegerField(constraints=[SQL("DEFAULT 0")])
     req_method = CharField(constraints=[SQL("DEFAULT 'POST'")], null=True)
-    resource_id = BigIntegerField(constraints=[SQL("DEFAULT 1")])
+    resource_id = BigIntegerField(constraints=[SQL("DEFAULT 1")], index=True)
     update_time = DateTimeField(null=True)
     update_user = BigIntegerField(null=True)
     url = CharField(null=True)
@@ -143,23 +141,6 @@ class SysResourceUrl(BaseModel):
 
     class Meta:
         table_name = 'sys_resource_url'
-
-
-class SysResourceUrl210928(BaseModel):
-    create_time = DateTimeField(null=True)
-    create_user = BigIntegerField(null=True)
-    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    id = BigAutoField()
-    operate_type = IntegerField(constraints=[SQL("DEFAULT 0")])
-    req_method = CharField(constraints=[SQL("DEFAULT 'POST'")], null=True)
-    resource_id = BigIntegerField(constraints=[SQL("DEFAULT 1")])
-    update_time = DateTimeField(null=True)
-    update_user = BigIntegerField(null=True)
-    url = CharField(null=True)
-    url_name = CharField(constraints=[SQL("DEFAULT ''")])
-
-    class Meta:
-        table_name = 'sys_resource_url_210928'
 
 
 class SysResourceUrlBkp(BaseModel):
@@ -177,23 +158,6 @@ class SysResourceUrlBkp(BaseModel):
 
     class Meta:
         table_name = 'sys_resource_url_bkp'
-
-
-class SysResourceUrlCopy1(BaseModel):
-    create_time = DateTimeField(null=True)
-    create_user = BigIntegerField(null=True)
-    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    id = BigAutoField()
-    operate_type = IntegerField(constraints=[SQL("DEFAULT 0")])
-    req_method = CharField(constraints=[SQL("DEFAULT 'POST'")], null=True)
-    resource_id = BigIntegerField(constraints=[SQL("DEFAULT 1")])
-    update_time = DateTimeField(null=True)
-    update_user = BigIntegerField(null=True)
-    url = CharField(null=True)
-    url_name = CharField(constraints=[SQL("DEFAULT ''")])
-
-    class Meta:
-        table_name = 'sys_resource_url_copy1'
 
 
 class SysRole(BaseModel):
@@ -238,8 +202,8 @@ class SysRoleResource(BaseModel):
     create_user = BigIntegerField()
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
     id = BigAutoField()
-    resource_id = BigIntegerField()
-    role_id = BigIntegerField()
+    resource_id = BigIntegerField(index=True)
+    role_id = BigIntegerField(index=True)
     update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     update_user = BigIntegerField(null=True)
 

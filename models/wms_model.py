@@ -14,6 +14,31 @@ class BaseModel(Model):
         database = database
 
 
+class BaseApiOperateLog(BaseModel):
+    after_content = TextField(null=True)
+    before_content = TextField(null=True)
+    content = TextField(null=True)
+    create_time = DateTimeField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    hide_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    id = BigAutoField()
+    operate_node = IntegerField(null=True)
+    operate_terminal = IntegerField(null=True)
+    operate_time = BigIntegerField(null=True)
+    operate_user_id = IntegerField(null=True)
+    operate_user_name = CharField(null=True)
+    response_time = BigIntegerField(null=True)
+    source_category = IntegerField()
+    source_no = CharField()
+    trace_id = CharField(null=True)
+
+    class Meta:
+        table_name = 'base_api_operate_log'
+        indexes = (
+            (('source_no', 'source_category'), False),
+        )
+
+
 class BaseWarehouse(BaseModel):
     business_time = CharField(null=True)
     create_time = DateTimeField(null=True)
@@ -131,6 +156,31 @@ class BaseWarehouseAreaCopy2(BaseModel):
         table_name = 'base_warehouse_area_copy2'
 
 
+class BaseWarehouseConfig(BaseModel):
+    config_code = CharField(constraints=[SQL("DEFAULT ''")])
+    config_name = CharField(constraints=[SQL("DEFAULT ''")])
+    config_parent = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    config_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    config_value = CharField(constraints=[SQL("DEFAULT ''")])
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    create_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    create_username = CharField(constraints=[SQL("DEFAULT ''")])
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    id = BigAutoField()
+    is_hide = IntegerField(constraints=[SQL("DEFAULT 0")])
+    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    update_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    update_username = CharField(constraints=[SQL("DEFAULT ''")])
+    warehouse_code = CharField(constraints=[SQL("DEFAULT ''")])
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+
+    class Meta:
+        table_name = 'base_warehouse_config'
+        indexes = (
+            (('warehouse_id', 'config_code'), True),
+        )
+
+
 class BaseWarehouseLocation(BaseModel):
     create_time = DateTimeField(null=True)
     create_user_id = BigIntegerField(null=True)
@@ -230,7 +280,7 @@ class EnEntryOrderDetail(BaseModel):
 class EnEntryOrderDetailBatchRecord(BaseModel):
     actual_sku_qty = IntegerField()
     batch_number = CharField()
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
     create_user = BigIntegerField()
     create_username = CharField()
     del_flag = IntegerField(null=True)
@@ -271,7 +321,7 @@ class EnEntryOrderLogistics(BaseModel):
 
 class EnEntryOrderOperateLog(BaseModel):
     content = TextField()
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
     create_user = BigIntegerField(null=True)
     create_username = CharField(null=True)
     entry_order_id = BigIntegerField(null=True)
@@ -567,7 +617,7 @@ class EnReceiptOrderDetail(BaseModel):
 
 class EnReceiptOrderDetailBatchRecord(BaseModel):
     batch_number = CharField()
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
     create_user = BigIntegerField()
     create_username = CharField()
     del_flag = IntegerField(null=True)
@@ -585,7 +635,7 @@ class EnReceiptOrderDetailBatchRecord(BaseModel):
 
 
 class EnShelvesOrder(BaseModel):
-    create_time = DateTimeField(index=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")], index=True)
     create_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
     create_username = CharField()
     del_flag = IntegerField(index=True, null=True)
@@ -613,7 +663,7 @@ class EnShelvesOrder(BaseModel):
 
 class EnShelvesOrderDetail(BaseModel):
     abnormal_qty = IntegerField(null=True)
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
     create_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
     create_username = CharField()
     del_flag = IntegerField(index=True, null=True)
@@ -637,7 +687,7 @@ class EnShelvesOrderDetail(BaseModel):
 
 class EnShelvesOrderDetailBatchRecord(BaseModel):
     batch_number = CharField()
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
     create_user_id = BigIntegerField()
     create_username = CharField()
     del_flag = IntegerField(null=True)
@@ -762,7 +812,7 @@ class TdoAbnormalOrder(BaseModel):
     abnormal_order_code = CharField(unique=True)
     abnormal_order_state = IntegerField(constraints=[SQL("DEFAULT 0")])
     abnormal_order_type = IntegerField()
-    create_time = DateTimeField(index=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")], index=True)
     create_user_id = BigIntegerField(null=True)
     create_username = CharField(null=True)
     customer_flag = IntegerField(constraints=[SQL("DEFAULT 1")], null=True)
@@ -822,7 +872,7 @@ class TdoDeliveryOrder(BaseModel):
     block_book_id = CharField(null=True)
     cancel_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
     check_time = DateTimeField(null=True)
-    create_time = DateTimeField(index=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")], index=True)
     create_user_id = BigIntegerField(null=True)
     create_username = CharField(null=True)
     currency = CharField(null=True)
@@ -853,6 +903,7 @@ class TdoDeliveryOrder(BaseModel):
     source_transport_mode = IntegerField(constraints=[SQL("DEFAULT 0")])
     state = IntegerField(constraints=[SQL("DEFAULT 0")])
     stock_book_id = CharField(null=True)
+    stock_out_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
     store = CharField(constraints=[SQL("DEFAULT ''")], null=True)
     store_name = CharField(null=True)
     transport_change_source = IntegerField(constraints=[SQL("DEFAULT 1")])
@@ -1083,7 +1134,7 @@ class TdoExpressOrder(BaseModel):
 
 
 class TdoExternalInterfaceOperateLog(BaseModel):
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")])
     create_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     create_username = CharField(constraints=[SQL("DEFAULT '0'")], null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -1110,7 +1161,7 @@ class TdoExternalInterfaceOperateLog(BaseModel):
 
 
 class TdoHandoverOrder(BaseModel):
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")])
     create_user_id = BigIntegerField(null=True)
     create_username = CharField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -1153,7 +1204,7 @@ class TdoHandoverOrderDetail(BaseModel):
 
 
 class TdoInterceptCancelOrder(BaseModel):
-    create_time = DateTimeField(index=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")], index=True)
     create_user_id = BigIntegerField(null=True)
     create_username = CharField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -1215,7 +1266,7 @@ class TdoPackageTask(BaseModel):
 
 
 class TdoPickOrder(BaseModel):
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")])
     create_user_id = BigIntegerField(null=True)
     create_username = CharField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -1470,7 +1521,7 @@ class TrfShelvesOrder(BaseModel):
     block_book_id = CharField(null=True)
     box_order_id = BigIntegerField()
     box_order_no = CharField()
-    create_time = DateTimeField(index=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")], index=True)
     create_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
     create_username = CharField()
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -1497,7 +1548,7 @@ class TrfShelvesOrder1(BaseModel):
     block_book_id = CharField(null=True)
     box_order_id = BigIntegerField()
     box_order_no = CharField()
-    create_time = DateTimeField(index=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")], index=True)
     create_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
     create_username = CharField()
     del_flag = IntegerField(null=True)
@@ -1522,7 +1573,7 @@ class TrfShelvesOrder1(BaseModel):
 
 class TrfShelvesOrderDetail(BaseModel):
     bom_version = CharField(null=True)
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
     create_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
     create_username = CharField()
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -1697,7 +1748,7 @@ class TrfTransferInOrderDetail(BaseModel):
 
 class TrfTransferOrderOperateLog(BaseModel):
     content = TextField()
-    create_time = DateTimeField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
     create_user_id = BigIntegerField(null=True)
     create_username = CharField(null=True)
     id = BigAutoField()
@@ -2089,11 +2140,11 @@ class TsfInstructOrderDetail(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
     delivery_qty = IntegerField(null=True)
     extension = CharField(null=True)
-    height = DecimalField(constraints=[SQL("DEFAULT 0.0000")], null=True)
+    height = DecimalField(null=True)
     id = BigAutoField()
     instruct_order_id = BigIntegerField(index=True)
     instruct_order_no = CharField(index=True)
-    length = DecimalField(constraints=[SQL("DEFAULT 0.0000")], null=True)
+    length = DecimalField(null=True)
     priority = IntegerField(null=True)
     sale_sku_code = CharField()
     sale_sku_img = CharField(null=True)
@@ -2102,8 +2153,8 @@ class TsfInstructOrderDetail(BaseModel):
     sku_code = CharField()
     sku_name = CharField(null=True)
     sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
-    weight = DecimalField(constraints=[SQL("DEFAULT 0.0000")], null=True)
-    width = DecimalField(constraints=[SQL("DEFAULT 0.0000")], null=True)
+    weight = DecimalField(null=True)
+    width = DecimalField(null=True)
 
     class Meta:
         table_name = 'tsf_instruct_order_detail'
@@ -2178,17 +2229,17 @@ class TsfPackOrderDetail(BaseModel):
     box_order_id = BigIntegerField(index=True)
     box_order_no = CharField(index=True, null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    height = DecimalField(constraints=[SQL("DEFAULT 0.0000")], null=True)
+    height = DecimalField(null=True)
     id = BigAutoField()
-    length = DecimalField(constraints=[SQL("DEFAULT 0.0000")], null=True)
+    length = DecimalField(null=True)
     sale_sku_code = CharField()
     sale_sku_img = CharField(null=True)
     sale_sku_name = CharField(null=True)
     sku_code = CharField()
     sku_name = CharField(null=True)
     sku_qty = IntegerField()
-    weight = DecimalField(constraints=[SQL("DEFAULT 0.0000")], null=True)
-    width = DecimalField(constraints=[SQL("DEFAULT 0.0000")], null=True)
+    weight = DecimalField(null=True)
+    width = DecimalField(null=True)
 
     class Meta:
         table_name = 'tsf_pack_order_detail'
@@ -2277,9 +2328,9 @@ class TsfPickOrderDetail(BaseModel):
     bom_map = IntegerField(null=True)
     bom_version = CharField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    height = DecimalField(constraints=[SQL("DEFAULT 0")], null=True)
+    height = DecimalField(null=True)
     id = BigAutoField()
-    length = DecimalField(constraints=[SQL("DEFAULT 0")], null=True)
+    length = DecimalField(null=True)
     location_code = CharField(index=True)
     location_id = BigIntegerField(index=True)
     pick_order_id = BigIntegerField(index=True)
@@ -2291,8 +2342,8 @@ class TsfPickOrderDetail(BaseModel):
     sku_code = CharField()
     sku_name = CharField(null=True)
     sku_qty = IntegerField()
-    weight = DecimalField(constraints=[SQL("DEFAULT 0")], null=True)
-    width = DecimalField(constraints=[SQL("DEFAULT 0")], null=True)
+    weight = DecimalField(null=True)
+    width = DecimalField(null=True)
 
     class Meta:
         table_name = 'tsf_pick_order_detail'

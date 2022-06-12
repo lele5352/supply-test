@@ -62,7 +62,7 @@ class IMSDBOperator:
 
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
-        :param int to_warehouse_id: 目的仓id
+        :param int or None to_warehouse_id: 目的仓id
 
         :return dict: 查询结果数据，字典格式
         """

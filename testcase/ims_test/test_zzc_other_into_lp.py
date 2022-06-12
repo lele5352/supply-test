@@ -22,7 +22,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -44,7 +44,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -66,7 +66,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = wms_logics.get_kw(1, 5, len(ware_sku_qty_list), self.ck_id, self.to_ck_id)
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -88,7 +88,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -110,7 +110,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -132,7 +132,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = wms_logics.get_kw(1, 5, len(ware_sku_qty_list), self.ck_id, self.to_ck_id)
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -154,7 +154,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -176,7 +176,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = wms_logics.get_kw(1, 5, len(ware_sku_qty_list), self.ck_id, self.to_ck_id)
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -198,7 +198,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -220,7 +220,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -242,7 +242,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -264,7 +264,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -288,7 +288,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = [fsj_kw_ids[0] for i in range(len(ware_sku_qty_list))]
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -310,7 +310,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = wms_logics.get_kw(1, 5, len(ware_sku_qty_list), self.ck_id, self.to_ck_id)
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
 
         res = ims_request.lp_other_in(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
@@ -331,7 +331,7 @@ class TestZZCOtherIntoLP(object):
         sj_kw_ids = wms_logics.get_kw(1, 5, len(ware_sku_qty_list), self.ck_id, self.to_ck_id)
 
         IMSDBOperator.delete_unqualified_inventory(sale_skus)
-        expect = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
+        expect = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, self.ck_id, self.to_ck_id)
         # 构造入库仓库sku明细数据
         for (ware_sku, qty), sj_location_id in zip(ware_sku_qty_list, sj_kw_ids):
             temp_ware_sku_qty_list = [(ware_sku, qty)]
@@ -360,14 +360,14 @@ class TestZZCOtherIntoLP(object):
 
         IMSDBOperator.delete_unqualified_inventory(([sale_sku_list1] + sale_sku_list2))
         # 先入中转仓1
-        expect1 = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list1, sj_kw_ids1, self.ck_id, self.to_ck_id)
+        expect1 = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list1, sj_kw_ids1, self.ck_id, self.to_ck_id)
         res = ims_request.lp_other_in(ware_sku_qty_list1, sj_kw_ids1, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
         actual1 = ims_logics.query_lp_inventories(sale_sku_list1, self.ck_id, self.to_ck_id)
         assert expect1 == actual1
 
         # 再入中转仓2
-        expect2 = ims_logics.get_expect_inventory_with_kws(ware_sku_qty_list2, sj_kw_ids2, self.ck_id, self.to_ck_id)
+        expect2 = ims_logics.get_add_kw_stock_expect_inventory(ware_sku_qty_list2, sj_kw_ids2, self.ck_id, self.to_ck_id)
         res = ims_request.lp_other_in(ware_sku_qty_list2, sj_kw_ids2, self.ck_id, self.to_ck_id)
         assert res['code'] == 200
         actual2 = ims_logics.query_lp_inventories(sale_sku_list2, self.ck_id, self.to_ck_id)
