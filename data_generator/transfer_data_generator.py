@@ -31,7 +31,7 @@ class WmsTransferDataGenerator:
         central_inventory = IMSDBOperator.query_central_inventory(sale_sku_code, trans_out_id, trans_out_to_id)
         # print(central_inventory)
         # 可用库存不足，需要添加库存，分为2种情况：1-查询不到库存；2-查询到库存，block＞stock
-        if not central_inventory or central_inventory['block'] >= central_inventory['stock']:
+        if not central_inventory or central_inventory['remain'] <= 0:
             bom_detail = IMSDBOperator.query_bom_detail(sale_sku_code, 'A')
             add_stock_res = self.ims_logics.add_lp_stock_by_other_in(
                 sale_sku_code,
@@ -56,6 +56,7 @@ class WmsTransferDataGenerator:
             remark)
         if not create_demand_res or create_demand_res['code'] != 200:
             log.error('创建调拨需求失败！')
+            return
         print('生成调拨需求：%s' % create_demand_res['data']['demandCode'])
         return create_demand_res['data']['demandCode']
 
@@ -209,5 +210,5 @@ if __name__ == '__main__':
     demand_qty = 1
     # transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
     # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', 2)
-    # transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
-    transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)
+    transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
+    # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)
