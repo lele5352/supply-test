@@ -75,6 +75,7 @@ class WmsTransferDataGenerator:
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         """
+        self.wms_request.switch_default_warehouse(trans_out_id)
         # 生成调拨需求
         demand_no = self.create_transfer_demand(
             trans_out_id,

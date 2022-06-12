@@ -8,7 +8,7 @@ class ImsDataGenerator:
 
     def add_stock(self, sale_sku, bom, count, warehouse_id, to_warehouse_id):
         bom_detail = IMSDBOperator.query_bom_detail(sale_sku, bom)
-        location_ids = wms_logics.get_kw(1, 5, len(bom_detail), warehouse_id, to_warehouse_id)
+        location_ids = wms_logics.get_kw(1, 5, len(bom_detail) + 1, warehouse_id, to_warehouse_id)
 
         res = ims_logics.add_lp_stock_by_other_in(sale_sku, bom, count, location_ids, warehouse_id, to_warehouse_id)
         if res and res['code'] == 200:
@@ -22,7 +22,7 @@ class ImsDataGenerator:
 
 if __name__ == '__main__':
     ims = ImsDataGenerator()
-    sale_sku = '63203684930'
+    sale_sku = '62325087738'
     bom = 'A'
     count = 10
     warehouse_id = 513
