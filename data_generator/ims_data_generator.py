@@ -15,6 +15,10 @@ class ImsDataGenerator:
             return True
         return
 
+    @classmethod
+    def del_stock(cls, sale_skus):
+        IMSDBOperator.delete_qualified_inventory(sale_skus)
+
 
 if __name__ == '__main__':
     ims = ImsDataGenerator()
@@ -23,4 +27,6 @@ if __name__ == '__main__':
     count = 10
     warehouse_id = 513
     to_warehouse_id = 513
-    ims.add_stock(sale_sku, bom, count, warehouse_id, to_warehouse_id)
+    # ims.add_stock(sale_sku, bom, count, warehouse_id, to_warehouse_id)
+
+    ims.del_stock([sale_sku])

@@ -7,6 +7,7 @@ from db_operator.ims_db_operator import IMSDBOperator
 class WmsTransferDataGenerator:
     def __init__(self):
         self.wms_request = wms_request
+        self.ims_request = ims_request
         self.wms_logics = wms_logics
         self.ims_logics = ims_logics
 
@@ -31,11 +32,12 @@ class WmsTransferDataGenerator:
         # print(central_inventory)
         # 可用库存不足，需要添加库存，分为2种情况：1-查询不到库存；2-查询到库存，block＞stock
         if not central_inventory or central_inventory['block'] >= central_inventory['stock']:
+            bom_detail = IMSDBOperator.query_bom_detail(sale_sku_code, 'A')
             add_stock_res = self.ims_logics.add_lp_stock_by_other_in(
                 sale_sku_code,
                 'A',
                 trans_qty,
-                self.wms_logics.get_kw(1, 5, 1, trans_out_id, trans_out_to_id),
+                self.wms_logics.get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id),
                 trans_out_id,
                 trans_out_to_id)
             if not add_stock_res:
@@ -72,17 +74,27 @@ class WmsTransferDataGenerator:
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         """
-        # 先生成调拨需求
-        demand_no = self.create_transfer_demand(trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id,
-                                                sale_sku_code, demand_qty, demand_type, customer_type, remark)
-        create_pick_order_res = self.wms_request.transfer_out_create_pick_order([demand_no], 1)
-        if not create_pick_order_res or create_pick_order_res['code'] != 200:
+        # 生成调拨需求
+        demand_no = self.create_transfer_demand(
+            trans_out_id,
+            trans_out_to_id,
+            trans_in_id,
+            trans_in_to_id,
+            sale_sku_code,
+            demand_qty,
+            demand_type,
+            customer_type,
+            remark
+        )
+        # 创建调拨拣货单
+        pick_order_res = self.wms_request.transfer_out_create_pick_order([demand_no], 1)
+        if not pick_order_res or pick_order_res['code'] != 200:
             print('创建调拨拣货单失败！')
             log.error('创建调拨拣货单失败！')
             return
-        barcode_generate(create_pick_order_res['data'], 'transfer_pick_order')
-        print('调拨拣货单号：%s' % create_pick_order_res['data'])
-        return create_pick_order_res['data']
+        pick_order_code = pick_order_res['data']
+        print('生成调拨拣货单：%s' % pick_order_code)
+        return pick_order_code
 
     def create_transfer_out_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
                                   demand_qty, demand_type=1, customer_type=1, remark=''):
@@ -129,18 +141,20 @@ class WmsTransferDataGenerator:
             log.error('创建调拨出库单失败：分配拣货人异常！')
             return
         # 获取调拨拣货单详情数据
-        pick_order_details = self.wms_request.transfer_out_pick_order_detail(pick_order_code)
-        if not pick_order_details:
+        pick_order_details_res = self.wms_request.transfer_out_pick_order_detail(pick_order_code)
+        if not pick_order_details_res:
             log.error('创建调拨出库单失败：获取拣货单详情数据异常！')
             return
+        pick_order_details = pick_order_details_res['details']
         # 调拨拣货单确认拣货-纸质
-        confirm_pick_res = self.wms_request.transfer_out_confirm_pick(pick_order_details)
+        confirm_pick_res = self.wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         if not confirm_pick_res:
             log.error('创建调拨出库单失败：确认拣货异常！')
             return
         # 调拨拣货单按需装托提交
         trans_out_tp_kw_ids = self.wms_logics.get_kw(1, 3, demand_qty, trans_out_id, trans_out_to_id)
-        submit_tray_res = self.wms_request.transfer_out_submit_tray(pick_order_details, trans_out_tp_kw_ids)
+        submit_tray_res = self.wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details,
+                                                                    trans_out_tp_kw_ids)
         if not submit_tray_res:
             log.error('创建调拨出库单失败：装托完成异常！')
             return
@@ -181,6 +195,7 @@ class WmsTransferDataGenerator:
                 log.error('创建调拨出库单失败：调拨发货交接单绑定箱单失败！')
                 return
             handover_no = bind_res['data']['handoverNo']
+        print('生成调拨发货交接单：%s' % handover_no)
 
         delivery_res = self.wms_request.transfer_out_delivery(handover_no)
         if not delivery_res:
@@ -194,4 +209,5 @@ if __name__ == '__main__':
     demand_qty = 1
     # transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
     # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', 2)
-    transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
+    # transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
+    transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)
