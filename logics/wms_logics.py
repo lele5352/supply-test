@@ -64,25 +64,33 @@ class WmsLogics:
         data = WMSDBOperator.query_warehouse_area_info_by_type(warehouse_id, area_type)
         return str(data.get('id'))
 
-    def get_kw(self, return_type, kw_type, num, warehouse_id, to_warehouse_id):
+    def get_kw(self, return_type, kw_type, num, ck_id, to_ck_id):
         """
         获取指定库位类型、指定目的仓、指定数量的仓库库位
 
         :param int return_type: 1-返回库位id；2-返回库位编码
         :param int kw_type: 库位类型
         :param int num: 获取的库位个数
-        :param int warehouse_id: 库位的所属仓库id
-        :param to_warehouse_id: 库位的目的仓id
+        :param int ck_id: 库位的所属仓库id
+        :param to_ck_id: 库位的目的仓id
         """
-        location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, warehouse_id, to_warehouse_id)
-        if not location_data or len(location_data) < num:
-            # 库位不够，则新建对应缺少的库位
-            new_locations = self.wms_app_request.create_location(num - len(location_data), kw_type, warehouse_id,
-                                                                 to_warehouse_id)
+        location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
+        if not location_data:
+            new_locations = self.wms_app_request.create_location(num, kw_type, ck_id, to_ck_id)
+            # 创建完缺口个数的库位后，重新获取库位
+            location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
             if not new_locations:
+                print('创建库位失败！')
+                return
+        elif num - len(location_data) > 0:
+            # 库位不够，则新建对应缺少的库位
+            new_locations = self.wms_app_request.create_location(num - len(location_data), kw_type, ck_id, to_ck_id)
+            if not new_locations:
+                print('创建库位失败！')
                 return
             # 创建完缺口个数的库位后，重新获取库位
-            location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, warehouse_id, to_warehouse_id)
+            location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
+        # 库位够的
         if return_type == 1:
             if len(location_data) == 1:
                 return location_data[0]['id']

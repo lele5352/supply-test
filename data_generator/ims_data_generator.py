@@ -1,12 +1,14 @@
+from data_generator import *
 from db_operator.ims_db_operator import IMSDBOperator
 from data_generator import ims_logics, wms_logics
 
 
 class ImsDataGenerator:
     def __init__(self):
-        self.ims_logics = ims_logics
+        pass
 
-    def add_stock(self, sale_sku, bom, count, warehouse_id, to_warehouse_id):
+    @classmethod
+    def add_bom_stock(cls, sale_sku, bom, count, warehouse_id, to_warehouse_id):
         bom_detail = IMSDBOperator.query_bom_detail(sale_sku, bom)
         location_ids = wms_logics.get_kw(1, 5, len(bom_detail) + 1, warehouse_id, to_warehouse_id)
 
@@ -14,6 +16,17 @@ class ImsDataGenerator:
         if res and res['code'] == 200:
             return True
         return
+
+    @classmethod
+    def add_ware_stock(cls, ware_qty_list, kw_ids, ck_id, to_ck_id):
+        """
+        :param list ware_qty_list: 仓库sku个数配置，格式： [('62325087738A01', 4), ('62325087738A01', 5)]
+        :param list kw_ids: 仓库库位id数据，与ware_qty_list长度相等
+        :param int ck_id: 仓库id
+        :param int or None kw_ids: 目的仓id，备货仓时为空
+        """
+        res = ims_request.lp_other_in(ware_qty_list, kw_ids, ck_id, to_ck_id)
+        return res
 
     @classmethod
     def del_stock(cls, sale_skus):
@@ -25,8 +38,11 @@ if __name__ == '__main__':
     sale_sku = '62325087738'
     bom = 'A'
     count = 10
-    warehouse_id = 513
-    to_warehouse_id = 513
+    warehouse_id = 511
+    to_warehouse_id = 540
     # ims.add_stock(sale_sku, bom, count, warehouse_id, to_warehouse_id)
+    # ims.del_stock([sale_sku])
 
-    ims.del_stock([sale_sku])
+    ware_sku_qtys = [('62325087738A01', 4), ('62325087738A01', 5)]
+    kw_ids = wms_logics.get_kw(1, 5, len(ware_sku_qtys), warehouse_id, to_warehouse_id)
+    ims.add_ware_stock(ware_sku_qtys, kw_ids, warehouse_id, to_warehouse_id)

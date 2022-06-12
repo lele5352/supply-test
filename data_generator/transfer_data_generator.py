@@ -37,7 +37,7 @@ class WmsTransferDataGenerator:
                 sale_sku_code,
                 'A',
                 trans_qty,
-                self.wms_logics.get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id),
+                self.wms_logics.get_kw(1, 5, len(bom_detail)+1, trans_out_id, trans_out_to_id),
                 trans_out_id,
                 trans_out_to_id)
             if not add_stock_res:
@@ -174,7 +174,7 @@ class WmsTransferDataGenerator:
         # 获取生成的调拨出库单号
         transfer_out_order_no = finish_packing_res['data']
         print('生成调拨出库单：%s' % transfer_out_order_no)
-        barcode_generate(transfer_out_order_no, 'transfer/trans_out_order')
+        # barcode_generate(transfer_out_order_no, 'transfer/trans_out_order')
         transfer_out_order_detail_res = self.wms_request.transfer_out_order_detail(transfer_out_order_no)
         if not transfer_out_order_detail_res:
             log.error('创建调拨出库单失败：获取调拨出库单详情数据异常！')
@@ -211,5 +211,5 @@ if __name__ == '__main__':
     demand_qty = 1
     # transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
     # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', 2)
-    transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
+    transfer_data.create_transfer_out_order(511, 513, 540, 540, '62325087738', 2)
     # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)
