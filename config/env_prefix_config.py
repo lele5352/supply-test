@@ -21,6 +21,7 @@ env_prefix_configs = {
         'app_prefix': 'https://test-scms.popicorns.com',
         'delivery_service_prefix': 'http://10.0.0.160:8330',
         'receipt_service_prefix': 'http://10.0.0.160:8323',
-        'transfer_service_prefix': 'http://10.0.0.160:8334'
+        'transfer_service_prefix': 'http://10.0.0.160:8334',
+        'eta_prefix': 'http://10.0.0.159:8701',
     }
 }

@@ -19,6 +19,8 @@ class ScmRequest(RequestHandler):
 
     def stock_plan_submit(self, sale_sku_list, num, delivery_warehouse_code, destination_warehouse_code):
         """备货计划提交"""
+        if not destination_warehouse_code:
+            destination_warehouse_code = '无'
         sale_sku_info_list = list()
         for sale_sku in sale_sku_list:
             sku_info = self.get_sku_info(sale_sku)
