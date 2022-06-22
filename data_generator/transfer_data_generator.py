@@ -184,7 +184,7 @@ class WmsTransferDataGenerator:
 
         # 按箱单和托盘对应逐个复核
         for box_no, tray_code in details:
-            barcode_generate(box_no, 'transfer/box_order')
+            # barcode_generate(box_no, 'transfer/box_order')
             print('生成箱单：%s' % box_no)
             review_res = self.wms_request.transfer_out_order_review(box_no, tray_code)
             if not review_res:
@@ -210,6 +210,6 @@ if __name__ == '__main__':
     transfer_data = WmsTransferDataGenerator()
     demand_qty = 1
     # transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
-    # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', 2)
-    transfer_data.create_transfer_out_order(511, 513, 540, 540, '62325087738', 2)
+    # transfer_data.create_transfer_demand(512, '', 513, 513, '14093131604', 10)
+    transfer_data.create_transfer_out_order(512, '', 513, 513, '14093131604', 10)
     # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)

@@ -176,8 +176,8 @@ class ScmDataGenerator:
         time.sleep(1)
         # 获取分货单号
         distribute_order_nos = self.scm_request.get_distribute_order_page(purchase_order_nos)
-        for code in distribute_order_nos:
-            barcode_generate(code, 'entry_order')
+        # for code in distribute_order_nos:
+        # barcode_generate(code, 'entry_order')
         print('分货单号：%s' % distribute_order_nos)
         return distribute_order_nos
 
@@ -185,6 +185,7 @@ class ScmDataGenerator:
 if __name__ == '__main__':
     scm = ScmDataGenerator()
 
-    # scm.create_distribute_order(["67330337129"], 1, 'ESZZ', 'ESFH')
-    # scm.create_stock_plan(['67330337129'], 1, 'ESZZ', 'ESFH')
-    scm.create_purchase_demand(['67330337129'], 1, 'ESZZ', 'ESFH')
+    # scm.create_distribute_order(["14093131604"], 10, 'ESBH', '')
+    # scm.create_stock_plan(['14093131604'], 10 ,'ESBH', '')
+    # scm.create_purchase_demand(['14093131604'], 10, 'ESBH', '')
+    scm.create_distribute_order(["J040610-CH"], 10, 'ESZZ', 'USLA01')

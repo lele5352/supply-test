@@ -77,12 +77,13 @@ class WmsAppRequest(RequestHandler):
         location_codes = list()
         for i in range(num):
             now = str(int(time.time() * 1000))
+            area_info = WMSDBOperator.query_warehouse_area_info_by_type(warehouse_id, kw_maps[kw_type][
+                'area_type'])
             location_info = {
                 'warehouseLocationCode': kw_maps[kw_type]['code_prefix'] + now,
                 'warehouseLocationName': kw_maps[kw_type]['name_prefix'] + now,
                 'warehouseLocationType': kw_type,
-                'belongWarehouseAreaId': WMSDBOperator.query_warehouse_area_info_by_type(warehouse_id, kw_maps[kw_type][
-                    'area_type']).get('id'),
+                'belongWarehouseAreaId': area_info.get('id'),
 
                 'warehouseAreaType': kw_maps[kw_type]['area_type'],
                 'belongWarehouseId': warehouse_id,
