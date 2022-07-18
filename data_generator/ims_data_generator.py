@@ -32,17 +32,3 @@ class ImsDataGenerator:
     def del_stock(cls, sale_skus):
         IMSDBOperator.delete_qualified_inventory(sale_skus)
 
-
-if __name__ == '__main__':
-    ims = ImsDataGenerator()
-    sale_sku = '62325087738'
-    bom = 'A'
-    count = 10
-    warehouse_id = 511
-    to_warehouse_id = 540
-    # ims.add_stock(sale_sku, bom, count, warehouse_id, to_warehouse_id)
-    # ims.del_stock([sale_sku])
-
-    ware_sku_qtys = [('62325087738A01', 4), ('62325087738A01', 5)]
-    kw_ids = wms_logics.get_kw(1, 5, len(ware_sku_qtys), warehouse_id, to_warehouse_id)
-    ims.add_ware_stock(ware_sku_qtys, kw_ids, warehouse_id, to_warehouse_id)
