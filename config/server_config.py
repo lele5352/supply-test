@@ -106,6 +106,8 @@ services = {
     '189': [
         'ec-gateway',
         'ec-fms-service',
+        'ec-fms-api',
+        'ec-eta',
         'ec-pms',
         'ec-bpms-service',
         'ec-bpms-api',
@@ -115,13 +117,16 @@ services = {
         'ec-ims-service',
         'ec-oms-api',
         'ec-spms-service',
+        'ec-spms-api',
         'ec-warehouse-base-service',
         'ec-warehouse-delivery-service',
         'ec-warehouse-receipt-service',
         'ec-warehouse-transfer-service',
         'ec-stockoperation-service',
-        'ec-stockoperation-api',
-        'ec-pwms-api'
+        'ec-supply-platform-service',
+        'ec-report',
+        'ec-pwms-api',
+        'ec-wms-api'
     ],
     '188': [
         'ec-authorization-service',
