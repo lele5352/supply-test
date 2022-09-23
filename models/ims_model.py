@@ -1,6 +1,6 @@
 from peewee import *
 
-from config.sys_config import db_config
+from config import db_config
 
 database = MySQLDatabase('supply_ims', **db_config)
 
@@ -124,6 +124,26 @@ class IdempotentResult(BaseModel):
         indexes = (
             (('param', 'uri'), True),
         )
+
+
+class NoSuitCheckRecord(BaseModel):
+    all_stock = IntegerField(constraints=[SQL("DEFAULT 0")])
+    bom_qty = IntegerField()
+    bom_version = CharField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    goods_sku_code = CharField()
+    id = BigAutoField()
+    is_deleted = IntegerField(constraints=[SQL("DEFAULT 0")])
+    no_suit_stock = IntegerField(constraints=[SQL("DEFAULT 0")])
+    no_suit_type = IntegerField()
+    target_warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
+    trace_id = CharField(null=True)
+    version = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    ware_sku_code = CharField(index=True)
+    warehouse_id = BigIntegerField(index=True)
+
+    class Meta:
+        table_name = 'no_suit_check_record'
 
 
 class NogoodWaresInventory(BaseModel):

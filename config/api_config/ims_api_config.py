@@ -116,20 +116,19 @@ ims_api_config = {
     "delivery_order_block": {
         "uri_path": "/ims/service/wms/business/add/sale/block",
         "method": "post",
-        "data": {
-            "functionType": "4",
-            "goodsSkuList": [
-                {
-                    "goodsSkuCode": "P68687174",
-                    "qty": 1
-                }
-            ],
-            "operateType": "2",
-            "operatorId": 8,
-            "sourceNo": "CK2109031022",
-            "targetWarehouseId": 19,
-            "warehouseId": 19
-        }
+        "data":
+            {
+                "bomVersion": "",
+                "functionType": "4",
+                "goodsSkuCode": "",
+                "idempotentSign": "",
+                "operateType": "2",
+                "qty": 0,
+                "sourceNo": "",
+                "targetWarehouseId": 0,
+                "warehouseId": 0
+            }
+
     },
     "assign_location_stock": {
         "uri_path": "/ims/service/wms/business/distribute/ware/block",

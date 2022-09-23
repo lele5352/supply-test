@@ -1,4 +1,14 @@
 wms_api_config = {
+    "get_warehouse_info": {
+        "uri_path": "/warehouse/bycode/",
+        "method": "get",
+        "data": {}
+    },
+    "get_warehouse_info_by_id": {
+        "uri_path": "ec-wms-api/warehouse/",
+        "method": "get",
+        "data": {}
+    },
     "get_switch_warehouse_list": {
         "uri_path": "/api/ec-wms-api/data/permission/user/list",
         "method": "get",

@@ -133,6 +133,7 @@ class ImsLogics:
     def query_format_goods_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id):
         """
         查询指定销售sku的goods_inventory数据，并格式化为库存统一结构进行返回
+
         :param str sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
         :param int to_warehouse_id: 目的仓id
@@ -189,20 +190,29 @@ class ImsLogics:
         """
         result = dict()
         for sale_sku in sale_sku_list:
-            qualified_inventory = dict()
-            central_inventory = cls.query_format_central_inventory(sale_sku, warehouse_id, to_warehouse_id)
-            goods_inventory = cls.query_format_goods_inventory(sale_sku, warehouse_id, to_warehouse_id)
-            wares_inventory = cls.query_format_wares_inventory_self(sale_sku, warehouse_id, to_warehouse_id)
-            if central_inventory:
-                qualified_inventory.update(central_inventory)
-            if goods_inventory:
-                qualified_inventory.update(goods_inventory)
-            if wares_inventory:
-                qualified_inventory.update(wares_inventory)
-            result.update({
-                sale_sku: qualified_inventory
-            })
+            result.update({sale_sku: cls.query_lp_inventory(sale_sku, warehouse_id, to_warehouse_id)})
         return result
+
+    @classmethod
+    def query_lp_inventory(cls, sale_sku, warehouse_id, to_warehouse_id) -> dict:
+        """
+        查询销售sku的库存数据，并格式化为库存统一格式进行返回
+        :param string sale_sku: 销售sku编码
+        :param int warehouse_id: 仓库id
+        :param int to_warehouse_id: 目的仓库id
+        :return: 格式化后的良品库存数据
+        """
+        qualified_inventory = dict()
+        central_inventory = cls.query_format_central_inventory(sale_sku, warehouse_id, to_warehouse_id)
+        goods_inventory = cls.query_format_goods_inventory(sale_sku, warehouse_id, to_warehouse_id)
+        wares_inventory = cls.query_format_wares_inventory_self(sale_sku, warehouse_id, to_warehouse_id)
+        if central_inventory:
+            qualified_inventory.update(central_inventory)
+        if goods_inventory:
+            qualified_inventory.update(goods_inventory)
+        if wares_inventory:
+            qualified_inventory.update(wares_inventory)
+        return qualified_inventory
 
     @classmethod
     def get_sale_skus(cls, ware_sku_qty_list) -> list:
@@ -227,28 +237,28 @@ class ImsLogics:
         :return: bom版本仓库sku明细字典
         """
         items = IMSDBO.query_unqualified_inventory(sale_sku_code, warehouse_id, bom_version)
-        temp_ware_sku_inventory = dict()
+        ware_sku_inventory = dict()
         for item in items:
-            if temp_ware_sku_inventory.get(item['ware_sku_code']):
+            if ware_sku_inventory.get(item['ware_sku_code']):
                 if item['storage_location_id'] == 0:
-                    temp_ware_sku_inventory[item['ware_sku_code']].update(
+                    ware_sku_inventory[item['ware_sku_code']].update(
                         {"total": {'stock': item['stock'], 'block': item['block']}}
                     )
                 elif item['storage_location_id'] > 0:
-                    temp_ware_sku_inventory[item['ware_sku_code']].update(
+                    ware_sku_inventory[item['ware_sku_code']].update(
                         {item['storage_location_id']: {'stock': item['stock'], 'block': item['block']}}
                     )
             else:
                 if item['storage_location_id'] == 0:
-                    temp_ware_sku_inventory.update({
+                    ware_sku_inventory.update({
                         item['ware_sku_code']: {"total": {'stock': item['stock'], 'block': item['block']}}
                     })
                 elif item['storage_location_id'] > 0:
-                    temp_ware_sku_inventory.update({
+                    ware_sku_inventory.update({
                         item['ware_sku_code']: {
                             item['storage_location_id']: {'stock': item['stock'], 'block': item['block']}}
                     })
-        return temp_ware_sku_inventory
+        return ware_sku_inventory
 
     @classmethod
     def calculate_sets(cls, ware_sku_qty_list):
@@ -830,22 +840,7 @@ class ImsLogics:
         res = self.ims_request.cp_other_in(ware_sku_qty_list, cp_location_ids, warehouse_id, to_warehouse_id)
         return res
 
-    def add_lp_stock_by_other_in(self, sale_sku_code, bom_version, add_stock_count, location_ids, warehouse_id,
-                                 to_warehouse_id):
-        """
-        :param str sale_sku_code: 销售sku编码
-        :param str bom_version: bom版本
-        :param int add_stock_count: 销售sku件数
-        :param list location_ids: 库位列表
-        :param int warehouse_id: 仓库id
-        :param int to_warehouse_id: 目的仓库id
-        """
-        details = IMSDBO.query_bom_detail(sale_sku_code, bom_version)
-        ware_sku_qty_list = list()
-        for ware_sku, qty in details.items():
-            ware_sku_qty_list.append((ware_sku, qty * add_stock_count))
-        res = self.ims_request.lp_other_in(ware_sku_qty_list, location_ids, warehouse_id, to_warehouse_id)
-        return res
+
 
     @classmethod
     def get_combined_block_result_list(cls, block_result_list):
@@ -868,12 +863,13 @@ class ImsLogics:
 
     def move_dock_to_sj_kw(self, warehouse_id, source_no, ware_sku_qty_list, sj_kw_ids):
         """
-        :param str source_no: 来源单号
-        :param list sj_kw_ids: 上架库位id列表
-        :param list ware_sku_qty_list: 仓库sku及件数关系，格式：[(ware_sku_code，qty),...]
-        :param int warehouse_id: 仓库id
+        从dock库位转移库存到上架库位
 
-        :return dict: 查询结果数据，字典格式
+        :param warehouse_id:
+        :param source_no:
+        :param ware_sku_qty_list:
+        :param sj_kw_ids:
+        :return:
         """
         ware_sku_list = list()
         for (ware_sku, qty), sj_kw_id in zip(ware_sku_qty_list, sj_kw_ids):
@@ -892,3 +888,25 @@ class ImsLogics:
     def confirm_all_picked(self, delivery_order_no, block_ware_list, warehouse_id):
         pick_res = self.ims_request.confirm_pick(delivery_order_no, block_ware_list, warehouse_id)
         return pick_res
+
+    def is_stock_satisfy(self, sale_sku_list, warehouse_id, to_warehouse_id) -> bool:
+        """
+        是否有可用库存
+
+        :param list sale_sku_list: 销售sku编码列表
+        :param int warehouse_id: 所属仓库id
+        :param any to_warehouse_id: 目的仓库id
+        """
+        for sale_sku in sale_sku_list:
+            inventory = self.query_format_goods_inventory(sale_sku, warehouse_id, to_warehouse_id)
+            # try:
+            remain = inventory.get("spot_goods_remain")
+            if remain > 0:
+                continue
+            else:
+                return False
+        return True
+        # except :
+        #     return False
+
+

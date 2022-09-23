@@ -1,56 +1,128 @@
 oms_api_config = {
-    "sync_mall_order": {
-        "uri_path": "/ec-oms-api/mall/sync/order",
+    "get_product_info": {
+        "uri_path": "/ec-oms-api/salesorder/listProduct",
+        "method": "get",
+        "data": {
+            "current": 1,
+            "size": 10,
+            "type": 1,
+            "skuCode": "JJH3C94287",
+            "productNameCn": "",
+            "siteCode": "US",
+            "t": 1663229253518
+        }
+    },
+    "get_warehouse_info": {
+        "uri_path": "/ec-oms-api/base/actual/getWarehouseList",
+        "method": "get",
+        "data": {}
+    },
+    "create_sale_order": {
+        "uri_path": "/ec-oms-api/salesorder/addSalesOrder",
         "method": "post",
         "data": {
-            "salesOrderNo": "USA207174486937431220446",
-            "dollarPrice": 117.51,
-            "salesOrderPrice": 849.81,
-            "postalCode": "RM8 3RR",
-            "locationType": "商业小区",
-            "salesOrderPlatformCode": "homary",
-            "buyerId": 377500,
-            "salesOrderSiteCode": "us",
-            "payType": "Affirm分期付款",
-            "countryCode": "GB",
-            "salesOrderRemarks": "yes",
+            "orderType": 1,
+            "shipType": 2,
+            "reissueReasonList": [],
+            "responsiblePartyList": [],
+            "relateSalesOrderNo": "",
+            "platformCode": "HOMARY",
+            "storeCode": "HOMARY",
+            "siteCode": "US",
+            "buyerId": "1",
+            "firstName": "hongwei",
+            "lastName": "xu", "mobilePhone": "12345678",
+            "email": "1@1.com",
+            "country": "US",
+            "province": "NY",
+            "city": "New York",
+            "postalCode": "10001",
+            "company": "popicorns",
+            "address1": "address 1",
+            "address2": "address 2",
+            "locationType": "Business with Dock",
+            "deliveryTimeStart": "01:30",
+            "deliveryTimeEnd": "01:30",
+            "currencyPrice": 123,
+            "discountAmount": 111,
+            "deliveryFee": 12,
             "currency": "USD",
-            "email": "pmarti111@gmail.com",
-            "address": "33777 Avenue E",
-            "address3": "Treorchy",
-            "salesOrderPayPrice": 760.35,
-            "address2": "13楼",
-            "address1": "11834 Pacific Avenue",
-            "buyerName": "Patrick Martin",
-            "salesOrderTitle": "21.7\" 3D Gold Fashion Metal Oversized Wall Clock Luxury Home Decor",
-            "deliveryTimeStart": "8:00",
-            "currencyPrice": 84.99,
-            "mobilePhone": "5107106838",
-            "salesOrderCreateTime": "1591434827",
-            "deliveryTimeEnd": "22:00",
-            "salesOrderStatus": 1,
-            "salesOrderPayTime": "1594199627",
-            "discountAmount": 100,
-            "payNo": "P12344555656",
-            "countryName": "GB",
-            "provinceName": "England",
-            "province": "England",
-            "city": "Dagenham",
             "items": [
                 {
-                    "itemSkuCode": "53170041074",
-                    "eta": "1-2 days",
-                    "itemQty": "1",
-                    "itemPrice": "849.81",
-                    "itemPayPrice": "760.35",
-                    "itemTitle": "21.7\" 3D Gold Fashion Metal Oversized Wall Clock Luxury Home Decor",
-                    "itemPicture": "https://img1.homary.com/fit-in/400x400/filters:quality(80)/mall/file/2021/06/10/af94c466c6654bbe98e8b2bbbee09afa.jpg",
-                    "itemSpuCode": "11471839",
-                    "itemCurrencyPrice": "84.99",
-                    "itemDollarPrice": "117.51",
-                    "planDataTime": "7-8 weeks"
+                    "productNameCn": "LI-测试商品9",
+                    "type": 1,
+                    "typeName": "销售sku",
+                    "relateSku": "",
+                    "categoryName": "家具>家具套装>餐桌桌椅套装",
+                    "mainUrl": "",
+                    "mostBomVersion": None,
+                    "skuTotalQty": None,
+                    "expressType": None,
+                    "deliveryType": "",
+                    "deliveryExpressValue": None,
+                    "deliveryExpressName": None,
+                    "itemSkuCode": "JJH3C94287",
+                    "itemQty": 1,
+                    "itemCurrencyPrice": 888,
+                    "originDeliveryInfo": {},
+                    "logisticsValue": None,
+                    "mallLabelList": [],
+                    "bomVersion": "",
+                    "warehouseCode": "",
+
                 }
-            ]
+            ],
+            "salesOrderRemarks": "",
+            "countryName": "United States",
+            "provinceName": "New York",
+            "storeName": "HOMARY",
+            "platformName": "HOMARY"
         }
-    }
+    },
+    "query_oms_order": {
+        "uri_path": "/ec-oms-api/order/page",
+        "method": "post",
+        "data": {"current": 1, "size": 10, "sortKey": "follow_time", "direction": 1, "orderNos": "",
+                 "salesOrderNos": "SO2209200051", "salesOutNos": "", "siteCodes": "", "buyerId": "", "provinceName": "",
+                 "city": "", "postalCodes": "", "email": "", "itemSkuCodes": "", "skuLike": "", "relateOrderNos": [],
+                 "createUsername": "", "relateSalesOrderNos": "", "orderSources": [], "address": "", "buyerName": "",
+                 "salesOrderRemarks": "", "remark": "", "logisticsInfo": "", "visualWarehouseCodes": [],
+                 "actualWarehouseCodes": [], "orderQtyType": [], "laborType": [], "orderStatus": [],
+                 "salesOutStatus": [], "platforms": [], "stores": [], "countryCodes": [], "excludeCountryCodes": [],
+                 "deliveryType": "", "isLabor": "", "urgentStatus": "", "orderDeliveryType": [], "orderTypes": [],
+                 "interceptStatusList": [], "interceptTypes": [], "mallLabelList": [], "payTimeStart": "",
+                 "payTimeEnd": "", "createTimeStart": "", "createTimeEnd": "", "deliveryTimeStart": "",
+                 "deliveryTimeEnd": ""}
+
+    },
+    "dispatch_oms_order": {
+        "uri_path": "/auto/verification/execute",
+        "method": "post",
+        "data": []
+    },
+    "query_oms_order_detail": {
+        "uri_path": "/ec-oms-api/order/getOrder/%s",
+        "method": "get",
+        "data": []
+    },
+    "query_oms_order_sku_items": {
+        "uri_path": "/ec-oms-api/order/getOrder/item/%s",
+        "method": "get",
+        "data": []
+    },
+    "push_order_to_wms": {
+        "uri_path": "/order/issue",
+        "method": "post",
+        "data": ""
+    },
+    "oms_order_follow": {
+        "uri_path": "/order/follow",
+        "method": "post",
+        "data": [{"skuCode": "demoData", "bomVersion": "demoData"}]
+    },
+    "query_common_warehouse": {
+        "uri_path": "/ec-oms-api/virtual/warehouse/page",
+        "method": "post",
+        "data": {"virtualWarehouseCodes": [], "warehouseCodes": [], "current": 1, "size": 10}
+    },
 }

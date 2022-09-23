@@ -1,4 +1,4 @@
-env_prefix_configs = {
+prefix_config = {
     # 26环境配置
     'test26': {
         'ims_service_prefix': 'http://10.0.0.26:28801',
@@ -17,12 +17,14 @@ env_prefix_configs = {
     },
     # 160环境配置
     'test160': {
-        'ims_service_prefix': 'http://10.0.0.159:28801',
-        'app_prefix': 'https://test-scms.popicorns.com',
-        'delivery_service_prefix': 'http://10.0.0.160:8330',
-        'receipt_service_prefix': 'http://10.0.0.160:8323',
-        'transfer_service_prefix': 'http://10.0.0.160:8334',
-        'eta_prefix': 'http://10.0.0.159:8701',
+        'ims': 'http://10.0.0.159:28801',
+        'app': 'https://test-scms.popicorns.com',
+        'wms_base': 'http://10.0.0.160:8321',
+        'delivery': 'http://10.0.0.160:8330',
+        'receipt': 'http://10.0.0.160:8323',
+        'transfer': 'http://10.0.0.160:8334',
+        'oms_app': 'http://10.0.0.160:8826',
+        'eta': 'http://10.0.0.159:8701',
     },
     # uat环境配置
     'uat': {
@@ -32,5 +34,32 @@ env_prefix_configs = {
         'receipt_service_prefix': 'http://10.0.0.160:8323',
         'transfer_service_prefix': 'http://10.0.0.160:8334',
         'eta_prefix': 'http://10.0.0.159:8701',
+    },
+}
+
+mysql_config = {
+    'test163': {
+        'user': 'app',
+        'passwd': '123456',
+        'host': '10.0.0.163',
+        'port': 3306
+    },
+    'test72': {
+        'user': 'root',
+        'passwd': '123456',
+        'host': '10.0.0.72',
+        'port': 3306
+    },
+    'test26': {
+        'user': 'app',
+        'passwd': '123456',
+        'host': '10.0.0.26',
+        'port': 3306
+    },
+    'test160': {
+        'user': 'erp',
+        'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
+        'host': '10.0.0.127',
+        'port': 3306
     },
 }

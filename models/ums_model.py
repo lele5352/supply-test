@@ -1,6 +1,6 @@
 from peewee import *
 
-from config.sys_config import db_config
+from config import db_config
 
 database = MySQLDatabase('supply_auth', **db_config)
 

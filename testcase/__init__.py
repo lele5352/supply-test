@@ -3,19 +3,19 @@ from logics.ims_logics import ImsLogics
 from logics.wms_logics import WmsLogics
 
 from db_operator.ims_db_operator import IMSDBOperator
-from api_request.ims_request import ImsRequest
-from api_request.ums_request import UmsRequest
-from api_request.wms_app_request import WmsAppRequest
+from robots.ims_robot import IMSRobot
+from robots.ums_robot import UmsRequest
+from robots.wms_robot import WMSRobot
 
 ums_request = UmsRequest()
 ums_logics = UmsLogics(ums_request)
 app_headers = ums_logics.get_app_headers()
 service_headers = ums_logics.get_service_headers()
 
-ims_request = ImsRequest()
+ims_request = IMSRobot()
 ims_logics = ImsLogics(ims_request)
 
-wms_request = WmsAppRequest(app_headers, service_headers)
+wms_request = WMSRobot(app_headers, service_headers)
 wms_logics = WmsLogics(wms_request)
 
 # 160的测试数据

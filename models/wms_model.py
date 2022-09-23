@@ -1,6 +1,6 @@
 from peewee import *
 
-from config.sys_config import db_config
+from config import db_config
 
 database = MySQLDatabase('supply_wms', **db_config)
 
@@ -31,6 +31,7 @@ class BaseApiOperateLog(BaseModel):
     source_category = IntegerField()
     source_no = CharField()
     trace_id = CharField(null=True)
+    warehouse_id = BigIntegerField(null=True)
 
     class Meta:
         table_name = 'base_api_operate_log'
@@ -256,6 +257,7 @@ class EnEntryOrderDetail(BaseModel):
     inspect_abnormal_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     length = DecimalField(null=True)
     plan_sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    quality_type = IntegerField(constraints=[SQL("DEFAULT 1")], null=True)
     receipt_abnormal_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     sale_sku_code = CharField()
     sale_sku_name = CharField()
@@ -704,6 +706,36 @@ class EnShelvesOrderDetailBatchRecord(BaseModel):
         table_name = 'en_shelves_order_detail_batch_record'
 
 
+class OmsGoodSkuReport(BaseModel):
+    central_block = IntegerField()
+    central_shortage = IntegerField()
+    central_stock = IntegerField()
+    central_virtual_block = IntegerField()
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    delivery_on_way_stock = IntegerField()
+    delivery_stock = IntegerField()
+    goods_sku_code = CharField(index=True)
+    goods_stock = IntegerField()
+    handle_date = CharField()
+    id = BigAutoField()
+    prepare_all_stock = IntegerField()
+    purchase_order_qty = IntegerField()
+    short_demand_qty = IntegerField()
+    subscribe_plan_qty = IntegerField()
+    target_warehouse_name = CharField()
+    transfer_plan_qty = IntegerField()
+    transit_purchase_on_way = IntegerField()
+    transit_stock = IntegerField()
+    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    version = IntegerField()
+
+    class Meta:
+        table_name = 'oms_good_sku_report'
+        indexes = (
+            (('handle_date', 'version'), False),
+        )
+
+
 class OtherStockOutOrder(BaseModel):
     block_book_id = CharField(null=True)
     create_time = DateTimeField(index=True, null=True)
@@ -920,6 +952,7 @@ class TdoDeliveryOrder(BaseModel):
 
 
 class TdoDeliveryOrderDetail(BaseModel):
+    bom_version = CharField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
     delivery_order_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
     delivery_order_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
@@ -944,6 +977,34 @@ class TdoDeliveryOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'tdo_delivery_order_detail'
+
+
+class TdoDeliveryOrderDetailCopy1(BaseModel):
+    bom_version = CharField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    delivery_order_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    delivery_order_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
+    delivery_qty = IntegerField(null=True)
+    height = DecimalField(null=True)
+    id = BigAutoField()
+    length = DecimalField(null=True)
+    purchase_currency = CharField(null=True)
+    purchase_price = DecimalField(null=True)
+    sale_currency = CharField(null=True)
+    sale_price = DecimalField(null=True)
+    sale_sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sale_sku_img = CharField(null=True)
+    sale_sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    sale_sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    sku_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    sku_id = BigIntegerField(null=True)
+    sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    weight = DecimalField(null=True)
+    width = DecimalField(null=True)
+
+    class Meta:
+        table_name = 'tdo_delivery_order_detail_copy1'
 
 
 class TdoDeliveryOrderOperateLog(BaseModel):
@@ -983,7 +1044,7 @@ class TdoDeliveryPackage(BaseModel):
     delivery_order_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
     express_change_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     express_change_version = CharField(null=True)
-    express_order_id = BigIntegerField(null=True)
+    express_order_id = BigIntegerField(index=True, null=True)
     express_order_state = IntegerField()
     handover_time = DateTimeField(null=True)
     height = DecimalField(null=True)
@@ -1020,6 +1081,30 @@ class TdoDeliveryPackageDetail(BaseModel):
 
     class Meta:
         table_name = 'tdo_delivery_package_detail'
+
+
+class TdoDeliveryPackageDetailBatch(BaseModel):
+    batch_num = CharField(null=True)
+    create_time = DateTimeField(null=True)
+    create_user_id = BigIntegerField(null=True)
+    create_username = CharField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    delivery_order_code = CharField(index=True)
+    delivery_order_id = BigIntegerField(index=True)
+    id = BigAutoField()
+    package_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
+    sale_sku_code = CharField(null=True)
+    sale_sku_name = CharField(null=True)
+    sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sku_name = CharField(null=True)
+    sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    source_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    update_time = DateTimeField(null=True)
+    update_user_id = BigIntegerField(null=True)
+    update_username = CharField(null=True)
+
+    class Meta:
+        table_name = 'tdo_delivery_package_detail_batch'
 
 
 class TdoDeliveryPickDetail(BaseModel):
@@ -1103,7 +1188,7 @@ class TdoDeliveryStockDetail(BaseModel):
 
 
 class TdoExpressOrder(BaseModel):
-    bar_code = CharField(null=True)
+    bar_code = CharField(index=True, null=True)
     channel_code = CharField(null=True)
     channel_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     channel_name = CharField(null=True)
@@ -1131,6 +1216,9 @@ class TdoExpressOrder(BaseModel):
 
     class Meta:
         table_name = 'tdo_express_order'
+        indexes = (
+            (('warehouse_id', 'delivery_order_id'), False),
+        )
 
 
 class TdoExternalInterfaceOperateLog(BaseModel):
@@ -1188,6 +1276,7 @@ class TdoHandoverOrderDetail(BaseModel):
     car_number = CharField(null=True)
     channel_code = CharField(null=True)
     channel_name = CharField(null=True)
+    create_time = DateTimeField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
     delivery_order_code = CharField()
     delivery_order_id = BigIntegerField(index=True)
@@ -1198,6 +1287,7 @@ class TdoHandoverOrderDetail(BaseModel):
     logistics_code = CharField(null=True)
     logistics_name = CharField(null=True)
     scan_total = IntegerField(constraints=[SQL("DEFAULT 0")])
+    update_time = DateTimeField(null=True)
 
     class Meta:
         table_name = 'tdo_handover_order_detail'
@@ -1309,6 +1399,243 @@ class TdoPickOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'tdo_pick_order_detail'
+
+
+class TdoPickOrderDetailBatch(BaseModel):
+    batch_num = CharField(null=True)
+    create_time = DateTimeField(null=True)
+    create_user_id = BigIntegerField(null=True)
+    create_username = CharField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    delivery_order_code = CharField(index=True, null=True)
+    delivery_order_id = BigIntegerField()
+    id = BigAutoField()
+    location_code = CharField(null=True)
+    location_id = BigIntegerField(null=True)
+    pick_order_id = BigIntegerField(index=True)
+    pick_qty = IntegerField(null=True)
+    sku_code = CharField(null=True)
+    update_time = DateTimeField(null=True)
+    update_user_id = BigIntegerField(null=True)
+    update_username = CharField(null=True)
+    warehouse_area_code = CharField(null=True)
+    warehouse_id = BigIntegerField(index=True)
+
+    class Meta:
+        table_name = 'tdo_pick_order_detail_batch'
+
+
+class ThirdPartOutExpressOrder(BaseModel):
+    bar_code = CharField(null=True)
+    channel_code = CharField(null=True)
+    channel_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    channel_name = CharField(null=True)
+    create_time = DateTimeField(null=True)
+    create_user_id = BigIntegerField(null=True)
+    create_username = CharField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    express_order_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    ext_info = CharField(null=True)
+    file_detail = TextField(null=True)
+    file_path = TextField(null=True)
+    id = BigAutoField()
+    logistics_code = CharField(null=True)
+    logistics_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    logistics_name = CharField(null=True)
+    print_count = IntegerField(constraints=[SQL("DEFAULT 0")])
+    remarks = CharField(null=True)
+    state = IntegerField(constraints=[SQL("DEFAULT 0")])
+    third_part_out_order_code = CharField(index=True)
+    third_part_out_order_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
+    update_time = DateTimeField(null=True)
+    update_user_id = BigIntegerField(null=True)
+    update_username = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    warehouse_id = BigIntegerField(index=True, null=True)
+
+    class Meta:
+        table_name = 'third_part_out_express_order'
+
+
+class ThirdPartOutOrder(BaseModel):
+    block_book_id = CharField(null=True)
+    cancel_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    create_time = DateTimeField(index=True, null=True)
+    create_user_id = BigIntegerField(null=True)
+    create_username = CharField(null=True)
+    currency = CharField(null=True)
+    customer_remarks = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    end_handover_time = DateTimeField(null=True)
+    export_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    express_state = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    first_handover_time = DateTimeField(null=True)
+    id = BigAutoField()
+    intercept_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    package_state = IntegerField(null=True)
+    platform = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    platform_name = CharField(null=True)
+    priority = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    prod_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    sale_amount = DecimalField(null=True)
+    sale_order_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sale_order_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    sale_order_type = IntegerField(null=True)
+    server_remarks = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    site = CharField(null=True)
+    source_order_code = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    source_order_create_time = DateTimeField(null=True)
+    state = IntegerField(constraints=[SQL("DEFAULT 0")])
+    stock_book_id = CharField(null=True)
+    store = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    store_name = CharField(null=True)
+    third_part_out_order_code = CharField(constraints=[SQL("DEFAULT ''")], unique=True)
+    transport_mode = IntegerField(constraints=[SQL("DEFAULT 1")])
+    update_time = DateTimeField(null=True)
+    update_user_id = BigIntegerField(null=True)
+    update_username = CharField(null=True)
+    warehouse_code = CharField(constraints=[SQL("DEFAULT ''")])
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
+
+    class Meta:
+        table_name = 'third_part_out_order'
+
+
+class ThirdPartOutOrderDetail(BaseModel):
+    bom_version = CharField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    delivery_qty = IntegerField(null=True)
+    height = DecimalField(null=True)
+    id = BigAutoField()
+    length = DecimalField(null=True)
+    purchase_currency = CharField(null=True)
+    purchase_price = DecimalField(null=True)
+    sale_currency = CharField(null=True)
+    sale_price = DecimalField(null=True)
+    sale_sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sale_sku_img = CharField(null=True)
+    sale_sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    sale_sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    sku_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    sku_id = BigIntegerField(null=True)
+    sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    third_part_out_order_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    third_part_out_order_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
+    weight = DecimalField(null=True)
+    width = DecimalField(null=True)
+
+    class Meta:
+        table_name = 'third_part_out_order_detail'
+
+
+class ThirdPartOutOrderProp(BaseModel):
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    id = BigAutoField()
+    prop_key = IntegerField(null=True)
+    prop_value = CharField(null=True)
+    third_part_out_order_code = CharField(null=True)
+    third_part_out_order_id = BigIntegerField(null=True)
+
+    class Meta:
+        table_name = 'third_part_out_order_prop'
+
+
+class ThirdPartOutPackage(BaseModel):
+    channel_code = CharField(constraints=[SQL("DEFAULT ''")])
+    channel_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    channel_name = CharField(constraints=[SQL("DEFAULT ''")])
+    create_time = DateTimeField(null=True)
+    create_user_id = BigIntegerField(null=True)
+    create_username = CharField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    express_order_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    express_order_state = IntegerField()
+    handover_time = DateTimeField(null=True)
+    height = DecimalField(null=True)
+    id = BigAutoField()
+    length = DecimalField(null=True)
+    logistics_code = CharField(constraints=[SQL("DEFAULT ''")])
+    logistics_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    logistics_name = CharField(constraints=[SQL("DEFAULT ''")])
+    package_code = CharField(constraints=[SQL("DEFAULT ''")], unique=True)
+    remarks = CharField(null=True)
+    state = IntegerField(constraints=[SQL("DEFAULT 0")])
+    third_part_out_order_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    third_part_out_order_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
+    update_time = DateTimeField(null=True)
+    update_user_id = BigIntegerField(null=True)
+    update_username = CharField(null=True)
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    weight = DecimalField(null=True)
+    width = DecimalField(null=True)
+
+    class Meta:
+        table_name = 'third_part_out_package'
+
+
+class ThirdPartOutPackageDetail(BaseModel):
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    id = BigAutoField()
+    package_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], index=True)
+    sale_sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sale_sku_name = CharField(constraints=[SQL("DEFAULT ''")])
+    sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sku_id = IntegerField(constraints=[SQL("DEFAULT 0")])
+    sku_name = CharField(constraints=[SQL("DEFAULT ''")])
+    sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+
+    class Meta:
+        table_name = 'third_part_out_package_detail'
+
+
+class ThirdPartOutReceiptInfo(BaseModel):
+    address = CharField(null=True)
+    area = CharField(null=True)
+    city = CharField(null=True)
+    country = CharField(null=True)
+    country_code = CharField(null=True)
+    country_id = IntegerField(null=True)
+    customer_type = IntegerField(null=True)
+    email = CharField(null=True)
+    first_name = CharField(null=True)
+    id = BigAutoField()
+    identity_card = CharField(null=True)
+    last_name = CharField(null=True)
+    phone = CharField(null=True)
+    postcode = CharField(null=True)
+    province = CharField(null=True)
+    province_code = CharField(null=True)
+    province_id = IntegerField(null=True)
+    receipt_data = TextField(null=True)
+    third_part_out_order_code = CharField(index=True)
+    third_part_out_order_id = BigIntegerField(index=True)
+
+    class Meta:
+        table_name = 'third_part_out_receipt_info'
+
+
+class ThirdPartOutStockDetail(BaseModel):
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    id = BigAutoField()
+    location_code = CharField()
+    location_id = BigIntegerField()
+    operation_time = DateTimeField(null=True)
+    operation_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    operation_username = CharField(null=True)
+    pick_qty = IntegerField(null=True)
+    sale_sku_code = CharField(null=True)
+    sku_code = CharField()
+    sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    third_part_out_order_code = CharField(index=True)
+    third_part_out_order_detail_id = BigIntegerField(null=True)
+    third_part_out_order_id = BigIntegerField(index=True)
+    warehouse_area_code = CharField()
+    warehouse_area_id = BigIntegerField(null=True)
+    warehouse_id = BigIntegerField(index=True)
+
+    class Meta:
+        table_name = 'third_part_out_stock_detail'
 
 
 class TrfBoxDemandDetail(BaseModel):
@@ -1462,6 +1789,28 @@ class TrfDemandPickRelation(BaseModel):
 
     class Meta:
         table_name = 'trf_demand_pick_relation'
+
+
+class TrfDischargeTime(BaseModel):
+    container_no = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    create_time = DateTimeField(null=True)
+    create_user_id = BigIntegerField(null=True)
+    create_username = CharField(constraints=[SQL("DEFAULT ''")])
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    discharge_end_time = DateTimeField(index=True, null=True)
+    discharge_end_time_pic = CharField(constraints=[SQL("DEFAULT ''")])
+    discharge_start_time = DateTimeField(index=True, null=True)
+    discharge_start_time_pic = CharField(constraints=[SQL("DEFAULT ''")])
+    id = BigAutoField()
+    remark = CharField(constraints=[SQL("DEFAULT ''")])
+    state = IntegerField(constraints=[SQL("DEFAULT 1")])
+    update_time = DateTimeField(null=True)
+    update_user_id = BigIntegerField(null=True)
+    update_username = CharField(constraints=[SQL("DEFAULT ''")])
+    warehouse_id = BigIntegerField(null=True)
+
+    class Meta:
+        table_name = 'trf_discharge_time'
 
 
 class TrfHandoverOrder(BaseModel):

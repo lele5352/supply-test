@@ -9,32 +9,18 @@ class TestDeliveryPick(object):
         self.warehouse_id = delivery_warehouse_id
         self.to_warehouse_id = delivery_warehouse_id
 
-        self.order_info = [(sale_sku, 2)]
+        self.order_info = [(sale_sku, bom, 2)]
         self.sj_kw_ids = wms_logics.get_kw(1, 2, len(sale_sku), self.warehouse_id, self.to_warehouse_id)
 
     def setup(self):
         # 这里踩过坑，单据号不能放在setupclass里面，否则每次单据号都一样，会触发幂等，导致结果不正确
-        self.delivery_code = 'CK' + str(int(time.time()))
-        # 清掉测试的销售sku库存数据
-        IMSDBOperator.delete_qualified_inventory([sale_sku])
-        time.sleep(1)
-        # 采购入库生成销售sku现货库存
-        ims_logics.add_lp_stock_by_other_in(
-            sale_sku,
-            bom,
-            self.order_info[0][1],
-            self.sj_kw_ids,
-            self.warehouse_id,
-            self.to_warehouse_id
-        )
-        self.expect_lp_inventory = ims_logics.query_lp_inventory(sale_sku, self.warehouse_id, self.to_warehouse_id)
+        self.delivery_code = 'OMS' + str(int(time.time()))
 
     # @pytest.mark.skip(reason='test')
     def test_1_completely_pick(self):
-        oms_order_block_res = ims_request.oms_order_block(
-            self.order_info,
-            self.warehouse_id,
-        )
+        if not ims_logics.is_stock_satisfy(sale_sku):
+            ims_logics.add_lp_stock_by_other_in()
+
         # 下发销售出库单预占仓库商品总库存、销售sku现货库存
         delivery_order_block_res = ims_request.delivery_order_block(
             self.delivery_code,

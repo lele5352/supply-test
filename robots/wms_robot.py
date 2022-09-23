@@ -2,26 +2,68 @@ import json
 import time
 from copy import deepcopy
 
-from config.sys_config import env_prefix_config
 from config.api_config.wms_api_config import wms_api_config
-from utils.request_handler import RequestHandler
+from robots.robot import ServiceRobot, AppRobot
 from db_operator.wms_db_operator import WMSDBOperator
 from utils.log_handler import logger as log
 
-from api_request.wms_transfer_request import WmsTransferRequest
 
+class WMSAppRobot(AppRobot):
+    def __init__(self):
+        super().__init__(WMSDBOperator)
 
-class WmsAppRequest(RequestHandler):
-    def __init__(self, app_headers, service_headers):
-        self.prefix = env_prefix_config.get('app_prefix')
-        self.transfer = WmsTransferRequest(service_headers)
-        super().__init__(self.prefix, app_headers)
+    def get_kw(self, return_type, kw_type, num, ck_id, to_ck_id):
+        """
+        获取指定库位类型、指定目的仓、指定数量的仓库库位
+
+        :param int return_type: 1-返回库位id；2-返回库位编码
+        :param int kw_type: 库位类型
+        :param int num: 获取的库位个数
+        :param int ck_id: 库位的所属仓库id
+        :param to_ck_id: 库位的目的仓id
+        """
+        location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
+        if not location_data:
+            new_locations = self.create_location(num, kw_type, ck_id, to_ck_id)
+            # 创建完缺口个数的库位后，重新获取库位
+            location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
+            if not new_locations:
+                print('创建库位失败！')
+                return self.report(0, False, {})
+        elif num - len(location_data) > 0:
+            # 库位不够，则新建对应缺少的库位
+            new_locations = self.create_location(num - len(location_data), kw_type, ck_id, to_ck_id)
+            if not new_locations:
+                print('创建库位失败！')
+                return self.report(0, False, {})
+            # 创建完缺口个数的库位后，重新获取库位
+            location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
+        # 库位够的
+        if return_type == 1:
+            data = [location['id'] for location in location_data]
+
+        else:
+            data = [location['warehouse_location_code'] for location in location_data]
+        return self.report(1, True, data)
+
+    def get_warehouse_info_by_id(self, warehouse_id):
+        """
+        根据仓库编码获取仓库信息
+        @param str warehouse_id : 仓库编码
+        @return : 仓库的信息
+        """
+        wms_api_config['get_warehouse_info_by_id']["uri_path"] += warehouse_id
+        res_data = self.call_api(**wms_api_config['get_warehouse_info_by_id'])
+
+        if not res_data:
+            return []
+        return res_data["data"]
 
     def get_switch_warehouse_data_perm_id(self, warehouse_id):
         wms_api_config['get_switch_warehouse_list']['data'].update({
             't': int(time.time() * 1000)
         })
-        res = self.send_request(**wms_api_config['get_switch_warehouse_list'])
+        res = self.call_api(**wms_api_config['get_switch_warehouse_list'])
         if not res:
             log.error("获取不到切换仓库列表！")
             return
@@ -35,7 +77,7 @@ class WmsAppRequest(RequestHandler):
         wms_api_config['switch_default_warehouse']['data'].update({
             'dataPermId': data_perm_id
         })
-        switch_res = self.send_request(**wms_api_config['switch_default_warehouse'])
+        switch_res = self.call_api(**wms_api_config['switch_default_warehouse'])
         if not switch_res:
             log.error('切换仓库失败！')
             return
@@ -77,7 +119,7 @@ class WmsAppRequest(RequestHandler):
         location_codes = list()
         for i in range(num):
             now = str(int(time.time() * 1000))
-            area_info = WMSDBOperator.query_warehouse_area_info_by_type(warehouse_id, kw_maps[kw_type][
+            area_info = self.dbo.query_warehouse_area_info_by_type(warehouse_id, kw_maps[kw_type][
                 'area_type'])
             location_info = {
                 'warehouseLocationCode': kw_maps[kw_type]['code_prefix'] + now,
@@ -90,39 +132,12 @@ class WmsAppRequest(RequestHandler):
                 'destWarehouseId': target_warehouse_id if kw_type != 6 else ''
             }
             wms_api_config['create_location']['data'].update(location_info)
-            location_create_res = self.send_request(**wms_api_config['create_location'])
+            location_create_res = self.call_api(**wms_api_config['create_location'])
             if location_create_res['code'] != 200:
                 log.error('创建库位失败:%s' % json.dumps(location_create_res, ensure_ascii=False))
                 return
             location_codes.append(wms_api_config['create_location']['data']['warehouseLocationCode'])
         return location_codes
-
-    def transfer_out_create_demand(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
-                                   trans_qty, demand_type=1, customer_type=1, remark=''):
-        """
-            创建调拨需求
-
-            :param int trans_out_id: 调出仓库id
-            :param int trans_in_id: 调入仓库id
-            :param int trans_out_to_id: 调出仓库的目的仓id
-            :param int trans_in_to_id: 调入仓库的目的仓id
-            :param string sale_sku_code: 调拨的商品的销售sku
-            :param int trans_qty: 调拨数量
-            :param int demand_type: 调拨类型
-            :param int customer_type: 客户类型：1-普通客户；2-大客户
-            :param string remark: 备注
-        """
-        create_demand_res = self.transfer.transfer_out_create_demand(
-            WMSDBOperator.query_warehouse_info_by_id(trans_out_id).get('warehouse_code'),
-            WMSDBOperator.query_warehouse_info_by_id(trans_out_to_id).get('warehouse_code') if trans_out_to_id else '',
-            WMSDBOperator.query_warehouse_info_by_id(trans_in_id).get('warehouse_code'),
-            WMSDBOperator.query_warehouse_info_by_id(trans_in_to_id).get('warehouse_code') if trans_in_to_id else '',
-            sale_sku_code,
-            trans_qty,
-            demand_type,
-            customer_type,
-            remark)
-        return create_demand_res
 
     def transfer_out_create_pick_order(self, demand_list, pick_type):
         """
@@ -137,7 +152,7 @@ class WmsAppRequest(RequestHandler):
                 "pickType": pick_type,
             }
         )
-        create_transfer_pick_order_res = self.send_request(**wms_api_config['create_transfer_pick_order'])
+        create_transfer_pick_order_res = self.call_api(**wms_api_config['create_transfer_pick_order'])
         return create_transfer_pick_order_res
 
     def transfer_out_pick_order_assign(self, pick_order_list, pick_username, pick_userid):
@@ -155,7 +170,7 @@ class WmsAppRequest(RequestHandler):
                 "pickUserId": pick_userid
             }
         )
-        assign_pick_user_res = self.send_request(**wms_api_config['transfer_pick_order_assign_pick_user'])
+        assign_pick_user_res = self.call_api(**wms_api_config['transfer_pick_order_assign_pick_user'])
         return assign_pick_user_res
 
     def transfer_out_pick_order_detail(self, pick_order_code):
@@ -172,7 +187,7 @@ class WmsAppRequest(RequestHandler):
                 "data": {"t": t}
             }
         )
-        detail_res = self.send_request(**data)
+        detail_res = self.call_api(**data)
         return detail_res['data']
 
     def transfer_out_confirm_pick(self, pick_order_code, pick_order_details):
@@ -196,7 +211,7 @@ class WmsAppRequest(RequestHandler):
                 "details": details
             }
         )
-        confirm_pick_res = self.send_request(**wms_api_config['transfer_confirm_pick'])
+        confirm_pick_res = self.call_api(**wms_api_config['transfer_confirm_pick'])
         return confirm_pick_res
 
     def transfer_out_submit_tray(self, pick_order_code, pick_order_details, tp_kw_ids):
@@ -208,7 +223,7 @@ class WmsAppRequest(RequestHandler):
         :param list tp_kw_ids: 托盘库位id列表
         """
         # 获取托盘编码
-        tp_kw_codes = [WMSDBOperator.query_warehouse_location_info_by_id(kw_id).get('warehouse_location_code') for kw_id
+        tp_kw_codes = [self.dbo.query_warehouse_location_info_by_id(kw_id).get('warehouse_location_code') for kw_id
                        in tp_kw_ids]
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         tray_info_list = list()
@@ -225,7 +240,7 @@ class WmsAppRequest(RequestHandler):
                 }
             )
         wms_api_config['transfer_submit_tray'].update({'data': tray_info_list})
-        submit_tray_res = self.send_request(**wms_api_config['transfer_submit_tray'])
+        submit_tray_res = self.call_api(**wms_api_config['transfer_submit_tray'])
         return submit_tray_res
 
     def transfer_out_pick_order_tray_detail(self, pick_order_no):
@@ -238,7 +253,7 @@ class WmsAppRequest(RequestHandler):
         data.update(
             {'uri_path': wms_api_config['transfer_pick_order_tray_detail']['uri_path'] % pick_order_no}
         )
-        tray_detail_res = self.send_request(**data)
+        tray_detail_res = self.call_api(**data)
         return tray_detail_res
 
     def transfer_out_finish_packing(self, pick_order_no, tray_list):
@@ -254,7 +269,7 @@ class WmsAppRequest(RequestHandler):
                 'storageLocationCodes': tray_list
             }
         )
-        finish_packing_res = self.send_request(**wms_api_config['transfer_finish_packing'])
+        finish_packing_res = self.call_api(**wms_api_config['transfer_finish_packing'])
         return finish_packing_res
 
     def transfer_out_order_detail(self, transfer_out_order_no):
@@ -262,7 +277,7 @@ class WmsAppRequest(RequestHandler):
         data.update(
             {'uri_path': wms_api_config['transfer_out_order_detail']['uri_path'] % transfer_out_order_no}
         )
-        detail_res = self.send_request(**data)
+        detail_res = self.call_api(**data)
         return detail_res
 
     def transfer_out_order_review(self, box_no, tray_code):
@@ -272,7 +287,7 @@ class WmsAppRequest(RequestHandler):
                 'storageLocationCode': tray_code
             }
         )
-        review_res = self.send_request(**wms_api_config['transfer_out_order_review'])
+        review_res = self.call_api(**wms_api_config['transfer_out_order_review'])
         return review_res
 
     def transfer_out_box_bind(self, box_no, handover_no, receive_warehouse_code):
@@ -283,17 +298,17 @@ class WmsAppRequest(RequestHandler):
                 "receiveWarehouseCode": receive_warehouse_code
             }
         )
-        bind_res = self.send_request(**wms_api_config['transfer_box_bind'])
+        bind_res = self.call_api(**wms_api_config['transfer_box_bind'])
         return bind_res
 
     def transfer_out_delivery(self, handover_no):
         wms_api_config['transfer_delivery']['data'].update({"handoverNo": handover_no})
-        delivery_res = self.send_request(**wms_api_config['transfer_delivery'])
+        delivery_res = self.call_api(**wms_api_config['transfer_delivery'])
         return delivery_res
 
     def transfer_in_received(self, handover_no):
         wms_api_config['transfer_in_received']['data'].update({"handoverNo": handover_no})
-        received_res = self.send_request(**wms_api_config['transfer_in_received'])
+        received_res = self.call_api(**wms_api_config['transfer_in_received'])
         return received_res
 
     def transfer_in_up_shelf(self, box_no, sj_kw_code):
@@ -302,7 +317,7 @@ class WmsAppRequest(RequestHandler):
                 "boxNo": box_no,
                 "storageLocationCode": sj_kw_code
             })
-        up_shelf_res = self.send_request(**wms_api_config['transfer_box_up_shelf'])
+        up_shelf_res = self.call_api(**wms_api_config['transfer_box_up_shelf'])
         return up_shelf_res
 
     def label_callback(self, delivery_order_code, order_list):
@@ -316,5 +331,97 @@ class WmsAppRequest(RequestHandler):
                 "deliveryNo": delivery_order_code,
                 "orderList": order_list
             })
-        callback_res = self.send_request(**wms_api_config['label_callback'])
+        callback_res = self.call_api(**wms_api_config['label_callback'])
         return callback_res
+
+
+class WMSTransferServiceRobot(ServiceRobot):
+    def __init__(self):
+        super().__init__("transfer")
+
+    def transfer_out_create_demand(self, delivery_warehouse_code, delivery_target_warehouse_code,
+                                   receive_warehouse_code, receive_target_warehouse_code, sale_sku_code, demand_qty,
+                                   demand_type=1, customer_type=1, remark=''):
+        """
+        :param string delivery_warehouse_code: 调出仓库
+        :param string receive_warehouse_code: 调入仓库
+        :param string delivery_target_warehouse_code: 调出仓库的目的仓，仅调出仓为中转仓时必填
+        :param string receive_target_warehouse_code: 调入仓库的目的仓，仅调入仓为中转仓时必填
+        :param string sale_sku_code: 调拨的商品的销售sku
+        :param int demand_qty: 调拨数量
+        :param int demand_type: 调拨类型
+        :param int customer_type: 客户类型：1-普通客户；2-大客户
+        :param string remark: 备注
+        """
+        wms_api_config['create_transfer_demand']['data'].update(
+            {
+                "deliveryWarehouseCode": delivery_warehouse_code,
+                "receiveWarehouseCode": receive_warehouse_code,
+                "deliveryTargetWarehouseCode": delivery_target_warehouse_code,
+                "receiveTargetWarehouseCode": receive_target_warehouse_code,
+                "goodsSkuCode": sale_sku_code,
+                "demandQty": demand_qty,
+                "demandType": demand_type,
+                "customerType": customer_type,  # 1：普通客户 2 ：大客户
+                "customerRemark": remark,
+                "sourceCode": "ZDH" + str(int(time.time())),
+            }
+        )
+        res_data = self.call_api(**wms_api_config['create_transfer_demand'])
+        return res_data
+
+
+class WMSDeliveryServiceRobot(ServiceRobot):
+    def __init__(self):
+        super().__init__("delivery")
+
+    def front_label_delivery_order_create(self):
+        """
+        :return: string：返回出库单号
+        """
+        # 修正来源单号、销售单号、销售单id
+        suffix = int(time.time() * 1000)
+        temp_data = {
+            "sourceOrderCode": 'source' + str(suffix),
+            "saleOrderId": suffix,
+            "saleOrderCode": 'sale' + str(suffix)
+        }
+        wms_api_config['front_label_delivery_order_create']['data'].update(temp_data)
+
+        service_delivery_order_create_res = self.call_api(
+            **wms_api_config['front_label_delivery_order_create'])
+        if service_delivery_order_create_res['code'] != 200:
+            log.error('出库单创建失败')
+            return
+        delivery_order_code = service_delivery_order_create_res['data']['deliveryOrderCode']
+        return delivery_order_code
+
+    def behind_label_delivery_order_create(self, sale_sku_count=1):
+        """
+        :return: string：返回出库单号
+        """
+        # 修正来源单号、销售单号、销售单id
+        suffix = int(time.time() * 1000)
+        temp_data = {
+            "sourceOrderCode": 'source' + str(suffix),
+            "saleOrderId": suffix,
+            "saleOrderCode": 'sale' + str(suffix)
+        }
+        wms_api_config['behind_label_delivery_order_create']['data'].update(temp_data)
+
+        # 更新销售sku数量
+        for sku in wms_api_config['behind_label_delivery_order_create']['data']['skuInfo']:
+            sku['saleSkuQty'] *= sale_sku_count
+
+        service_delivery_order_create_res = self.call_api(
+            **wms_api_config['behind_label_delivery_order_create'])
+        if service_delivery_order_create_res['code'] != 200:
+            log.error('出库单创建失败')
+            return
+        delivery_order_code = service_delivery_order_create_res['data']['deliveryOrderCode']
+        return delivery_order_code
+
+
+if __name__ == '__main__':
+    wms = WMSAppRobot()
+    print(wms.get_warehouse_info_by_id("513"))

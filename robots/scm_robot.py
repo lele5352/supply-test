@@ -1,20 +1,18 @@
 import copy
 
-from config.sys_config import env_prefix_config
 from config.api_config.scm_api_config import scm_api_config
-from utils.request_handler import RequestHandler
+from robots.robot import AppRobot
 from utils.log_handler import logger as log
 
 
-class ScmRequest(RequestHandler):
-    def __init__(self, app_headers):
-        self.prefix = env_prefix_config.get('app_prefix')
-        super().__init__(self.prefix, app_headers)
+class SCMRobot(AppRobot):
+    def __init__(self):
+        super().__init__()
 
     def get_sku_info(self, sale_sku_code):
         """获取供应商产品信息"""
         scm_api_config['get_product_info']['data'].update({'skuCode': sale_sku_code})
-        res = self.send_request(**scm_api_config['get_product_info'])
+        res = self.robot_call_api(**scm_api_config['get_product_info'])
         return res['data']['list'] if res else None
 
     def stock_plan_submit(self, sale_sku_list, num, delivery_warehouse_code, destination_warehouse_code):
@@ -40,13 +38,13 @@ class ScmRequest(RequestHandler):
                 "deliveryWarehouse": delivery_warehouse_code
             }
         })
-        res = self.send_request(**scm_api_config['stock_plan_submit'])
+        res = self.robot_call_api(**scm_api_config['stock_plan_submit'])
         return res
 
     def stock_plan_batch_audit(self, stock_plan_id):
         """备货计划批量审核"""
         scm_api_config['stock_plan_batch_audit']['data'].update({"ids": [stock_plan_id]})
-        audit_res = self.send_request(**scm_api_config['stock_plan_batch_audit'])
+        audit_res = self.robot_call_api(**scm_api_config['stock_plan_batch_audit'])
         if not audit_res or audit_res['code'] != 200:
             return
         return audit_res
@@ -56,7 +54,7 @@ class ScmRequest(RequestHandler):
         scm_api_config['get_purchase_demand_page']['data'].update(
             {"orderNos": [stock_plan_no]}
         )
-        res = self.send_request(**scm_api_config['get_purchase_demand_page'])
+        res = self.robot_call_api(**scm_api_config['get_purchase_demand_page'])
         if not res:
             return
         purchase_demand_id_list = [demand['id'] for demand in res['data']['list']]
@@ -65,13 +63,13 @@ class ScmRequest(RequestHandler):
     def get_purchase_demand_detail(self, purchase_demand_id):
         """获取采购需求详情"""
         scm_api_config['get_purchase_demand_detail']['uri_path'] += str(purchase_demand_id)
-        res = self.send_request(**scm_api_config['get_purchase_demand_detail'])
+        res = self.robot_call_api(**scm_api_config['get_purchase_demand_detail'])
         return res['data'] if res else None
 
     def batch_get_purchase_demand_detail(self, purchase_demand_id_list):
         """获取采购需求详情"""
         scm_api_config['batch_get_purchase_demand_detail'].update({'data': purchase_demand_id_list})
-        res = self.send_request(**scm_api_config['batch_get_purchase_demand_detail'])
+        res = self.robot_call_api(**scm_api_config['batch_get_purchase_demand_detail'])
         return res['data'] if res else None
 
     def confirm_and_generate_purchase_order(self, purchase_demand_id_list):
@@ -90,7 +88,7 @@ class ScmRequest(RequestHandler):
         scm_api_config['confirm_and_generate_purchase_order'].update({
             'data': purchase_demand_detail_list
         })
-        res = self.send_request(**scm_api_config['confirm_and_generate_purchase_order'])
+        res = self.robot_call_api(**scm_api_config['confirm_and_generate_purchase_order'])
         if not res or res['code'] != 200:
             return
         return True
@@ -99,7 +97,7 @@ class ScmRequest(RequestHandler):
         scm_api_config['get_purchase_order_page']['data'].update({
             "stockOrderNos": [stock_plan_no]
         })
-        res = self.send_request(**scm_api_config['get_purchase_order_page'])
+        res = self.robot_call_api(**scm_api_config['get_purchase_order_page'])
         purchase_order_ids = [purchase_order['id'] for purchase_order in res['data']['list']]
         purchase_order_nos = [purchase_order['purchaseOrderNo'] for purchase_order in res['data']['list']]
         return purchase_order_nos, purchase_order_ids
@@ -111,14 +109,14 @@ class ScmRequest(RequestHandler):
             'uri_path': body['uri_path'] % purchase_order_id
         })
 
-        res = self.send_request(**body)
+        res = self.robot_call_api(**body)
         return res['data'] if res else None
 
     def update_and_submit_purchase_order_to_audit(self, purchase_order_detail):
         """采购订单更新并提交审核"""
         purchase_order_detail.update({"operation": 2})
         scm_api_config['purchase_order_update'].update({'data': purchase_order_detail})
-        res = self.send_request(**scm_api_config['purchase_order_update'])
+        res = self.robot_call_api(**scm_api_config['purchase_order_update'])
         if not res or res['code'] != 200:
             return
         return True
@@ -128,7 +126,7 @@ class ScmRequest(RequestHandler):
         scm_api_config['purchase_order_batch_audit']['data'].update({
             "ids": purchase_order_id_list
         })
-        audit_res = self.send_request(**scm_api_config['purchase_order_batch_audit'])
+        audit_res = self.robot_call_api(**scm_api_config['purchase_order_batch_audit'])
         if not audit_res or audit_res['code'] != 200:
             return
         return True
@@ -138,7 +136,7 @@ class ScmRequest(RequestHandler):
         scm_api_config['purchase_order_batch_buy'].update({
             "data": purchase_order_id_list
         })
-        audit_res = self.send_request(**scm_api_config['purchase_order_batch_buy'])
+        audit_res = self.robot_call_api(**scm_api_config['purchase_order_batch_buy'])
         if not audit_res or audit_res['code'] != 200:
             return
         return True
@@ -148,7 +146,7 @@ class ScmRequest(RequestHandler):
         scm_api_config['get_purchase_order_delivery_detail']['data'].update({
             'ids': [purchase_order_id]
         })
-        res = self.send_request(**scm_api_config['get_purchase_order_delivery_detail'])
+        res = self.robot_call_api(**scm_api_config['get_purchase_order_delivery_detail'])
         return res['data']['list'] if res else None
 
     def generate_distribute_order(self, purchase_order_delivery_detail, delivery_warehouse_code):
@@ -162,7 +160,7 @@ class ScmRequest(RequestHandler):
         scm_api_config['generate_distribute_order'].update({
             'data': purchase_order_delivery_detail
         })
-        res = self.send_request(**scm_api_config['generate_distribute_order'])
+        res = self.robot_call_api(**scm_api_config['generate_distribute_order'])
         return res['data'] if res else None
 
     def purchase_order_delivery(self, distribute_order_info):
@@ -171,7 +169,7 @@ class ScmRequest(RequestHandler):
             {'logisticsInfos': []}
         )
         scm_api_config['purchase_order_delivery']['data'].update(distribute_order_info)
-        res = self.send_request(**scm_api_config['purchase_order_delivery'])
+        res = self.robot_call_api(**scm_api_config['purchase_order_delivery'])
         if not res or res['code'] != 200:
             return
         return True
@@ -181,7 +179,7 @@ class ScmRequest(RequestHandler):
         scm_api_config['get_distribute_order_page']['data'].update({
             "purchaseOrderNos": purchase_order_nos
         })
-        res = self.send_request(**scm_api_config['get_distribute_order_page'])
+        res = self.robot_call_api(**scm_api_config['get_distribute_order_page'])
         if not res:
             return
         distribute_order_nos = [distribute_order['shippingOrderNo'] for distribute_order in res['data']['list']]

@@ -11,7 +11,7 @@ class UserBehavior(TaskSet):
             ums = UmsController()
             account = self.user.user_data_queue.get()
             print(account)
-            authorization = ums.ums_login(True, account['username'], account['password'])
+            authorization = ums.login(True, account['username'], account['password'])
             self.headers = {
                 'Content-Type': 'application/json;charset=UTF-8',
                 'Authorization': authorization

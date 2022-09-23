@@ -8,21 +8,20 @@ class TestSalesOutboundOrderDelivery(object):
     def setup_class(self):
         self.warehouse_id = delivery_warehouse_id
         self.to_warehouse_id = delivery_warehouse_id
+        self.sj_kw_ids = wms_logics.get_kw(1, 5, 5, self.warehouse_id, self.to_warehouse_id)
 
     def setup(self):
-        self.delivery_code = 'CK' + str(int(time.time() * 1000))
+        self.delivery_code = 'OMS' + str(int(time.time() * 1000))
 
     def test_1_reissue_order_delivered_break_up_suite(self):
         """
         测试场景：一套库存放在多个不同库位，出库补发单,导致不成套
         """
         sale_sku = '63203684930'
+        bom = 'A'
         origin_inventory = [('63203684930A01', 1), ('63203684930A02', 2), ('63203684930A02', 3)]
         delivery_order_goods_list = [('BP63203684930A01', 1)]
-        sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.warehouse_id, self.to_warehouse_id)
 
-        # 干掉该销售sku的库存数据；
-        IMSDBOperator.delete_qualified_inventory([sale_sku])
         # 其他入库生成销售sku现货库存
         ims_request.lp_other_in(
             origin_inventory,

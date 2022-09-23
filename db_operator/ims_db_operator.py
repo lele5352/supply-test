@@ -36,6 +36,27 @@ class IMSDBOperator:
         return items
 
     @classmethod
+    def query_stock_with_bom(cls, sku_code, bom, ck_id, to_ck_id) -> list:
+        """
+        查询wares_inventory表发货仓指定bom的数据
+        @param to_ck_id: 目的仓库id
+        @param ck_id: 所属仓库id
+        @param sku_code: 销售sku编码
+        @param bom: bom版本
+        @return: 查询结果数据list
+        """
+
+        items = WaresInventory.select().order_by(WaresInventory.ware_sku_code).where(
+            WaresInventory.goods_sku_code == sku_code,
+            WaresInventory.warehouse_id == ck_id,
+            WaresInventory.bom_version == bom,
+            WaresInventory.target_warehouse_id == to_ck_id)
+        if not items:
+            return []
+        items = [model_to_dict(item) for item in items]
+        return items
+
+    @classmethod
     def query_goods_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id) -> list:
         """
         查询goods_inventory表指定条件数据
@@ -172,3 +193,4 @@ class IMSDBOperator:
                 NogoodWaresInventory.warehouse_id == warehouse_id)
         data = [model_to_dict(item) for item in items]
         return data
+
