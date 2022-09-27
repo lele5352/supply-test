@@ -2,7 +2,7 @@ import time
 from copy import deepcopy
 from robots.robot import AppRobot, ServiceRobot
 from config.api_config.oms_api_config import oms_api_config
-from db_operator.oms_db_operator import OMSDBOperator
+from dbo.oms_dbo import OMSDBOperator
 
 
 class OMSAppRobot(AppRobot):
@@ -101,12 +101,13 @@ class OMSAppRobot(AppRobot):
         @param oms_order_id: oms单id
         @return: list
         """
-        oms_api_config["query_oms_order_detail"].update({
-            "uri_path": oms_api_config["query_oms_order_detail"]["uri_path"] % oms_order_id,
+        temp = deepcopy(oms_api_config["query_oms_order_detail"])
+        temp.update({
+            "uri_path": temp["uri_path"] % oms_order_id,
             "data": {'t': int(time.time() * 1000)}
         })
 
-        res_data = self.call_api(**oms_api_config["query_oms_order_detail"])
+        res_data = self.call_api(**temp)
         return self.formatted_result(res_data)
 
     def query_oms_order_sku_items(self, oms_order_id):
@@ -114,12 +115,12 @@ class OMSAppRobot(AppRobot):
         @param oms_order_id: oms单id
         @return: list
         """
-        oms_api_config["query_oms_order_sku_items"].update({
-            "uri_path": oms_api_config["query_oms_order_sku_items"]["uri_path"] % oms_order_id,
+        temp = deepcopy(oms_api_config["query_oms_order_sku_items"])
+        temp.update({
+            "uri_path": temp["uri_path"] % oms_order_id,
             "data": {'t': int(time.time() * 1000)}
         })
-
-        res_data = self.call_api(**oms_api_config["query_oms_order_sku_items"])
+        res_data = self.call_api(**temp)
         return self.formatted_result(res_data)
 
     def query_common_warehouse(self, common_warehouse_code):
@@ -141,8 +142,9 @@ class OMSAppIpRobot(ServiceRobot):
         super().__init__("oms_app", OMSDBOperator)
 
     def dispatch_oms_order(self, oms_order_list):
-        oms_api_config["dispatch_oms_order"]["data"].extend(oms_order_list)
-        aaa = oms_api_config["dispatch_oms_order"]
+        oms_api_config["dispatch_oms_order"].update({
+            "data": oms_order_list
+        })
         res_data = self.call_api(**oms_api_config["dispatch_oms_order"])
         return self.formatted_result(res_data)
 

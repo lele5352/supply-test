@@ -2,7 +2,7 @@ from logics.ums_logics import UmsLogics
 from logics.ims_logics import ImsLogics
 from logics.wms_logics import WmsLogics
 
-from db_operator.ims_db_operator import IMSDBOperator
+from dbo.ims_dbo import IMSDBOperator
 from robots.ims_robot import IMSRobot
 from robots.ums_robot import UmsRequest
 from robots.wms_robot import WMSRobot

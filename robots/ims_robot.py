@@ -3,7 +3,7 @@ import time
 from robots.robot import ServiceRobot
 from config.api_config.ims_api_config import ims_api_config
 from copy import deepcopy
-from db_operator.ims_db_operator import IMSDBOperator
+from dbo.ims_dbo import IMSDBOperator
 
 
 class IMSRobot(ServiceRobot):

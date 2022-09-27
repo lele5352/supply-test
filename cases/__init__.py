@@ -13,3 +13,4 @@ default_stock_warehouse_id = 512
 default_exchange_warehouse_id = 511
 
 default_bom_version = 'A'
+
