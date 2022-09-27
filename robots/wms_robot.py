@@ -4,7 +4,7 @@ from copy import deepcopy
 
 from config.api_config.wms_api_config import wms_api_config
 from robots.robot import ServiceRobot, AppRobot
-from db_operator.wms_db_operator import WMSDBOperator
+from dbo.wms_dbo import WMSDBOperator
 from utils.log_handler import logger as log
 
 
