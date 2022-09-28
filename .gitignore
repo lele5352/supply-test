@@ -149,3 +149,5 @@ barcodes/
 
 # pytest_cache
 .pytest_cache
+/reports/
+/allure-report-files/

@@ -1,6 +1,6 @@
 import pytest
 import allure
-
+import os
 from cases import *
 
 oms_data = [
@@ -11,16 +11,14 @@ oms_data = [
 
 
 @allure.feature("测试链路：新建销售订单→审单→添加库存→跟单→下发wms")
-class TestPushDeliveryOrder(object):
-    @allure.story("测试场景：正常下发场景")
+class OMSOrderPushWMS(object):
+    @allure.story("测试场景：正常推送wms生成销售出库单场景")
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
     @pytest.mark.parametrize("order_sku_info_list,expected", oms_data)
-    def test_push_delivery_order_task(self, order_sku_info_list, expected):
+    def test_push_wms_success(self, order_sku_info_list, expected):
         """
-        生成双指定销售订单，并审单下发至WMS生成销售出库单
+        生成销售订单，并审单下发至WMS生成销售出库单
         @param order_sku_info_list: 格式：[{"sku_code": "JJH3C94287", "qty": 2, "bom": "A", "warehouse_id": '513'}]
-
-        @return:
         """
         expected = expected
         with allure.step("步骤1：新建销售单"):
@@ -87,3 +85,4 @@ class TestPushDeliveryOrder(object):
 
 if __name__ == '__main__':
     pytest.main()
+    os.system("allure generate ../allure-report-files -o ../reports --clean")
