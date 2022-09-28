@@ -84,6 +84,6 @@ class TestOMSOrderPushWMS(object):
 
 if __name__ == '__main__':
     pytest.main()
-    os.system("pytest -v -s cases/links/oms_order_push_wms.py --alluredir=./allure-report-files")
+    os.system("pytest -v -s cases/links/test_oms_order_push_wms.py --alluredir=./allure-report-files")
     os.system("allure generate ./allure-report-files -o ./reports --clean")
 
