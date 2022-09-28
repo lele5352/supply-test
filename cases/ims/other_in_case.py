@@ -54,7 +54,7 @@ from cases import *
 
 @allure.feature("测试模块：其他入库")
 class TestOtterInStock(object):
-    ims_cp_other_in_data = get_excel_data("../../data/ims_test_data.xlsx", "cp_other_in")
+    ims_cp_other_in_data = get_excel_data("data/ims_test_data.xlsx", "cp_other_in")
 
     @allure.story("测试场景：其他入库，上架次品")
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
