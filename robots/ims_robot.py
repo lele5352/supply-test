@@ -53,7 +53,7 @@ class IMSRobot(ServiceRobot):
         # 构造 销售sku+bom的唯一键，用来下面聚合同个销售sku同个bom的仓库sku
         temp_list = list()
         for i in ware_sku_qty_list:
-            bom_info = ims_robot.dbo.query_bom_detail_by_ware_sku_code(i[0])
+            bom_info = self.dbo.query_bom_detail_by_ware_sku_code(i[0])
             if bom_info not in temp_list:
                 temp_list.append(bom_info)
 
@@ -61,7 +61,7 @@ class IMSRobot(ServiceRobot):
         for temp in temp_list:
             ware_sku_list = list()
             for (ware_sku, qty), location_id in zip(ware_sku_qty_list, sj_location_ids):
-                sale_sku_bom = ims_robot.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
+                sale_sku_bom = self.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
                 if temp == sale_sku_bom:
                     ware_sku_list.append(
                         {
@@ -137,7 +137,7 @@ class IMSRobot(ServiceRobot):
                 "wareSkuList": ware_sku_list
             })
         res = self.call_api(**ims_api_config['unqualified_goods_other_into_warehouse'])
-        return res
+        return self.formatted_result(res)
 
     def delivery_order_block(self, oms_order_no, oms_order_sku_info_list, warehouse_id, to_warehouse_id):
         """
@@ -551,8 +551,7 @@ class IMSRobot(ServiceRobot):
                         )
         return formatted_inventory
 
-    @classmethod
-    def query_format_wares_inventory_self(cls, sale_sku_code, ck_id, to_ck_id):
+    def query_format_wares_inventory_self(self, sale_sku_code, ck_id, to_ck_id):
         """
         仅查询指定销售sku在指定所属仓+目的仓的单个仓库数据,并格式化为统一库存结构进行返回
         :param str sale_sku_code: 销售sku编码
@@ -560,11 +559,10 @@ class IMSRobot(ServiceRobot):
         :param int to_ck_id: 目的仓id
         :return: 查询结果数据，字典格式
         """
-        wares_inventory = ims_robot.dbo.query_wares_inventory(sale_sku_code, ck_id, to_ck_id)
-        return cls.format_wares_inventory(wares_inventory)
+        wares_inventory = self.dbo.query_wares_inventory(sale_sku_code, ck_id, to_ck_id)
+        return self.format_wares_inventory(wares_inventory)
 
-    @classmethod
-    def query_format_wares_inventory_all(cls, sale_sku_code, ck_id, to_ck_id):
+    def query_format_wares_inventory_all(self, sale_sku_code, ck_id, to_ck_id):
         """
         查询指定销售sku在全部相关仓库的数据,并格式化为统一库存结构进行返回
         :param str sale_sku_code: 销售sku编码
@@ -572,11 +570,10 @@ class IMSRobot(ServiceRobot):
         :param int to_ck_id: 目的仓id
         :return: 查询结果数据，字典格式
         """
-        wares_inventory = ims_robot.dbo.query_wares_inventory(sale_sku_code, ck_id, to_ck_id, 2)
-        return cls.format_wares_inventory(wares_inventory)
+        wares_inventory = self.dbo.query_wares_inventory(sale_sku_code, ck_id, to_ck_id, 2)
+        return self.format_wares_inventory(wares_inventory)
 
-    @classmethod
-    def query_format_goods_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id):
+    def query_format_goods_inventory(self, sale_sku_code, warehouse_id, to_warehouse_id):
         """
         查询指定销售sku的goods_inventory数据，并格式化为库存统一结构进行返回
 
@@ -585,7 +582,7 @@ class IMSRobot(ServiceRobot):
         :param int to_warehouse_id: 目的仓id
         :return: 查询结果数据，字典格式
         """
-        goods_inventory = ims_robot.dbo.query_goods_inventory(sale_sku_code, warehouse_id, to_warehouse_id)
+        goods_inventory = self.dbo.query_goods_inventory(sale_sku_code, warehouse_id, to_warehouse_id)
         formatted_goods_inventory = dict()
         for item in goods_inventory:
             # 销售商品采购在途库存
@@ -606,8 +603,7 @@ class IMSRobot(ServiceRobot):
                 })
         return formatted_goods_inventory
 
-    @classmethod
-    def query_format_central_inventory(cls, sale_sku_code, warehouse_id, to_warehouse_id):
+    def query_format_central_inventory(self, sale_sku_code, warehouse_id, to_warehouse_id):
         """
         查询指定销售sku的central_inventory数据，并格式化为库存统一结构进行返回
         :param str sale_sku_code: 销售sku编码
@@ -615,7 +611,7 @@ class IMSRobot(ServiceRobot):
         :param int to_warehouse_id: 目的仓id
         :return dict: 查询结果数据，字典格式
         """
-        central_inventory = ims_robot.dbo.query_central_inventory(sale_sku_code, warehouse_id, to_warehouse_id)
+        central_inventory = self.dbo.query_central_inventory(sale_sku_code, warehouse_id, to_warehouse_id)
         if not central_inventory:
             return {}
         else:
@@ -639,8 +635,7 @@ class IMSRobot(ServiceRobot):
             result.update({sale_sku: cls.query_lp_inventory(sale_sku, warehouse_id, to_warehouse_id)})
         return result
 
-    @classmethod
-    def query_lp_inventory(cls, sale_sku, warehouse_id, to_warehouse_id) -> dict:
+    def query_lp_inventory(self, sale_sku, warehouse_id, to_warehouse_id) -> dict:
         """
         查询销售sku的库存数据，并格式化为库存统一格式进行返回
         :param string sale_sku: 销售sku编码
@@ -649,9 +644,9 @@ class IMSRobot(ServiceRobot):
         :return: 格式化后的良品库存数据
         """
         qualified_inventory = dict()
-        central_inventory = cls.query_format_central_inventory(sale_sku, warehouse_id, to_warehouse_id)
-        goods_inventory = cls.query_format_goods_inventory(sale_sku, warehouse_id, to_warehouse_id)
-        wares_inventory = cls.query_format_wares_inventory_self(sale_sku, warehouse_id, to_warehouse_id)
+        central_inventory = self.query_format_central_inventory(sale_sku, warehouse_id, to_warehouse_id)
+        goods_inventory = self.query_format_goods_inventory(sale_sku, warehouse_id, to_warehouse_id)
+        wares_inventory = self.query_format_wares_inventory_self(sale_sku, warehouse_id, to_warehouse_id)
         if central_inventory:
             qualified_inventory.update(central_inventory)
         if goods_inventory:
@@ -660,29 +655,27 @@ class IMSRobot(ServiceRobot):
             qualified_inventory.update(wares_inventory)
         return qualified_inventory
 
-    @classmethod
-    def get_sale_skus(cls, ware_sku_qty_list) -> list:
+    def get_sale_skus(self, ware_sku_qty_list) -> list:
         """
         根据ware_sku_qty_list计算出对应的销售sku列表
         :param list ware_sku_qty_list: 变更的仓库sku及数量列表，格式[(ware_sku,qty),...]
         """
         sale_sku_list = list()
-        ware_sku_list = [_[0] for _ in cls.combine_ware_sku_qty_list(ware_sku_qty_list)]
+        ware_sku_list = [_[0] for _ in self.combine_ware_sku_qty_list(ware_sku_qty_list)]
         for ware_sku in ware_sku_list:
-            sale_sku = ims_robot.dbo.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code']
+            sale_sku = self.dbo.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code']
             if sale_sku not in sale_sku_list:
                 sale_sku_list.append(sale_sku)
         return sale_sku_list
 
-    @classmethod
-    def query_format_cp_inventory(cls, sale_sku_code, warehouse_id, bom_version='') -> dict:
+    def query_format_cp_inventory(self, sale_sku_code, warehouse_id, bom_version='') -> dict:
         """
         :param string sale_sku_code: 销售sku编码
         :param int warehouse_id: 仓库id
         :param string bom_version: bom版本
         :return: bom版本仓库sku明细字典
         """
-        items = ims_robot.dbo.query_unqualified_inventory(sale_sku_code, warehouse_id, bom_version)
+        items = self.dbo.query_unqualified_inventory(sale_sku_code, warehouse_id, bom_version)
         ware_sku_inventory = dict()
         for item in items:
             if ware_sku_inventory.get(item['ware_sku_code']):
@@ -706,12 +699,11 @@ class IMSRobot(ServiceRobot):
                     })
         return ware_sku_inventory
 
-    @classmethod
-    def calculate_sets(cls, ware_sku_qty_list):
+    def calculate_sets(self, ware_sku_qty_list):
         sale_sku_dict = dict()
         result_sku_suites = dict()
         for ware_sku, qty in ware_sku_qty_list:
-            sale_sku_info = ims_robot.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
+            sale_sku_info = self.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
             if sale_sku_info['goods_sku_code'] not in sale_sku_dict:
                 sale_sku_dict.update({
                     sale_sku_info['goods_sku_code']: {
@@ -734,7 +726,7 @@ class IMSRobot(ServiceRobot):
                 sale_sku_dict[sale_sku_info['goods_sku_code']][sale_sku_info['bom_version']][ware_sku] += qty
         for sale_sku in sale_sku_dict:
             for bom in sale_sku_dict[sale_sku]:
-                bom_detail = ims_robot.dbo.query_bom_detail(sale_sku, bom)
+                bom_detail = self.dbo.query_bom_detail(sale_sku, bom)
                 if len(sale_sku_dict[sale_sku][bom]) < len(bom_detail):
                     result_sku_suites.update(
                         {sale_sku: 0}
@@ -742,7 +734,7 @@ class IMSRobot(ServiceRobot):
                 else:
                     result_suites = list()
                     for ware_sku, qty in sale_sku_dict[sale_sku][bom].items():
-                        suites = qty // ims_robot.dbo.query_bom_detail(sale_sku, bom)[ware_sku]
+                        suites = qty // self.dbo.query_bom_detail(sale_sku, bom)[ware_sku]
                         result_suites.append(suites)
                     min_suites = min(result_suites)
                     if result_sku_suites.get(sale_sku):
@@ -765,7 +757,7 @@ class IMSRobot(ServiceRobot):
         """
         result_stock = list()
         result_block = list()
-        bom_detail = ims_robot.dbo.query_bom_detail(sale_sku, bom)
+        bom_detail = self.dbo.query_bom_detail(sale_sku, bom)
         if len(wares_inventory) < len(bom_detail):
             return 0, 0, 0
         else:
@@ -801,8 +793,7 @@ class IMSRobot(ServiceRobot):
             ware_sku_list.append((ware_sku, total_qty))
         return sorted(ware_sku_list, key=lambda s: s[0])
 
-    @classmethod
-    def get_add_stock_change_inventory(cls, ware_sku_qty_list, kw_ids_list=None) -> dict:
+    def get_add_stock_change_inventory(self, ware_sku_qty_list, kw_ids_list=None) -> dict:
         """
         把ware_sku_qty_list格式化库存统一格式
         :param list ware_sku_qty_list: 变动的ware_sku、qty列表，格式[(ware_sku,qty),...]
@@ -811,7 +802,7 @@ class IMSRobot(ServiceRobot):
         result_dict = dict()
         if kw_ids_list:
             for (ware_sku, qty), kw_id in zip(ware_sku_qty_list, kw_ids_list):
-                bom_detail_info = ims_robot.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
+                bom_detail_info = self.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
                 sale_sku, bom = bom_detail_info['goods_sku_code'], bom_detail_info['bom_version']
                 if sale_sku not in result_dict:
                     result_dict.update({
@@ -833,7 +824,7 @@ class IMSRobot(ServiceRobot):
                     result_dict[sale_sku][bom][ware_sku][kw_id] += qty
         else:
             for ware_sku, qty in ware_sku_qty_list:
-                bom_detail_info = ims_robot.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
+                bom_detail_info = self.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
                 sale_sku, bom = bom_detail_info['goods_sku_code'], bom_detail_info['bom_version']
                 if sale_sku not in result_dict:
                     result_dict.update({
@@ -860,7 +851,7 @@ class IMSRobot(ServiceRobot):
         result_dict = dict()
 
         for ware_sku, qty, kw_id in ware_sku_kw_qty_list:
-            bom_detail_info = ims_robot.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
+            bom_detail_info = self.dbo.query_bom_detail_by_ware_sku_code(ware_sku)
             sale_sku, bom = bom_detail_info['goods_sku_code'], bom_detail_info['bom_version']
             if sale_sku not in result_dict:
                 result_dict.update({
@@ -1050,39 +1041,37 @@ class IMSRobot(ServiceRobot):
             wares_inventory[sale_sku].update(expect_central_inventory[sale_sku])
         return wares_inventory
 
-    @classmethod
-    def get_cp_other_in_expect_inventory(cls, ware_sku_qty_list, location_list):
+    def get_cp_other_in_expect_inventory(self, origin_cp_inventory, ware_sku_qty_list, location_list):
         result_dict = dict()
-        sale_sku_suites_dict = cls.calculate_sets(ware_sku_qty_list)
-        for sale_sku in sale_sku_suites_dict:
+        sale_sku_list = self.get_sale_skus(ware_sku_qty_list)
+        for sale_sku in sale_sku_list:
             # 构造库位期望库存，更新到temp_ware_dict中
-            expect_cp_inventory = dict()
             for (ware_sku, qty), cp_location_id in zip(ware_sku_qty_list, location_list):
-                if ims_robot.dbo.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
+                if self.dbo.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
                     continue
-                if expect_cp_inventory.get(ware_sku):
-                    if expect_cp_inventory[ware_sku].get(cp_location_id):
-                        expect_cp_inventory[ware_sku][cp_location_id]['stock'] += qty
+                if origin_cp_inventory.get(ware_sku):
+                    if origin_cp_inventory[ware_sku].get(cp_location_id):
+                        origin_cp_inventory[ware_sku][cp_location_id]['stock'] += qty
                     else:
-                        expect_cp_inventory[ware_sku].update({
+                        origin_cp_inventory[ware_sku].update({
                             cp_location_id: {'stock': qty, 'block': 0}
                         })
-                    if expect_cp_inventory[ware_sku].get('total'):
-                        expect_cp_inventory[ware_sku]['total']['stock'] += qty
+                    if origin_cp_inventory[ware_sku].get('total'):
+                        origin_cp_inventory[ware_sku]['total']['stock'] += qty
                     else:
-                        expect_cp_inventory[ware_sku].update({
+                        origin_cp_inventory[ware_sku].update({
                             'total': {'stock': qty, 'block': 0}
                         })
                 else:
                     # 更新temp_ware_dict写入库位总库存和仓库总库存
-                    expect_cp_inventory.update({
+                    origin_cp_inventory.update({
                         ware_sku: {
                             'total': {'stock': qty, 'block': 0},
                             cp_location_id: {'stock': qty, 'block': 0}
                         }
                     })
             result_dict.update({
-                sale_sku: expect_cp_inventory
+                sale_sku: origin_cp_inventory
             })
         return result_dict
 
@@ -1105,7 +1094,7 @@ class IMSRobot(ServiceRobot):
             })
             # 构造库位期望库存，更新到temp_ware_dict中
             for (ware_sku, qty), sj_location_id in zip(ware_sku_qty_list, location_list):
-                if ims_robot.dbo.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
+                if self.dbo.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
                     continue
                 if expect_lp_inventory.get(ware_sku):
                     if expect_lp_inventory[ware_sku].get(sj_location_id):
@@ -1164,7 +1153,7 @@ class IMSRobot(ServiceRobot):
             })
             # 构造库位期望库存，更新到temp_ware_dict中
             for ware_sku, qty in ware_sku_qty_list:
-                if ims_robot.dbo.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
+                if self.dbo.query_bom_detail_by_ware_sku_code(ware_sku)['goods_sku_code'] != sale_sku:
                     continue
                 if expect_lp_inventory.get(ware_sku):
                     if expect_lp_inventory[ware_sku].get('warehouse_total'):
@@ -1198,7 +1187,7 @@ class IMSRobot(ServiceRobot):
         :param int warehouse_id: 仓库id
         :param int to_warehouse_id: 目的仓库id
         """
-        details = ims_robot.dbo.query_bom_detail(sale_sku_code, bom_version)
+        details = self.dbo.query_bom_detail(sale_sku_code, bom_version)
         ware_sku_qty_list = list()
         for ware_sku, qty in details.items():
             ware_sku_qty_list.append((ware_sku, qty * add_stock_count))
@@ -1274,7 +1263,7 @@ class IMSRobot(ServiceRobot):
 
 
 if __name__ == '__main__':
-    ims_robot = IMSRobot()
-    ims_robot.del_stock(["67330337129"])
-    # ims_robot.add_bom_stock("JF2KB93311", "C", 1, [1496], 513, 513)
-    # ims_robot.add_bom_stock("JF2KB93311", "D", 1, [1544], 512, '')
+    self = IMSRobot()
+    self.del_stock(["67330337129"])
+    # self.add_bom_stock("JF2KB93311", "C", 1, [1496], 513, 513)
+    # self.add_bom_stock("JF2KB93311", "D", 1, [1544], 512, '')
