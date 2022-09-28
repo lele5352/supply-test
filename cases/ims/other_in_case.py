@@ -3,7 +3,7 @@ import allure
 import os
 from cases import *
 
-data = [
+cp_data = [
     # 测试场景：1种单品，数量1个，上架到1个上架库位
     [[('16338527895A01', 1)], "one", "513", "513", 1],
 
@@ -53,7 +53,7 @@ data = [
 class TestOtterInStock(object):
     @allure.story("测试场景：其他入库，上架次品")
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
-    @pytest.mark.parametrize("ware_sku_qty_list,kw_num,warehouse_id,to_warehouse_id,expected", data)
+    @pytest.mark.parametrize("ware_sku_qty_list,kw_num,warehouse_id,to_warehouse_id,expected", cp_data)
     def test_cp_other_in_stock(self, ware_sku_qty_list, kw_num, warehouse_id, to_warehouse_id, expected):
         sale_skus = ims_robot.get_sale_skus(ware_sku_qty_list)
 
