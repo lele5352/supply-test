@@ -1,7 +1,7 @@
 from data_generator import *
 from utils.log_handler import logger as log
 from utils.barcode_handler import barcode_generate
-from db_operator.ims_db_operator import IMSDBOperator
+from dbo.ims_dbo import IMSDBOperator
 
 
 class WmsTransferDataGenerator:

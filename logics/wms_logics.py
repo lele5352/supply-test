@@ -3,7 +3,7 @@ import time
 from copy import deepcopy
 
 from config.api_config.wms_api_config import wms_api_config
-from db_operator.wms_db_operator import WMSDBOperator
+from dbo.wms_dbo import WMSDBOperator
 
 
 class WmsLogics:
@@ -64,8 +64,6 @@ class WmsLogics:
         """
         data = WMSDBOperator.query_warehouse_area_info_by_type(warehouse_id, area_type)
         return str(data.get('id'))
-
-
 
     def mock_express_label_callback(self, delivery_order_code, package_list):
         """
@@ -207,5 +205,7 @@ class WmsLogics:
         """
         res = ims_request.lp_other_in(ware_qty_list, kw_ids, ck_id, to_ck_id)
         return res
+
+
 if __name__ == '__main__':
     wms = WmsLogics()
