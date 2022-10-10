@@ -12,10 +12,12 @@ oms_data = [
 
 @allure.feature("测试链路：新建销售订单→审单→添加库存→跟单→下发wms")
 class TestOMSOrderPushWMS(object):
+    oms_to_wms_data = get_excel_data("data/link_test_data.xlsx", "oms_to_wms")
+
     @allure.story("测试场景：正常推送wms生成销售出库单场景")
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
-    @pytest.mark.parametrize("order_sku_info_list,expected", oms_data)
-    def test_push_wms_success(self, order_sku_info_list, expected):
+    @pytest.mark.parametrize("order_sku_info_list,expected,bak", oms_to_wms_data)
+    def test_push_wms_success(self, order_sku_info_list, expected, bak):
         """
         生成销售订单，并审单下发至WMS生成销售出库单
         """
@@ -86,4 +88,3 @@ if __name__ == '__main__':
     pytest.main()
     os.system("pytest -v -s cases/links/test_oms_order_push_wms.py --alluredir=./allure-report-files")
     os.system("allure generate ./allure-report-files -o ./reports --clean")
-

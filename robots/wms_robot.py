@@ -12,6 +12,96 @@ class WMSAppRobot(AppRobot):
     def __init__(self):
         super().__init__(WMSDBOperator)
 
+    def ck_id_to_code(self, warehouse_id):
+        """
+        根据仓库id获取仓库编码
+
+        :param int warehouse_id: 仓库id
+        """
+        if not warehouse_id:
+            return
+        data = self.dbo.query_warehouse_info_by_id(warehouse_id)
+        return data.get('warehouse_code')
+
+    def ck_code_to_id(self, warehouse_code):
+        """
+        根据仓库编码获取仓库id
+
+        :param string warehouse_code: 仓库编码
+        """
+        if not warehouse_code:
+            return
+        data = self.dbo.query_warehouse_info_by_code(warehouse_code)
+        return data.get('id')
+
+    def kw_id_to_code(self, kw_id):
+        """
+        根据库位id获取库位编码
+
+        :param int kw_id: 库位id
+        """
+        data = self.dbo.query_warehouse_location_info_by_id(kw_id)
+        return data.get('warehouse_location_code')
+
+    def kw_code_to_id(self, kw_code):
+        """
+        根据库位编码获取库位id
+
+        :param string kw_code: 库位编码
+        """
+        data = self.dbo.query_warehouse_location_info_by_code(kw_code)
+        return data.get('id')
+
+    def get_ck_area_id(self, warehouse_id, area_type):
+        """
+        获取指定区域类型的仓库区域id
+
+        :param int warehouse_id: 仓库id
+        :param int area_type: 区域类型
+        """
+        data = self.dbo.query_warehouse_area_info_by_type(warehouse_id, area_type)
+        return str(data.get('id'))
+
+    def mock_express_label_callback(self, delivery_order_code, package_list):
+        """
+        :param string delivery_order_code: 出库单号
+        :param list package_list: 包裹列表
+
+        """
+        order_list = list()
+        count = 0
+        for package in package_list:
+            count += 1
+            temp_order_info = deepcopy(wms_api_config['label_callback']['data']['orderList'][0])
+            temp_order_info.update({
+                "deliveryNo": delivery_order_code,
+                "packageNoList": [package],
+                "logistyNo": "logistyNo" + str(int(time.time() * 1000 + count)),
+                "barCode": "barCode" + str(int(time.time() * 1000 + count)),
+                "turnOrderNo": str(int(time.time() * 1000)),
+                "drawOrderNo": str(int(time.time() * 1000))
+            })
+            order_list.append(temp_order_info)
+        res = self.label_callback(delivery_order_code, order_list)
+        if res['code'] == 200:
+            return True
+        else:
+            return False
+
+    def query_delivery_order_package_list(self, delivery_order_code):
+        data = self.dbo.query_delivery_order_package_info(delivery_order_code)
+        package_no_list = [package['package_code'] for package in data]
+        return package_no_list
+
+    @classmethod
+    def get_pick_sku_list(cls, pick_order_details):
+        pick_sku_list = list()
+        for detail in pick_order_details:
+            pick_sku_list.append(
+                (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
+        pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
+        return pick_sku_list
+
     def get_kw(self, return_type, kw_type, num, ck_id, to_ck_id):
         """
         获取指定库位类型、指定目的仓、指定数量的仓库库位
@@ -49,7 +139,7 @@ class WMSAppRobot(AppRobot):
     def get_warehouse_info_by_id(self, warehouse_id):
         """
         根据仓库编码获取仓库信息
-        @param str warehouse_id : 仓库编码
+        @param str warehouse_id : 仓库id
         @return : 仓库的信息
         """
         wms_api_config['get_warehouse_info_by_id']["uri_path"] += warehouse_id
@@ -78,10 +168,7 @@ class WMSAppRobot(AppRobot):
             'dataPermId': data_perm_id
         })
         switch_res = self.call_api(**wms_api_config['switch_default_warehouse'])
-        if not switch_res:
-            log.error('切换仓库失败！')
-            return
-        return True
+        return self.formatted_result(switch_res)
 
     # 创建库位
     def create_location(self, num, kw_type, warehouse_id, target_warehouse_id=None) -> list or None:
@@ -153,7 +240,7 @@ class WMSAppRobot(AppRobot):
             }
         )
         create_transfer_pick_order_res = self.call_api(**wms_api_config['create_transfer_pick_order'])
-        return create_transfer_pick_order_res
+        return self.formatted_result(create_transfer_pick_order_res)
 
     def transfer_out_pick_order_assign(self, pick_order_list, pick_username, pick_userid):
         """
@@ -171,7 +258,7 @@ class WMSAppRobot(AppRobot):
             }
         )
         assign_pick_user_res = self.call_api(**wms_api_config['transfer_pick_order_assign_pick_user'])
-        return assign_pick_user_res
+        return self.formatted_result(assign_pick_user_res)
 
     def transfer_out_pick_order_detail(self, pick_order_code):
         """
@@ -188,7 +275,7 @@ class WMSAppRobot(AppRobot):
             }
         )
         detail_res = self.call_api(**data)
-        return detail_res['data']
+        return self.formatted_result(detail_res)
 
     def transfer_out_confirm_pick(self, pick_order_code, pick_order_details):
         """
@@ -212,7 +299,7 @@ class WMSAppRobot(AppRobot):
             }
         )
         confirm_pick_res = self.call_api(**wms_api_config['transfer_confirm_pick'])
-        return confirm_pick_res
+        return self.formatted_result(confirm_pick_res)
 
     def transfer_out_submit_tray(self, pick_order_code, pick_order_details, tp_kw_ids):
         """
@@ -241,7 +328,7 @@ class WMSAppRobot(AppRobot):
             )
         wms_api_config['transfer_submit_tray'].update({'data': tray_info_list})
         submit_tray_res = self.call_api(**wms_api_config['transfer_submit_tray'])
-        return submit_tray_res
+        return self.formatted_result(submit_tray_res)
 
     def transfer_out_pick_order_tray_detail(self, pick_order_no):
         """
@@ -254,7 +341,7 @@ class WMSAppRobot(AppRobot):
             {'uri_path': wms_api_config['transfer_pick_order_tray_detail']['uri_path'] % pick_order_no}
         )
         tray_detail_res = self.call_api(**data)
-        return tray_detail_res
+        return self.formatted_result(tray_detail_res)
 
     def transfer_out_finish_packing(self, pick_order_no, tray_list):
         """
@@ -270,7 +357,7 @@ class WMSAppRobot(AppRobot):
             }
         )
         finish_packing_res = self.call_api(**wms_api_config['transfer_finish_packing'])
-        return finish_packing_res
+        return self.formatted_result(finish_packing_res)
 
     def transfer_out_order_detail(self, transfer_out_order_no):
         data = deepcopy(wms_api_config['transfer_out_order_detail'])
@@ -278,7 +365,7 @@ class WMSAppRobot(AppRobot):
             {'uri_path': wms_api_config['transfer_out_order_detail']['uri_path'] % transfer_out_order_no}
         )
         detail_res = self.call_api(**data)
-        return detail_res
+        return self.formatted_result(detail_res)
 
     def transfer_out_order_review(self, box_no, tray_code):
         wms_api_config['transfer_out_order_review']['data'].update(
@@ -288,7 +375,7 @@ class WMSAppRobot(AppRobot):
             }
         )
         review_res = self.call_api(**wms_api_config['transfer_out_order_review'])
-        return review_res
+        return self.formatted_result(review_res)
 
     def transfer_out_box_bind(self, box_no, handover_no, receive_warehouse_code):
         wms_api_config['transfer_box_bind']['data'].update(
@@ -299,17 +386,17 @@ class WMSAppRobot(AppRobot):
             }
         )
         bind_res = self.call_api(**wms_api_config['transfer_box_bind'])
-        return bind_res
+        return self.formatted_result(bind_res)
 
     def transfer_out_delivery(self, handover_no):
         wms_api_config['transfer_delivery']['data'].update({"handoverNo": handover_no})
         delivery_res = self.call_api(**wms_api_config['transfer_delivery'])
-        return delivery_res
+        return self.formatted_result(delivery_res)
 
     def transfer_in_received(self, handover_no):
         wms_api_config['transfer_in_received']['data'].update({"handoverNo": handover_no})
         received_res = self.call_api(**wms_api_config['transfer_in_received'])
-        return received_res
+        return self.formatted_result(received_res)
 
     def transfer_in_up_shelf(self, box_no, sj_kw_code):
         wms_api_config['transfer_box_up_shelf']['data'].update(
@@ -318,7 +405,7 @@ class WMSAppRobot(AppRobot):
                 "storageLocationCode": sj_kw_code
             })
         up_shelf_res = self.call_api(**wms_api_config['transfer_box_up_shelf'])
-        return up_shelf_res
+        return self.formatted_result(up_shelf_res)
 
     def label_callback(self, delivery_order_code, order_list):
         """
@@ -368,7 +455,21 @@ class WMSTransferServiceRobot(ServiceRobot):
             }
         )
         res_data = self.call_api(**wms_api_config['create_transfer_demand'])
-        return res_data
+        return self.formatted_result(res_data)
+
+    def get_demand_list(self, goods_list, trans_out_code, trans_out_to_code, trans_in_code, trans_in_to_code):
+        demand_list = list()
+        for sku, bom, qty in goods_list:
+            demand_res = self.transfer_out_create_demand(
+                trans_out_code,
+                trans_out_to_code,
+                trans_in_code,
+                trans_in_to_code,
+                sku,
+                qty)
+            demand_no = demand_res['data']['demandCode']
+            demand_list.append(demand_no)
+        return demand_list
 
 
 class WMSDeliveryServiceRobot(ServiceRobot):

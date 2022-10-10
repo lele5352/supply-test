@@ -85,5 +85,5 @@ class TestOtterInStock(object):
 
 
 if __name__ == '__main__':
-    pytest.main()
-    os.system("allure generate ../allure-report-files -o ../reports --clean")
+    os.system("pytest -v -s cases/ims/test_other_in_case.py --alluredir=./allure-report-files")
+    os.system("allure generate ./allure-report-files -o ./reports --clean")
