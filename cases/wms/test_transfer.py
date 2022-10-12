@@ -82,10 +82,6 @@ class TestTransfer(object):
             tray_detail_result = wms_app_robot.transfer_out_pick_order_tray_detail(pick_order_code)
             assert tray_detail_result['code'] == expected
             tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_result['data']]
-        # tray_id_list = [tray['storageLocationId'] for tray in tray_detail_res['data']]
-        # tray_id_list.sort(reverse=False)
-        # tray_sku_list = [tray_detail for tray in tray_detail_res['data'] for tray_detail in tray['trayDetails']]
-        # sorted_tray_sku_list = sorted(tray_sku_list, key=lambda x: x['storageLocationCode'], reverse=False)
 
         with allure.step("获取生成的调拨出库单号"):
             # 获取生成的调拨出库单号

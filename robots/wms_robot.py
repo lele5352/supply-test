@@ -322,7 +322,11 @@ class WMSAppRobot(AppRobot):
                     'trayInfos': [{
                         'waresSkuCode': detail['waresSkuCode'],
                         'goodsSkuCode': detail['goodsSkuCode'],
-                        'skuQty': detail['shouldPickQty']
+                        'skuQty': detail['shouldPickQty'],
+                        'batchInfos': [{
+                            'batchNo': '',
+                            'skuQty': detail['shouldPickQty']
+                        }]
                     }]
                 }
             )

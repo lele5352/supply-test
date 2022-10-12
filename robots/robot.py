@@ -9,7 +9,7 @@ from robots import app_headers, service_headers
 
 class Robot:
     """
-    定义抽象类机器人，应用机器人和服务机器人根据具体情况对抽象机器人进行初始化和行为定义
+    定义基础机器人
     """
 
     def __init__(self, prefix, headers, db_operator=None):
