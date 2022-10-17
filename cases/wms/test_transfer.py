@@ -70,14 +70,13 @@ class TestTransfer(object):
                                                                   trans_out_to_id)
             assert get_trans_out_tp_kw_ids_result['code'] == expected
             trans_out_tp_kw_ids = get_trans_out_tp_kw_ids_result['data']
-
         with allure.step("调拨拣货单按需装托提交"):
             # 调拨拣货单按需装托提交
             submit_tray_result = wms_app_robot.transfer_out_submit_tray(pick_order_code, pick_order_details,
                                                                         trans_out_tp_kw_ids)
             assert submit_tray_result['code'] == expected
 
-        with allure.step("查看整单获取已装托的托盘交"):
+        with allure.step("查看整单获取已装托的托盘"):
             # 查看整单获取已装托的托盘
             tray_detail_result = wms_app_robot.transfer_out_pick_order_tray_detail(pick_order_code)
             assert tray_detail_result['code'] == expected

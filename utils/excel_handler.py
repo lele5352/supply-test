@@ -21,5 +21,5 @@ def get_excel_data(file, sheet_name=''):
 
 
 if __name__ == '__main__':
-    ims_cp_other_in_data = get_excel_data("../data/ims_test_data.xlsx", "cp_other_in")
+    ims_cp_other_in_data = get_excel_data("../data/ims_test_data.xlsx", "fhc_cp_other_in")
     print(ims_cp_other_in_data)
