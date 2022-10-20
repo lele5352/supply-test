@@ -67,7 +67,7 @@ class TestDeliveryPick(object):
             self.warehouse_id
         )
 
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -135,7 +135,7 @@ class TestDeliveryPick(object):
             self.warehouse_id
         )
 
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id

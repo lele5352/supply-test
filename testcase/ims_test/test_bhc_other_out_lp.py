@@ -25,7 +25,7 @@ class TestBHCOtherOutLP(object):
             self.warehouse_id,
             self.target_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.target_warehouse_id)
@@ -59,7 +59,7 @@ class TestBHCOtherOutLP(object):
                         self.warehouse_id,
                         self.target_warehouse_id)
                     # 调用其他出库预占库存接口后获取库存数据，用于与构造的期望库存数据进行比对
-                    after_block_inventory = ims_logics.query_lp_inventory(
+                    after_block_inventory = ims_logics.get_lp_inventory(
                         self.sale_sku,
                         self.warehouse_id,
                         self.target_warehouse_id)
@@ -86,7 +86,7 @@ class TestBHCOtherOutLP(object):
                         self.warehouse_id,
                         self.target_warehouse_id
                     )
-                    after_delivered_inventory = ims_logics.query_lp_inventory(
+                    after_delivered_inventory = ims_logics.get_lp_inventory(
                         self.sale_sku,
                         self.warehouse_id,
                         self.target_warehouse_id)

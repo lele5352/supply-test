@@ -17,7 +17,7 @@ class TestOMSOrderBlock(object):
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -28,7 +28,7 @@ class TestOMSOrderBlock(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -51,7 +51,7 @@ class TestOMSOrderBlock(object):
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -62,7 +62,7 @@ class TestOMSOrderBlock(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -90,7 +90,7 @@ class TestOMSOrderBlock(object):
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -101,7 +101,7 @@ class TestOMSOrderBlock(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -131,7 +131,7 @@ class TestOMSOrderBlock(object):
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -142,7 +142,7 @@ class TestOMSOrderBlock(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -172,7 +172,7 @@ class TestOMSOrderBlock(object):
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -183,7 +183,7 @@ class TestOMSOrderBlock(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -213,7 +213,7 @@ class TestOMSOrderBlock(object):
 
         # 干掉该销售sku的库存数据；
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -224,7 +224,7 @@ class TestOMSOrderBlock(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id

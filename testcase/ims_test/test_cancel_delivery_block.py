@@ -31,7 +31,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -48,7 +48,7 @@ class TestCancelDeliveryBlock(object):
         cancel_oms_order_block_res = ims_request.cancel_oms_order_block(
             oms_order_order_block_book_id, oms_order_order_block_source_no
         )
-        cancel_oms_order_block_inventory = ims_logics.query_lp_inventory(
+        cancel_oms_order_block_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -68,7 +68,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -87,7 +87,7 @@ class TestCancelDeliveryBlock(object):
         )
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -109,7 +109,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -135,7 +135,7 @@ class TestCancelDeliveryBlock(object):
         cancel_location_block = ims_request.only_cancel_location_block(block_book_id, self.delivery_code)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -158,7 +158,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -182,7 +182,7 @@ class TestCancelDeliveryBlock(object):
         assign_stock_res = ims_request.assign_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 1)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -211,7 +211,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -251,7 +251,7 @@ class TestCancelDeliveryBlock(object):
         # 取消出库单（拣货前）
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 1)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -285,7 +285,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -336,7 +336,7 @@ class TestCancelDeliveryBlock(object):
             self.warehouse_id
         )
 
-        cancel_block_after_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_after_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -375,7 +375,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -391,7 +391,7 @@ class TestCancelDeliveryBlock(object):
         cancel_oms_order_block_res = ims_request.cancel_oms_order_block(
             oms_order_order_block_book_id, oms_order_order_block_source_no
         )
-        cancel_oms_order_block_inventory = ims_logics.query_lp_inventory(
+        cancel_oms_order_block_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -411,7 +411,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -430,7 +430,7 @@ class TestCancelDeliveryBlock(object):
         )
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -452,7 +452,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -471,7 +471,7 @@ class TestCancelDeliveryBlock(object):
         )
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -493,7 +493,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -519,7 +519,7 @@ class TestCancelDeliveryBlock(object):
         cancel_location_block = ims_request.only_cancel_location_block(block_book_id, self.delivery_code)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -542,7 +542,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -566,7 +566,7 @@ class TestCancelDeliveryBlock(object):
         assign_stock_res = ims_request.assign_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 1)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -588,7 +588,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -640,7 +640,7 @@ class TestCancelDeliveryBlock(object):
             self.warehouse_id
         )
 
-        cancel_block_after_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_after_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -675,8 +675,8 @@ class TestCancelDeliveryBlock(object):
         ims_logics.add_lp_stock_by_other_in(self.sale_sku, bom, self.sale_sku_count, self.sj_kw_ids,
                                             self.warehouse_id,
                                             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(self.sale_sku, self.warehouse_id,
-                                                              self.to_warehouse_id)
+        self.expect_inventory = ims_logics.get_lp_inventory(self.sale_sku, self.warehouse_id,
+                                                            self.to_warehouse_id)
         order_info = [(self.component_sku, 1)]
         oms_order_block_res = ims_request.oms_order_block(
             order_info,
@@ -689,7 +689,7 @@ class TestCancelDeliveryBlock(object):
         cancel_oms_order_block_res = ims_request.cancel_oms_order_block(
             oms_order_order_block_book_id, oms_order_order_block_source_no
         )
-        cancel_oms_order_block_inventory = ims_logics.query_lp_inventory(
+        cancel_oms_order_block_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -709,7 +709,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -728,7 +728,7 @@ class TestCancelDeliveryBlock(object):
         )
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -749,7 +749,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -774,7 +774,7 @@ class TestCancelDeliveryBlock(object):
         cancel_location_block = ims_request.only_cancel_location_block(block_book_id, self.delivery_code)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 2)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -797,7 +797,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -821,7 +821,7 @@ class TestCancelDeliveryBlock(object):
         assign_stock_res = ims_request.assign_stock(self.delivery_code, block_ware_sku_list, self.warehouse_id)
         cancel_block_before_pick_res = ims_request.cancel_block_before_pick(self.delivery_code, 1)
 
-        cancel_block_before_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_before_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -843,7 +843,7 @@ class TestCancelDeliveryBlock(object):
             self.sj_kw_ids,
             self.warehouse_id,
             self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -895,7 +895,7 @@ class TestCancelDeliveryBlock(object):
             self.warehouse_id
         )
 
-        cancel_block_after_pick_inventory = ims_logics.query_lp_inventory(
+        cancel_block_after_pick_inventory = ims_logics.get_lp_inventory(
             self.sale_sku,
             self.warehouse_id,
             self.to_warehouse_id

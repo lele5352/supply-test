@@ -20,7 +20,7 @@ class TestCPOtherOut(object):
 
         IMSDBOperator.delete_unqualified_inventory([sale_sku])
         ims_request.cp_other_in(ware_sku_qty_list, cp_kw_ids, self.warehouse_id, self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id, 'A')
+        self.expect_inventory = ims_logics.get_format_cp_inventory(sale_sku, self.warehouse_id, 'A')
 
         for (ware_sku, qty), cp_kw_id in zip(ware_sku_qty_list, cp_kw_ids):
             sub_ware_sku_qty_list = [(ware_sku, qty)]
@@ -30,7 +30,7 @@ class TestCPOtherOut(object):
             self.expect_inventory[ware_sku][cp_kw_id]['block'] += qty
             self.expect_inventory[ware_sku]['total']['block'] += qty
 
-            after_block_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id)
+            after_block_inventory = ims_logics.get_format_cp_inventory(sale_sku, self.warehouse_id)
             assert block_res['code'] == 200
             assert after_block_inventory == self.expect_inventory
 
@@ -41,7 +41,7 @@ class TestCPOtherOut(object):
             self.expect_inventory[ware_sku][cp_kw_id]['stock'] -= qty
             self.expect_inventory[ware_sku]['total']['stock'] -= qty
 
-            after_delivered_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id)
+            after_delivered_inventory = ims_logics.get_format_cp_inventory(sale_sku, self.warehouse_id)
 
             assert delivered_res['code'] == 200
             assert after_delivered_inventory == self.expect_inventory
@@ -56,7 +56,7 @@ class TestCPOtherOut(object):
 
         IMSDBOperator.delete_unqualified_inventory([sale_sku])
         ims_request.cp_other_in(ware_sku_qty_list, cp_kw_ids, self.warehouse_id, self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id, 'A')
+        self.expect_inventory = ims_logics.get_format_cp_inventory(sale_sku, self.warehouse_id, 'A')
 
         for (ware_sku, qty), cp_kw_id in zip(ware_sku_qty_list, cp_kw_ids):
             sub_ware_sku_qty_list = [(ware_sku, qty)]
@@ -66,7 +66,7 @@ class TestCPOtherOut(object):
             self.expect_inventory[ware_sku][cp_kw_id]['block'] += qty
             self.expect_inventory[ware_sku]['total']['block'] += qty
 
-            after_block_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id)
+            after_block_inventory = ims_logics.get_format_cp_inventory(sale_sku, self.warehouse_id)
             assert block_res['code'] == 200
             assert after_block_inventory == self.expect_inventory
 
@@ -77,7 +77,7 @@ class TestCPOtherOut(object):
             self.expect_inventory[ware_sku][cp_kw_id]['stock'] -= qty
             self.expect_inventory[ware_sku]['total']['stock'] -= qty
 
-            after_delivered_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id)
+            after_delivered_inventory = ims_logics.get_format_cp_inventory(sale_sku, self.warehouse_id)
 
             assert delivered_res['code'] == 200
             assert after_delivered_inventory == self.expect_inventory
@@ -92,14 +92,14 @@ class TestCPOtherOut(object):
 
         IMSDBOperator.delete_unqualified_inventory([sale_sku])
         ims_request.cp_other_in(ware_sku_qty_list, cp_kw_ids, self.warehouse_id, self.to_warehouse_id)
-        self.expect_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id, 'A')
+        self.expect_inventory = ims_logics.get_format_cp_inventory(sale_sku, self.warehouse_id, 'A')
 
         block_res = ims_request.cp_other_out_block(ware_sku_qty_list, cp_kw_ids, self.warehouse_id)
         for (ware_sku, qty), cp_kw_id in zip(ware_sku_qty_list, cp_kw_ids):
             self.expect_inventory[ware_sku][cp_kw_id]['block'] += qty
             self.expect_inventory[ware_sku]['total']['block'] += qty
 
-        after_block_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id)
+        after_block_inventory = ims_logics.get_format_cp_inventory(sale_sku, self.warehouse_id)
         assert block_res['code'] == 200
         assert after_block_inventory == self.expect_inventory
 
@@ -111,7 +111,7 @@ class TestCPOtherOut(object):
             self.expect_inventory[ware_sku][cp_kw_id]['stock'] -= qty
             self.expect_inventory[ware_sku]['total']['stock'] -= qty
 
-        after_delivered_inventory = ims_logics.query_format_cp_inventory(sale_sku, self.warehouse_id)
+        after_delivered_inventory = ims_logics.get_format_cp_inventory(sale_sku, self.warehouse_id)
 
         assert delivered_res['code'] == 200
         assert after_delivered_inventory == self.expect_inventory

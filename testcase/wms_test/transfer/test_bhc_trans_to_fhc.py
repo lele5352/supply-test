@@ -29,8 +29,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -176,8 +176,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -196,8 +196,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -343,8 +343,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -363,8 +363,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -511,8 +511,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -532,8 +532,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -681,8 +681,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -702,8 +702,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -851,8 +851,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -872,8 +872,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1021,8 +1021,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1041,8 +1041,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1190,8 +1190,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1210,8 +1210,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1359,8 +1359,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1380,8 +1380,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1527,8 +1527,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1548,8 +1548,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1697,8 +1697,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 
@@ -1718,8 +1718,8 @@ class TestBHCTransToFHC:
             self.trans_out_id,
             self.trans_out_to_id
         )
-        expect_trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        expect_trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        expect_trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        expect_trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
 
         # 生成调拨需求
         demand_list = list()
@@ -1865,8 +1865,8 @@ class TestBHCTransToFHC:
                     in_sj_kw_id: {'stock': detail['skuQty'], 'block': 0}
                 })
         # 获取当前最新库存数据，比对预期数据
-        trans_out_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
-        trans_in_inventory = ims_logics.query_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
+        trans_out_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_out_id, self.trans_out_to_id)
+        trans_in_inventory = ims_logics.get_lp_inventory(sale_sku, self.trans_in_id, self.trans_in_to_id)
         assert expect_trans_out_inventory == trans_out_inventory
         assert expect_trans_in_inventory == trans_in_inventory
 

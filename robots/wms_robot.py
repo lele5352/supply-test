@@ -310,8 +310,7 @@ class WMSAppRobot(AppRobot):
         :param list tp_kw_ids: 托盘库位id列表
         """
         # 获取托盘编码
-        tp_kw_codes = [self.dbo.query_warehouse_location_info_by_id(kw_id).get('warehouse_location_code') for kw_id
-                       in tp_kw_ids]
+        tp_kw_codes = [self.kw_id_to_code(kw_id) for kw_id in tp_kw_ids]
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         tray_info_list = list()
         for detail, code in zip(pick_order_details, tp_kw_codes):

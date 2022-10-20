@@ -22,12 +22,12 @@ class TestLPChangedToCP(object):
             self.warehouse_id,
             self.target_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.target_warehouse_id
         )
-        self.expect_cp_inventory = ims_logics.query_format_cp_inventory(
+        self.expect_cp_inventory = ims_logics.get_format_cp_inventory(
             sale_sku,
             bom,
             self.warehouse_id
@@ -89,7 +89,7 @@ class TestLPChangedToCP(object):
                         bom,
                         self.warehouse_id,
                         self.target_warehouse_id)
-                    current_unqualified_inventory = ims_logics.query_format_cp_inventory(
+                    current_unqualified_inventory = ims_logics.get_format_cp_inventory(
                         sale_sku,
                         bom,
                         self.warehouse_id

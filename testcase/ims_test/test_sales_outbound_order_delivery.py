@@ -29,7 +29,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -40,7 +40,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -66,7 +66,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -91,7 +91,7 @@ class TestSalesOutboundOrderDelivery(object):
         assigned_sku_list = assign_location_stock_res['data'][0]['wareSkuList']
 
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -129,7 +129,7 @@ class TestSalesOutboundOrderDelivery(object):
                 }
             )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -145,7 +145,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -185,7 +185,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -196,7 +196,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -222,7 +222,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -247,7 +247,7 @@ class TestSalesOutboundOrderDelivery(object):
         assigned_sku_list = assign_location_stock_res['data'][0]['wareSkuList']
 
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -285,7 +285,7 @@ class TestSalesOutboundOrderDelivery(object):
                 }
             )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -301,7 +301,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -341,7 +341,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -352,7 +352,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -378,7 +378,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -403,7 +403,7 @@ class TestSalesOutboundOrderDelivery(object):
         assigned_sku_list = assign_location_stock_res['data'][0]['wareSkuList']
 
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -441,7 +441,7 @@ class TestSalesOutboundOrderDelivery(object):
                 }
             )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -457,7 +457,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -497,7 +497,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -508,7 +508,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -537,7 +537,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -562,7 +562,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -603,7 +603,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -619,7 +619,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -660,7 +660,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -671,7 +671,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -701,7 +701,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -726,7 +726,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -767,7 +767,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -783,7 +783,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -824,7 +824,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -835,7 +835,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -865,7 +865,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -890,7 +890,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -931,7 +931,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -947,7 +947,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -989,7 +989,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -1000,7 +1000,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1030,7 +1030,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1055,7 +1055,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1096,7 +1096,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1112,7 +1112,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1152,7 +1152,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -1163,7 +1163,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1192,7 +1192,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1217,7 +1217,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1258,7 +1258,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1274,7 +1274,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1314,7 +1314,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -1325,7 +1325,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1354,7 +1354,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1379,7 +1379,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1420,7 +1420,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1436,7 +1436,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1476,7 +1476,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
             self.to_warehouse_id
         )
-        self.expect_inventory = ims_logics.query_lp_inventory(
+        self.expect_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id)
@@ -1487,7 +1487,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id,
         )
         # 获取库存数据
-        after_oms_block_inventory = ims_logics.query_lp_inventory(
+        after_oms_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1516,7 +1516,7 @@ class TestSalesOutboundOrderDelivery(object):
         combined_block_result_list = ims_logics.get_combined_block_result_list(block_result_list)
 
         # 获取库存数据
-        after_delivery_order_block_inventory = ims_logics.query_lp_inventory(
+        after_delivery_order_block_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1541,7 +1541,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.warehouse_id
         )
         # 获取库存数据
-        after_assign_stock_inventory = ims_logics.query_lp_inventory(
+        after_assign_stock_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1582,7 +1582,7 @@ class TestSalesOutboundOrderDelivery(object):
                     }
                 )
         # 获取库存数据
-        after_pick_inventory = ims_logics.query_lp_inventory(
+        after_pick_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id
@@ -1598,7 +1598,7 @@ class TestSalesOutboundOrderDelivery(object):
             self.to_warehouse_id
         )
         # 获取库存数据
-        after_delivered_inventory = ims_logics.query_lp_inventory(
+        after_delivered_inventory = ims_logics.get_lp_inventory(
             sale_sku,
             self.warehouse_id,
             self.to_warehouse_id

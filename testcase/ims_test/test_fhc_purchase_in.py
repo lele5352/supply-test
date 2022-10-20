@@ -24,11 +24,11 @@ class TestFHCPurchaseIn(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            current_qualified_inventory = ims_logics.query_lp_inventory(
+            current_qualified_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 self.warehouse_id,
                 self.to_warehouse_id)
-            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
+            current_unqualified_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 self.warehouse_id,
                 self.to_warehouse_id
@@ -47,11 +47,11 @@ class TestFHCPurchaseIn(object):
             self.to_warehouse_id)
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            current_qualified_inventory = ims_logics.query_lp_inventory(
+            current_qualified_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 self.warehouse_id,
                 self.to_warehouse_id)
-            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
+            current_unqualified_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 self.warehouse_id,
                 self.to_warehouse_id)

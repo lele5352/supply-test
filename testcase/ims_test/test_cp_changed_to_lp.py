@@ -20,7 +20,7 @@ class TestCPChangedToLP(object):
             self.ware_sku_count,
             self.warehouse_id,
             self.target_warehouse_id)
-        self.expect_inventory = ims_logics.query_format_cp_inventory(
+        self.expect_inventory = ims_logics.get_format_cp_inventory(
             sale_sku,
             bom,
             self.warehouse_id)
@@ -44,7 +44,7 @@ class TestCPChangedToLP(object):
             self.expect_inventory[ware_sku][self.cp_kw_id]['block'] += 1
             self.expect_inventory[ware_sku]['total']['block'] += 1
 
-            after_block_inventory = ims_logics.query_format_cp_inventory(
+            after_block_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 bom,
                 self.warehouse_id
@@ -58,7 +58,7 @@ class TestCPChangedToLP(object):
             self.expect_inventory[ware_sku][self.cp_kw_id]['stock'] -= 1
             self.expect_inventory[ware_sku]['total']['stock'] -= 1
 
-            after_delivered_inventory = ims_logics.query_format_cp_inventory(
+            after_delivered_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 bom,
                 self.warehouse_id

@@ -29,11 +29,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims_logics.query_lp_inventory(
+            after_create_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
+            current_unqualified_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -47,7 +47,7 @@ class TestCancelPurchaseOrderDelivery(object):
 
             cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
                                                                     to_warehouse_id)
-            after_cancel_inventory = ims_logics.query_lp_inventory(
+            after_cancel_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -83,11 +83,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims_logics.query_lp_inventory(
+            after_create_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
+            current_unqualified_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -101,7 +101,7 @@ class TestCancelPurchaseOrderDelivery(object):
 
             cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
                                                                     to_warehouse_id)
-            after_cancel_inventory = ims_logics.query_lp_inventory(
+            after_cancel_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -137,11 +137,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims_logics.query_lp_inventory(
+            after_create_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
+            current_unqualified_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -155,7 +155,7 @@ class TestCancelPurchaseOrderDelivery(object):
 
             cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
                                                                     to_warehouse_id)
-            after_cancel_inventory = ims_logics.query_lp_inventory(
+            after_cancel_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -191,11 +191,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims_logics.query_lp_inventory(
+            after_create_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
+            current_unqualified_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -209,7 +209,7 @@ class TestCancelPurchaseOrderDelivery(object):
 
             cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
                                                                     to_warehouse_id)
-            after_cancel_inventory = ims_logics.query_lp_inventory(
+            after_cancel_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -245,11 +245,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims_logics.query_lp_inventory(
+            after_create_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
+            current_unqualified_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -263,7 +263,7 @@ class TestCancelPurchaseOrderDelivery(object):
 
             cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
                                                                     to_warehouse_id)
-            after_cancel_inventory = ims_logics.query_lp_inventory(
+            after_cancel_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
@@ -299,11 +299,11 @@ class TestCancelPurchaseOrderDelivery(object):
 
         for sale_sku in self.sale_sku_suite_dict.keys():
             # 获取库存数据
-            after_create_inventory = ims_logics.query_lp_inventory(
+            after_create_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
-            current_unqualified_inventory = ims_logics.query_format_cp_inventory(
+            current_unqualified_inventory = ims_logics.get_format_cp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id
@@ -317,7 +317,7 @@ class TestCancelPurchaseOrderDelivery(object):
 
             cancel_res = ims_request.cancel_purchase_order_delivery(cancel_ware_sku_qty_list, warehouse_id,
                                                                     to_warehouse_id)
-            after_cancel_inventory = ims_logics.query_lp_inventory(
+            after_cancel_inventory = ims_logics.get_lp_inventory(
                 sale_sku,
                 warehouse_id,
                 to_warehouse_id)
