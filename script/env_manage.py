@@ -1,7 +1,7 @@
 import time
 
 from utils.ssh_handler import SSHHandler
-from config.server_config import server_info, services
+from config.server_config import ServerInfoConfig, ServiceDistributeConfig
 
 
 class EnvManager(SSHHandler):
@@ -66,14 +66,13 @@ if __name__ == '__main__':
     # env_uat_2222 = EnvManager(server_info_2222, services_2222)
     # env_uat_2221 = EnvManager(server_info_2221, services_2221)
 
-    env159 = EnvManager(server_info.get('159'), services.get('159'))
-    env160 = EnvManager(server_info.get('160'), services.get('160'))
+    env159 = EnvManager(ServerInfoConfig.test_159, ServiceDistributeConfig.test_159)
+    env160 = EnvManager(ServerInfoConfig.test_160, ServiceDistributeConfig.test_160)
 
-    env188 = EnvManager(server_info.get('188'), services.get('188'))
-    env189 = EnvManager(server_info.get('189'), services.get('189'))
+    # env188 = EnvManager(ServerInfoConfig.test_188, services.get('188'))
+    # env189 = EnvManager(ServerInfoConfig.test_189, services.get('189'))
 
     env160.restart_service('ec-warehouse-transfer-service')
-
 
     # env_uat_2222.restart_service()
     # env_uat_2221.restart_service()

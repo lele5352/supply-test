@@ -1,7 +1,7 @@
 import time
 import math
 from robots.robot import ServiceRobot
-from config.api_config.ims_api_config import ims_api_config
+from config.third_party_api_configs.ims_api_config import ims_api_config
 from copy import deepcopy
 from dbo.ims_dbo import IMSDBOperator
 
@@ -755,11 +755,9 @@ class IMSRobot(ServiceRobot):
         result_block = list()
         bom_detail = self.dbo.query_bom_detail(sale_sku, bom)
         if len(wares_inventory) < len(bom_detail):
-            return 0, 0, 0
+            return 0, 0
         else:
             for ware_sku in wares_inventory:
-                # stock = wares_inventory[ware_sku][inventory_type]['stock']
-                # block = wares_inventory[ware_sku][inventory_type]['block']
                 if inventory_type not in wares_inventory[ware_sku]:
                     stock = 0
                     block = 0

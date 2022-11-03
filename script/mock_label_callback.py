@@ -33,7 +33,7 @@ ck_order_list = ["PRE-CK2205060577", "PRE-CK2205060578", "PRE-CK2205060579", "PR
 
 for ck_order in ck_order_list:
     package_list = wms_logics.query_delivery_order_package_list(ck_order)
-    result = wms_logics.mock_express_label_callback(ck_order, package_list)
+    result = wms_logics.mock_label_callback(ck_order, package_list)
     if not result:
         print("%s回调失败！" % ck_order)
         break

@@ -1,45 +1,44 @@
-server_info = {
-    '159': {
+class ServerInfoConfig:
+    test_159 = {
         'hostname': '10.0.0.159',
         'port': 22,
         'username': 'www',
         'password': '123456789'
-    },
-    '189': {
+    }
+    test_189 = {
         'hostname': '10.0.0.189',
         'port': 22,
         'username': 'www',
         'password': '123456789'
-    },
-    '188': {
+    }
+    test_188 = {
         'hostname': '10.0.0.188',
         'port': 22,
         'username': 'www',
         'password': '123456789'
-    },
-    '160':
-        {
-            'hostname': '10.0.0.160',
-            'port': 22,
-            'username': 'www',
-            'password': '123456789'
-        },
-    'uat_2221': {
+    }
+    test_160 = {
+        'hostname': '10.0.0.160',
+        'port': 22,
+        'username': 'www',
+        'password': '123456789'
+    }
+    uat_2221 = {
         'hostname': '10.0.15.21',
         'port': 2221,
         'username': 'www',
         'password': '123456789'
-    },
-    'uat_2222': {
+    }
+    uat_2222 = {
         'hostname': '10.0.15.21',
         'port': 2222,
         'username': 'www',
         'password': '123456789'
     }
-}
 
-services = {
-    'uat_2222': [
+
+class ServiceDistributeConfig:
+    uat_2222 = [
         'ec-warehouse-base-service',
         'ec-warehouse-delivery-service',
         'ec-warehouse-receipt-service',
@@ -49,8 +48,8 @@ services = {
         'ec-wms-api',
         'ec-pwms-api',
         'ec-supply-platform-service'
-    ],
-    'uat_2221': [
+    ]
+    uat_2221 = [
         'ec-gateway',
         'ec-authorization-service',
         'ec-ums-api',
@@ -69,16 +68,16 @@ services = {
         'ec-ims-service',
         'ec-spms-api',
         'ec-spms-service'
-    ],
-    '159': [
+    ]
+    test_159 = [
         'ec-eta',
         'ec-fms-api',
         'ec-fms-service',
         'ec-ims-service',
         'ec-report',
         'ec-wms-api'
-    ],
-    '160': [
+    ]
+    test_160 = [
         'ec-gateway',
         'ec-authorization-service',
         'ec-ums-api',
@@ -102,8 +101,8 @@ services = {
         'ec-stockoperation-service',
         'ec-pwms-api',
         'ec-supply-platform-service'
-    ],
-    '189': [
+    ]
+    test_189 = [
         'ec-gateway',
         'ec-fms-service',
         'ec-fms-api',
@@ -127,12 +126,11 @@ services = {
         'ec-report',
         'ec-pwms-api',
         'ec-wms-api'
-    ],
-    '188': [
+    ]
+    test_188 = [
         'ec-authorization-service',
         'ec-ums-api',
         'ec-base',
         'ec-scm-service',
         'ec-scm-api'
     ]
-}

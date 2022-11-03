@@ -10,7 +10,7 @@ from utils.excel_handler import get_excel_data
 
 @allure.feature("测试模块：采购入库")
 class TestPurchaseInStock(object):
-    fhc_purchase_in_data = get_excel_data("data/ims_test_data.xlsx", "fhc_purchase_in")
+    fhc_purchase_in_data = get_excel_data("test_data/ims_test_data.xlsx", "fhc_purchase_in")
 
     @allure.story("测试场景：发货仓采购入库")
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例

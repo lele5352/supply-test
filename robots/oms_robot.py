@@ -1,7 +1,7 @@
 import time
 from copy import deepcopy
 from robots.robot import AppRobot, ServiceRobot
-from config.api_config.oms_api_config import oms_api_config
+from config.third_party_api_configs.oms_api_config import oms_api_config
 from dbo.oms_dbo import OMSDBOperator
 
 

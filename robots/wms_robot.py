@@ -2,7 +2,8 @@ import json
 import time
 from copy import deepcopy
 
-from config.api_config.wms_api_config import wms_api_config
+from config.third_party_api_configs.wms_api_config import ReceiptApiConfig, DeliveryApiConfig, BaseApiConfig, \
+    TransferApiConfig
 from robots.robot import ServiceRobot, AppRobot
 from dbo.wms_dbo import WMSDBOperator
 from utils.log_handler import logger as log
@@ -62,7 +63,7 @@ class WMSAppRobot(AppRobot):
         data = self.dbo.query_warehouse_area_info_by_type(warehouse_id, area_type)
         return str(data.get('id'))
 
-    def mock_express_label_callback(self, delivery_order_code, package_list):
+    def mock_label_callback(self, delivery_order_code, package_list):
         """
         :param string delivery_order_code: 出库单号
         :param list package_list: 包裹列表
@@ -72,8 +73,8 @@ class WMSAppRobot(AppRobot):
         count = 0
         for package in package_list:
             count += 1
-            temp_order_info = deepcopy(wms_api_config['label_callback']['data']['orderList'][0])
-            temp_order_info.update({
+            temp_order_info = deepcopy(DeliveryApiConfig.LabelCallBack.get_attributes())
+            temp_order_info['data']['orderList'][0].update({
                 "deliveryNo": delivery_order_code,
                 "packageNoList": [package],
                 "logistyNo": "logistyNo" + str(int(time.time() * 1000 + count)),
@@ -142,18 +143,20 @@ class WMSAppRobot(AppRobot):
         @param str warehouse_id : 仓库id
         @return : 仓库的信息
         """
-        wms_api_config['get_warehouse_info_by_id']["uri_path"] += warehouse_id
-        res_data = self.call_api(**wms_api_config['get_warehouse_info_by_id'])
+        content = deepcopy(BaseApiConfig.GetWarehouseInfoById.get_attributes())
+        content["uri_path"] += warehouse_id
+        res_data = self.call_api(**content)
 
         if not res_data:
             return []
         return res_data["data"]
 
     def get_switch_warehouse_data_perm_id(self, warehouse_id):
-        wms_api_config['get_switch_warehouse_list']['data'].update({
+        content = deepcopy(BaseApiConfig.GetSwitchWarehouseList.get_attributes())
+        content['data'].update({
             't': int(time.time() * 1000)
         })
-        res = self.call_api(**wms_api_config['get_switch_warehouse_list'])
+        res = self.call_api(**content)
         if not res:
             log.error("获取不到切换仓库列表！")
             return
@@ -164,10 +167,11 @@ class WMSAppRobot(AppRobot):
 
     def switch_default_warehouse(self, warehouse_id):
         data_perm_id = self.get_switch_warehouse_data_perm_id(warehouse_id)
-        wms_api_config['switch_default_warehouse']['data'].update({
+        content = deepcopy(BaseApiConfig.SwitchDefaultWarehouse.get_attributes())
+        content['data'].update({
             'dataPermId': data_perm_id
         })
-        switch_res = self.call_api(**wms_api_config['switch_default_warehouse'])
+        switch_res = self.call_api(**content)
         return self.formatted_result(switch_res)
 
     # 创建库位
@@ -175,7 +179,7 @@ class WMSAppRobot(AppRobot):
         """
         创建库位
 
-        :param int kw_type:
+        @param int kw_type:
             1:收货库位 area_type:5(容器库区)
             2:质检库位 area_type:5(容器库区)
             3:托盘库位 area_type:5(容器库区)
@@ -184,12 +188,12 @@ class WMSAppRobot(AppRobot):
             6:不良品库位 area_type:2(不良品库区)
             7:入库异常库位 area_type:3(入库异常库区)
             8:出库异常库位 area_type:4(出库异常库区)
-        :param int num: 新建的库位数
-        :param int warehouse_id: 所属仓库id
-        :param int target_warehouse_id: 目的仓id
-        :return: list 创建出来的库位列表
+        @param int num: 新建的库位数
+        @param int warehouse_id: 所属仓库id
+        @param int target_warehouse_id: 目的仓id
+        @return: list 创建出来的库位列表
         """
-        if warehouse_id == target_warehouse_id:
+        if warehouse_id == target_warehouse_id or target_warehouse_id == 0:
             target_warehouse_id = ''
         self.switch_default_warehouse(warehouse_id)
         kw_maps = {
@@ -213,75 +217,71 @@ class WMSAppRobot(AppRobot):
                 'warehouseLocationName': kw_maps[kw_type]['name_prefix'] + now,
                 'warehouseLocationType': kw_type,
                 'belongWarehouseAreaId': area_info.get('id'),
-
                 'warehouseAreaType': kw_maps[kw_type]['area_type'],
                 'belongWarehouseId': warehouse_id,
                 'destWarehouseId': target_warehouse_id if kw_type != 6 else ''
             }
-            wms_api_config['create_location']['data'].update(location_info)
-            location_create_res = self.call_api(**wms_api_config['create_location'])
+            content = deepcopy(BaseApiConfig.CreateLocation.get_attributes())
+            content['data'].update(location_info)
+            location_create_res = self.call_api(**content)
             if location_create_res['code'] != 200:
                 log.error('创建库位失败:%s' % json.dumps(location_create_res, ensure_ascii=False))
                 return
-            location_codes.append(wms_api_config['create_location']['data']['warehouseLocationCode'])
+            location_codes.append(content['data']['warehouseLocationCode'])
         return location_codes
 
     def transfer_out_create_pick_order(self, demand_list, pick_type):
         """
         创建调拨拣货单
-
-        :param list demand_list: 调拨需求列表
-        :param int pick_type: 拣货方式: 1-纸质；2-PDA
+        @param list demand_list: 调拨需求列表
+        @param int pick_type: 拣货方式: 1-纸质；2-PDA
         """
-        wms_api_config['create_transfer_pick_order']['data'].update(
-            {
-                "demandCodes": demand_list,
-                "pickType": pick_type,
-            }
+        content = deepcopy(TransferApiConfig.CreateTransferPickOrder.get_attributes())
+        content['data'].update(
+            {"demandCodes": demand_list, "pickType": pick_type, }
         )
-        create_transfer_pick_order_res = self.call_api(**wms_api_config['create_transfer_pick_order'])
+        create_transfer_pick_order_res = self.call_api(**content)
         return self.formatted_result(create_transfer_pick_order_res)
 
     def transfer_out_pick_order_assign(self, pick_order_list, pick_username, pick_userid):
         """
         分配调拨拣货人
-
-        :param list pick_order_list: 调拨拣货单列表
-        :param int pick_userid: 拣货人id
-        :param string pick_username: 拣货人名称
+        @param list pick_order_list: 调拨拣货单列表
+        @param int pick_userid: 拣货人id
+        @param string pick_username: 拣货人名称
         """
-        wms_api_config['transfer_pick_order_assign_pick_user']['data'].update(
+        content = deepcopy(TransferApiConfig.TransferPickOrderAssign.get_attributes())
+        content['data'].update(
             {
                 "pickOrderNos": pick_order_list,
                 "pickUsername": pick_username,
                 "pickUserId": pick_userid
             }
         )
-        assign_pick_user_res = self.call_api(**wms_api_config['transfer_pick_order_assign_pick_user'])
+        assign_pick_user_res = self.call_api(**content)
         return self.formatted_result(assign_pick_user_res)
 
     def transfer_out_pick_order_detail(self, pick_order_code):
         """
         调拨拣货单详情
-
-        :param string pick_order_code: 调拨拣货单号
+        @param string pick_order_code: 调拨拣货单号
         """
         t = int(time.time() * 1000)
-        data = deepcopy(wms_api_config['transfer_pick_order_detail'])
-        data.update(
+        content = deepcopy(TransferApiConfig.TransferPickOrderDetail.get_attributes())
+        content.update(
             {
-                'uri_path': data['uri_path'] % pick_order_code,
+                'uri_path': content['uri_path'] % pick_order_code,
                 "data": {"t": t}
             }
         )
-        detail_res = self.call_api(**data)
+        detail_res = self.call_api(**content)
         return self.formatted_result(detail_res)
 
     def transfer_out_confirm_pick(self, pick_order_code, pick_order_details):
         """
         调拨拣货单确认拣货
-        :param str pick_order_code: 拣货单号
-        :param dict pick_order_details: 拣货单详情
+        @param str pick_order_code: 拣货单号
+        @param dict pick_order_details: 拣货单详情
         """
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         details = list()
@@ -292,22 +292,22 @@ class WMSAppRobot(AppRobot):
                 'waresSkuCode': detail['waresSkuCode'],
                 'realPickQty': detail['shouldPickQty']
             })
-        wms_api_config['transfer_confirm_pick']['data'].update(
+        content = deepcopy(TransferApiConfig.TransferConfirmPick.get_attributes())
+        content['data'].update(
             {
                 "pickOrderNo": pick_order_code,
                 "details": details
             }
         )
-        confirm_pick_res = self.call_api(**wms_api_config['transfer_confirm_pick'])
+        confirm_pick_res = self.call_api(**content)
         return self.formatted_result(confirm_pick_res)
 
     def transfer_out_submit_tray(self, pick_order_code, pick_order_details, tp_kw_ids):
         """
         调拨按需装托
-
-        :param str pick_order_code: 拣货单号
-        :param dict pick_order_details: 拣货单详情数据
-        :param list tp_kw_ids: 托盘库位id列表
+        @param str pick_order_code: 拣货单号
+        @param dict pick_order_details: 拣货单详情数据
+        @param list tp_kw_ids: 托盘库位id列表
         """
         # 获取托盘编码
         tp_kw_codes = [self.kw_id_to_code(kw_id) for kw_id in tp_kw_ids]
@@ -329,21 +329,21 @@ class WMSAppRobot(AppRobot):
                     }]
                 }
             )
-        wms_api_config['transfer_submit_tray'].update({'data': tray_info_list})
-        submit_tray_res = self.call_api(**wms_api_config['transfer_submit_tray'])
+        content = deepcopy(TransferApiConfig.TransferSubmitTray.get_attributes())
+        content.update({'data': tray_info_list})
+        submit_tray_res = self.call_api(**content)
         return self.formatted_result(submit_tray_res)
 
     def transfer_out_pick_order_tray_detail(self, pick_order_no):
         """
         获取调拨拣货单装托明细
-
-        :param string pick_order_no: 拣货单号
+        @param string pick_order_no: 拣货单号
         """
-        data = deepcopy(wms_api_config['transfer_pick_order_tray_detail'])
-        data.update(
-            {'uri_path': wms_api_config['transfer_pick_order_tray_detail']['uri_path'] % pick_order_no}
+        content = deepcopy(TransferApiConfig.TransferPickOrderTrayDetail.get_attributes())
+        content.update(
+            {'uri_path': content['uri_path'] % pick_order_no}
         )
-        tray_detail_res = self.call_api(**data)
+        tray_detail_res = self.call_api(**content)
         return self.formatted_result(tray_detail_res)
 
     def transfer_out_finish_packing(self, pick_order_no, tray_list):
@@ -353,61 +353,69 @@ class WMSAppRobot(AppRobot):
         :param string pick_order_no: 拣货单号
         :param list tray_list: 托盘列表
         """
-        wms_api_config['transfer_finish_packing']['data'].update(
+        content = deepcopy(TransferApiConfig.TransferFinishPacking.get_attributes())
+        content['data'].update(
             {
                 'pickOrderNo': pick_order_no,
                 'storageLocationCodes': tray_list
             }
         )
-        finish_packing_res = self.call_api(**wms_api_config['transfer_finish_packing'])
+        finish_packing_res = self.call_api(**content)
         return self.formatted_result(finish_packing_res)
 
     def transfer_out_order_detail(self, transfer_out_order_no):
-        data = deepcopy(wms_api_config['transfer_out_order_detail'])
-        data.update(
-            {'uri_path': wms_api_config['transfer_out_order_detail']['uri_path'] % transfer_out_order_no}
+        content = deepcopy(TransferApiConfig.TransferOutOrderDetail.get_attributes())
+
+        content.update(
+            {'uri_path': content['uri_path'] % transfer_out_order_no}
         )
-        detail_res = self.call_api(**data)
+        detail_res = self.call_api(**content)
         return self.formatted_result(detail_res)
 
     def transfer_out_order_review(self, box_no, tray_code):
-        wms_api_config['transfer_out_order_review']['data'].update(
+        content = deepcopy(TransferApiConfig.TransferOutOrderReview.get_attributes())
+        content['data'].update(
             {
                 'boxNo': box_no,
                 'storageLocationCode': tray_code
             }
         )
-        review_res = self.call_api(**wms_api_config['transfer_out_order_review'])
+        review_res = self.call_api(**content)
         return self.formatted_result(review_res)
 
     def transfer_out_box_bind(self, box_no, handover_no, receive_warehouse_code):
-        wms_api_config['transfer_box_bind']['data'].update(
+        content = deepcopy(TransferApiConfig.TransferBoxBind.get_attributes())
+        content['data'].update(
             {
                 "boxNo": box_no,
                 "handoverNo": handover_no,
                 "receiveWarehouseCode": receive_warehouse_code
             }
         )
-        bind_res = self.call_api(**wms_api_config['transfer_box_bind'])
+        bind_res = self.call_api(**content)
         return self.formatted_result(bind_res)
 
     def transfer_out_delivery(self, handover_no):
-        wms_api_config['transfer_delivery']['data'].update({"handoverNo": handover_no})
-        delivery_res = self.call_api(**wms_api_config['transfer_delivery'])
+        content = deepcopy(TransferApiConfig.TransferDelivery.get_attributes())
+        content['data'].update({"handoverNo": handover_no})
+        delivery_res = self.call_api(**content)
         return self.formatted_result(delivery_res)
 
     def transfer_in_received(self, handover_no):
-        wms_api_config['transfer_in_received']['data'].update({"handoverNo": handover_no})
-        received_res = self.call_api(**wms_api_config['transfer_in_received'])
+        content = deepcopy(TransferApiConfig.TransferInReceived.get_attributes())
+        content['data'].update({"handoverNo": handover_no})
+        received_res = self.call_api(**content)
         return self.formatted_result(received_res)
 
     def transfer_in_up_shelf(self, box_no, sj_kw_code):
-        wms_api_config['transfer_box_up_shelf']['data'].update(
+        content = deepcopy(TransferApiConfig.TransferBoxUpShelf.get_attributes())
+
+        content['data'].update(
             {
                 "boxNo": box_no,
                 "storageLocationCode": sj_kw_code
             })
-        up_shelf_res = self.call_api(**wms_api_config['transfer_box_up_shelf'])
+        up_shelf_res = self.call_api(**content)
         return self.formatted_result(up_shelf_res)
 
     def label_callback(self, delivery_order_code, order_list):
@@ -416,13 +424,114 @@ class WMSAppRobot(AppRobot):
         :param list order_list: 出库单下的包裹物流单信息列表
 
         """
-        wms_api_config['label_callback']['data'].update(
+        content = deepcopy(DeliveryApiConfig.LabelCallBack.get_attributes())
+        content['data'].update(
             {
                 "deliveryNo": delivery_order_code,
                 "orderList": order_list
             })
-        callback_res = self.call_api(**wms_api_config['label_callback'])
+        callback_res = self.call_api(**content)
         return callback_res
+
+    def entry_order_page(self, distribute_order_code_list):
+        """
+        @param list distribute_order_code_list: 分货单号列表
+        """
+        content = deepcopy(ReceiptApiConfig.EntryOrderPage.get_attributes())
+        content['data'].update(
+            {"distributeOrderCodeList": distribute_order_code_list}
+        )
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def entry_order_detail(self, entry_order_code):
+        """
+        @param string entry_order_code: 分货单/入库单号
+        """
+        content = deepcopy(ReceiptApiConfig.EntryOrderDetail.get_attributes())
+        content['uri_path'] = content['uri_path'] % entry_order_code
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def confirm_receive(self, entry_order_code, pre_receive_order_code, receive_sku_list):
+        """
+        @param pre_receive_order_code: 预售货单号
+        @param entry_order_code: 入库单号
+        @param dict receive_sku_list: 收货sku明细
+        """
+        content = deepcopy(ReceiptApiConfig.PreReceiveOrder.get_attributes())
+        content['data'].update({
+            "entryOrderCode": entry_order_code,
+            "predictReceiptOrderCode": pre_receive_order_code,
+            "skuList": receive_sku_list
+        })
+
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def submit_pre_receive_order(self, pre_receive_order_list):
+        """
+        提交预收货单
+        @param pre_receive_order_list: 预收货单号列表
+        @return:
+        """
+        content = deepcopy(ReceiptApiConfig.SubmitPreReceiveOrder.get_attributes())
+        content['data'].update({
+            "predictReceiptOrderCodeList": pre_receive_order_list
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def handover_to_upshelf(self, kw_codes):
+        """
+        上架交接
+        @param kw_codes: 上架交接的库位编码列表
+        @return:
+        """
+        content = deepcopy(ReceiptApiConfig.HandoverToUpShelf.get_attributes())
+        content['data'].update(
+            {
+                "locationCodes": kw_codes
+            }
+        )
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def upshelf_whole_location(self, old_kw_code, sj_kw_code):
+        """
+        整托上架
+        @param sj_kw_code: 上架库位
+        @param old_kw_code: 原库位，可以是收货库位或者质检库位
+        @return:
+        """
+        content = deepcopy(ReceiptApiConfig.UpShelfWholeLocation.get_attributes())
+        content['data'].update(
+            {
+                "upshelfLocationCode": sj_kw_code,
+                "oldLocationCode": old_kw_code
+            }
+        )
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def complete_upshelf(self):
+        """
+        上架完成
+        @return:
+        """
+        content = deepcopy(ReceiptApiConfig.CompleteUpShelf.get_attributes())
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def location_detail(self, kw_code):
+        """
+        查询库位明细数据
+        @return:
+        """
+        content = deepcopy(ReceiptApiConfig.LocationDetail.get_attributes())
+        content['uri_path'] = content['uri_path'] % kw_code
+        res = self.call_api(**content)
+        return self.formatted_result(res)
 
 
 class WMSTransferServiceRobot(ServiceRobot):
@@ -443,7 +552,8 @@ class WMSTransferServiceRobot(ServiceRobot):
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         """
-        wms_api_config['create_transfer_demand']['data'].update(
+        content = deepcopy(TransferApiConfig.CreateTransferDemand.get_attributes())
+        content['data'].update(
             {
                 "deliveryWarehouseCode": delivery_warehouse_code,
                 "receiveWarehouseCode": receive_warehouse_code,
@@ -457,7 +567,7 @@ class WMSTransferServiceRobot(ServiceRobot):
                 "sourceCode": "ZDH" + str(int(time.time())),
             }
         )
-        res_data = self.call_api(**wms_api_config['create_transfer_demand'])
+        res_data = self.call_api(**content)
         return self.formatted_result(res_data)
 
     def get_demand_list(self, goods_list, trans_out_code, trans_out_to_code, trans_in_code, trans_in_to_code):
@@ -470,6 +580,8 @@ class WMSTransferServiceRobot(ServiceRobot):
                 trans_in_to_code,
                 sku,
                 qty)
+            if not demand_res['code']:
+                log.error("创建调拨需求失败")
             demand_no = demand_res['data']['demandCode']
             demand_list.append(demand_no)
         return demand_list
@@ -479,53 +591,9 @@ class WMSDeliveryServiceRobot(ServiceRobot):
     def __init__(self):
         super().__init__("delivery")
 
-    def front_label_delivery_order_create(self):
-        """
-        :return: string：返回出库单号
-        """
-        # 修正来源单号、销售单号、销售单id
-        suffix = int(time.time() * 1000)
-        temp_data = {
-            "sourceOrderCode": 'source' + str(suffix),
-            "saleOrderId": suffix,
-            "saleOrderCode": 'sale' + str(suffix)
-        }
-        wms_api_config['front_label_delivery_order_create']['data'].update(temp_data)
-
-        service_delivery_order_create_res = self.call_api(
-            **wms_api_config['front_label_delivery_order_create'])
-        if service_delivery_order_create_res['code'] != 200:
-            log.error('出库单创建失败')
-            return
-        delivery_order_code = service_delivery_order_create_res['data']['deliveryOrderCode']
-        return delivery_order_code
-
-    def behind_label_delivery_order_create(self, sale_sku_count=1):
-        """
-        :return: string：返回出库单号
-        """
-        # 修正来源单号、销售单号、销售单id
-        suffix = int(time.time() * 1000)
-        temp_data = {
-            "sourceOrderCode": 'source' + str(suffix),
-            "saleOrderId": suffix,
-            "saleOrderCode": 'sale' + str(suffix)
-        }
-        wms_api_config['behind_label_delivery_order_create']['data'].update(temp_data)
-
-        # 更新销售sku数量
-        for sku in wms_api_config['behind_label_delivery_order_create']['data']['skuInfo']:
-            sku['saleSkuQty'] *= sale_sku_count
-
-        service_delivery_order_create_res = self.call_api(
-            **wms_api_config['behind_label_delivery_order_create'])
-        if service_delivery_order_create_res['code'] != 200:
-            log.error('出库单创建失败')
-            return
-        delivery_order_code = service_delivery_order_create_res['data']['deliveryOrderCode']
-        return delivery_order_code
-
 
 if __name__ == '__main__':
     wms = WMSAppRobot()
-    print(wms.get_warehouse_info_by_id("513"))
+    # print(wms.entry_order_page(["FH2211022680"]))
+    for kw in ['SH1667384662143', 'SH1667384662515']:
+        print(wms.location_detail(kw))

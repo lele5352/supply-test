@@ -7,7 +7,7 @@ from cases import *
 
 @allure.feature("测试模块：调拨")
 class TestTransfer(object):
-    fhc_to_fhc_data = get_excel_data("data/transfer_test_data.xlsx", "fhc_to_fhc")
+    fhc_to_fhc_data = get_excel_data("test_data/transfer_test_data.xlsx")
 
     @allure.story("测试场景：调拨出库、调拨入库")
     @pytest.mark.parametrize("goods_list, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id,expected,bak",

@@ -9,7 +9,6 @@ class WMSDBOperator:
         :param int warehouse_id: 仓库id
         :return: 查询结果数据，字典格式
         """
-
         item = BaseWarehouse.get_or_none(BaseWarehouse.id == warehouse_id)
         if not item:
             return
@@ -50,22 +49,26 @@ class WMSDBOperator:
         return model_to_dict(item)
 
     @classmethod
-    def query_warehouse_locations(cls, kw_type, num, warehouse_id, to_warehouse_id):
+    def query_warehouse_locations(cls, kw_type, num, warehouse_id, to_warehouse_id, use_status=0):
         """
-        :param int kw_type: 库位类型
-        :param int num: 库位个数
-        :param int warehouse_id: 仓库id
-        :param int to_warehouse_id: 目的仓库id
-        :return: 查询结果数据，字典格式
+        @param int kw_type: 库位类型
+        @param int num: 库位个数
+        @param int warehouse_id: 仓库id
+        @param int to_warehouse_id: 目的仓库id
+        @param int use_status: 库位状态
+        @return: 查询结果数据，字典格式
         """
         if not to_warehouse_id or to_warehouse_id == warehouse_id or kw_type == 6:
             items = BaseWarehouseLocation.select().where(BaseWarehouseLocation.warehouse_id == warehouse_id,
                                                          BaseWarehouseLocation.dest_warehouse_id >> None,
-                                                         BaseWarehouseLocation.type == kw_type).limit(num)
+                                                         BaseWarehouseLocation.type == kw_type,
+                                                         BaseWarehouseLocation.use_state == use_status
+                                                         ).limit(num)
         else:
             items = BaseWarehouseLocation.select().where(BaseWarehouseLocation.warehouse_id == warehouse_id,
                                                          BaseWarehouseLocation.dest_warehouse_id == to_warehouse_id,
-                                                         BaseWarehouseLocation.type == kw_type).limit(num)
+                                                         BaseWarehouseLocation.type == kw_type,
+                                                         BaseWarehouseLocation.use_state == use_status).limit(num)
         if not items:
             return
         items = [model_to_dict(item) for item in items]

@@ -1,6 +1,6 @@
 import copy
 
-from config.api_config.scm_api_config import scm_api_config
+from config.third_party_api_configs.scm_api_config import scm_api_config
 from robots.robot import AppRobot
 from utils.log_handler import logger as log
 

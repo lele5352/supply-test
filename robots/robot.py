@@ -17,6 +17,14 @@ class Robot:
         self.headers = headers
         self.dbo = db_operator
 
+    @classmethod
+    def content_parse(cls, uri_path, method, data):
+        return {
+            "uri_path": uri_path,
+            "method": method,
+            "data": data
+        }
+
     def call_api(self, uri_path, method, data, files='') -> dict:
         req_url = urljoin(self.prefix, uri_path)
 

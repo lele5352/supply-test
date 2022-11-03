@@ -10,12 +10,12 @@ from utils.excel_handler import get_excel_data
 
 @allure.feature("测试模块：其他入库")
 class TestOtherInStock(object):
-    fhc_cp_other_in_data = get_excel_data("data/ims_test_data.xlsx", "fhc_cp_other_in")
-    bhc_cp_other_in_data = get_excel_data("data/ims_test_data.xlsx", "bhc_cp_other_in")
-    zzc_cp_other_in_data = get_excel_data("data/ims_test_data.xlsx", "zzc_cp_other_in")
-    fhc_lp_other_in_data = get_excel_data("data/ims_test_data.xlsx", "fhc_lp_other_in")
-    bhc_lp_other_in_data = get_excel_data("data/ims_test_data.xlsx", "bhc_lp_other_in")
-    zzc_lp_other_in_data = get_excel_data("data/ims_test_data.xlsx", "zzc_lp_other_in")
+    fhc_cp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "fhc_cp_other_in")
+    bhc_cp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "bhc_cp_other_in")
+    zzc_cp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "zzc_cp_other_in")
+    fhc_lp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "fhc_lp_other_in")
+    bhc_lp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "bhc_lp_other_in")
+    zzc_lp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "zzc_lp_other_in")
 
     # @pytest.mark.skip("调试，暂时跳过")
     @allure.story("测试场景：发货仓其他入库，上架次品")

@@ -6,7 +6,7 @@ import json
 import config
 from utils.rsa_handler import encrypt_data
 from dbo.ums_dbo import UMSDBOperator
-from config.api_config.ums_api_config import ums_api_config
+from config.third_party_api_configs.ums_api_config import ums_api_config
 from config import user
 
 

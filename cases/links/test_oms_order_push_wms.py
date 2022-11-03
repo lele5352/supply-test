@@ -12,7 +12,7 @@ oms_data = [
 
 @allure.feature("测试链路：新建销售订单→审单→添加库存→跟单→下发wms")
 class TestOMSOrderPushWMS(object):
-    oms_to_wms_data = get_excel_data("data/link_test_data.xlsx", "oms_to_wms")
+    oms_to_wms_data = get_excel_data("test_data/link_test_data.xlsx", "oms_to_wms")
 
     @allure.story("测试场景：正常推送wms生成销售出库单场景")
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
