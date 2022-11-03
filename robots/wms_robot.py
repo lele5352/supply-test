@@ -96,10 +96,8 @@ class WMSAppRobot(AppRobot):
 
     @classmethod
     def get_pick_sku_list(cls, pick_order_details):
-        pick_sku_list = list()
-        for detail in pick_order_details:
-            pick_sku_list.append(
-                (detail['waresSkuCode'], detail['shouldPickQty'], detail['storageLocationId']))
+        pick_sku_list = [(_['waresSkuCode'], _['shouldPickQty'], _['storageLocationId']) for _ in pick_order_details]
+
         pick_sku_list = sorted(pick_sku_list, key=lambda pick_sku: pick_sku[2])
         return pick_sku_list
 
@@ -284,14 +282,12 @@ class WMSAppRobot(AppRobot):
         @param dict pick_order_details: 拣货单详情
         """
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
-        details = list()
-        for detail in pick_order_details:
-            details.append({
-                'id': detail['id'],
-                'goodsSkuCode': detail['goodsSkuCode'],
-                'waresSkuCode': detail['waresSkuCode'],
-                'realPickQty': detail['shouldPickQty']
-            })
+        details = [{
+            'id': detail['id'],
+            'goodsSkuCode': detail['goodsSkuCode'],
+            'waresSkuCode': detail['waresSkuCode'],
+            'realPickQty': detail['shouldPickQty']
+        } for detail in pick_order_details]
         content = deepcopy(TransferApiConfig.TransferConfirmPick.get_attributes())
         content['data'].update(
             {

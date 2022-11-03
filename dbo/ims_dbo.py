@@ -155,10 +155,7 @@ class IMSDBOperator:
             BomDetail.goods_sku_code == sale_sku_code, BomDetail.bom_version == bom_version)
         items = [model_to_dict(item) for item in items]
 
-        sale_sku_bom_detail = dict()
-        for item in items:
-            sale_sku_bom_detail.update(
-                {item['ware_sku_code']: item['bom_qty']})
+        sale_sku_bom_detail = {item['ware_sku_code']: item['bom_qty'] for item in items}
         return sale_sku_bom_detail
 
     @classmethod
@@ -193,4 +190,3 @@ class IMSDBOperator:
                 NogoodWaresInventory.warehouse_id == warehouse_id)
         data = [model_to_dict(item) for item in items]
         return data
-
