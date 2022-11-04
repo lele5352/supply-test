@@ -1,6 +1,8 @@
 from cases import *
 from robot_run.run_receive import run_receive
 from robot_run.run_transfer import run_transfer
+from multiprocessing import Process
+import os
 
 
 def query_wait_receive_entry_order():
@@ -55,5 +57,12 @@ def robot_run_transfer():
 
 
 if __name__ == '__main__':
-    robot_run_transfer()
-    robot_run_receive()
+    p1 = Process(target=robot_run_transfer)
+    p2 = Process(target=robot_run_receive)
+
+    p1.start()
+    p2.start()
+
+    p1.join()
+    p2.join()
+    print('task already completely run!')
