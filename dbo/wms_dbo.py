@@ -77,9 +77,9 @@ class WMSDBOperator:
     @classmethod
     def query_warehouse_area_info_by_type(cls, warehouse_id, area_type):
         """
-        :param int warehouse_id: 仓库id
-        :param int area_type: 库区类型
-        :return: 查询结果数据，字典格式
+        @param int warehouse_id: 仓库id
+        @param int area_type: 库区类型
+        @return: 查询结果数据，字典格式
         """
         item = BaseWarehouseArea.get_or_none(BaseWarehouseArea.warehouse_id == warehouse_id,
                                              BaseWarehouseArea.type == area_type)
@@ -90,8 +90,8 @@ class WMSDBOperator:
     @classmethod
     def query_delivery_order_package_info(cls, delivery_order_code):
         """
-        :param string delivery_order_code: 销售出库单号
-        :return: 查询结果数据，字典格式
+        @param string delivery_order_code: 销售出库单号
+        @return: 查询结果数据，字典格式
         """
         items = TdoDeliveryPackage.select().where(TdoDeliveryPackage.delivery_order_code == delivery_order_code,
                                                   TdoDeliveryPackage.del_flag == 0)
@@ -104,7 +104,7 @@ class WMSDBOperator:
     def query_wait_assign_demands(cls):
         """
         获取未分配的调拨需求数据
-        :return: 查询结果数据，字典格式
+        @return: 查询结果数据，字典格式
         """
         items = TrfTransferDemand.select().where(TrfTransferDemand.state == 0, TrfTransferDemand.del_flag == 0)
         if not items:
@@ -116,7 +116,8 @@ class WMSDBOperator:
     def query_demand_detail(cls, demand_code):
         """
         获取未分配的调拨需求数据
-        :return: 查询结果数据，字典格式
+        @param demand_code: 调拨需求编码
+        @return: 查询结果数据，字典格式
         """
         items = TrfTransferDemandDetail.select().where(TrfTransferDemandDetail.demand_code == demand_code)
         if not items:
