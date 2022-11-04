@@ -99,3 +99,39 @@ class WMSDBOperator:
             return
         items = [model_to_dict(item) for item in items]
         return items
+
+    @classmethod
+    def query_wait_assign_demands(cls):
+        """
+        获取未分配的调拨需求数据
+        :return: 查询结果数据，字典格式
+        """
+        items = TrfTransferDemand.select().where(TrfTransferDemand.state == 0, TrfTransferDemand.del_flag == 0)
+        if not items:
+            return
+        items = [model_to_dict(item) for item in items]
+        return items
+
+    @classmethod
+    def query_demand_detail(cls, demand_code):
+        """
+        获取未分配的调拨需求数据
+        :return: 查询结果数据，字典格式
+        """
+        items = TrfTransferDemandDetail.select().where(TrfTransferDemandDetail.demand_code == demand_code)
+        if not items:
+            return
+        items = [model_to_dict(item) for item in items]
+        return items
+
+    @classmethod
+    def query_wait_receive_entry_order(cls):
+        """
+        获取未分配的调拨需求数据
+        :return: 查询结果数据，字典格式
+        """
+        items = EnEntryOrder.select().where(EnEntryOrder.state == 1, EnEntryOrder.type == 0, EnEntryOrder.del_flag == 0)
+        if not items:
+            return
+        items = [model_to_dict(item) for item in items]
+        return items
