@@ -210,6 +210,8 @@ class WMSAppRobot(AppRobot):
             now = str(int(time.time() * 1000))
             area_info = self.dbo.query_warehouse_area_info_by_type(warehouse_id, kw_maps[kw_type][
                 'area_type'])
+            if not area_info:
+                return
             location_info = {
                 'warehouseLocationCode': kw_maps[kw_type]['code_prefix'] + now,
                 'warehouseLocationName': kw_maps[kw_type]['name_prefix'] + now,
