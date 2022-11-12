@@ -57,8 +57,8 @@ class WMSAppRobot(AppRobot):
         """
         获取指定区域类型的仓库区域id
 
-        :param int warehouse_id: 仓库id
-        :param int area_type: 区域类型
+        @param int warehouse_id: 仓库id
+        @param int area_type: 区域类型
         """
         data = self.dbo.query_warehouse_area_info_by_type(warehouse_id, area_type)
         return str(data.get('id'))
@@ -71,10 +71,12 @@ class WMSAppRobot(AppRobot):
         """
         order_list = list()
         count = 0
+        content = deepcopy(DeliveryApiConfig.LabelCallBack.get_attributes())
+
         for package in package_list:
             count += 1
-            temp_order_info = deepcopy(DeliveryApiConfig.LabelCallBack.get_attributes())
-            temp_order_info['data']['orderList'][0].update({
+            temp_order_info = deepcopy(content['data']['orderList'][0])
+            temp_order_info.update({
                 "deliveryNo": delivery_order_code,
                 "packageNoList": [package],
                 "logistyNo": "logistyNo" + str(int(time.time() * 1000 + count)),
@@ -83,11 +85,13 @@ class WMSAppRobot(AppRobot):
                 "drawOrderNo": str(int(time.time() * 1000))
             })
             order_list.append(temp_order_info)
-        res = self.label_callback(delivery_order_code, order_list)
-        if res['code'] == 200:
-            return True
-        else:
-            return False
+        content['data'].update(
+            {
+                "deliveryNo": delivery_order_code,
+                "orderList": order_list
+            })
+        callback_res = self.call_api(**content)
+        return self.formatted_result(callback_res)
 
     def query_delivery_order_package_list(self, delivery_order_code):
         data = self.dbo.query_delivery_order_package_info(delivery_order_code)
@@ -112,18 +116,19 @@ class WMSAppRobot(AppRobot):
         :param to_ck_id: 库位的目的仓id
         """
         location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
+
         if not location_data:
             new_locations = self.create_location(num, kw_type, ck_id, to_ck_id)
             # 创建完缺口个数的库位后，重新获取库位
             location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
             if not new_locations:
-                print('创建库位失败！')
+                print('无库位，创建库位失败！')
                 return self.report(0, False, {})
         elif num - len(location_data) > 0:
             # 库位不够，则新建对应缺少的库位
             new_locations = self.create_location(num - len(location_data), kw_type, ck_id, to_ck_id)
             if not new_locations:
-                print('创建库位失败！')
+                print('缺库位，创建库位失败！')
                 return self.report(0, False, {})
             # 创建完缺口个数的库位后，重新获取库位
             location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
@@ -159,7 +164,7 @@ class WMSAppRobot(AppRobot):
             log.error("获取不到切换仓库列表！")
             return
         for perm in res['data']:
-            if perm['dataId'] == warehouse_id:
+            if perm['dataId'] == int(warehouse_id):
                 return perm['id']
         return
 
@@ -416,21 +421,6 @@ class WMSAppRobot(AppRobot):
         up_shelf_res = self.call_api(**content)
         return self.formatted_result(up_shelf_res)
 
-    def label_callback(self, delivery_order_code, order_list):
-        """
-        :param string delivery_order_code: 出库单号
-        :param list order_list: 出库单下的包裹物流单信息列表
-
-        """
-        content = deepcopy(DeliveryApiConfig.LabelCallBack.get_attributes())
-        content['data'].update(
-            {
-                "deliveryNo": delivery_order_code,
-                "orderList": order_list
-            })
-        callback_res = self.call_api(**content)
-        return callback_res
-
     def entry_order_page(self, distribute_order_code_list):
         """
         @param list distribute_order_code_list: 分货单号列表
@@ -531,6 +521,72 @@ class WMSAppRobot(AppRobot):
         res = self.call_api(**content)
         return self.formatted_result(res)
 
+    def get_delivery_order_page(self, delivery_order_code_list):
+        """
+        销售出库单详情
+        @param list delivery_order_code_list: 销售出库单编码列表
+        @return:
+        """
+        content = deepcopy(DeliveryApiConfig.DeliveryOrderPage.get_attributes())
+        content['data'].update({
+            "deliveryOrderCodeList": delivery_order_code_list
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def get_delivery_order_detail(self, delivery_order_id):
+        """
+        销售出库单详情
+        @param int delivery_order_id: 销售出库单id
+        @return:
+        """
+        content = deepcopy(DeliveryApiConfig.DeliveryOrderDetail.get_attributes())
+        content['uri_path'] = content['uri_path'].format(delivery_order_id)
+        content['data'].update({
+            "t": int(time.time() * 1000)
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def delivery_order_assign_stock(self, delivery_order_code_list):
+        """
+        销售出库单分配库存
+        @param list delivery_order_code_list: 销售出库单号列表
+        @return:
+        """
+        content = deepcopy(DeliveryApiConfig.AssignStock.get_attributes())
+        content['data'].update({
+            "deliveryOrderCodes": delivery_order_code_list
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def mock_package_call_back(self, delivery_order_code, transport_type, delivery_order_sku_list):
+        """
+        模拟TMS回调包裹方案
+        @param transport_type: 运输方式1快递，2卡车
+        @param delivery_order_sku_list: 出库单sku列表
+        @param delivery_order_code: 销售出库单号
+        @return:
+        """
+        content = deepcopy(DeliveryApiConfig.PackageCallBack.get_attributes())
+        content['data'].update({
+            "deliveryNo": delivery_order_code,
+            "transportType": transport_type
+        })
+        content['data']['packageInfo']['packageList'][0].update({
+            "packageNo": "BG" + delivery_order_code,
+            "packageSkuList": delivery_order_sku_list
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def create_pick_order(self, delivery_order_code):
+        """
+        创建拣货单
+        @param delivery_order_code: 销售出库单编码
+        @return:
+        """
 
 class WMSTransferServiceRobot(ServiceRobot):
     def __init__(self):
@@ -593,5 +649,5 @@ class WMSDeliveryServiceRobot(ServiceRobot):
 if __name__ == '__main__':
     wms = WMSAppRobot()
     # print(wms.entry_order_page(["FH2211022680"]))
-    for kw in ['SH1667384662143', 'SH1667384662515']:
-        print(wms.location_detail(kw))
+    # wms.delivery_order_assign_stock(['PRE-CK2211100010'])
+    print(wms.get_delivery_order_page(['PRE-CK2211100010']))

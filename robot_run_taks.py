@@ -1,55 +1,25 @@
-from cases import *
-from robot_run.run_receive import run_receive
-from robot_run.run_transfer import run_transfer
+import time
 from multiprocessing import Process
-import os
 
-
-def query_wait_receive_entry_order():
-    data = wms_app_robot.dbo.query_wait_receive_entry_order()
-    if len(data) == 0:
-        return
-    entry_order_list = [(_['distribute_order_code'], _['warehouse_id'], _['dest_warehouse_id']) for _ in data]
-    return entry_order_list
+from robot_run.run_receive import *
+from robot_run.run_transfer import *
+from robot_run.run_delivery import *
+from robot_run.run_purchase import *
 
 
 def robot_run_receive():
-    entry_order_list = query_wait_receive_entry_order()
+    entry_order_list = query_wait_receive_data()
     if not entry_order_list:
         print('当前无新建状态的采购入库单！')
         return
     for (distribute_order_code, ck_id, to_ck_id) in entry_order_list:
-        print("正在执行收货仓：{0}，分货单：{1}的采购入库流程".format(wms_app_robot.ck_id_to_code(ck_id), distribute_order_code))
+        print("正在执行收货仓：{0}，分货单：{1}的采购入库流程".format(wms_app.ck_id_to_code(ck_id), distribute_order_code))
         result, entry_order_code = run_receive(distribute_order_code, ck_id, to_ck_id)
         print("执行结果：{0}；对应入库库单号：{1}".format(result, entry_order_code))
 
 
-def get_demand_sku_bom(demand_code):
-    data = wms_app_robot.dbo.query_demand_detail(demand_code)
-    bom = data[0]['bom_version']
-    return bom
-
-
-def get_wait_run_demands():
-    """获取待执行调拨流程的调拨需求"""
-    data = wms_app_robot.dbo.query_wait_assign_demands()
-    if not data:
-        return
-    demands_list = [
-        (
-            _['demand_code'],
-            _['goods_sku_code'],
-            get_demand_sku_bom(_['demand_code']),
-            _['demand_qty'], _['warehouse_id'],
-            _['delivery_target_warehouse_id'],
-            _['receive_warehouse_id'],
-            _['receive_target_warehouse_id']
-        ) for _ in data]
-    return demands_list
-
-
 def robot_run_transfer():
-    demands_list = get_wait_run_demands()
+    demands_list = get_wait_transfer_data()
     if not demands_list:
         print('当前无待分配状态的调拨需求！')
         return
@@ -61,13 +31,57 @@ def robot_run_transfer():
         print("执行结果：{0}；对应调拨出库单号：{1}".format(result, trans_out_order_code))
 
 
+def robot_run_delivery():
+    order_list = get_wait_delivery_data()
+    if not order_list:
+        print('当前无待发货状态的销售出库单！')
+        return
+    for (order_no, ck_id) in order_list:
+        print("正在执行仓库{0}的销售出库单号为{1}的销售发货流程".format(ck_id, order_no))
+        result, delivery_order_code = run_delivery(order_no, ck_id)
+        print("执行结果：{0}；对应销售出库单号：{1}".format(result, order_no))
+
+
+def robot_run_purchase():
+    shortage_demand_ids = get_wait_purchase_shortage_demands()
+
+    if not shortage_demand_ids:
+        print('当前无待采购的缺货需求！')
+    for child_list in shortage_demand_ids:
+        confirm_result = scm_app.shortage_demand_batch_confirm(child_list)
+        if not confirm_result["code"]:
+            print("缺货需求{0}确认失败".format(child_list))
+
+    purchase_demand_ids = get_wait_purchase_demands()
+    if not purchase_demand_ids:
+        print("当前无待采购的采购需求")
+
+    for child_list in purchase_demand_ids:
+        # 根据采购需求id批量确认并生单
+        confirm_and_buy_res = scm_app.confirm_and_generate_purchase_order(child_list)
+        if not confirm_and_buy_res["code"]:
+            print("采购需求批量确认并生单失败！")
+    # 采购需求下单是异步，可能有延迟
+    time.sleep(3)
+
+    purchase_order_list = get_wait_purchase_order()
+    for purchase_order_no in purchase_order_list:
+        print("正在执行采购单{0}的采购流程".format(purchase_order_no))
+        result, purchase_order_no = run_purchase(purchase_order_no)
+        print("采购单{0}执行结果为：{1}".format(purchase_order_no, result))
+
+
 if __name__ == '__main__':
-    p1 = Process(target=robot_run_transfer)
-    p2 = Process(target=robot_run_receive)
-
-    p1.start()
-    p2.start()
-
-    p1.join()
-    p2.join()
+    # p1 = Process(target=robot_run_transfer)
+    # p2 = Process(target=robot_run_receive)
+    # p3 = Process(target=robot_run_delivery)
+    p4 = Process(target=robot_run_purchase)
+    # p1.start()
+    # p2.start()
+    # p3.start()
+    p4.start()
+    # p1.join()
+    # p2.join()
+    # p3.join()
+    p4.join()
     print('tasks have been completely run!')

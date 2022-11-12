@@ -128,10 +128,22 @@ class WMSDBOperator:
     @classmethod
     def query_wait_receive_entry_order(cls):
         """
-        获取未分配的调拨需求数据
+        获取待收货的入库单数据
         :return: 查询结果数据，字典格式
         """
         items = EnEntryOrder.select().where(EnEntryOrder.state == 1, EnEntryOrder.type == 0, EnEntryOrder.del_flag == 0)
+        if not items:
+            return
+        items = [model_to_dict(item) for item in items]
+        return items
+
+    @classmethod
+    def query_wait_delivery_order(cls):
+        """
+        获取待发货的出库数据数据,状态为0（未分配），从分配库存走到发货完成
+        :return: 查询结果数据，字典格式
+        """
+        items = TdoDeliveryOrder.select().where(TdoDeliveryOrder.state == 0, TdoDeliveryOrder.del_flag == 0)
         if not items:
             return
         items = [model_to_dict(item) for item in items]

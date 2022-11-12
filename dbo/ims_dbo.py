@@ -61,10 +61,10 @@ class IMSDBOperator:
         """
         查询goods_inventory表指定条件数据
 
-        :param str sale_sku_code: 销售sku编码
-        :param int warehouse_id: 仓库id
-        :param int to_warehouse_id: 目的仓id
-        :return: 查询结果数据list
+        @param str sale_sku_code: 销售sku编码
+        @param int warehouse_id: 仓库id
+        @param int to_warehouse_id: 目的仓id
+        @return: 查询结果数据list
         """
         to_warehouse_id = to_warehouse_id if to_warehouse_id else 0
         items = GoodsInventory.select().where(
@@ -81,11 +81,10 @@ class IMSDBOperator:
         """
         查询central_inventory表指定条件数据
 
-        :param str sale_sku_code: 销售sku编码
-        :param int warehouse_id: 仓库id
-        :param int or None to_warehouse_id: 目的仓id
-
-        :return dict: 查询结果数据，字典格式
+        @param str sale_sku_code: 销售sku编码
+        @param int warehouse_id: 仓库id
+        @param int or None to_warehouse_id: 目的仓id
+        @return dict: 查询结果数据，字典格式
         """
         warehouse_id = to_warehouse_id if to_warehouse_id else warehouse_id
         item = CentralInventory.get_or_none(CentralInventory.goods_sku_code == sale_sku_code,

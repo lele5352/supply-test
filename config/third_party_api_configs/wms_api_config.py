@@ -1,4 +1,6 @@
 from config.third_party_api_configs import ApiConfig
+
+
 class BaseApiConfig:
     class GetWarehouseInfo(ApiConfig):
         uri_path = "/warehouse/bycode/"
@@ -163,6 +165,73 @@ class OtherEntryOrderApiConfig:
 
 
 class DeliveryApiConfig:
+    class DeliveryOrderPage(ApiConfig):
+        uri_path = "https://test-scms.popicorns.com/api/ec-wms-api/delivery-order/page"
+        method = "post"
+        data = {"deliveryOrderCodeList": ["PRE-CK2211100010"], "saleOrderCodeList": None, "packageCodeList": None,
+                "expressOrderCodeList": None, "skuCodeList": None, "saleSkuCodeList": None, "stateList": [],
+                "prodType": None, "expressOrderState": None, "packageState": None, "hasPackage": None,
+                "transportMode": None, "operationMode": None, "interceptFlag": "", "cancelFlag": "", "priority": None,
+                "logisticsCodeList": [], "channelCodeList": [], "planLogisticsCodeList": [], "planChannelCodeList": [],
+                "platform": None, "store": None, "customerType": None, "hasTickets": None, "countryCode": None,
+                "createTimeStart": None, "createTimeEnd": None, "pickOrderCodes": None, "expressChangeFlag": None,
+                "saleOrderTypes": [], "props": [], "size": 10, "current": 1}
+
+    class DeliveryOrderDetail(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/info/{0}"
+        method = "get"
+        data = {"t": 1668051101602}
+
+    class AssignStock(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/stock-assign/v2"
+        method = "post"
+        data = {"deliveryOrderCodes": ["PRE-CK2211060001"]}
+
+    class PackageCallBack(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order-api/push-plan"
+        method = "post"
+        data = {
+            "deliveryNo": "PRE-CK2211090021",
+            "status": 1,
+            "transportType": 2,
+            "packageInfo": {
+                "channelPrice": "123",
+                "packageCount": 1,
+                "packageIds": ["2"],
+                "packageList": [
+                    {
+                        "packageNo": "PRE-CK2211090021",
+                        "channelPrice": "1000",
+                        "channelId": "181",
+                        "channelCode": "unknow",
+                        "channelName": "unknow快递",
+                        "serviceId": "36",
+                        "serviceCode": "unknow",
+                        "serviceName": "unknow",
+                        "timeValue": "1",
+                        "length": "112",
+                        "width": "113",
+                        "height": "113",
+                        "weight": "55",
+                        "packageSkuList": [
+                            {
+                                "skuCode": "JJH3C94287A01",
+                                "skuName": "包装名称1 1/2 X1",
+                                "num": 3
+                            },
+                            {
+                                "skuCode": "JJH3C94287A02",
+                                "skuName": "包装名称2 2/2 X1",
+                                "num": 3
+                            }
+                        ]
+                    }
+                ]
+            },
+            "code": 1,
+            "info": "success"
+        }
+
     class LabelCallBack(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order-api/push-express-order/v2"
         method = "post"
@@ -199,6 +268,41 @@ class DeliveryApiConfig:
             ]
         }
 
+    class CreatePickOrder(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order-api/push-express-order/v2"
+        method = "post"
+        data = {
+            "deliveryNo": "PRE-CK2205050011",
+            "orderList": [
+                {
+                    "expressChangeFlag": 0,
+                    "expressChangeVersion": "1",
+                    "deliveryNo": "PRE-CK2205050011",
+                    "packageNoList": [
+                        "PRE-BG2205050039"
+                    ],
+                    "logistyNo": "64324234152-119900",
+                    "barCode": "534574353214234-119900",
+                    "serviceName": "正式-Postpony",
+                    "serviceCode": "prod-PostPony",
+                    "channelName": "正式-PostPony-PostPony",
+                    "channelCode": "UspsFirstClassMail",
+                    "fileList": [
+                        {
+                            "filePath": "https://img.popicorns.com/dev/file/2022/02/28/f8a138a6a3e5447cad33a9ab9cc800fa.pdf",
+                            "fileType": "pdf",
+                            "fileCategory": "1",
+                            "fileScale": "10*10",
+                            "fileCopies": "1",
+                            "filePrintDirection": "0"
+                        }
+                    ],
+                    "extInfo": "{\"logisticsMerchant\": \"UPS1\", \"turnOrderNo\": \"转运单号123123\"}",
+                    "turnOrderNo": "543255",
+                    "drawOrderNo": "7879096854"
+                }
+            ]
+        }
 
 class ReceiptApiConfig:
     class EntryOrderPage(ApiConfig):
