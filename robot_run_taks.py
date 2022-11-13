@@ -13,7 +13,8 @@ def robot_run_receive():
         print('当前无新建状态的采购入库单！')
         return
     for (distribute_order_code, ck_id, to_ck_id) in entry_order_list:
-        print("正在执行收货仓：{0}，分货单：{1}的采购入库流程".format(wms_app.ck_id_to_code(ck_id), distribute_order_code))
+        print("正在执行收货仓：{0}，分货单：{1}的采购入库流程".format(wms_app.db_ck_id_to_code(ck_id),
+                                                                   distribute_order_code))
         result, entry_order_code = run_receive(distribute_order_code, ck_id, to_ck_id)
         print("执行结果：{0}；对应入库库单号：{1}".format(result, entry_order_code))
 
@@ -36,8 +37,8 @@ def robot_run_delivery():
     if not order_list:
         print('当前无待发货状态的销售出库单！')
         return
-    for (order_no, ck_id) in order_list:
-        print("正在执行仓库{0}的销售出库单号为{1}的销售发货流程".format(ck_id, order_no))
+    for (ck_id, ck_code, order_no) in order_list:
+        print("正在执行仓库id为：{0}、仓库编码：{1}的销售出库单号为{2}的销售发货流程".format(ck_id, ck_code, order_no))
         result, delivery_order_code = run_delivery(order_no, ck_id)
         print("执行结果：{0}；对应销售出库单号：{1}".format(result, order_no))
 
@@ -74,14 +75,14 @@ def robot_run_purchase():
 if __name__ == '__main__':
     # p1 = Process(target=robot_run_transfer)
     # p2 = Process(target=robot_run_receive)
-    # p3 = Process(target=robot_run_delivery)
-    p4 = Process(target=robot_run_purchase)
+    p3 = Process(target=robot_run_delivery)
+    # p4 = Process(target=robot_run_purchase)
     # p1.start()
     # p2.start()
-    # p3.start()
-    p4.start()
+    p3.start()
+    # p4.start()
     # p1.join()
     # p2.join()
-    # p3.join()
-    p4.join()
+    p3.join()
+    # p4.join()
     print('tasks have been completely run!')

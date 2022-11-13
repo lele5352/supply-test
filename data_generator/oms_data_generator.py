@@ -76,7 +76,7 @@ def create_wms_sale_outbound_order(order_sku_info_list):
                 warehouse_list = common_warehouse_info["records"][0]["extResBoList"]
                 warehouse_id = list(filter(lambda x: x["warehouseCode"] == warehouse_code, warehouse_list))[0].get(
                     "warehouseId")
-            get_kw_result = wms_app.get_kw(1, 5, len(order_sku_info_list), warehouse_id, warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 5, len(order_sku_info_list), warehouse_id, warehouse_id)
             if not get_kw_result["code"]:
                 return
             kw_ids = get_kw_result.get('data')
@@ -112,6 +112,8 @@ def create_wms_sale_outbound_order(order_sku_info_list):
 
 
 if __name__ == '__main__':
-    data = [{"sku_code": "67330337129", "qty": 2, "bom": "A", "warehouse_id": "520"},
-            {"sku_code": "63203684930", "qty": 3, "bom": "A", "warehouse_id": "520"}]
+    # data = [{"sku_code": "67330337129", "qty": 2, "bom": "A", "warehouse_id": "520"},
+    #         {"sku_code": "63203684930", "qty": 3, "bom": "A", "warehouse_id": "520"}]
+    data = [{"sku_code": "63203684930", "qty": 2, "bom": "A", "warehouse_id": "540"}]
+
     print(create_wms_sale_outbound_order(data))

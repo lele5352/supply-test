@@ -27,14 +27,14 @@ class WmsTransferDataGenerator:
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         """
-        self.wms_app_robot.switch_default_warehouse(trans_out_id)
+        self.wms_app_robot.common_switch_warehouse(trans_out_id)
 
         central_inventory = IMSDBOperator.query_central_inventory(sale_sku_code, trans_out_id, trans_out_to_id)
         # print(central_inventory)
         # 可用库存不足，需要添加库存，分为2种情况：1-查询不到库存；2-查询到库存，block＞stock
         if not central_inventory or central_inventory['remain'] <= 0:
             bom_detail = IMSDBOperator.query_bom_detail(sale_sku_code, 'A')
-            kw_ids = self.wms_app_robot.get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
+            kw_ids = self.wms_app_robot.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
             add_stock_res = self.ims_robot.add_lp_stock_by_other_in(
                 sale_sku_code,
                 'A',
@@ -45,10 +45,10 @@ class WmsTransferDataGenerator:
             if not add_stock_res:
                 log.error('创建调拨需求失败：加库存失败！')
                 return
-        trans_out_code = self.wms_app_robot.ck_id_to_code(trans_out_id)
-        trans_out_to_code = self.wms_app_robot.ck_id_to_code(trans_out_to_id)
-        trans_in_code = self.wms_app_robot.ck_id_to_code(trans_in_id)
-        trans_in_to_code = self.wms_app_robot.ck_id_to_code(trans_in_to_id)
+        trans_out_code = self.wms_app_robot.db_ck_id_to_code(trans_out_id)
+        trans_out_to_code = self.wms_app_robot.db_ck_id_to_code(trans_out_to_id)
+        trans_in_code = self.wms_app_robot.db_ck_id_to_code(trans_in_id)
+        trans_in_to_code = self.wms_app_robot.db_ck_id_to_code(trans_in_to_id)
         # 调用创建调拨需求接口
         create_demand_res = self.wms_transfer_robot.transfer_out_create_demand(
             trans_out_code,
@@ -81,7 +81,7 @@ class WmsTransferDataGenerator:
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         """
-        self.wms_app_robot.switch_default_warehouse(trans_out_id)
+        self.wms_app_robot.common_switch_warehouse(trans_out_id)
         # 生成调拨需求
         demand_no = self.create_transfer_demand(
             trans_out_id,
@@ -151,14 +151,14 @@ class WmsTransferDataGenerator:
         pick_order_details = pick_order_details_result['data']['details']
 
         # 获取拣货单sku详情数据
-        pick_sku_list = self.wms_app_robot.get_pick_sku_list(pick_order_details)
+        pick_sku_list = self.wms_app_robot.transfer_get_pick_sku_list(pick_order_details)
 
         # 调拨拣货单确认拣货-纸质
         confirm_pick_result = self.wms_app_robot.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         if not confirm_pick_result['code']:
             return
-        get_trans_out_tp_kw_ids_result = self.wms_app_robot.get_kw(1, 3, len(pick_sku_list), trans_out_id,
-                                                                   trans_out_to_id)
+        get_trans_out_tp_kw_ids_result = self.wms_app_robot.db_get_kw(1, 3, len(pick_sku_list), trans_out_id,
+                                                                      trans_out_to_id)
         trans_out_tp_kw_ids = get_trans_out_tp_kw_ids_result['data']
         # 调拨拣货单按需装托提交
         submit_tray_result = self.wms_app_robot.transfer_out_submit_tray(pick_order_code, pick_order_details,

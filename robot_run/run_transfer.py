@@ -26,8 +26,8 @@ def get_wait_transfer_data():
 
 
 def run_transfer(demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id):
-    get_out_sj_kw_ids_result = wms_app.get_kw(1, 5, len(ims.dbo.query_bom_detail(sku, bom)), trans_out_id,
-                                              trans_out_to_id)
+    get_out_sj_kw_ids_result = wms_app.db_get_kw(1, 5, len(ims.dbo.query_bom_detail(sku, bom)), trans_out_id,
+                                                 trans_out_to_id)
     if not get_out_sj_kw_ids_result['code']:
         return 'Fail', None
 
@@ -38,7 +38,7 @@ def run_transfer(demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, tran
         return 'Fail', None
 
     # 切到调出仓
-    switch_warehouse_result = wms_app.switch_default_warehouse(trans_out_id)
+    switch_warehouse_result = wms_app.common_switch_warehouse(trans_out_id)
     if not switch_warehouse_result['code']:
         return 'Fail', None
 
@@ -62,14 +62,14 @@ def run_transfer(demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, tran
     pick_order_details = pick_order_details_result['data']['details']
 
     # 获取拣货单sku详情数据
-    pick_sku_list = wms_app.get_pick_sku_list(pick_order_details)
+    pick_sku_list = wms_app.transfer_get_pick_sku_list(pick_order_details)
 
     # 调拨拣货单确认拣货-纸质
     confirm_pick_result = wms_app.transfer_out_confirm_pick(pick_order_code, pick_order_details)
     if not confirm_pick_result['code']:
         return 'Fail', None
 
-    get_trans_out_tp_kw_ids_result = wms_app.get_kw(1, 3, len(pick_sku_list), trans_out_id, trans_out_to_id)
+    get_trans_out_tp_kw_ids_result = wms_app.db_get_kw(1, 3, len(pick_sku_list), trans_out_id, trans_out_to_id)
     if not get_trans_out_tp_kw_ids_result['code']:
         return 'Fail', None
 
@@ -121,15 +121,15 @@ def run_transfer(demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, tran
     if not delivery_result['code']:
         return 'Fail', None
 
-    switch_warehouse_result = wms_app.switch_default_warehouse(trans_in_id)
+    switch_warehouse_result = wms_app.common_switch_warehouse(trans_in_id)
     if not switch_warehouse_result['code']:
         return 'Fail', None
 
-    trans_in_sj_kw_ids_result = wms_app.get_kw(1, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
+    trans_in_sj_kw_ids_result = wms_app.db_get_kw(1, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
     if not trans_in_sj_kw_ids_result['code']:
         return 'Fail', None
 
-    trans_in_sj_kw_codes = [wms_app.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids_result['data']]
+    trans_in_sj_kw_codes = [wms_app.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids_result['data']]
 
     # 调拨入库收货
     receive_result = wms_app.transfer_in_received(handover_no)

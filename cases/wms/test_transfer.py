@@ -14,7 +14,7 @@ class TestTransfer(object):
                              fhc_to_fhc_data)
     def test_transfer_flow(self, goods_list, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, expected, bak):
         with allure.step("获取调出仓上架库位"):
-            get_out_sj_kw_ids_result = wms_app.get_kw(1, 5, len(goods_list), trans_out_id, trans_out_to_id)
+            get_out_sj_kw_ids_result = wms_app.db_get_kw(1, 5, len(goods_list), trans_out_id, trans_out_to_id)
             assert get_out_sj_kw_ids_result['code'] == expected
             out_sj_kw_ids = get_out_sj_kw_ids_result['data']
 
@@ -25,15 +25,15 @@ class TestTransfer(object):
 
         with allure.step("切到调出仓"):
             # 切到调出仓
-            switch_warehouse_result = wms_app.switch_default_warehouse(trans_out_id)
+            switch_warehouse_result = wms_app.common_switch_warehouse(trans_out_id)
             assert switch_warehouse_result['code'] == expected
 
         with allure.step("生成调拨需求"):
             # 生成调拨需求
-            trans_out_code = wms_app.ck_id_to_code(trans_out_id)
-            trans_out_to_code = wms_app.ck_id_to_code(trans_out_to_id)
-            trans_in_code = wms_app.ck_id_to_code(trans_in_id)
-            trans_in_to_code = wms_app.ck_id_to_code(trans_in_to_id)
+            trans_out_code = wms_app.db_ck_id_to_code(trans_out_id)
+            trans_out_to_code = wms_app.db_ck_id_to_code(trans_out_to_id)
+            trans_in_code = wms_app.db_ck_id_to_code(trans_in_id)
+            trans_in_to_code = wms_app.db_ck_id_to_code(trans_in_to_id)
             demand_list = wms_transfer.get_demand_list(goods_list, trans_out_code, trans_out_to_code,
                                                        trans_in_code, trans_in_to_code)
             assert demand_list is not None
@@ -58,7 +58,7 @@ class TestTransfer(object):
 
         with allure.step("获取拣货单sku详情数据"):
             # 获取拣货单sku详情数据
-            pick_sku_list = wms_app.get_pick_sku_list(pick_order_details)
+            pick_sku_list = wms_app.transfer_get_pick_sku_list(pick_order_details)
 
         with allure.step("调拨拣货单确认拣货-纸质"):
             # 调拨拣货单确认拣货-纸质
@@ -66,8 +66,8 @@ class TestTransfer(object):
             assert confirm_pick_result['code'] == expected
 
         with allure.step("获取调拨出库托盘库位"):
-            get_trans_out_tp_kw_ids_result = wms_app.get_kw(1, 3, len(pick_sku_list), trans_out_id,
-                                                            trans_out_to_id)
+            get_trans_out_tp_kw_ids_result = wms_app.db_get_kw(1, 3, len(pick_sku_list), trans_out_id,
+                                                               trans_out_to_id)
             assert get_trans_out_tp_kw_ids_result['code'] == expected
             trans_out_tp_kw_ids = get_trans_out_tp_kw_ids_result['data']
         with allure.step("调拨拣货单按需装托提交"):
@@ -114,13 +114,13 @@ class TestTransfer(object):
             assert delivery_result['code'] == expected
 
         with allure.step("切换仓库到调入仓"):
-            switch_warehouse_result = wms_app.switch_default_warehouse(trans_in_id)
+            switch_warehouse_result = wms_app.common_switch_warehouse(trans_in_id)
             assert switch_warehouse_result['code'] == expected
 
         with allure.step("获取调入仓托盘库位"):
-            trans_in_sj_kw_ids_result = wms_app.get_kw(1, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
+            trans_in_sj_kw_ids_result = wms_app.db_get_kw(1, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
             assert trans_in_sj_kw_ids_result['code'] == expected
-            trans_in_sj_kw_codes = [wms_app.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids_result['data']]
+            trans_in_sj_kw_codes = [wms_app.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids_result['data']]
 
         with allure.step("调拨入库收货"):
             # 调拨入库收货

@@ -140,11 +140,30 @@ class WMSDBOperator:
     @classmethod
     def query_wait_delivery_order(cls):
         """
-        获取待发货的出库数据数据,状态为0（未分配），从分配库存走到发货完成
+        获取待发货的出库数据数据,状态为0（未分配）且未被拦截、未被取消，从分配库存走到发货完成
         :return: 查询结果数据，字典格式
         """
-        items = TdoDeliveryOrder.select().where(TdoDeliveryOrder.state == 0, TdoDeliveryOrder.del_flag == 0)
+        items = TdoDeliveryOrder.select().where(TdoDeliveryOrder.state == 0, TdoDeliveryOrder.del_flag == 0,
+                                                TdoDeliveryOrder.cancel_flag == 0, TdoDeliveryOrder.intercept_flag == 0)
         if not items:
             return
         items = [model_to_dict(item) for item in items]
         return items
+
+    @classmethod
+    def query_warehouse_config(cls):
+        """
+        获取仓库作业流程配置
+        :return: 查询结果数据，字典格式
+        """
+        items = BaseWarehouseConfig.select(BaseWarehouseConfig.warehouse_id).distinct().where(
+            BaseWarehouseConfig.del_flag == 0)
+        if not items:
+            return
+        items = [model_to_dict(item) for item in items]
+        return items
+
+
+if __name__ == "__main__":
+    dbo = WMSDBOperator()
+    print(dbo.query_warehouse_config())

@@ -25,12 +25,12 @@ class TestOtherInStock(object):
         sale_skus = ims.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
-            get_kw_result = wms_app.get_kw(1, 6, 1, warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 6, 1, warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             cp_kw_id = get_kw_result['data']
             cp_location_ids = cp_kw_id * len(ware_sku_qty_list)
         else:
-            get_kw_result = wms_app.get_kw(1, 6, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 6, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             cp_location_ids = get_kw_result['data']
         other_in_result = ims.cp_other_in(ware_sku_qty_list, cp_location_ids, warehouse_id, to_warehouse_id)
@@ -50,12 +50,12 @@ class TestOtherInStock(object):
         sale_skus = ims.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
-            get_kw_result = wms_app.get_kw(1, 6, 1, warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 6, 1, warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             cp_kw_id = get_kw_result['data']
             cp_location_ids = cp_kw_id * len(ware_sku_qty_list)
         else:
-            get_kw_result = wms_app.get_kw(1, 6, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 6, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             cp_location_ids = get_kw_result['data']
         other_in_result = ims.cp_other_in(ware_sku_qty_list, cp_location_ids, warehouse_id, to_warehouse_id)
@@ -75,12 +75,12 @@ class TestOtherInStock(object):
         sale_skus = ims.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
-            get_kw_result = wms_app.get_kw(1, 6, 1, warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 6, 1, warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             cp_kw_id = get_kw_result['data']
             cp_location_ids = cp_kw_id * len(ware_sku_qty_list)
         else:
-            get_kw_result = wms_app.get_kw(1, 6, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 6, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             cp_location_ids = get_kw_result['data']
         other_in_result = ims.cp_other_in(ware_sku_qty_list, cp_location_ids, warehouse_id, to_warehouse_id)
@@ -100,12 +100,12 @@ class TestOtherInStock(object):
         sale_skus = ims.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
-            get_kw_result = wms_app.get_kw(1, 5, 1, warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 5, 1, warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             sj_kw_id = get_kw_result['data']
             sj_kw_ids = sj_kw_id * len(ware_sku_qty_list)
         else:
-            get_kw_result = wms_app.get_kw(1, 5, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 5, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             sj_kw_ids = get_kw_result['data']
         expect_lp_inventory = ims.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, warehouse_id,
@@ -125,12 +125,12 @@ class TestOtherInStock(object):
         sale_skus = ims.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
-            get_kw_result = wms_app.get_kw(1, 5, 1, warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 5, 1, warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             sj_kw_id = get_kw_result['data']
             sj_kw_ids = sj_kw_id * len(ware_sku_qty_list)
         else:
-            get_kw_result = wms_app.get_kw(1, 5, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 5, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             sj_kw_ids = get_kw_result['data']
         expect_lp_inventory = ims.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, warehouse_id,
@@ -149,12 +149,12 @@ class TestOtherInStock(object):
         sale_skus = ims.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
-            get_kw_result = wms_app.get_kw(1, 5, 1, warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 5, 1, warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             sj_kw_id = get_kw_result['data']
             sj_kw_ids = sj_kw_id * len(ware_sku_qty_list)
         else:
-            get_kw_result = wms_app.get_kw(1, 5, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 5, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             sj_kw_ids = get_kw_result['data']
         expect_lp_inventory = ims.get_add_kw_stock_expect_inventory(ware_sku_qty_list, sj_kw_ids, warehouse_id,
