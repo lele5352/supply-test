@@ -13,8 +13,7 @@ def robot_run_receive():
         print('当前无新建状态的采购入库单！')
         return
     for (distribute_order_code, ck_id, to_ck_id) in entry_order_list:
-        print("正在执行收货仓：{0}，分货单：{1}的采购入库流程".format(wms_app.db_ck_id_to_code(ck_id),
-                                                                   distribute_order_code))
+        print("正在执行收货仓：{0}，分货单：{1}的采购入库流程".format(wms_app.db_ck_id_to_code(ck_id), distribute_order_code))
         result, entry_order_code = run_receive(distribute_order_code, ck_id, to_ck_id)
         print("执行结果：{0}；对应入库库单号：{1}".format(result, entry_order_code))
 
@@ -73,16 +72,16 @@ def robot_run_purchase():
 
 
 if __name__ == '__main__':
-    # p1 = Process(target=robot_run_transfer)
-    # p2 = Process(target=robot_run_receive)
+    p1 = Process(target=robot_run_transfer)
+    p2 = Process(target=robot_run_receive)
     p3 = Process(target=robot_run_delivery)
-    # p4 = Process(target=robot_run_purchase)
-    # p1.start()
-    # p2.start()
+    p4 = Process(target=robot_run_purchase)
+    p1.start()
+    p2.start()
     p3.start()
-    # p4.start()
-    # p1.join()
-    # p2.join()
+    p4.start()
+    p1.join()
+    p2.join()
     p3.join()
-    # p4.join()
+    p4.join()
     print('tasks have been completely run!')
