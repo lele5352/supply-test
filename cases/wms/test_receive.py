@@ -49,5 +49,5 @@ class TestReceive(object):
 
 
 if __name__ == '__main__':
-    os.system("pytest -v -s cases/wms/test_transfer.py --alluredir=./allure-report-files")
+    os.system("pytest -v -s cases/wms/test_receive.py --alluredir=./allure-report-files")
     os.system("allure generate ./allure-report-files -o ./reports --clean")

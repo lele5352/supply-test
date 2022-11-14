@@ -63,7 +63,7 @@ class TestOMSOrderPushWMS(object):
                     assert get_kw_result["code"] == expected
 
                     kw_ids = get_kw_result.get('data')
-                    add_stock_result = ims.add_bom_stock(sku_code, bom, qty, kw_ids, warehouse_id, warehouse_id)
+                    add_stock_result = ims_robot.add_bom_stock(sku_code, bom, qty, kw_ids, warehouse_id, warehouse_id)
                     assert add_stock_result["code"] == expected
 
                     if {"skuCode": sku_code, "bomVersion": bom} not in follow_order_list:

@@ -20,7 +20,7 @@ class TestTransfer(object):
 
         with allure.step("往调出仓添加相应库存"):
             for sku, bom, qty in goods_list:
-                add_stck_result = ims.add_bom_stock(sku, bom, qty, out_sj_kw_ids, trans_out_id, trans_out_to_id)
+                add_stck_result = ims_robot.add_bom_stock(sku, bom, qty, out_sj_kw_ids, trans_out_id, trans_out_to_id)
                 assert add_stck_result['code'] == expected
 
         with allure.step("切到调出仓"):

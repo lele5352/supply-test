@@ -80,7 +80,7 @@ def create_wms_sale_outbound_order(order_sku_info_list):
             if not get_kw_result["code"]:
                 return
             kw_ids = get_kw_result.get('data')
-            add_stock_result = ims.add_bom_stock(sku_code, bom, qty, kw_ids, warehouse_id, warehouse_id)
+            add_stock_result = ims_robot.add_bom_stock(sku_code, bom, qty, kw_ids, warehouse_id, warehouse_id)
             if not add_stock_result["code"]:
                 return
 
