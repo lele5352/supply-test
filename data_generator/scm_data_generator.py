@@ -175,9 +175,14 @@ class ScmDataGenerator:
         # for code in distribute_order_nos:
         # barcode_generate(code, 'entry_order')
         distribute_order_list = distribute_order_result["data"]["list"]
-        distribute_order_nos = [_["shippingOrderNo"] for _ in distribute_order_list]
-        print('分货单号：%s' % distribute_order_nos)
-        return distribute_order_nos
+        distribute_order_list = [
+            (
+                _["shippingOrderNo"],
+                _["deliveryWarehouse"],
+                _["destinationWarehouse"]
+            ) for _ in distribute_order_list]
+        print('分货单列表：%s' % distribute_order_list)
+        return distribute_order_list
 
 
 if __name__ == '__main__':
