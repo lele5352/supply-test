@@ -28,11 +28,11 @@ prefix_config = {
     },
     # uat环境配置
     'uat': {
-        'ims_service_prefix': 'http://10.0.0.159:28801',
-        'app_prefix': 'https://test-scms.popicorns.com',
-        'delivery_service_prefix': 'http://10.0.0.160:8330',
-        'receipt_service_prefix': 'http://10.0.0.160:8323',
-        'transfer_service_prefix': 'http://10.0.0.160:8334',
+        'ims_service_prefix': 'http://10.0.15.13:28801',
+        'app_prefix': 'https://uat-scms.popicorns.com',
+        'delivery_service_prefix': 'http://10.0.15.13:8330',
+        'receipt_service_prefix': 'http://10.0.15.13:8323',
+        'transfer_service_prefix': 'http://10.0.15.13:8334',
         'eta_prefix': 'http://10.0.0.159:8701',
     },
 }
@@ -61,5 +61,11 @@ mysql_config = {
         'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
         'host': '10.0.0.127',
         'port': 3306
+    },
+    'uat': {
+        'user': 'erp',
+        'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
+        'host': '10.0.15.13',
+        'port': 3002
     },
 }
