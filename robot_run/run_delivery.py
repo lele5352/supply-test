@@ -112,7 +112,7 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail):
     transport_mode = delivery_order_info["transportMode"]
     # 出库单分配库存
     assign_stock_result = wms_app.delivery_assign_stock([delivery_order_code])
-    if not assign_stock_result["code"]:
+    if not assign_stock_result["code"] or assign_stock_result["data"]["failNum"] > 0:
         return "Fail: fail to assign stock!", None
     # 提取出库单sku明细
     order_sku_list = [
