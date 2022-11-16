@@ -2,7 +2,7 @@ prefix_config = {
     # 26环境配置
     'test26': {
         'ims_service_prefix': 'http://10.0.0.26:28801',
-        'app_prefix': 'https://test-26.popicorns.com',
+        'app': 'https://test-26.popicorns.com',
         'delivery_service_prefix': 'http://10.0.0.26:8330',
         'receipt_service_prefix': 'http://10.0.0.26:8323',
         'transfer_service_prefix': 'http://10.0.0.26:8334'
@@ -10,7 +10,7 @@ prefix_config = {
     # 25环境配置
     'test25': {
         'ims_service_prefix': 'http://10.0.0.25:28801',
-        'app_prefix': 'https://test-25.popicorns.com',
+        'app': 'https://test-25.popicorns.com',
         'delivery_service_prefix': 'http://10.0.0.25:8330',
         'receipt_service_prefix': 'http://10.0.0.25:8323',
         'transfer_service_prefix': 'http://10.0.0.25:8334'
@@ -29,7 +29,7 @@ prefix_config = {
     # uat环境配置
     'uat': {
         'ims_service_prefix': 'http://10.0.15.13:28801',
-        'app_prefix': 'https://uat-scms.popicorns.com',
+        'app': 'https://uat-scms.popicorns.com',
         'delivery_service_prefix': 'http://10.0.15.13:8330',
         'receipt_service_prefix': 'http://10.0.15.13:8323',
         'transfer_service_prefix': 'http://10.0.15.13:8334',

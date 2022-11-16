@@ -8,11 +8,9 @@ database = MySQLDatabase('supply_wms', **db_config)
 class UnknownField(object):
     def __init__(self, *_, **__): pass
 
-
 class BaseModel(Model):
     class Meta:
         database = database
-
 
 class BaseApiOperateLog(BaseModel):
     after_content = TextField(null=True)
@@ -39,7 +37,6 @@ class BaseApiOperateLog(BaseModel):
             (('source_no', 'source_category'), False),
         )
 
-
 class BaseWarehouse(BaseModel):
     business_time = CharField(null=True)
     create_time = DateTimeField(null=True)
@@ -63,7 +60,6 @@ class BaseWarehouse(BaseModel):
 
     class Meta:
         table_name = 'base_warehouse'
-
 
 class BaseWarehouseAddress(BaseModel):
     address = CharField(null=True)
@@ -96,7 +92,6 @@ class BaseWarehouseAddress(BaseModel):
     class Meta:
         table_name = 'base_warehouse_address'
 
-
 class BaseWarehouseArea(BaseModel):
     create_time = DateTimeField(null=True)
     create_user_id = BigIntegerField(null=True)
@@ -115,7 +110,6 @@ class BaseWarehouseArea(BaseModel):
 
     class Meta:
         table_name = 'base_warehouse_area'
-
 
 class BaseWarehouseAreaCopy1(BaseModel):
     create_time = DateTimeField(null=True)
@@ -136,7 +130,6 @@ class BaseWarehouseAreaCopy1(BaseModel):
     class Meta:
         table_name = 'base_warehouse_area_copy1'
 
-
 class BaseWarehouseAreaCopy2(BaseModel):
     create_time = DateTimeField(null=True)
     create_user_id = BigIntegerField(null=True)
@@ -155,7 +148,6 @@ class BaseWarehouseAreaCopy2(BaseModel):
 
     class Meta:
         table_name = 'base_warehouse_area_copy2'
-
 
 class BaseWarehouseConfig(BaseModel):
     config_code = CharField(constraints=[SQL("DEFAULT ''")])
@@ -180,7 +172,6 @@ class BaseWarehouseConfig(BaseModel):
         indexes = (
             (('warehouse_id', 'config_code'), True),
         )
-
 
 class BaseWarehouseLocation(BaseModel):
     create_time = DateTimeField(null=True)
@@ -208,7 +199,6 @@ class BaseWarehouseLocation(BaseModel):
 
     class Meta:
         table_name = 'base_warehouse_location'
-
 
 class EnEntryOrder(BaseModel):
     create_time = DateTimeField(index=True, null=True)
@@ -241,7 +231,6 @@ class EnEntryOrder(BaseModel):
 
     class Meta:
         table_name = 'en_entry_order'
-
 
 class EnEntryOrderDetail(BaseModel):
     abnormal_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -280,7 +269,6 @@ class EnEntryOrderDetail(BaseModel):
     class Meta:
         table_name = 'en_entry_order_detail'
 
-
 class EnEntryOrderDetailBatchRecord(BaseModel):
     actual_sku_qty = IntegerField()
     batch_number = CharField()
@@ -299,7 +287,6 @@ class EnEntryOrderDetailBatchRecord(BaseModel):
 
     class Meta:
         table_name = 'en_entry_order_detail_batch_record'
-
 
 class EnEntryOrderLogistics(BaseModel):
     car_number = CharField(null=True)
@@ -322,7 +309,6 @@ class EnEntryOrderLogistics(BaseModel):
     class Meta:
         table_name = 'en_entry_order_logistics'
 
-
 class EnEntryOrderOperateLog(BaseModel):
     content = TextField()
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -337,7 +323,6 @@ class EnEntryOrderOperateLog(BaseModel):
 
     class Meta:
         table_name = 'en_entry_order_operate_log'
-
 
 class EnExceptionOrder(BaseModel):
     cancel_remark = CharField(null=True)
@@ -361,7 +346,6 @@ class EnExceptionOrder(BaseModel):
 
     class Meta:
         table_name = 'en_exception_order'
-
 
 class EnExceptionOrderDetail(BaseModel):
     cancel_remark = CharField(null=True)
@@ -393,7 +377,6 @@ class EnExceptionOrderDetail(BaseModel):
     class Meta:
         table_name = 'en_exception_order_detail'
 
-
 class EnExceptionOrderDetailLocation(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     exception_order_detail_id = BigIntegerField(null=True)
@@ -405,7 +388,6 @@ class EnExceptionOrderDetailLocation(BaseModel):
     class Meta:
         table_name = 'en_exception_order_detail_location'
 
-
 class EnExceptionOrderDetailPic(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     exception_order_detail_id = BigIntegerField(null=True)
@@ -414,7 +396,6 @@ class EnExceptionOrderDetailPic(BaseModel):
 
     class Meta:
         table_name = 'en_exception_order_detail_pic'
-
 
 class EnExceptionOrderDetailSolution(BaseModel):
     create_time = DateTimeField(null=True)
@@ -439,7 +420,6 @@ class EnExceptionOrderDetailSolution(BaseModel):
     class Meta:
         table_name = 'en_exception_order_detail_solution'
 
-
 class EnPredictReceiptOrder(BaseModel):
     create_time = DateTimeField(index=True, null=True)
     create_user_id = BigIntegerField(null=True)
@@ -460,7 +440,6 @@ class EnPredictReceiptOrder(BaseModel):
 
     class Meta:
         table_name = 'en_predict_receipt_order'
-
 
 class EnPredictReceiptOrderDetail(BaseModel):
     bom_version = CharField(null=True)
@@ -495,7 +474,6 @@ class EnPredictReceiptOrderDetail(BaseModel):
     class Meta:
         table_name = 'en_predict_receipt_order_detail'
 
-
 class EnQualityOrder(BaseModel):
     create_time = DateTimeField(index=True, null=True)
     create_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
@@ -520,7 +498,6 @@ class EnQualityOrder(BaseModel):
 
     class Meta:
         table_name = 'en_quality_order'
-
 
 class EnQualityOrderDetail(BaseModel):
     boom_version = CharField(null=True)
@@ -551,7 +528,6 @@ class EnQualityOrderDetail(BaseModel):
     class Meta:
         table_name = 'en_quality_order_detail'
 
-
 class EnQualityResultPic(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
@@ -563,7 +539,6 @@ class EnQualityResultPic(BaseModel):
 
     class Meta:
         table_name = 'en_quality_result_pic'
-
 
 class EnReceiptOrder(BaseModel):
     create_time = DateTimeField(index=True, null=True)
@@ -591,7 +566,6 @@ class EnReceiptOrder(BaseModel):
     class Meta:
         table_name = 'en_receipt_order'
 
-
 class EnReceiptOrderDetail(BaseModel):
     bom_version = CharField(null=True)
     del_flag = IntegerField(index=True, null=True)
@@ -618,7 +592,6 @@ class EnReceiptOrderDetail(BaseModel):
     class Meta:
         table_name = 'en_receipt_order_detail'
 
-
 class EnReceiptOrderDetailBatchRecord(BaseModel):
     batch_number = CharField()
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -636,7 +609,6 @@ class EnReceiptOrderDetailBatchRecord(BaseModel):
 
     class Meta:
         table_name = 'en_receipt_order_detail_batch_record'
-
 
 class EnShelvesOrder(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")], index=True)
@@ -664,7 +636,6 @@ class EnShelvesOrder(BaseModel):
     class Meta:
         table_name = 'en_shelves_order'
 
-
 class EnShelvesOrderDetail(BaseModel):
     abnormal_qty = IntegerField(null=True)
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -688,7 +659,6 @@ class EnShelvesOrderDetail(BaseModel):
     class Meta:
         table_name = 'en_shelves_order_detail'
 
-
 class EnShelvesOrderDetailBatchRecord(BaseModel):
     batch_number = CharField()
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -706,7 +676,6 @@ class EnShelvesOrderDetailBatchRecord(BaseModel):
 
     class Meta:
         table_name = 'en_shelves_order_detail_batch_record'
-
 
 class OmsGoodSkuReport(BaseModel):
     central_block = IntegerField()
@@ -737,7 +706,6 @@ class OmsGoodSkuReport(BaseModel):
             (('handle_date', 'version'), False),
         )
 
-
 class OtherStockOutOrder(BaseModel):
     block_book_id = CharField(null=True)
     create_time = DateTimeField(index=True, null=True)
@@ -767,7 +735,6 @@ class OtherStockOutOrder(BaseModel):
             (('other_stock_out_order', 'del_flag'), True),
         )
 
-
 class OtherStockOutOrderFlow(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -780,7 +747,6 @@ class OtherStockOutOrderFlow(BaseModel):
 
     class Meta:
         table_name = 'other_stock_out_order_flow'
-
 
 class OtherStockOutOrderLogistics(BaseModel):
     car_num = CharField(null=True)
@@ -801,7 +767,6 @@ class OtherStockOutOrderLogistics(BaseModel):
 
     class Meta:
         table_name = 'other_stock_out_order_logistics'
-
 
 class OtherStockOutOrderSku(BaseModel):
     bom_version = CharField()
@@ -824,7 +789,6 @@ class OtherStockOutOrderSku(BaseModel):
     class Meta:
         table_name = 'other_stock_out_order_sku'
 
-
 class OtherStockOutOrderSkuLocation(BaseModel):
     create_time = DateTimeField(null=True)
     create_user_id = BigIntegerField(null=True)
@@ -844,7 +808,6 @@ class OtherStockOutOrderSkuLocation(BaseModel):
     class Meta:
         table_name = 'other_stock_out_order_sku_location'
 
-
 class ReQualityOrder(BaseModel):
     create_time = DateTimeField(null=True)
     create_user_id = BigIntegerField(null=True)
@@ -861,7 +824,6 @@ class ReQualityOrder(BaseModel):
 
     class Meta:
         table_name = 're_quality_order'
-
 
 class ReQualityOrderDetail(BaseModel):
     create_time = DateTimeField(index=True, null=True)
@@ -899,7 +861,6 @@ class ReQualityOrderDetail(BaseModel):
     class Meta:
         table_name = 're_quality_order_detail'
 
-
 class ReQualityOrderDetailReason(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
@@ -910,7 +871,6 @@ class ReQualityOrderDetailReason(BaseModel):
 
     class Meta:
         table_name = 're_quality_order_detail_reason'
-
 
 class ReQualityResultPic(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -923,7 +883,6 @@ class ReQualityResultPic(BaseModel):
 
     class Meta:
         table_name = 're_quality_result_pic'
-
 
 class ReReceiptOrder(BaseModel):
     create_time = DateTimeField(index=True, null=True)
@@ -943,7 +902,6 @@ class ReReceiptOrder(BaseModel):
 
     class Meta:
         table_name = 're_receipt_order'
-
 
 class ReShelvesOrder(BaseModel):
     create_time = DateTimeField(null=True)
@@ -975,7 +933,6 @@ class ReShelvesOrder(BaseModel):
     class Meta:
         table_name = 're_shelves_order'
 
-
 class TdoAbnormalOrder(BaseModel):
     abnormal_order_code = CharField()
     abnormal_order_state = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -1002,7 +959,6 @@ class TdoAbnormalOrder(BaseModel):
         indexes = (
             (('abnormal_order_code', 'del_flag'), True),
         )
-
 
 class TdoAbnormalOrderBak(BaseModel):
     abnormal_order_code = CharField()
@@ -1031,7 +987,6 @@ class TdoAbnormalOrderBak(BaseModel):
             (('abnormal_order_code', 'del_flag'), True),
         )
 
-
 class TdoAbnormalOrderDetail(BaseModel):
     abnormal_order_id = BigIntegerField(index=True)
     abnormal_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -1049,7 +1004,6 @@ class TdoAbnormalOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'tdo_abnormal_order_detail'
-
 
 class TdoAbnormalOrderDetailBak(BaseModel):
     abnormal_order_id = BigIntegerField(index=True)
@@ -1069,7 +1023,6 @@ class TdoAbnormalOrderDetailBak(BaseModel):
     class Meta:
         table_name = 'tdo_abnormal_order_detail_bak'
 
-
 class TdoAbnormalOrderSkuDetail(BaseModel):
     abnormal_order_detail_id = BigIntegerField(index=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -1085,7 +1038,6 @@ class TdoAbnormalOrderSkuDetail(BaseModel):
     class Meta:
         table_name = 'tdo_abnormal_order_sku_detail'
 
-
 class TdoAbnormalOrderSkuDetailBak(BaseModel):
     abnormal_order_detail_id = BigIntegerField(index=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -1100,7 +1052,6 @@ class TdoAbnormalOrderSkuDetailBak(BaseModel):
 
     class Meta:
         table_name = 'tdo_abnormal_order_sku_detail_bak'
-
 
 class TdoDeliveryOrder(BaseModel):
     block_book_id = CharField(null=True)
@@ -1155,7 +1106,6 @@ class TdoDeliveryOrder(BaseModel):
             (('delivery_order_code', 'del_flag'), True),
         )
 
-
 class TdoDeliveryOrderDetail(BaseModel):
     bom_version = CharField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -1184,7 +1134,6 @@ class TdoDeliveryOrderDetail(BaseModel):
     class Meta:
         table_name = 'tdo_delivery_order_detail'
 
-
 class TdoDeliveryOrderDetailCopy1(BaseModel):
     bom_version = CharField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -1212,7 +1161,6 @@ class TdoDeliveryOrderDetailCopy1(BaseModel):
     class Meta:
         table_name = 'tdo_delivery_order_detail_copy1'
 
-
 class TdoDeliveryOrderOperateLog(BaseModel):
     content = TextField(null=True)
     create_time = DateTimeField(null=True)
@@ -1228,7 +1176,6 @@ class TdoDeliveryOrderOperateLog(BaseModel):
     class Meta:
         table_name = 'tdo_delivery_order_operate_log'
 
-
 class TdoDeliveryOrderProp(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     delivery_order_code = CharField(null=True)
@@ -1239,7 +1186,6 @@ class TdoDeliveryOrderProp(BaseModel):
 
     class Meta:
         table_name = 'tdo_delivery_order_prop'
-
 
 class TdoDeliveryPackage(BaseModel):
     create_time = DateTimeField(null=True)
@@ -1276,7 +1222,6 @@ class TdoDeliveryPackage(BaseModel):
             (('package_code', 'del_flag'), True),
         )
 
-
 class TdoDeliveryPackageDetail(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
@@ -1290,7 +1235,6 @@ class TdoDeliveryPackageDetail(BaseModel):
 
     class Meta:
         table_name = 'tdo_delivery_package_detail'
-
 
 class TdoDeliveryPackageDetailBatch(BaseModel):
     batch_num = CharField(null=True)
@@ -1314,7 +1258,6 @@ class TdoDeliveryPackageDetailBatch(BaseModel):
 
     class Meta:
         table_name = 'tdo_delivery_package_detail_batch'
-
 
 class TdoDeliveryPickDetail(BaseModel):
     channel_code = CharField(null=True)
@@ -1345,7 +1288,6 @@ class TdoDeliveryPickDetail(BaseModel):
     class Meta:
         table_name = 'tdo_delivery_pick_detail'
 
-
 class TdoDeliveryReceiptInfo(BaseModel):
     address = CharField(null=True)
     area = CharField(null=True)
@@ -1371,7 +1313,6 @@ class TdoDeliveryReceiptInfo(BaseModel):
     class Meta:
         table_name = 'tdo_delivery_receipt_info'
 
-
 class TdoDeliveryStockDetail(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     delivery_order_code = CharField(index=True)
@@ -1394,7 +1335,6 @@ class TdoDeliveryStockDetail(BaseModel):
 
     class Meta:
         table_name = 'tdo_delivery_stock_detail'
-
 
 class TdoExpressOrder(BaseModel):
     bar_code = CharField(index=True, null=True)
@@ -1429,7 +1369,6 @@ class TdoExpressOrder(BaseModel):
             (('warehouse_id', 'delivery_order_id'), False),
         )
 
-
 class TdoExternalInterfaceOperateLog(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")])
     create_user_id = BigIntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -1455,7 +1394,6 @@ class TdoExternalInterfaceOperateLog(BaseModel):
 
     class Meta:
         table_name = 'tdo_external_interface_operate_log'
-
 
 class TdoHandoverOrder(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")])
@@ -1483,7 +1421,6 @@ class TdoHandoverOrder(BaseModel):
             (('handover_order_code', 'del_flag'), True),
         )
 
-
 class TdoHandoverOrderDetail(BaseModel):
     car_number = CharField(null=True)
     channel_code = CharField(null=True)
@@ -1503,7 +1440,6 @@ class TdoHandoverOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'tdo_handover_order_detail'
-
 
 class TdoInterceptCancelOrder(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")], index=True)
@@ -1534,7 +1470,6 @@ class TdoInterceptCancelOrder(BaseModel):
             (('intercept_cancel_order_code', 'del_flag'), True),
         )
 
-
 class TdoInterceptCancelOrderDetail(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
@@ -1555,7 +1490,6 @@ class TdoInterceptCancelOrderDetail(BaseModel):
     class Meta:
         table_name = 'tdo_intercept_cancel_order_detail'
 
-
 class TdoPackageTask(BaseModel):
     callback_content = TextField(null=True)
     callback_state = IntegerField(null=True)
@@ -1569,7 +1503,6 @@ class TdoPackageTask(BaseModel):
 
     class Meta:
         table_name = 'tdo_package_task'
-
 
 class TdoPickOrder(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT 0000-00-00 00:00:00")])
@@ -1603,7 +1536,6 @@ class TdoPickOrder(BaseModel):
             (('pick_order_code', 'del_flag'), True),
         )
 
-
 class TdoPickOrderDetail(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
@@ -1618,7 +1550,6 @@ class TdoPickOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'tdo_pick_order_detail'
-
 
 class TdoPickOrderDetailBatch(BaseModel):
     batch_num = CharField(null=True)
@@ -1642,7 +1573,6 @@ class TdoPickOrderDetailBatch(BaseModel):
 
     class Meta:
         table_name = 'tdo_pick_order_detail_batch'
-
 
 class ThirdPartOutExpressOrder(BaseModel):
     bar_code = CharField(null=True)
@@ -1673,7 +1603,6 @@ class ThirdPartOutExpressOrder(BaseModel):
 
     class Meta:
         table_name = 'third_part_out_express_order'
-
 
 class ThirdPartOutOrder(BaseModel):
     block_book_id = CharField(null=True)
@@ -1721,7 +1650,6 @@ class ThirdPartOutOrder(BaseModel):
             (('del_flag', 'third_part_out_order_code'), True),
         )
 
-
 class ThirdPartOutOrderDetail(BaseModel):
     bom_version = CharField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -1749,7 +1677,6 @@ class ThirdPartOutOrderDetail(BaseModel):
     class Meta:
         table_name = 'third_part_out_order_detail'
 
-
 class ThirdPartOutOrderProp(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
@@ -1760,7 +1687,6 @@ class ThirdPartOutOrderProp(BaseModel):
 
     class Meta:
         table_name = 'third_part_out_order_prop'
-
 
 class ThirdPartOutPackage(BaseModel):
     channel_code = CharField(constraints=[SQL("DEFAULT ''")])
@@ -1797,7 +1723,6 @@ class ThirdPartOutPackage(BaseModel):
             (('del_flag', 'package_code'), True),
         )
 
-
 class ThirdPartOutPackageDetail(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
@@ -1811,7 +1736,6 @@ class ThirdPartOutPackageDetail(BaseModel):
 
     class Meta:
         table_name = 'third_part_out_package_detail'
-
 
 class ThirdPartOutReceiptInfo(BaseModel):
     address = CharField(null=True)
@@ -1838,7 +1762,6 @@ class ThirdPartOutReceiptInfo(BaseModel):
     class Meta:
         table_name = 'third_part_out_receipt_info'
 
-
 class ThirdPartOutStockDetail(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
@@ -1862,7 +1785,6 @@ class ThirdPartOutStockDetail(BaseModel):
     class Meta:
         table_name = 'third_part_out_stock_detail'
 
-
 class TrfBoxDemandDetail(BaseModel):
     box_detail_id = BigIntegerField(null=True)
     box_id = BigIntegerField(null=True)
@@ -1875,7 +1797,6 @@ class TrfBoxDemandDetail(BaseModel):
 
     class Meta:
         table_name = 'trf_box_demand_detail'
-
 
 class TrfBoxOrder(BaseModel):
     box_no = CharField(index=True, null=True)
@@ -1923,7 +1844,6 @@ class TrfBoxOrder(BaseModel):
     class Meta:
         table_name = 'trf_box_order'
 
-
 class TrfBoxOrderBatchDetail(BaseModel):
     batch_no = CharField(null=True)
     batch_qty = IntegerField(null=True)
@@ -1936,7 +1856,6 @@ class TrfBoxOrderBatchDetail(BaseModel):
 
     class Meta:
         table_name = 'trf_box_order_batch_detail'
-
 
 class TrfBoxOrderDetail(BaseModel):
     bom_version = CharField(null=True)
@@ -1958,7 +1877,6 @@ class TrfBoxOrderDetail(BaseModel):
     class Meta:
         table_name = 'trf_box_order_detail'
 
-
 class TrfBoxOrderDetailIn(BaseModel):
     box_no = CharField(null=True)
     box_order_id = BigIntegerField(index=True)
@@ -1976,7 +1894,6 @@ class TrfBoxOrderDetailIn(BaseModel):
 
     class Meta:
         table_name = 'trf_box_order_detail_in'
-
 
 class TrfBoxOrderIn(BaseModel):
     box_no = CharField(index=True, null=True)
@@ -2013,7 +1930,6 @@ class TrfBoxOrderIn(BaseModel):
     class Meta:
         table_name = 'trf_box_order_in'
 
-
 class TrfDemandPickRelation(BaseModel):
     block_book_id = CharField(null=True)
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -2028,7 +1944,6 @@ class TrfDemandPickRelation(BaseModel):
 
     class Meta:
         table_name = 'trf_demand_pick_relation'
-
 
 class TrfDischargeTime(BaseModel):
     container_no = CharField(constraints=[SQL("DEFAULT ''")], index=True)
@@ -2050,7 +1965,6 @@ class TrfDischargeTime(BaseModel):
 
     class Meta:
         table_name = 'trf_discharge_time'
-
 
 class TrfHandoverOrder(BaseModel):
     box_qty = IntegerField(null=True)
@@ -2089,7 +2003,6 @@ class TrfHandoverOrder(BaseModel):
     class Meta:
         table_name = 'trf_handover_order'
 
-
 class TrfPickDemandDetail(BaseModel):
     actual_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -2103,7 +2016,6 @@ class TrfPickDemandDetail(BaseModel):
 
     class Meta:
         table_name = 'trf_pick_demand_detail'
-
 
 class TrfShelvesOrder(BaseModel):
     block_book_id = CharField(null=True)
@@ -2132,7 +2044,6 @@ class TrfShelvesOrder(BaseModel):
     class Meta:
         table_name = 'trf_shelves_order'
 
-
 class TrfShelvesOrder1(BaseModel):
     block_book_id = CharField(null=True)
     box_order_id = BigIntegerField()
@@ -2159,7 +2070,6 @@ class TrfShelvesOrder1(BaseModel):
     class Meta:
         table_name = 'trf_shelves_order1'
 
-
 class TrfShelvesOrderDetail(BaseModel):
     bom_version = CharField(null=True)
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -2183,7 +2093,6 @@ class TrfShelvesOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'trf_shelves_order_detail'
-
 
 class TrfTransferDemand(BaseModel):
     block_book_id = CharField(null=True)
@@ -2230,7 +2139,6 @@ class TrfTransferDemand(BaseModel):
     class Meta:
         table_name = 'trf_transfer_demand'
 
-
 class TrfTransferDemandDetail(BaseModel):
     bom_version = CharField(null=True)
     cancel_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -2255,7 +2163,6 @@ class TrfTransferDemandDetail(BaseModel):
     class Meta:
         table_name = 'trf_transfer_demand_detail'
 
-
 class TrfTransferInDemandDetail(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     demand_code = CharField(null=True)
@@ -2269,7 +2176,6 @@ class TrfTransferInDemandDetail(BaseModel):
 
     class Meta:
         table_name = 'trf_transfer_in_demand_detail'
-
 
 class TrfTransferInOrder(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -2310,7 +2216,6 @@ class TrfTransferInOrder(BaseModel):
     class Meta:
         table_name = 'trf_transfer_in_order'
 
-
 class TrfTransferInOrderDetail(BaseModel):
     bom_version = CharField(null=True)
     box_no = CharField(null=True)
@@ -2336,7 +2241,6 @@ class TrfTransferInOrderDetail(BaseModel):
     class Meta:
         table_name = 'trf_transfer_in_order_detail'
 
-
 class TrfTransferOrderOperateLog(BaseModel):
     content = TextField()
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -2350,7 +2254,6 @@ class TrfTransferOrderOperateLog(BaseModel):
 
     class Meta:
         table_name = 'trf_transfer_order_operate_log'
-
 
 class TrfTransferOutOrder(BaseModel):
     change_time = DateTimeField(null=True)
@@ -2401,7 +2304,6 @@ class TrfTransferOutOrder(BaseModel):
     class Meta:
         table_name = 'trf_transfer_out_order'
 
-
 class TrfTransferOutOrderDetail(BaseModel):
     bom_version = CharField(null=True)
     box_no = CharField(null=True)
@@ -2423,7 +2325,6 @@ class TrfTransferOutOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'trf_transfer_out_order_detail'
-
 
 class TrfTransferPickOrder(BaseModel):
     block_book_id = CharField(null=True)
@@ -2461,7 +2362,6 @@ class TrfTransferPickOrder(BaseModel):
     class Meta:
         table_name = 'trf_transfer_pick_order'
 
-
 class TrfTransferPickOrderDetail(BaseModel):
     bom_version = CharField(null=True)
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -2486,7 +2386,6 @@ class TrfTransferPickOrderDetail(BaseModel):
     class Meta:
         table_name = 'trf_transfer_pick_order_detail'
 
-
 class TrfTransferPickTrayRelation(BaseModel):
     box_check_state = IntegerField(constraints=[SQL("DEFAULT 0")])
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -2504,7 +2403,6 @@ class TrfTransferPickTrayRelation(BaseModel):
 
     class Meta:
         table_name = 'trf_transfer_pick_tray_relation'
-
 
 class TrfTransferPickTrayRelationDetail(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -2530,7 +2428,6 @@ class TrfTransferPickTrayRelationDetail(BaseModel):
 
     class Meta:
         table_name = 'trf_transfer_pick_tray_relation_detail'
-
 
 class TsfEntryOrder(BaseModel):
     category = IntegerField(null=True)
@@ -2565,7 +2462,6 @@ class TsfEntryOrder(BaseModel):
     class Meta:
         table_name = 'tsf_entry_order'
 
-
 class TsfEntryOrderDetail(BaseModel):
     bom_map = IntegerField(null=True)
     bom_version = CharField(null=True)
@@ -2584,7 +2480,6 @@ class TsfEntryOrderDetail(BaseModel):
     class Meta:
         table_name = 'tsf_entry_order_detail'
 
-
 class TsfEntryOrderPack(BaseModel):
     box_order_code = CharField(index=True)
     box_order_id = BigIntegerField(index=True)
@@ -2598,7 +2493,6 @@ class TsfEntryOrderPack(BaseModel):
 
     class Meta:
         table_name = 'tsf_entry_order_pack'
-
 
 class TsfEntryOrderPackDetail(BaseModel):
     bom_map = IntegerField(null=True)
@@ -2621,7 +2515,6 @@ class TsfEntryOrderPackDetail(BaseModel):
 
     class Meta:
         table_name = 'tsf_entry_order_pack_detail'
-
 
 class TsfInstructHandoverOrder(BaseModel):
     category = IntegerField(null=True)
@@ -2659,7 +2552,6 @@ class TsfInstructHandoverOrder(BaseModel):
     class Meta:
         table_name = 'tsf_instruct_handover_order'
 
-
 class TsfInstructHandoverOrderDetail(BaseModel):
     box_id = BigIntegerField(index=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -2668,7 +2560,6 @@ class TsfInstructHandoverOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'tsf_instruct_handover_order_detail'
-
 
 class TsfInstructHandoverOrderProp(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
@@ -2691,7 +2582,6 @@ class TsfInstructHandoverOrderProp(BaseModel):
         indexes = (
             (('handover_order_id', 'prop_id'), False),
         )
-
 
 class TsfInstructOrder(BaseModel):
     block_book_id = CharField(null=True)
@@ -2729,7 +2619,6 @@ class TsfInstructOrder(BaseModel):
     class Meta:
         table_name = 'tsf_instruct_order'
 
-
 class TsfInstructOrderDetail(BaseModel):
     bom_map = IntegerField(null=True)
     bom_version = CharField(null=True)
@@ -2756,7 +2645,6 @@ class TsfInstructOrderDetail(BaseModel):
     class Meta:
         table_name = 'tsf_instruct_order_detail'
 
-
 class TsfInstructOrderProp(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     create_user_id = BigIntegerField(null=True)
@@ -2778,7 +2666,6 @@ class TsfInstructOrderProp(BaseModel):
         indexes = (
             (('instruct_order_id', 'prop_id'), False),
         )
-
 
 class TsfPackOrder(BaseModel):
     box_order_no = CharField(index=True, null=True)
@@ -2819,7 +2706,6 @@ class TsfPackOrder(BaseModel):
     class Meta:
         table_name = 'tsf_pack_order'
 
-
 class TsfPackOrderDetail(BaseModel):
     bom_map = IntegerField(null=True)
     bom_version = CharField(null=True)
@@ -2840,7 +2726,6 @@ class TsfPackOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'tsf_pack_order_detail'
-
 
 class TsfPackOrderInstructDetail(BaseModel):
     bom_map = IntegerField()
@@ -2870,7 +2755,6 @@ class TsfPackOrderInstructDetail(BaseModel):
     class Meta:
         table_name = 'tsf_pack_order_instruct_detail'
 
-
 class TsfPickInstructRel(BaseModel):
     block_book_id = CharField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -2883,7 +2767,6 @@ class TsfPickInstructRel(BaseModel):
 
     class Meta:
         table_name = 'tsf_pick_instruct_rel'
-
 
 class TsfPickOrder(BaseModel):
     assign_strategy = IntegerField(constraints=[SQL("DEFAULT 1")], null=True)
@@ -2920,7 +2803,6 @@ class TsfPickOrder(BaseModel):
     class Meta:
         table_name = 'tsf_pick_order'
 
-
 class TsfPickOrderDetail(BaseModel):
     bom_map = IntegerField(null=True)
     bom_version = CharField(null=True)
@@ -2944,7 +2826,6 @@ class TsfPickOrderDetail(BaseModel):
 
     class Meta:
         table_name = 'tsf_pick_order_detail'
-
 
 class TsfPickOrderInstructDetail(BaseModel):
     bom_map = IntegerField()
@@ -2972,7 +2853,6 @@ class TsfPickOrderInstructDetail(BaseModel):
     class Meta:
         table_name = 'tsf_pick_order_instruct_detail'
 
-
 class TsfPickOrderInventory(BaseModel):
     del_flag = BigIntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
@@ -2986,7 +2866,6 @@ class TsfPickOrderInventory(BaseModel):
 
     class Meta:
         table_name = 'tsf_pick_order_inventory'
-
 
 class TsfPickOrderInventoryDetail(BaseModel):
     abnormal_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -3007,7 +2886,6 @@ class TsfPickOrderInventoryDetail(BaseModel):
 
     class Meta:
         table_name = 'tsf_pick_order_inventory_detail'
-
 
 class TsfPickOrderInventoryMovement(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -3030,7 +2908,6 @@ class TsfPickOrderInventoryMovement(BaseModel):
     class Meta:
         table_name = 'tsf_pick_order_inventory_movement'
 
-
 class TsfPickOrderPicker(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     create_user_id = BigIntegerField(null=True)
@@ -3045,7 +2922,6 @@ class TsfPickOrderPicker(BaseModel):
     class Meta:
         table_name = 'tsf_pick_order_picker'
 
-
 class TsfPropKeyDict(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -3057,7 +2933,6 @@ class TsfPropKeyDict(BaseModel):
 
     class Meta:
         table_name = 'tsf_prop_key_dict'
-
 
 class TsfShelvesOrder(BaseModel):
     block_book_id = CharField(null=True)
@@ -3085,7 +2960,6 @@ class TsfShelvesOrder(BaseModel):
     class Meta:
         table_name = 'tsf_shelves_order'
 
-
 class TsfShelvesOrderDetail(BaseModel):
     bom_map = IntegerField(null=True)
     bom_version = CharField(null=True)
@@ -3110,7 +2984,6 @@ class TsfShelvesOrderDetail(BaseModel):
     class Meta:
         table_name = 'tsf_shelves_order_detail'
 
-
 class UndoLog(BaseModel):
     branch_id = BigIntegerField()
     context = CharField()
@@ -3126,7 +2999,6 @@ class UndoLog(BaseModel):
         indexes = (
             (('xid', 'branch_id'), True),
         )
-
 
 class WarehouseSkuRelation(BaseModel):
     bom_version = CharField(null=True)
@@ -3153,3 +3025,4 @@ class WarehouseSkuRelation(BaseModel):
 
     class Meta:
         table_name = 'warehouse_sku_relation'
+
