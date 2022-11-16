@@ -15,12 +15,11 @@ def get_wait_transfer_data():
     demands_list = [
         (
             _['demand_code'],
-            _['goods_sku_code'],
-            get_demand_sku_bom(_['demand_code']),
-            _['demand_qty'], _['warehouse_id'],
+            _['warehouse_id'],
             _['delivery_target_warehouse_id'],
             _['receive_warehouse_id'],
-            _['receive_target_warehouse_id']
+            _['receive_target_warehouse_id'],
+            _['delivery_warehouse_code']
         ) for _ in data]
     return demands_list
 

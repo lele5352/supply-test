@@ -24,8 +24,8 @@ def robot_run_transfer():
     if not demands_list:
         print('当前无待分配状态的调拨需求！')
         return
-    for (demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id) in demands_list:
-        print("正在执行仓库：{0}、调拨需求为：{1} 的调拨流程".format(trans_out_id, demand_code))
+    for (demand_code, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, warehouse_code) in demands_list:
+        print("正在执行仓库：{0}、调拨需求为：{1} 的调拨流程".format(warehouse_code, demand_code))
         result, trans_out_order_code = run_transfer(
             demand_code, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id
         )
