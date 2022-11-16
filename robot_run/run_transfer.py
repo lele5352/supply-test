@@ -25,18 +25,7 @@ def get_wait_transfer_data():
     return demands_list
 
 
-def run_transfer(demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id):
-    # get_out_sj_kw_ids_result = wms_app.db_get_kw(1, 5, len(ims_robot.dbo.query_bom_detail(sku, bom)), trans_out_id,
-    #                                              trans_out_to_id)
-    # if not get_out_sj_kw_ids_result['code']:
-    #     return 'Fail', None
-    #
-    # out_sj_kw_ids = get_out_sj_kw_ids_result['data']
-
-    # add_stock_result = ims_robot.add_bom_stock(sku, bom, qty, out_sj_kw_ids, trans_out_id, trans_out_to_id)
-    # if not add_stock_result['code']:
-    #     return 'Fail', None
-
+def run_transfer(demand_code,  trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id):
     # 切到调出仓
     switch_warehouse_result = wms_app.common_switch_warehouse(trans_out_id)
     if not switch_warehouse_result['code']:
