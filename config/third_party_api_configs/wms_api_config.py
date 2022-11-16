@@ -166,7 +166,7 @@ class OtherEntryOrderApiConfig:
 
 class DeliveryApiConfig:
     class DeliveryOrderPage(ApiConfig):
-        uri_path = "https://test-scms.popicorns.com/api/ec-wms-api/delivery-order/page"
+        uri_path = "/api/ec-wms-api/delivery-order/page"
         method = "post"
         data = {"deliveryOrderCodeList": ["PRE-CK2211100010"], "saleOrderCodeList": None, "packageCodeList": None,
                 "expressOrderCodeList": None, "skuCodeList": None, "saleSkuCodeList": None, "stateList": [],
