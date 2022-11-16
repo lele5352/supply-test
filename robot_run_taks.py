@@ -27,7 +27,7 @@ def robot_run_transfer():
     for (demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id) in demands_list:
         print("正在执行仓库：{0}、调拨需求为：{1} 的调拨流程".format(trans_out_id, demand_code))
         result, trans_out_order_code = run_transfer(
-            demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id
+            demand_code, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id
         )
         print("执行结果：{0}；对应调拨出库单号：{1}".format(result, trans_out_order_code))
 
