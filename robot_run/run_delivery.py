@@ -26,31 +26,35 @@ def run_front_label_delivery(delivery_order_info, delivery_order_detail):
     delivery_order_code = delivery_order_info["deliveryOrderCode"]
     delivery_order_id = delivery_order_info["deliveryOrderId"]
     transport_mode = delivery_order_info["transportMode"]
+    express_state = delivery_order_info["expressOrderState"]
+    package_state = delivery_order_info["packageState"]
     # 出库单分配库存
     assign_stock_result = wms_app.delivery_assign_stock([delivery_order_code])
     if not assign_stock_result["code"] or assign_stock_result["data"]["failNum"] > 0:
-        return "Fail: fail to assign stock!", None
+        return "Fail", "Fail to assign stock!"
     # 提取出库单sku明细
     order_sku_list = [
         {
             "skuCode": _["skuCode"], "skuName": _["skuName"], "num": _["skuQty"]
         } for _ in delivery_order_detail["packageItems"]]
-    # 模拟包裹回调
-    package_call_back_result = wms_app.delivery_mock_package_call_back(delivery_order_code, transport_mode,
-                                                                       order_sku_list)
-    if not package_call_back_result["code"]:
-        return "Fail: fail to mock package call back!", None
 
-    # 模拟面单回调
-    package_list = wms_app.db_get_delivery_order_package_list(delivery_order_code)
-    label_call_back_result = wms_app.delivery_mock_label_callback(delivery_order_code, package_list)
-    if not label_call_back_result["code"]:
-        return "Fail: fail to mock label call back!", None
+    if package_state != 2:
+        # 模拟包裹回调
+        package_call_back_result = wms_app.delivery_mock_package_call_back(delivery_order_code, transport_mode,
+                                                                           order_sku_list)
+        if not package_call_back_result["code"]:
+            return "Fail", "Fail to mock package call back!"
+    if express_state != 2:
+        # 模拟面单回调
+        package_list = wms_app.db_get_delivery_order_package_list(delivery_order_code)
+        label_call_back_result = wms_app.delivery_mock_label_callback(delivery_order_code, package_list)
+        if not label_call_back_result["code"]:
+            return "Fail", "Fail to mock label call back!"
 
     # 创建拣货单
     create_pick_order_result = wms_app.delivery_create_pick_order(delivery_order_code)
     if not create_pick_order_result["code"]:
-        return "Fail: fail to create pick order!", None
+        return "Fail", "Fail to create pick order!"
     pick_order_info = create_pick_order_result["data"]
 
     # 提取拣货单号
@@ -59,11 +63,11 @@ def run_front_label_delivery(delivery_order_info, delivery_order_detail):
     # 拣货单分配拣货人为当前登录的用户
     assign_pick_user_result = wms_app.delivery_assign_pick_user(pick_order_code)
     if not assign_pick_user_result["code"]:
-        return "Fail: fail to assign pick user!", None
+        return "Fail", "Fail to assign pick user!"
 
     get_to_pick_data_result = wms_app.delivery_get_pick_data(pick_order_id)
     if not get_to_pick_data_result["code"]:
-        return "Fail: fail to get pick order to pick data!", None
+        return "Fail", "Fail to get pick order to pick data!"
     to_pick_data = get_to_pick_data_result["data"]
 
     # 确认拣货，无异常，非短拣
@@ -79,14 +83,14 @@ def run_front_label_delivery(delivery_order_info, delivery_order_detail):
 
     confirm_pick_result = wms_app.delivery_confirm_pick(pick_order_code, normal_list, [])
     if not confirm_pick_result["code"]:
-        return "Fail: fail to confirm pick!", None
+        return "Fail", "Fail to confirm pick!"
 
     # 构造复核正常数据
     normal_list = [{"deliveryOrderId": delivery_order_id, "deliveryOrderCode": delivery_order_code}]
     # 执行复核
     review_result = wms_app.delivery_review(normal_list, [])
     if not review_result["code"] or review_result["data"]["failSize"] > 0:
-        return "Fail: fail to review delivery order!", None
+        return "Fail", "Fail to review delivery order!"
 
     # 构造发货正常数据
     normal_ids = [delivery_order_id]
@@ -94,8 +98,8 @@ def run_front_label_delivery(delivery_order_info, delivery_order_detail):
     # 执行发货
     shipping_result = wms_app.delivery_shipping(normal_ids, normal_codes, [])
     if not shipping_result["code"]:
-        return "Fail: fail to ship the delivery order!", None
-    return "Success", delivery_order_code
+        return "Fail", "Fail to ship the delivery order!"
+    return "Success", None
 
 
 def run_backend_label_delivery(delivery_order_info, delivery_order_detail):
@@ -110,25 +114,29 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail):
     delivery_order_id = delivery_order_info["deliveryOrderId"]
     prod_type = delivery_order_info["prodType"]
     transport_mode = delivery_order_info["transportMode"]
+    express_state = delivery_order_info["expressOrderState"]
+    package_state = delivery_order_info["packageState"]
     # 出库单分配库存
     assign_stock_result = wms_app.delivery_assign_stock([delivery_order_code])
     if not assign_stock_result["code"] or assign_stock_result["data"]["failNum"] > 0:
-        return "Fail: fail to assign stock!", None
+        return "Fail", "Fail to assign stock!"
     # 提取出库单sku明细
     order_sku_list = [
         {
             "skuCode": _["skuCode"], "skuName": _["skuName"], "num": _["skuQty"]
         } for _ in delivery_order_detail["packageItems"]]
-    # 模拟包裹回调
-    package_call_back_result = wms_app.delivery_mock_package_call_back(delivery_order_code, transport_mode,
-                                                                       order_sku_list)
-    if not package_call_back_result["code"]:
-        return "Fail: fail to mock package call back!", None
+
+    if package_state != 2:
+        # 模拟包裹回调
+        package_call_back_result = wms_app.delivery_mock_package_call_back(delivery_order_code, transport_mode,
+                                                                           order_sku_list)
+        if not package_call_back_result["code"]:
+            return "Fail", "Fail to mock package call back!"
 
     # 创建拣货单
     create_pick_order_result = wms_app.delivery_create_pick_order(delivery_order_code, prod_type)
     if not create_pick_order_result["code"]:
-        return "Fail: fail to create pick order!", None
+        return "Fail", "Fail to create pick order!"
     pick_order_info = create_pick_order_result["data"]
 
     # 提取拣货单号
@@ -137,11 +145,11 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail):
     # 拣货单分配拣货人为当前登录的用户
     assign_pick_user_result = wms_app.delivery_assign_pick_user(pick_order_code)
     if not assign_pick_user_result["code"]:
-        return "Fail: fail to assign pick user!", None
+        return "Fail", "Fail to assign pick user!"
 
     get_to_pick_data_result = wms_app.delivery_get_pick_data(pick_order_id)
     if not get_to_pick_data_result["code"]:
-        return "Fail: fail to get pick order to pick data!", None
+        return "Fail", "Fail to get pick order to pick data!"
     to_pick_data = get_to_pick_data_result["data"]
 
     # 确认拣货，无异常，非短拣
@@ -157,31 +165,32 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail):
 
     confirm_pick_result = wms_app.delivery_confirm_pick(pick_order_code, normal_list, [])
     if not confirm_pick_result["code"]:
-        return "Fail: fail to confirm pick!", None
+        return "Fail", "Fail to confirm pick!"
 
     # 获取出库单包裹方案信息
     package_info_result = wms_app.delivery_package_info(delivery_order_code)
     if not package_info_result["code"]:
-        return "Fail: fail to get package info!", None
+        return "Fail", "Fail to get package info!"
     package_info = package_info_result["data"]
 
     # 提交维护包裹
     save_package_result = wms_app.delivery_save_package(package_info)
     if not save_package_result["code"]:
-        return "Fail: fail to save package!", None
+        return "Fail", "Fail to save package!"
 
-    # 模拟面单回调
-    package_list = wms_app.db_get_delivery_order_package_list(delivery_order_code)
-    label_call_back_result = wms_app.delivery_mock_label_callback(delivery_order_code, package_list)
-    if not label_call_back_result["code"]:
-        return "Fail: fail to mock label call back!", None
+    if express_state != 2:
+        # 模拟面单回调
+        package_list = wms_app.db_get_delivery_order_package_list(delivery_order_code)
+        label_call_back_result = wms_app.delivery_mock_label_callback(delivery_order_code, package_list)
+        if not label_call_back_result["code"]:
+            return "Fail", "Fail to mock label call back!"
 
     # 构造复核正常数据
     normal_list = [{"deliveryOrderId": delivery_order_id, "deliveryOrderCode": delivery_order_code}]
     # 执行复核
     review_result = wms_app.delivery_review(normal_list, [])
     if not review_result["code"] or review_result["data"]["failSize"] > 0:
-        return "Fail: fail to review delivery order!", None
+        return "Fail", "Fail to review delivery order!"
 
     # 构造发货正常数据
     normal_ids = [delivery_order_id]
@@ -189,8 +198,8 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail):
     # 执行发货
     shipping_result = wms_app.delivery_shipping(normal_ids, normal_codes, [])
     if not shipping_result["code"]:
-        return "Fail: fail to ship the delivery order!", None
-    return "Success", delivery_order_code
+        return "Fail", "Fail to ship the delivery order!"
+    return "Success", None
 
 
 def run_delivery(delivery_order_code, warehouse_id):
@@ -202,18 +211,18 @@ def run_delivery(delivery_order_code, warehouse_id):
     """
     switch_result = wms_app.common_switch_warehouse(warehouse_id)
     if not switch_result["code"]:
-        return "Fail", None
+        return "Fail", "Fail to switch warehouse!"
 
     delivery_order_page_result = wms_app.delivery_get_delivery_order_page([delivery_order_code])
     if not delivery_order_page_result["code"] or len(delivery_order_page_result["data"]["records"]) == 0:
-        return "Fail", None
+        return "Fail", "Fail to get delivery order page info"
 
     delivery_order_info = delivery_order_page_result["data"]["records"][0]
     delivery_order_id = delivery_order_info["deliveryOrderId"]
     # 获取出库单明细
     delivery_order_detail_result = wms_app.delivery_get_delivery_order_detail(delivery_order_id)
     if not delivery_order_detail_result["code"]:
-        return "Fail", None
+        return "Fail", "Fail to get delivery order detail!"
 
     delivery_order_detail = delivery_order_detail_result["data"]
 

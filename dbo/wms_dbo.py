@@ -62,13 +62,16 @@ class WMSDBOperator:
             items = BaseWarehouseLocation.select().where(BaseWarehouseLocation.warehouse_id == warehouse_id,
                                                          BaseWarehouseLocation.dest_warehouse_id >> None,
                                                          BaseWarehouseLocation.type == kw_type,
-                                                         BaseWarehouseLocation.use_state == use_status
+                                                         BaseWarehouseLocation.use_state == use_status,
+                                                         BaseWarehouseLocation.state == 0
                                                          ).limit(num)
         else:
             items = BaseWarehouseLocation.select().where(BaseWarehouseLocation.warehouse_id == warehouse_id,
                                                          BaseWarehouseLocation.dest_warehouse_id == to_warehouse_id,
                                                          BaseWarehouseLocation.type == kw_type,
-                                                         BaseWarehouseLocation.use_state == use_status).limit(num)
+                                                         BaseWarehouseLocation.use_state == use_status,
+                                                         BaseWarehouseLocation.state == 0
+                                                         ).limit(num)
         if not items:
             return
         items = [model_to_dict(item) for item in items]
