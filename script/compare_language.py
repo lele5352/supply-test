@@ -11,6 +11,14 @@ TRANS_FILE_PATH = '/Users/linzhongjie/Downloads/国际化文档.xlsx'
 reg = "[^0-9A-Za-z\u4e00-\u9fa5]"
 
 
+def handle_str(raw_str: str):
+    """
+    处理字符
+    """
+    return raw_str.replace('\u00A0', '').replace(',', '，')\
+        .replace("!", "！").replace(":", "：").replace(" ", "").replace('\\', '')
+
+
 def get_properties_data(file_path: str) -> dict:
     """
     解析配置文件数据，返回 dict
@@ -23,13 +31,13 @@ def get_properties_data(file_path: str) -> dict:
         for line in config_file:
             if line.find('=') > 0 and line.startswith('rest.i18n'):
                 # 过滤掉导出的配置
-                strs = line.replace('\n', '').split('=')  # 以 = 分割
+                strs = line.replace('\n', '').split('=', 1)  # 以 = 分割
                 properties[strs[0]] = strs[1]
 
     return properties
 
 
-def get_trans_data(file_path: str):
+def get_trans_data(file_path: str) -> dict:
     """
     解析翻译文档结果
     """
@@ -44,9 +52,9 @@ def get_trans_data(file_path: str):
         if front[0].value is None:
             continue
 
-        front_map[re.sub(reg, '', front[0].value)] = {
-            "us": re.sub(reg, '', front[3].value),
-            "fr": re.sub(reg, '', front[4].value)
+        front_map[handle_str(front[0].value)] = {
+            "us": front[3].value,
+            "fr": front[4].value
         }
 
     for backend in backend_sheet.rows:
@@ -55,15 +63,17 @@ def get_trans_data(file_path: str):
             continue
 
         try:
-            backend_map[re.sub(reg, '', backend[0].value)] = {
-                "us": re.sub(reg, '', backend[2].value),
-                "fr": re.sub(reg, '', backend[3].value)
+            backend_map[handle_str(backend[0].value)] = {
+                "us": backend[2].value,
+                "fr": backend[3].value
             }
         except TypeError:
             log.error('翻译文案可能缺失，检查: %s' % backend[0].value)
             continue
 
-    return front_map, backend_map
+    backend_map.update(front_map)
+
+    return backend_map
 
 
 def bulid_lang_dict() -> dict:
@@ -77,18 +87,19 @@ def bulid_lang_dict() -> dict:
     fr_data = get_properties_data(FR_FR_PATH)
 
     for k, v in ch_data.items():
+        v_k = handle_str(v)
 
-        if v not in result_map:
+        if v_k not in result_map:
             # 相同中文文案的，只保留一个
 
-            result_map[v] = {
+            result_map[v_k] = {
                 "code": k
             }
 
             if k in us_data:
-                result_map[v]['us'] = us_data[k]
+                result_map[v_k]['us'] = us_data[k]
             if k in fr_data:
-                result_map[v]['fr'] = fr_data[k]
+                result_map[v_k]['fr'] = fr_data[k]
 
     return result_map
 
@@ -100,28 +111,26 @@ def do_compare() -> list:
     """
     wrong_list = []
 
-    front_rs, backend_rs = get_trans_data(TRANS_FILE_PATH)
+    backend_rs = get_trans_data(TRANS_FILE_PATH)
     lang_rs = bulid_lang_dict()
 
     for k, v in lang_rs.items():
 
-        k_re = re.sub(reg, '', k)
-
-        if k_re not in backend_rs and k_re not in front_rs:
+        if k not in backend_rs:
             wrong_list.append(k)
-            log.error("文案: %s ，在线文档中不存在" % k)
+            log.error("code：%s ，文案: %s ，在线文档中不存在" % (v['code'], k))
             continue
 
-        if re.sub(reg, '', v['us']) != backend_rs[k_re]['us']:
-            if v['us'] != front_rs.get(k_re, {}).get('us', ""):
+        if re.sub(reg, '', v['us']) != re.sub(reg, '', backend_rs[k]['us']):
+            wrong_list.append(k)
+            log.error("code：%s ，文案：%s ，读取配置英语文案为 %s \n "
+                      "在线文档结果为：%s" % (v['code'], k, v['us'], backend_rs[k]['us']))
+            continue
+        else:
+            if re.sub(reg, '', v['fr']) != re.sub(reg, '', backend_rs[k]['fr']):
                 wrong_list.append(k)
-                log.error("文案：%s ，读取配置英语文案为 %s" % (k, v['us']))
-                continue
-
-        if re.sub(reg, '', v['fr']) != backend_rs[k_re]['fr']:
-            if v['fr'] != front_rs.get(k_re, {}).get('fr', ""):
-                wrong_list.append(k)
-                log.error("文案：%s ，读取配置法语文案为 %s" % (k, v['fr']))
+                log.error("code：%s ，文案：%s ，读取配置法语文案为 %s \n "
+                          "在线文档结果为：%s" % (v['code'], k, v['fr'], backend_rs[k]['fr']))
                 continue
 
     return wrong_list
@@ -130,9 +139,9 @@ def do_compare() -> list:
 if __name__ == '__main__':
 
     rs = do_compare()
-    print("校验完成")
 
     if rs:
         print('输出校验不通过列表：%s' % json.dumps(rs, ensure_ascii=False))
-
+    else:
+        print("校验完成，未检查到差异项")
 
