@@ -9,7 +9,7 @@ class WmsTransferDataGenerator:
         self.wms_transfer = wms_transfer
         self.ims = ims_robot
 
-    def create_transfer_demand(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
+    def create_transfer_demand(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom,
                                trans_qty, demand_type=1, customer_type=1, remark=''):
         """
         创建调拨需求
@@ -23,6 +23,7 @@ class WmsTransferDataGenerator:
         :param int demand_type: 调拨类型
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
+        @param bom: bom版本
         """
         self.wms_app.common_switch_warehouse(trans_out_id)
 
@@ -30,11 +31,11 @@ class WmsTransferDataGenerator:
         # print(central_inventory)
         # 可用库存不足，需要添加库存，分为2种情况：1-查询不到库存；2-查询到库存，block＞stock
         if not central_inventory or central_inventory['remain'] <= 0:
-            bom_detail = ims_robot.dbo.query_bom_detail(sale_sku_code, 'A')
+            bom_detail = ims_robot.dbo.query_bom_detail(sale_sku_code, bom)
             kw_ids = self.wms_app.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
             add_stock_res = self.ims.add_lp_stock_by_other_in(
                 sale_sku_code,
-                'A',
+                bom,
                 trans_qty,
                 kw_ids,
                 trans_out_id,
@@ -53,6 +54,7 @@ class WmsTransferDataGenerator:
             trans_in_code,
             trans_in_to_code,
             sale_sku_code,
+            bom,
             trans_qty,
             demand_type,
             customer_type,
@@ -63,7 +65,7 @@ class WmsTransferDataGenerator:
         print('生成调拨需求：%s' % create_demand_res['data']['demandCode'])
         return create_demand_res['data']['demandCode']
 
-    def create_transfer_pick_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
+    def create_transfer_pick_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom,
                                    demand_qty, demand_type=1, customer_type=1, remark=''):
         """
         生成调拨拣货单
@@ -77,6 +79,7 @@ class WmsTransferDataGenerator:
         :param int demand_type: 调拨类型
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
+        @param bom: bom版本
         """
         self.wms_app.common_switch_warehouse(trans_out_id)
         # 生成调拨需求
@@ -86,6 +89,7 @@ class WmsTransferDataGenerator:
             trans_in_id,
             trans_in_to_id,
             sale_sku_code,
+            bom,
             demand_qty,
             demand_type,
             customer_type,
@@ -101,7 +105,7 @@ class WmsTransferDataGenerator:
         print('生成调拨拣货单：%s' % pick_order_code)
         return pick_order_code
 
-    def create_transfer_out_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
+    def create_transfer_out_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom,
                                   demand_qty, demand_type=1, customer_type=1, remark=''):
         """
         生成调拨出库单
@@ -115,6 +119,7 @@ class WmsTransferDataGenerator:
         :param int demand_type: 调拨类型
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
+        @param bom: bom版本
         """
         # 生成调拨需求
         demand_no = self.create_transfer_demand(
@@ -123,6 +128,7 @@ class WmsTransferDataGenerator:
             trans_in_id,
             trans_in_to_id,
             sale_sku_code,
+            bom,
             demand_qty,
             demand_type,
             customer_type,
@@ -201,6 +207,6 @@ if __name__ == '__main__':
     transfer_data = WmsTransferDataGenerator(wms_app, wms_transfer, ims_robot)
     demand_qty = 1
     # transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
-    # transfer_data.create_transfer_demand(512, '', 513, 513, '14093131604', 10)
-    transfer_data.create_transfer_out_order(512, 0, 513, 513, '63203684930', 1)
-    # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)
+    # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930',"A", 10)
+    transfer_data.create_transfer_out_order(512, 0, 513, 513, '63203684930', "B", 1)
+    transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)

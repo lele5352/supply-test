@@ -11,7 +11,7 @@ class AddInventory:
     库存生成器，用于生成各种类型库存数据，具体库存类型定义如下：
     1, "现货"
     2, "调拨在途": 已调拨出库
-    3, "采购在途": 目的仓跟发货仓不一样，且目的仓为直发仓的采购在途
+    3, "采购在途": 目的仓跟发货仓一样，且目的仓为直发仓的采购在途
     4, "申购库存": 发货仓申购库存，有目的仓的缺货需求（待处理）、采购需求（待确认+已确认+确认中）、采购单（草稿+待审核+待下单+已下单(未发数量)）
     5, "调拨计划": 调拨需求(未分配状态)
     6, "采购下单库存": 有目的仓的采购单(已下单未发货)
@@ -30,9 +30,9 @@ class AddInventory:
 
     def add_in_stock_inventory(self, sale_sku, bom, count, location_ids, warehouse_id, to_warehouse_id):
         """
-        添加1现货库存/7中转现货/8备货现货,通过其他入库方式
+        添加1发货仓现货库存/7中转现货/8备货现货,通过其他入库方式
 
-        @param to_warehouse_id: 目的仓id
+        @param to_warehouse_id: 目的仓id，备货仓时为''
         @param warehouse_id: 所属仓id
         @param location_ids: 上架库位id，格式：[1496,1505]
         @param count:数量
@@ -43,10 +43,11 @@ class AddInventory:
         return add_res
 
     def add_transfer_on_way_inventory(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
-                                      demand_qty):
+                                      bom, demand_qty):
         """
         添加2 调拨在途库存,通过调用wms调拨出库流程
 
+        @param bom: bom版本
         @param trans_out_id: 调出仓id
         @param trans_out_to_id: 调出仓目的仓id
         @param trans_in_id: 调入仓id
@@ -55,12 +56,12 @@ class AddInventory:
         @param sale_sku_code:销售sku编码
         """
         add_res = self.transfer_data.create_transfer_out_order(trans_out_id, trans_out_to_id, trans_in_id,
-                                                               trans_in_to_id, sale_sku_code, demand_qty)
+                                                               trans_in_to_id, sale_sku_code, bom, demand_qty)
         return add_res
 
     def add_purchase_on_way_inventory(self, sale_sku_list, num, delivery_warehouse_code, to_warehouse_code):
         """
-        添加3采购在途/9中转在途/10备货在途库存,通过调用scm采购入库发货流程
+        添加3采购在途/9中转在途/10备货在途库存,通过调用scm采购发货流程
 
         @param sale_sku_list: 需要采购的销售sku的列表，格式["sku1","sku2"]
         @param num: 采购的件数
@@ -85,10 +86,11 @@ class AddInventory:
         return add_res
 
     def add_transfer_plan_inventory(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
-                                    demand_qty):
+                                    bom, demand_qty):
         """
         添加5调拨计划库存,通过调用wms调拨出库流程
 
+        @param bom: bom版本
         @param trans_out_id: 调出仓id
         @param trans_out_to_id: 调出仓目的仓id
         @param trans_in_id: 调入仓id
@@ -96,8 +98,8 @@ class AddInventory:
         @param demand_qty:调拨件数
         @param sale_sku_code:销售sku编码
         """
-        add_res = self.transfer_data.create_transfer_demand(trans_out_id, trans_out_to_id, trans_in_id,
-                                                            trans_in_to_id, sale_sku_code, demand_qty)
+        add_res = self.transfer_data.create_transfer_demand(trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id,
+                                                            sale_sku_code, bom, demand_qty)
         return add_res
 
     def add_purchase_wait_delivery_inventory(self, sale_sku_list, num, delivery_warehouse_code, to_warehouse_code):
@@ -132,10 +134,10 @@ if __name__ == '__main__':
     # -------------------采购相关------------------------------------------------------------------------------------
     # purchase_sku_list = ["63203684930"]
     # purchase_num = 3
-    # delivery_warehouse_code = "ESZZ"
-    # to_warehouse_code = "ESFH"
+    # delivery_warehouse_code = "ESZF"
+    # to_warehouse_code = "ESZF"
     #
-    # # 采购在途库存:3采购在途/9中转在途/10备货在途都用这个
+    # # 采购在途库存:3直发仓仓采购在途/9中转在途/10备货在途都用这个
     # data.add_purchase_on_way_inventory(purchase_sku_list, purchase_num, delivery_warehouse_code, to_warehouse_code)
     #
     # # 采购申购库存:4采购申购/12备货仓申购都用这个
@@ -146,15 +148,18 @@ if __name__ == '__main__':
     #
     # # -------------------------------------------------------------------------------------------------------
     # # 调拨参数
-    trans_out_id = 511
-    trans_out_to_id = 513
-    trans_in_id = 566
-    trans_in_to_id = 566
+    trans_out_id = 512
+    trans_out_to_id = 0
+    trans_in_id = 513
+    trans_in_to_id = 513
     trans_sku = "63203684930"
+    bom = "B"
     trans_num = 2
     #
     # # 调拨在途库存:2调拨在途
-    # data.add_transfer_on_way_inventory(trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, trans_sku, trans_num)
+    # data.add_transfer_on_way_inventory(trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, trans_sku, bom,
+    #                                    trans_num)
     #
     # # 调拨计划库存: 5调拨计划
-    # data.add_transfer_plan_inventory(trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, trans_sku, trans_num)
+    data.add_transfer_plan_inventory(trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, trans_sku, bom,
+                                     trans_num)

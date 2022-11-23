@@ -50,6 +50,7 @@ class TransferApiConfig:
             "userId": 1,
             "username": "admin",
             "goodsSkuCode": "53586714577",
+            "bomVersion" : "A",
             "demandQty": 5,
             "customerType": 1,  # 1：普通客户 2 ：大客户
             "customerRemark": "客戶備注",
