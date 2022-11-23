@@ -1,13 +1,12 @@
 import time
 
-from robots.scm_robot import SCMRobot
 from utils.log_handler import logger as log
-from utils.barcode_handler import barcode_generate
+from cases import scm_app
 
 
 class ScmDataGenerator:
-    def __init__(self):
-        self.scm_app = SCMRobot()
+    def __init__(self, scm_app):
+        self.scm_app = scm_app
 
     def create_stock_plan(self, sale_sku_list, num, delivery_warehouse_code, target_warehouse_code):
         """
@@ -186,7 +185,7 @@ class ScmDataGenerator:
 
 
 if __name__ == '__main__':
-    scm = ScmDataGenerator()
+    scm = ScmDataGenerator(scm_app)
 
     # scm.create_purchase_order(["14093131604"], 10, 'ESBH', '')
     # scm.create_stock_plan(['14093131604'], 10 ,'ESBH', '')

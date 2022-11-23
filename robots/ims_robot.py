@@ -96,9 +96,7 @@ class IMSRobot(ServiceRobot):
         kw_diff_num = len(ware_sku_qty_list) - len(sj_location_ids)
         temp = list()
         if kw_diff_num > 0:
-            for i in range(kw_diff_num):
-                temp.append(sj_location_ids[-1])
-            sj_location_ids.extend(temp)
+            sj_location_ids.extend([sj_location_ids[-1]]*kw_diff_num)
         for (ware_sku, qty), sj_location_id in zip(ware_sku_qty_list, sj_location_ids):
             temp_dict = {
                 "qty": qty,

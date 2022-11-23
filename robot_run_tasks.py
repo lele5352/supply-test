@@ -66,10 +66,13 @@ def robot_run_purchase():
     time.sleep(3)
 
     purchase_order_list = get_wait_purchase_order()
-    for purchase_order_no in purchase_order_list:
-        print("正在执行采购单{0}的采购流程".format(purchase_order_no))
-        result, info = run_purchase(purchase_order_no)
-        print("采购单{0}执行结果为：{1}； 错误原因：{2}".format(purchase_order_no, result, info))
+    if not purchase_order_list:
+        print("当前无待采购的采购单!")
+    else:
+        for purchase_order_no in purchase_order_list:
+            print("正在执行采购单{0}的采购流程".format(purchase_order_no))
+            result, info = run_purchase(purchase_order_no)
+            print("采购单{0}执行结果为：{1}； 错误原因：{2}".format(purchase_order_no, result, info))
 
 
 if __name__ == '__main__':
