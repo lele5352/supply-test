@@ -14,15 +14,15 @@ class WmsTransferDataGenerator:
         """
         创建调拨需求
 
-        :param int trans_out_id: 调出仓库id
-        :param int trans_in_id: 调入仓库id
-        :param int trans_out_to_id: 调出仓库的目的仓id
-        :param int trans_in_to_id: 调入仓库的目的仓id
-        :param string sale_sku_code: 调拨的商品的销售sku
-        :param int trans_qty: 调拨数量
-        :param int demand_type: 调拨类型
-        :param int customer_type: 客户类型：1-普通客户；2-大客户
-        :param string remark: 备注
+        @param int trans_out_id: 调出仓库id
+        @param int trans_in_id: 调入仓库id
+        @param int trans_out_to_id: 调出仓库的目的仓id
+        @param int trans_in_to_id: 调入仓库的目的仓id
+        @param string sale_sku_code: 调拨的商品的销售sku
+        @param int trans_qty: 调拨数量
+        @param int demand_type: 调拨类型
+        @param int customer_type: 客户类型：1-普通客户；2-大客户
+        @param string remark: 备注
         @param bom: bom版本
         """
         self.wms_app.common_switch_warehouse(trans_out_id)
@@ -70,15 +70,15 @@ class WmsTransferDataGenerator:
         """
         生成调拨拣货单
 
-        :param int trans_out_id: 调出仓库id
-        :param int trans_in_id: 调入仓库id
-        :param int trans_out_to_id: 调出仓库的目的仓id，仅调出仓为中转仓时必填
-        :param int trans_in_to_id: 调入仓库的目的仓id，仅调入仓为中转仓时必填
-        :param string sale_sku_code: 调拨的商品的销售sku
-        :param int demand_qty: 调拨数量
-        :param int demand_type: 调拨类型
-        :param int customer_type: 客户类型：1-普通客户；2-大客户
-        :param string remark: 备注
+        @param int trans_out_id: 调出仓库id
+        @param int trans_in_id: 调入仓库id
+        @param int trans_out_to_id: 调出仓库的目的仓id，仅调出仓为中转仓时必填
+        @param int trans_in_to_id: 调入仓库的目的仓id，仅调入仓为中转仓时必填
+        @param string sale_sku_code: 调拨的商品的销售sku
+        @param int demand_qty: 调拨数量
+        @param int demand_type: 调拨类型
+        @param int customer_type: 客户类型：1-普通客户；2-大客户
+        @param string remark: 备注
         @param bom: bom版本
         """
         self.wms_app.common_switch_warehouse(trans_out_id)
@@ -110,15 +110,15 @@ class WmsTransferDataGenerator:
         """
         生成调拨出库单
 
-        :param int trans_out_id: 调出仓库id
-        :param int trans_in_id: 调入仓库id
-        :param any trans_out_to_id: 调出仓库的目的仓id，仅调出仓为中转仓时必填
-        :param any trans_in_to_id: 调入仓库的目的仓id，仅调入仓为中转仓时必填
-        :param string sale_sku_code: 调拨的商品的销售sku
-        :param int demand_qty: 调拨数量
-        :param int demand_type: 调拨类型
-        :param int customer_type: 客户类型：1-普通客户；2-大客户
-        :param string remark: 备注
+        @param int trans_out_id: 调出仓库id
+        @param int trans_in_id: 调入仓库id
+        @param any trans_out_to_id: 调出仓库的目的仓id，仅调出仓为中转仓时必填
+        @param any trans_in_to_id: 调入仓库的目的仓id，仅调入仓为中转仓时必填
+        @param string sale_sku_code: 调拨的商品的销售sku
+        @param int demand_qty: 调拨数量
+        @param int demand_type: 调拨类型
+        @param int customer_type: 客户类型：1-普通客户；2-大客户
+        @param string remark: 备注
         @param bom: bom版本
         """
         # 生成调拨需求

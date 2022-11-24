@@ -17,7 +17,7 @@ class WMSAppRobot(AppRobot):
         """
         根据仓库id获取仓库编码
 
-        :param int warehouse_id: 仓库id
+        @param int warehouse_id: 仓库id
         """
         if not warehouse_id:
             return
@@ -28,7 +28,7 @@ class WMSAppRobot(AppRobot):
         """
         根据仓库编码获取仓库id
 
-        :param string warehouse_code: 仓库编码
+        @param string warehouse_code: 仓库编码
         """
         if not warehouse_code:
             return
@@ -39,7 +39,7 @@ class WMSAppRobot(AppRobot):
         """
         根据库位id获取库位编码
 
-        :param int kw_id: 库位id
+        @param int kw_id: 库位id
         """
         data = self.dbo.query_warehouse_location_info_by_id(kw_id)
         return data.get("warehouse_location_code")
@@ -48,7 +48,7 @@ class WMSAppRobot(AppRobot):
         """
         根据库位编码获取库位id
 
-        :param string kw_code: 库位编码
+        @param string kw_code: 库位编码
         """
         data = self.dbo.query_warehouse_location_info_by_code(kw_code)
         return data.get("id")
@@ -72,11 +72,11 @@ class WMSAppRobot(AppRobot):
         """
         获取指定库位类型、指定目的仓、指定数量的仓库库位
 
-        :param int return_type: 1-返回库位id；2-返回库位编码
-        :param int kw_type: 库位类型
-        :param int num: 获取的库位个数
-        :param int ck_id: 库位的所属仓库id
-        :param to_ck_id: 库位的目的仓id
+        @param int return_type: 1-返回库位id；2-返回库位编码
+        @param int kw_type: 库位类型
+        @param int num: 获取的库位个数
+        @param int ck_id: 库位的所属仓库id
+        @param to_ck_id: 库位的目的仓id
         """
         location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
 
@@ -323,8 +323,8 @@ class WMSAppRobot(AppRobot):
         """
         创建调拨出库单
 
-        :param string pick_order_no: 拣货单号
-        :param list tray_list: 托盘列表
+        @param string pick_order_no: 拣货单号
+        @param list tray_list: 托盘列表
         """
         content = deepcopy(TransferApiConfig.TransferFinishPacking.get_attributes())
         content["data"].update(
@@ -533,8 +533,8 @@ class WMSAppRobot(AppRobot):
 
     def delivery_mock_label_callback(self, delivery_order_code, package_list):
         """
-        :param string delivery_order_code: 出库单号
-        :param list package_list: 包裹列表
+        @param string delivery_order_code: 出库单号
+        @param list package_list: 包裹列表
 
         """
         order_list = list()
@@ -734,15 +734,15 @@ class WMSTransferServiceRobot(ServiceRobot):
                                    receive_warehouse_code, receive_target_warehouse_code, sale_sku_code, demand_qty,
                                    demand_type=1, customer_type=1, remark=""):
         """
-        :param string delivery_warehouse_code: 调出仓库
-        :param string receive_warehouse_code: 调入仓库
-        :param string delivery_target_warehouse_code: 调出仓库的目的仓，仅调出仓为中转仓时必填
-        :param string receive_target_warehouse_code: 调入仓库的目的仓，仅调入仓为中转仓时必填
-        :param string sale_sku_code: 调拨的商品的销售sku
-        :param int demand_qty: 调拨数量
-        :param int demand_type: 调拨类型
-        :param int customer_type: 客户类型：1-普通客户；2-大客户
-        :param string remark: 备注
+        @param string delivery_warehouse_code: 调出仓库
+        @param string receive_warehouse_code: 调入仓库
+        @param string delivery_target_warehouse_code: 调出仓库的目的仓，仅调出仓为中转仓时必填
+        @param string receive_target_warehouse_code: 调入仓库的目的仓，仅调入仓为中转仓时必填
+        @param string sale_sku_code: 调拨的商品的销售sku
+        @param int demand_qty: 调拨数量
+        @param int demand_type: 调拨类型
+        @param int customer_type: 客户类型：1-普通客户；2-大客户
+        @param string remark: 备注
         """
         content = deepcopy(TransferApiConfig.CreateTransferDemand.get_attributes())
         content["data"].update(
