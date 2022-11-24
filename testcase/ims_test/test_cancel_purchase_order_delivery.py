@@ -19,7 +19,7 @@ class TestCancelPurchaseOrderDelivery(object):
         warehouse_id = delivery_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
-        self.sj_kw_ids = wms_logics.get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_logics.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
         create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
@@ -73,7 +73,7 @@ class TestCancelPurchaseOrderDelivery(object):
         warehouse_id = exchange_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
-        self.sj_kw_ids = wms_logics.get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_logics.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
         create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
@@ -127,7 +127,7 @@ class TestCancelPurchaseOrderDelivery(object):
         warehouse_id = stock_warehouse_id
         to_warehouse_id = ''
 
-        self.sj_kw_ids = wms_logics.get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_logics.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
         create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
@@ -181,7 +181,7 @@ class TestCancelPurchaseOrderDelivery(object):
         warehouse_id = delivery_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
-        self.sj_kw_ids = wms_logics.get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_logics.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
         create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
@@ -235,7 +235,7 @@ class TestCancelPurchaseOrderDelivery(object):
         warehouse_id = exchange_warehouse_id
         to_warehouse_id = delivery_warehouse_id
 
-        self.sj_kw_ids = wms_logics.get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_logics.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
         create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
@@ -289,7 +289,7 @@ class TestCancelPurchaseOrderDelivery(object):
         warehouse_id = stock_warehouse_id
         to_warehouse_id = ''
 
-        self.sj_kw_ids = wms_logics.get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
+        self.sj_kw_ids = wms_logics.db_get_kw(1, 5, len(self.ware_sku_qty_list), warehouse_id, to_warehouse_id)
 
         create_res = ims_request.purchase_create_order(
             self.ware_sku_qty_list,
