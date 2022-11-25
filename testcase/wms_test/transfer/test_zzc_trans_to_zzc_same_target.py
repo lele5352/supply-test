@@ -12,7 +12,7 @@ class TestZZCTransToZZCSameTarget:
         self.trans_in_to_id = delivery_warehouse_id  # 调入仓的目的仓id
 
     def setup(self):
-        wms_request.switch_default_warehouse(self.trans_out_id)
+        wms_request.common_switch_warehouse(self.trans_out_id)
 
     def test_1_trans_multiple_goods_components_break_up_suite(self):
         """测试成套的库存，调拨出库配件后，导致库存不成套场景"""
@@ -20,7 +20,7 @@ class TestZZCTransToZZCSameTarget:
         transfer_demand_goods_list = [('BP63203684930A01', 1)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -68,11 +68,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -113,12 +113,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -187,7 +187,7 @@ class TestZZCTransToZZCSameTarget:
         transfer_demand_goods_list = [('BP63203684930A01', 1)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -235,11 +235,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -280,12 +280,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -354,7 +354,7 @@ class TestZZCTransToZZCSameTarget:
         transfer_demand_goods_list = [('BP63203684930A01', 2)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -402,11 +402,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -447,12 +447,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -522,7 +522,7 @@ class TestZZCTransToZZCSameTarget:
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -570,11 +570,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -615,12 +615,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -690,7 +690,7 @@ class TestZZCTransToZZCSameTarget:
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 1)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -738,11 +738,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -783,12 +783,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -858,7 +858,7 @@ class TestZZCTransToZZCSameTarget:
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('BP63203684930A02', 5), ('63203684930', 2)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -906,11 +906,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -951,12 +951,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1025,7 +1025,7 @@ class TestZZCTransToZZCSameTarget:
         transfer_demand_goods_list = [('BP63203684930A01', 1), ('63203684930', 1)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -1073,11 +1073,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1118,12 +1118,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1192,7 +1192,7 @@ class TestZZCTransToZZCSameTarget:
         transfer_demand_goods_list = [('63203684930', 3)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -1240,11 +1240,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1285,12 +1285,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1360,7 +1360,7 @@ class TestZZCTransToZZCSameTarget:
         transfer_demand_goods_list = [('63203684930', 3)]
         sale_sku = '63203684930'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -1408,11 +1408,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1453,12 +1453,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1528,7 +1528,7 @@ class TestZZCTransToZZCSameTarget:
         sale_sku = '53170041592'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = [
-            wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
+            wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -1576,11 +1576,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1621,12 +1621,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200
@@ -1696,7 +1696,7 @@ class TestZZCTransToZZCSameTarget:
         sale_sku = '53170041592'
         IMSDBOperator.delete_qualified_inventory([sale_sku])
         trans_out_sj_kw_ids = [
-            wms_logics.get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
+            wms_logics.db_get_kw(1, 5, len(origin_inventory), self.trans_out_id, self.trans_out_to_id)]
 
         # 其他入库生成库存
         ims_request.lp_other_in(
@@ -1744,11 +1744,11 @@ class TestZZCTransToZZCSameTarget:
         confirm_pick_res = wms_request.transfer_out_confirm_pick(pick_order_code, pick_order_details)
         assert confirm_pick_res['code'] == 200
         if len(pick_sku_list) > 1:
-            trans_out_tp_kw_ids = wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
-                                                    self.trans_out_to_id)
+            trans_out_tp_kw_ids = wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id,
+                                                       self.trans_out_to_id)
         else:
             trans_out_tp_kw_ids = [
-                wms_logics.get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
+                wms_logics.db_get_kw(1, 3, len(pick_sku_list), self.trans_out_id, self.trans_out_to_id)]
 
         # 调拨拣货单按需装托提交
         submit_tray_res = wms_request.transfer_out_submit_tray(pick_order_code, pick_order_details, trans_out_tp_kw_ids)
@@ -1789,12 +1789,12 @@ class TestZZCTransToZZCSameTarget:
         assert delivery_res['code'] == 200
 
         # 切换仓库到调入仓
-        wms_request.switch_default_warehouse(self.trans_in_id)
+        wms_request.common_switch_warehouse(self.trans_in_id)
         if len(pick_sku_list) > 1:
-            trans_in_sj_kw_ids = wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
+            trans_in_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)
         else:
-            trans_in_sj_kw_ids = [wms_logics.get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
-        trans_in_sj_kw_codes = [wms_logics.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
+            trans_in_sj_kw_ids = [wms_logics.db_get_kw(1, 5, len(pick_sku_list), self.trans_in_id, self.trans_in_to_id)]
+        trans_in_sj_kw_codes = [wms_logics.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids]
         # 调拨入库收货
         received_res = wms_request.transfer_in_received(handover_no)
         assert received_res['code'] == 200

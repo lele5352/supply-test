@@ -9,7 +9,7 @@ class ETARobot(ServiceRobot):
 
     def get_available_stock(self, ck_code_list=None):
         """获取可用库存（商城用）
-        :param list ck_code_list : 发货仓编码数组
+        @param list ck_code_list : 发货仓编码数组
         """
         content = deepcopy(ETAApiConfig.GetAvailableStock.get_attributes())
         content.get('data').update(
@@ -22,10 +22,10 @@ class ETARobot(ServiceRobot):
 
     def get_goods_eta(self, country_code, site_code, sku_codes, zip_code):
         """获取商品非自提ETA（商城用）
-        :param list sku_codes : 销售sku编码数组
-        :param string country_code : 国家编码
-        :param string site_code : 站点编码，如US
-        :param string zip_code : 邮编
+        @param list sku_codes : 销售sku编码数组
+        @param string country_code : 国家编码
+        @param string site_code : 站点编码，如US
+        @param string zip_code : 邮编
         """
         content = deepcopy(ETAApiConfig.GetGoodsETA.get_attributes())
         content.get('data').update(

@@ -3,11 +3,7 @@ from locust import HttpUser, TaskSet, task
 import os
 import time
 
-from config.api_config.ims_api_config import ims_api_config
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
-# 禁用安全请求警告
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+from config.third_party_api_configs.ims_api_config import ims_api_config
 
 
 class TestImsOtherOut(TaskSet):
@@ -77,5 +73,4 @@ class WebSitUser(HttpUser):
 
 
 if __name__ == "__main__":
-    os.system('cd /Users/essenxu/PycharmProjects/supply-test/script')
     os.system("locust -f locust_test_ims_other_out.py --host=http://10.0.0.160:28801/")

@@ -1,10 +1,13 @@
 import requests
 import json
 from urllib.parse import urljoin
+from copy import deepcopy
+import time
 
 from utils.log_handler import logger as log
 from config import env_prefix_config
 from robots import app_headers, service_headers
+from config.third_party_api_configs.ums_api_config import UMSApiConfig
 
 
 class Robot:
@@ -25,31 +28,31 @@ class Robot:
             "data": data
         }
 
-    def call_api(self, uri_path, method, data, files='') -> dict:
+    def call_api(self, uri_path, method, data, files="") -> dict:
         req_url = urljoin(self.prefix, uri_path)
 
-        if method == 'post':
+        if method == "post":
             res = requests.post(req_url, headers=self.headers, json=data, files=files)
-        elif method == 'get':
+        elif method == "get":
             res = requests.get(req_url, headers=self.headers, params=data)
-        elif method == 'put':
+        elif method == "put":
             res = requests.put(req_url, headers=self.headers, json=data)
         else:
             return {}
 
         result_data = res.json()
-        log.info('请求头：%s' % json.dumps(self.headers, ensure_ascii=False))
-        log.info('请求内容：%s' % json.dumps({'method': method, 'url': req_url, 'data': data}, ensure_ascii=False))
-        log.info('响应内容：' + json.dumps(result_data, ensure_ascii=False))
+        log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
+        log.info("请求内容：%s" % json.dumps({"method": method, "url": req_url, "data": data}, ensure_ascii=False))
+        log.info("响应内容：" + json.dumps(result_data, ensure_ascii=False))
         log.info(
-            '-------------------------------------------------我是分隔符-------------------------------------------------')
+            "-------------------------------------------------我是分隔符-------------------------------------------------")
         return result_data
 
     @classmethod
     def formatted_result(cls, res_data):
-        if res_data['code'] == 200:
-            return cls.report(1, "操作成功,msg:%s" % res_data['message'], res_data['data'])
-        return cls.report(0, "操作失败,msg:%s" % res_data['message'], res_data['data'])
+        if res_data["code"] == 200:
+            return cls.report(1, "操作成功,msg:%s" % res_data["message"], res_data["data"])
+        return cls.report(0, "操作失败,msg:%s" % res_data["message"], res_data["data"])
 
     @classmethod
     def report(cls, code, msg, data):
@@ -59,6 +62,17 @@ class Robot:
             "data": data
         }
 
+    @classmethod
+    def get_user_info(cls):
+        prefix = env_prefix_config.get("app")
+        content = deepcopy(UMSApiConfig.UserInfo.get_attributes())
+        content["data"].update({
+            "t": str(int(time.time() * 1000))
+        })
+        url = urljoin(prefix, content["uri_path"])
+        res = requests.get(url, headers=app_headers, params=content["data"]).json()
+        return res["data"]
+
 
 class AppRobot(Robot):
     """
@@ -66,7 +80,7 @@ class AppRobot(Robot):
     """
 
     def __init__(self, db_operator=None):
-        self.prefix = env_prefix_config.get('app')
+        self.prefix = env_prefix_config.get("app")
         super().__init__(self.prefix, app_headers, db_operator)
 
 

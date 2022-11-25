@@ -18,8 +18,8 @@ class TestTransferToSelf:
         trans_in_to_id = delivery_warehouse_id  # 调入仓的目的仓id
         trans_qty = 2  # 调拨的销售sku件数
 
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
-        wms_request.switch_default_warehouse(trans_out_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
+        wms_request.common_switch_warehouse(trans_out_id)
         ims_logics.add_lp_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
         trans_out_expect_inventory = ims_logics.get_lp_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
 
@@ -47,8 +47,8 @@ class TestTransferToSelf:
         trans_in_to_id = ''  # 调入仓的目的仓id
 
         trans_qty = 2  # 调拨的销售sku件数
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
-        wms_request.switch_default_warehouse(trans_out_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
+        wms_request.common_switch_warehouse(trans_out_id)
         ims_logics.add_lp_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
         trans_out_expect_inventory = ims_logics.get_lp_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
 
@@ -76,8 +76,8 @@ class TestTransferToSelf:
         trans_in_to_id = delivery_warehouse_id  # 调入仓的目的仓id
 
         trans_qty = 2  # 调拨的销售sku件数
-        trans_out_sj_kw_ids = wms_logics.get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
-        wms_request.switch_default_warehouse(trans_out_id)
+        trans_out_sj_kw_ids = wms_logics.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
+        wms_request.common_switch_warehouse(trans_out_id)
         ims_logics.add_lp_stock_by_other_in(sale_sku, bom, trans_qty, trans_out_sj_kw_ids, trans_out_id, trans_out_to_id)
         trans_out_expect_inventory = ims_logics.get_lp_inventory(sale_sku, trans_out_id, trans_out_to_id, bom)
 

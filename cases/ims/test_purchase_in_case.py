@@ -5,7 +5,6 @@ import allure
 import os
 
 from cases import *
-from utils.excel_handler import get_excel_data
 
 
 @allure.feature("测试模块：采购入库")
@@ -19,12 +18,12 @@ class TestPurchaseInStock(object):
         sale_skus = ims_robot.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
-            get_kw_result = wms_app_robot.get_kw(1, 5, 1, warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 5, 1, warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             sj_kw_id = get_kw_result['data']
             sj_kw_ids = sj_kw_id * len(ware_sku_qty_list)
         else:
-            get_kw_result = wms_app_robot.get_kw(1, 5, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
+            get_kw_result = wms_app.db_get_kw(1, 5, len(ware_sku_qty_list), warehouse_id, to_warehouse_id)
             assert get_kw_result['code'] == expected
             sj_kw_ids = get_kw_result['data']
         # 查询创建采购单前的库存

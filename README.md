@@ -40,3 +40,4 @@ model生成：
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_wms > models/wms_model.py
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_ims > models/ims_model.py
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_oms > models/oms_model.py
+    python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_scm > models/scm_model.py

@@ -1,4 +1,6 @@
 from config.third_party_api_configs import ApiConfig
+
+
 class BaseApiConfig:
     class GetWarehouseInfo(ApiConfig):
         uri_path = "/warehouse/bycode/"
@@ -48,6 +50,7 @@ class TransferApiConfig:
             "userId": 1,
             "username": "admin",
             "goodsSkuCode": "53586714577",
+            "bomVersion" : "A",
             "demandQty": 5,
             "customerType": 1,  # 1：普通客户 2 ：大客户
             "customerRemark": "客戶備注",
@@ -163,6 +166,73 @@ class OtherEntryOrderApiConfig:
 
 
 class DeliveryApiConfig:
+    class DeliveryOrderPage(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/page"
+        method = "post"
+        data = {"deliveryOrderCodeList": ["PRE-CK2211100010"], "saleOrderCodeList": None, "packageCodeList": None,
+                "expressOrderCodeList": None, "skuCodeList": None, "saleSkuCodeList": None, "stateList": [],
+                "prodType": None, "expressOrderState": None, "packageState": None, "hasPackage": None,
+                "transportMode": None, "operationMode": None, "interceptFlag": "", "cancelFlag": "", "priority": None,
+                "logisticsCodeList": None, "channelCodeList": None, "planLogisticsCodeList": None,
+                "planChannelCodeList": None, "platform": None, "store": None, "customerType": None, "hasTickets": None,
+                "countryCode": None, "createTimeStart": None, "createTimeEnd": None, "pickOrderCodes": None,
+                "expressChangeFlag": None, "saleOrderTypes": None, "props": [], "size": 10, "current": 1}
+
+    class DeliveryOrderDetail(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/info/{0}"
+        method = "get"
+        data = {"t": 1668051101602}
+
+    class AssignStock(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/stock-assign/v2"
+        method = "post"
+        data = {"deliveryOrderCodes": ["PRE-CK2211060001"]}
+
+    class PackageCallBack(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order-api/push-plan"
+        method = "post"
+        data = {
+            "deliveryNo": "PRE-CK2211090021",
+            "status": 1,
+            "transportType": 2,
+            "packageInfo": {
+                "channelPrice": "123",
+                "packageCount": 1,
+                "packageIds": ["2"],
+                "packageList": [
+                    {
+                        "packageNo": "PRE-CK2211090021",
+                        "channelPrice": "1000",
+                        "channelId": "181",
+                        "channelCode": "unknow",
+                        "channelName": "unknow快递",
+                        "serviceId": "36",
+                        "serviceCode": "unknow",
+                        "serviceName": "unknow",
+                        "timeValue": "1",
+                        "length": "112",
+                        "width": "113",
+                        "height": "113",
+                        "weight": "55",
+                        "packageSkuList": [
+                            {
+                                "skuCode": "JJH3C94287A01",
+                                "skuName": "包装名称1 1/2 X1",
+                                "num": 3
+                            },
+                            {
+                                "skuCode": "JJH3C94287A02",
+                                "skuName": "包装名称2 2/2 X1",
+                                "num": 3
+                            }
+                        ]
+                    }
+                ]
+            },
+            "code": 1,
+            "info": "success"
+        }
+
     class LabelCallBack(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order-api/push-express-order/v2"
         method = "post"
@@ -198,6 +268,65 @@ class DeliveryApiConfig:
                 }
             ]
         }
+
+    class CreatePickOrder(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/create-pick-order"
+        method = "put"
+        data = {"singleDeliveryOrderCodes": ["PRE-CK2211130002"], "singleMaxQty": 1, "singlePickType": 0,
+                "multiDeliveryOrderCodes": [], "multiPickType": 0}
+
+    class AssignPickUser(ApiConfig):
+        uri_path = "/api/ec-wms-api/pick-order/set-pick-user"
+        method = "post"
+        data = {"pickOrderCodeList": ["XJH2211130002"], "userId": 418, "userName": "许宏伟"}
+
+    class GetToPickData(ApiConfig):
+        uri_path = "/api/ec-wms-api/pick-order/to-pick/%s"
+        method = "get"
+        data = {"t": 0}
+
+    class PickOrderConfirmPick(ApiConfig):
+        uri_path = "/api/ec-wms-api/pick-order/save-pick-result"
+        method = "put"
+        data = {
+            "pickOrderCode": "XJH2211130005",
+            "normalList": [{"deliveryOrderCode": "PRE-CK2211130006", "skuCode": "67330337129A01",
+                            "expressOrderCode": "logistyNo1668315676240", "skuQty": 24, "locationCode": "GZZF-SJKW99"}],
+            "errList": []}
+
+    class DeliverySavePackage(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/save-package"
+        method = "post"
+        data = {
+            "deliveryOrderCode": "PRE-CK2211130021",
+            "packageInfoList": [
+                {"packageIndex": 0,
+                 "remarks": "{\"logistics_code\":\"unknow\",\"logistics_name\":\"unknow\",\"channel_code\":\"unknow\",\"channel_name\":\"unknow快递\"}",
+                 "length": 44.1, "width": 44.5,
+                 "height": 44.5, "weight": 121.254,
+                 "skuInfoList": [
+                     {"skuCode": "63203684930A01",
+                      "skuQty": 2},
+                     {"skuCode": "63203684930A02",
+                      "skuQty": 10}]}],
+            "transportType": 2,
+            "expressOrderFlag": 1
+        }
+
+    class DeliveryPackageInfo(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/package-info/%s"
+        method = "get"
+        data = {"t": 0}
+
+    class DeliveryOrderReview(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/re-confirm"
+        method = "post"
+        data = {"unNormalList": [], "normalList": []}
+
+    class DeliveryOrderShipping(ApiConfig):
+        uri_path = "/api/ec-wms-api/delivery-order/shipping"
+        method = "post"
+        data = {"normalIdList": [15025], "normalCodeList": ["PRE-CK2211130010"], "unNormalList": []}
 
 
 class ReceiptApiConfig:

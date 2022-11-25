@@ -1,79 +1,91 @@
 from cases import *
 
 
-def run_transfer(demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id):
-    get_out_sj_kw_ids_result = wms_app_robot.get_kw(1, 5, len(ims_robot.dbo.query_bom_detail(sku, bom)), trans_out_id,
-                                                    trans_out_to_id)
-    if not get_out_sj_kw_ids_result['code']:
-        return 'Fail', None
+def get_demand_sku_bom(demand_code):
+    data = wms_app.dbo.query_demand_detail(demand_code)
+    bom = data[0]['bom_version']
+    return bom
 
-    out_sj_kw_ids = get_out_sj_kw_ids_result['data']
 
-    add_stock_result = ims_robot.add_bom_stock(sku, bom, qty, out_sj_kw_ids, trans_out_id, trans_out_to_id)
-    if not add_stock_result['code']:
-        return 'Fail', None
+def get_wait_transfer_data():
+    """获取待执行调拨流程的调拨需求"""
+    data = wms_app.dbo.query_wait_assign_demands()
+    if not data:
+        return
+    demands_list = [
+        (
+            _['demand_code'],
+            _['warehouse_id'],
+            _['delivery_target_warehouse_id'],
+            _['receive_warehouse_id'],
+            _['receive_target_warehouse_id'],
+            _['delivery_warehouse_code']
+        ) for _ in data]
+    return demands_list
 
+
+def run_transfer(demand_code, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id):
     # 切到调出仓
-    switch_warehouse_result = wms_app_robot.switch_default_warehouse(trans_out_id)
+    switch_warehouse_result = wms_app.common_switch_warehouse(trans_out_id)
     if not switch_warehouse_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to switch to trans out warehouse!"
 
     # 创建调拨拣货单
-    create_pick_order_result = wms_app_robot.transfer_out_create_pick_order([demand_code], 1)
+    create_pick_order_result = wms_app.transfer_out_create_pick_order([demand_code], 1)
     if not create_pick_order_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to create pick order!"
 
     pick_order_code = create_pick_order_result['data']
 
     # 分配调拨拣货人
-    pick_order_assign_result = wms_app_robot.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
+    pick_order_assign_result = wms_app.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
     if not pick_order_assign_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to assign pick user!"
 
     # 获取调拨拣货单详情数据
-    pick_order_details_result = wms_app_robot.transfer_out_pick_order_detail(pick_order_code)
+    pick_order_details_result = wms_app.transfer_out_pick_order_detail(pick_order_code)
     if not pick_order_details_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to get pick order detail!"
 
     pick_order_details = pick_order_details_result['data']['details']
 
     # 获取拣货单sku详情数据
-    pick_sku_list = wms_app_robot.get_pick_sku_list(pick_order_details)
+    pick_sku_list = wms_app.transfer_get_pick_sku_list(pick_order_details)
 
     # 调拨拣货单确认拣货-纸质
-    confirm_pick_result = wms_app_robot.transfer_out_confirm_pick(pick_order_code, pick_order_details)
+    confirm_pick_result = wms_app.transfer_out_confirm_pick(pick_order_code, pick_order_details)
     if not confirm_pick_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to confirm pick!"
 
-    get_trans_out_tp_kw_ids_result = wms_app_robot.get_kw(1, 3, len(pick_sku_list), trans_out_id, trans_out_to_id)
+    get_trans_out_tp_kw_ids_result = wms_app.db_get_kw(1, 3, len(pick_sku_list), trans_out_id, trans_out_to_id)
     if not get_trans_out_tp_kw_ids_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to get trans out tp location!"
 
     trans_out_tp_kw_ids = get_trans_out_tp_kw_ids_result['data']
 
     # 调拨拣货单按需装托提交
-    submit_tray_result = wms_app_robot.transfer_out_submit_tray(pick_order_code, pick_order_details,
-                                                                trans_out_tp_kw_ids)
+    submit_tray_result = wms_app.transfer_out_submit_tray(pick_order_code, pick_order_details,
+                                                          trans_out_tp_kw_ids)
     if not submit_tray_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to submit tray!"
 
     # 查看整单获取已装托的托盘
-    tray_detail_result = wms_app_robot.transfer_out_pick_order_tray_detail(pick_order_code)
+    tray_detail_result = wms_app.transfer_out_pick_order_tray_detail(pick_order_code)
     if not tray_detail_result['code']:
-        return
+        return 'Fail', "Fail to get pick order tray detail!"
     tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_result['data']]
 
     # 获取生成的调拨出库单号
-    finish_result = wms_app_robot.transfer_out_finish_packing(pick_order_code, tray_code_list)
+    finish_result = wms_app.transfer_out_finish_packing(pick_order_code, tray_code_list)
     if not finish_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to finish tray packing!"
 
     transfer_out_order_no = finish_result['data']
 
     # 获取调拨出库单明细
-    transfer_out_order_detail_result = wms_app_robot.transfer_out_order_detail(transfer_out_order_no)
+    transfer_out_order_detail_result = wms_app.transfer_out_order_detail(transfer_out_order_no)
     if not transfer_out_order_detail_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to get trans out order detail!"
 
     transfer_out_order_detail = transfer_out_order_detail_result['data']['details']
 
@@ -82,43 +94,39 @@ def run_transfer(demand_code, sku, bom, qty, trans_out_id, trans_out_to_id, tran
     sorted_details = sorted(details, key=lambda a: a[1])
     # 按箱单和托盘对应逐个复核
     for box_no, tray_code in details:
-        review_result = wms_app_robot.transfer_out_order_review(box_no, tray_code)
+        review_result = wms_app.transfer_out_order_review(box_no, tray_code)
         if not review_result['code']:
-            return 'Fail', None
+            return 'Fail', "Fail to review trans out order!"
 
     for detail in details:
-        bind_result = wms_app_robot.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+        bind_result = wms_app.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
         if not bind_result['code']:
-            return 'Fail', None
+            return 'Fail', "Fail to bind box to handover order!"
 
         handover_no = bind_result['data']['handoverNo']
 
-    delivery_result = wms_app_robot.transfer_out_delivery(handover_no)
+    delivery_result = wms_app.transfer_out_delivery(handover_no)
     if not delivery_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to ship trans out order!"
 
-    switch_warehouse_result = wms_app_robot.switch_default_warehouse(trans_in_id)
+    switch_warehouse_result = wms_app.common_switch_warehouse(trans_in_id)
     if not switch_warehouse_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to switch to trans in warehouse!"
 
-    trans_in_sj_kw_ids_result = wms_app_robot.get_kw(1, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
+    trans_in_sj_kw_ids_result = wms_app.db_get_kw(1, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
     if not trans_in_sj_kw_ids_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to get trans in sj location!"
 
-    trans_in_sj_kw_codes = [wms_app_robot.kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids_result['data']]
+    trans_in_sj_kw_codes = [wms_app.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids_result['data']]
 
     # 调拨入库收货
-    receive_result = wms_app_robot.transfer_in_received(handover_no)
+    receive_result = wms_app.transfer_in_received(handover_no)
     if not receive_result['code']:
-        return 'Fail', None
+        return 'Fail', "Fail to receive trans in order!"
 
     # 调拨入库按箱单逐个整箱上架
     for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-        up_shelf_result = wms_app_robot.transfer_in_up_shelf(detail[0], sj_kw_code)
+        up_shelf_result = wms_app.transfer_in_up_shelf(detail[0], sj_kw_code)
         if not up_shelf_result['code']:
-            return 'Fail', None
-    return True, transfer_out_order_no
-
-
-if __name__ == '__main__':
-    run_transfer()
+            return 'Fail', "Fail to up shelf trans in!"
+    return "Success", None
