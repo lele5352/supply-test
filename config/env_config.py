@@ -1,11 +1,11 @@
 prefix_config = {
     # 26环境配置
     'test26': {
-        'ims_service_prefix': 'http://10.0.0.26:28801',
+        'ims': 'http://10.0.0.26:28801',
         'app': 'https://test-26.popicorns.com',
-        'delivery_service_prefix': 'http://10.0.0.26:8330',
-        'receipt_service_prefix': 'http://10.0.0.26:8323',
-        'transfer_service_prefix': 'http://10.0.0.26:8334'
+        'delivery': 'http://10.0.0.26:8330',
+        'receipt': 'http://10.0.0.26:8323',
+        'transfer': 'http://10.0.0.26:8334'
     },
     # 25环境配置
     'test25': {
@@ -53,7 +53,7 @@ mysql_config = {
     'test26': {
         'user': 'app',
         'passwd': '123456',
-        'host': '10.0.0.26',
+        'host': '10.0.0.163',
         'port': 3306
     },
     'test160': {
