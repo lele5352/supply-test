@@ -38,6 +38,47 @@ class BaseApiConfig:
         }
 
 
+class OtherInApiConfig:
+    class GetSkuInfo(ApiConfig):
+        uri_path = "/api/ec-wms-api/entryorder/addSkuInfoPage"
+        method = "post"
+        data = {"skuCode": None, "skuCodeLike": None, "skuName": None, "saleSkuCode": None, "saleSkuCodeLike": None,
+                "size": 10, "current": 1}
+
+    class CreateOtherInOrder(ApiConfig):
+        uri_path = "/api/ec-wms-api/entryorder"
+        method = "post"
+        data = {"entryOrderType": 3, "eta": 1669873281000, "supplierCode": None, "fromOrderCode": None, "remark": None,
+                "qualityType": 0, "timestamp": 1669873281000, "logisticsInfoList": [], "skuInfoList": [
+                {"warehouseSkuCode": "JFO91L3917A01", "planSkuQty": 1, "warehouseSkuName": "包装方案名称1 1/1 X1",
+                 "warehouseSkuWeight": 4.11, "saleSkuCode": "JFO91L3917",
+                 "saleSkuName": "LI-计划系统测试商品-可/不可跨仓", "bomVersion": "A",
+                 "saleSkuImg": "https://img.popicorns.com/mall/file/2021/10/19/3109bcabaf6a46c5ae191d7e44246c62.jpeg",
+                 "warehouseSkuHeight": 3.1, "warehouseSkuLength": 1.1, "warehouseSkuWidth": 2.1}], "operationFlag": 0}
+
+    class SubmitOtherInOrder(ApiConfig):
+        uri_path = "/api/ec-wms-api/entryorder"
+        method = "put"
+        data = {"entryOrderId": "85846", "entryOrderType": 3, "eta": 1669824000000, "supplierCode": None,
+                "fromOrderCode": None, "qualityType": 0, "remark": None, "logisticsInfoList": [], "skuInfoList": [
+                {"warehouseSkuCode": "JFO91L3917A01", "planSkuQty": 2, "warehouseSkuName": "包装方案名称1",
+                 "warehouseSkuWeight": 4.11, "saleSkuCode": "JFO91L3917",
+                 "saleSkuName": "LI-计划系统测试商品-可/不可跨仓", "bomVersion": "A",
+                 "saleSkuImg": "https://img1.popicorns.com/fit-in/200x200/mall/file/2021/10/19/3109bcabaf6a46c5ae191d7e44246c62.jpeg",
+                 "warehouseSkuHeight": 3.1, "warehouseSkuLength": 1.1, "warehouseSkuWidth": 2.1}], "operationFlag": 1}
+
+    class GetOtherInOrderSkuInfoByEntryOrderCode(ApiConfig):
+        uri_path = "/api/ec-wms-api/entryorder/getSkuInfoByEntryCode"
+        method = "post"
+        data = {"size": 100, "current": 1, "entryOrderCode": "RK2212010004", "entryOrderId": "85848"}
+
+    class PutOnTheShelf(ApiConfig):
+        uri_path = "/api/ec-wms-api/entryorder/putOnTheShelf"
+        method = "post"
+        data = {"entryOrderId": 85847, "skuList": [
+            {"skuCode": "JFO91L3917A01", "shelvesLocationCode": "NJ01-A01-101", "skuQty": "1", "abnormalQty": 0}]}
+
+
 class TransferApiConfig:
     class CreateTransferDemand(ApiConfig):
         uri_path = "/transferDemand/create"
@@ -50,7 +91,7 @@ class TransferApiConfig:
             "userId": 1,
             "username": "admin",
             "goodsSkuCode": "53586714577",
-            "bomVersion" : "A",
+            "bomVersion": "A",
             "demandQty": 5,
             "customerType": 1,  # 1：普通客户 2 ：大客户
             "customerRemark": "客戶備注",
