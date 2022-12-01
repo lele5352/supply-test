@@ -30,16 +30,18 @@ class AddInventory:
         self.transfer_data = WmsTransferDataGenerator(wms_app, wms_transfer, ims_robot)
         self.receipt_data = WmsReceiptDataGenerator(wms_app, ims_robot)
 
-    def add_in_stock_inventory(self, sale_sku, bom, count, warehouse_id):
+    def add_in_stock_inventory(self, sale_sku, bom, count, warehouse_id, to_warehouse_id):
         """
         添加1发货仓现货库存/7中转现货/8备货现货,通过其他入库方式
 
+        @param to_warehouse_id: 目的仓id
         @param warehouse_id: 所属仓id
         @param count:数量
         @param bom:bom版本
         @param sale_sku:销售sku编码
         """
-        add_res = self.receipt_data.create_other_in_order_and_up_shelf(sale_sku, bom, count, warehouse_id)
+        add_res = self.receipt_data.create_other_in_order_and_up_shelf(sale_sku, bom, count, warehouse_id,
+                                                                       to_warehouse_id)
         return add_res
 
     def add_transfer_on_way_inventory(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
@@ -135,7 +137,7 @@ if __name__ == '__main__':
     to_warehouse_id = 528
     #
     # # 添加1发货仓现货库存，7中转仓现货库存、8备货仓现货库存，都用这个，控制warehouse_id和to_warehouse_id即可，没有
-    data.add_in_stock_inventory(spot_sku, bom, count, warehouse_id)
+    data.add_in_stock_inventory(spot_sku, bom, count, warehouse_id, to_warehouse_id)
 
     # -------------------采购相关------------------------------------------------------------------------------------
     # purchase_sku_list = ["DJ22GE7041","DJ730T32F5"]

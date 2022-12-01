@@ -811,9 +811,11 @@ class WMSAppRobot(AppRobot):
         res = self.call_api(**content)
         return self.formatted_result(res)
 
-    def other_in_order_up_shelf(self, entry_order_code, entry_order_id, warehouse_id):
+    def other_in_order_up_shelf(self, entry_order_code, entry_order_id, warehouse_id, to_warehouse_id):
         """
         其他人库单上架
+        @param warehouse_id: 所属仓库id
+        @param to_warehouse_id: 目的仓id
         @param entry_order_code: 入库单编码
         @param entry_order_id: 入库单id
         @return:
@@ -824,7 +826,7 @@ class WMSAppRobot(AppRobot):
             return
         sku_info_records = entry_order_sku_info_result["data"]["records"]
 
-        get_sj_kw_result = self.db_get_kw(2, 5, len(sku_info_records), warehouse_id, warehouse_id)
+        get_sj_kw_result = self.db_get_kw(2, 5, len(sku_info_records), warehouse_id, to_warehouse_id)
         if not get_sj_kw_result["code"]:
             return
         sj_kw_codes = get_sj_kw_result["data"]

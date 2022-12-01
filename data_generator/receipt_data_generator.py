@@ -54,9 +54,10 @@ class WmsReceiptDataGenerator:
 
         return create_other_in_order_res
 
-    def create_other_in_order_and_up_shelf(self, sale_sku_code, bom, qty, warehouse_id):
+    def create_other_in_order_and_up_shelf(self, sale_sku_code, bom, qty, warehouse_id, to_warehouse_id):
         """
         创建其他入库单并执行提交和上架
+        @param to_warehouse_id: 目的仓id
         @param warehouse_id: 仓库id
         @param sale_sku_code: 销售sku编码
         @param bom: bom版本
@@ -75,10 +76,10 @@ class WmsReceiptDataGenerator:
         if not submit_res["code"]:
             print("提交其他入库单失败")
             return
-        up_shelf_res = wms_app.other_in_order_up_shelf(entry_order_code, entry_order_id, warehouse_id)
+        up_shelf_res = wms_app.other_in_order_up_shelf(entry_order_code, entry_order_id, warehouse_id, to_warehouse_id)
         return up_shelf_res
 
 
 if __name__ == '__main__':
     receipt_data = WmsReceiptDataGenerator(wms_app, ims_robot)
-    print(receipt_data.create_other_in_order_and_up_shelf("JJ306J84G7", "A", 2, 543))
+    print(receipt_data.create_other_in_order_and_up_shelf("JJ306J84G7", "A", 2, 543, 543))
