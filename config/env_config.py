@@ -28,11 +28,11 @@ prefix_config = {
     },
     # uat环境配置
     'uat': {
-        'ims': 'http://10.0.15.13:28801',
+        'ims': 'http://10.0.15.21:28801',
         'app': 'https://uat-scms.popicorns.com',
-        'delivery': 'http://10.0.15.13:8330',
-        'receipt': 'http://10.0.15.13:8323',
-        'transfer': 'http://10.0.15.13:8334',
+        'delivery': 'http://10.0.15.21:8330',
+        'receipt': 'http://10.0.15.21:8323',
+        'transfer': 'http://10.0.15.21:8334',
         'eta': 'http://10.0.0.159:8701',
     },
 }
