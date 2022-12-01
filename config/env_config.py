@@ -65,7 +65,7 @@ mysql_config = {
     'uat': {
         'user': 'erp',
         'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
-        'host': '10.0.15.13',
-        'port': 3002
+        'host': '10.0.15.21',
+        'port': 3301
     },
 }
