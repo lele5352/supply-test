@@ -6,7 +6,8 @@ from utils.log_handler import logger as log
 ZH_CN_PATH = '/Users/linzhongjie/Downloads/messages_zh_CN.properties'
 FR_FR_PATH = '/Users/linzhongjie/Downloads/messages_fr_FR.properties'
 EN_US_PATH = '/Users/linzhongjie/Downloads/messages_en_US.properties'
-TRANS_FILE_PATH = '/Users/linzhongjie/Downloads/国际化文档.xlsx'
+# TRANS_FILE_PATH = '/Users/linzhongjie/Downloads/国际化文档.xlsx'
+TRANS_FILE_PATH = '/Users/linzhongjie/Downloads/国际化语言包(内部).xlsx'
 
 reg = "[^0-9A-Za-z\u4e00-\u9fa5]"
 
@@ -37,9 +38,34 @@ def get_properties_data(file_path: str) -> dict:
     return properties
 
 
+def get_unduplicated_data(file_path: str) -> dict:
+    """
+    解析国际化翻译文档（已合并前后端文案到同一个sheet,不需要程序再处理）
+    """
+    work_book = load_workbook(file_path)
+    trans_data = {}
+    target_sheet = work_book['中文去重翻译(客服)']
+
+    for row in target_sheet.rows:
+        # 过滤可能存在的空行
+        if row[0].value is None:
+            continue
+
+        try:
+            trans_data[handle_str(row[0].value)] = {
+                "us": row[1].value,
+                "fr": row[2].value
+            }
+        except TypeError:
+            log.error("翻译文案可能缺失，检查: %s" % row[0].value)
+            continue
+
+    return trans_data
+
+
 def get_trans_data(file_path: str) -> dict:
     """
-    解析翻译文档结果
+    解析国际化翻译文档（未将前后端文案合并到同一个sheet,需要做合并去重）
     """
     work_book = load_workbook(file_path)
     front_map, backend_map = {}, {}
@@ -111,7 +137,9 @@ def do_compare() -> list:
     """
     wrong_list = []
 
-    backend_rs = get_trans_data(TRANS_FILE_PATH)
+    # backend_rs = get_trans_data(TRANS_FILE_PATH)
+    backend_rs = get_unduplicated_data(TRANS_FILE_PATH)
+
     lang_rs = bulid_lang_dict()
 
     for k, v in lang_rs.items():
