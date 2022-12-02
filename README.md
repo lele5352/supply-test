@@ -41,3 +41,19 @@ model生成：
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_ims > models/ims_model.py
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_oms > models/oms_model.py
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_scm > models/scm_model.py
+
+全局配置：
+
+    在config下新建__init__.py文件，写入以下内容：
+        from config.env_config import prefix_config, mysql_config
+        
+        # 指定环境：'test160'/'test25'/'test26'/'uat'
+        env = 填上方注释中的对应环境变量
+        
+        env_prefix_config = env_config.prefix_config.get(env)
+        db_config = env_config.mysql_config.get(env)
+        
+        user = {
+            'username': '', # 你的账号
+            'password': '' # 你的密码
+        }

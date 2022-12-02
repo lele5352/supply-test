@@ -3,7 +3,7 @@ import time
 from copy import deepcopy
 
 from config.third_party_api_configs.wms_api_config import ReceiptApiConfig, DeliveryApiConfig, BaseApiConfig, \
-    TransferApiConfig
+    TransferApiConfig, OtherInApiConfig
 from robots.robot import ServiceRobot, AppRobot
 from dbo.wms_dbo import WMSDBOperator
 from utils.log_handler import logger as log
@@ -722,6 +722,124 @@ class WMSAppRobot(AppRobot):
         content = deepcopy(DeliveryApiConfig.DeliveryOrderShipping.get_attributes())
         content["data"].update(
             {"normalIdList": normal_ids, "normalCodeList": normal_codes, "unNormalList": abnormal_list})
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def other_in_get_sku_info(self, ware_sku_code_list):
+        """
+        其他入库添加sku时获取sku信息
+        @param ware_sku_code_list:仓库sku编码列表
+        @return:info list
+        """
+        content = deepcopy(OtherInApiConfig.GetSkuInfo.get_attributes())
+        content["data"].update(
+            {"skuCode": ware_sku_code_list})
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def other_in_create_order(self, sku_info_list):
+        """
+        创建其他入库单
+        @param sku_info_list:查找到的仓库sku的信息列表
+        @return:
+        """
+        content = deepcopy(OtherInApiConfig.CreateOtherInOrder.get_attributes())
+        now = int(time.time() * 1000)
+        content["data"].update(
+            {
+                "eta": now,
+                "remark": "自动化脚本生成",
+                "qualityType": 0,
+                "timestamp": now,
+                "skuInfoList": sku_info_list
+            })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def other_in_get_order_sku_info(self, entry_order_code, entry_order_id):
+        """
+        获取其他入库单信息
+        @param entry_order_code: 入库单编码
+        @param entry_order_id: 入库单id
+        @return:
+        """
+        content = deepcopy(OtherInApiConfig.GetOtherInOrderSkuInfoByEntryOrderCode.get_attributes())
+        now = int(time.time() * 1000)
+        content["data"].update({
+            "size": 100,
+            "current": 1,
+            "entryOrderCode": entry_order_code,
+            "entryOrderId": entry_order_id
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def other_in_submit_order(self, entry_order_code, entry_order_id):
+        """
+        提交其他入库单
+        @param entry_order_code: 入库单编码
+        @param entry_order_id: 入库单id
+        @return:
+        """
+        entry_order_sku_info_result = self.other_in_get_order_sku_info(entry_order_code, entry_order_id)
+        if not entry_order_sku_info_result["code"]:
+            return
+        sku_info_records = entry_order_sku_info_result["data"]["records"]
+        sku_info_list = [
+            {
+                "warehouseSkuCode": sku["warehouseSkuCode"],
+                "planSkuQty": sku["planSkuQty"],
+                "warehouseSkuName": sku["warehouseSkuName"],
+                "warehouseSkuWeight": sku["warehouseSkuWeight"],
+                "saleSkuCode": sku["saleSkuCode"],
+                "saleSkuName": sku["saleSkuName"],
+                "bomVersion": sku["bomVersion"],
+                "saleSkuImg": sku["skuImgUrl"],
+                "warehouseSkuHeight": sku["warehouseSkuHeight"],
+                "warehouseSkuLength": sku["warehouseSkuLength"],
+                "warehouseSkuWidth": sku["warehouseSkuWidth"]} for sku in sku_info_records
+        ]
+
+        content = deepcopy(OtherInApiConfig.SubmitOtherInOrder.get_attributes())
+        now = int(time.time() * 1000)
+        content["data"].update(
+            {"entryOrderId": entry_order_id,
+             "entryOrderType": 3, "eta": now,
+             "skuInfoList": sku_info_list,
+             "operationFlag": 1
+             })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def other_in_order_up_shelf(self, entry_order_code, entry_order_id, warehouse_id, to_warehouse_id):
+        """
+        其他人库单上架
+        @param warehouse_id: 所属仓库id
+        @param to_warehouse_id: 目的仓id
+        @param entry_order_code: 入库单编码
+        @param entry_order_id: 入库单id
+        @return:
+        """
+        content = deepcopy(OtherInApiConfig.PutOnTheShelf.get_attributes())
+        entry_order_sku_info_result = self.other_in_get_order_sku_info(entry_order_code, entry_order_id)
+        if not entry_order_sku_info_result["code"]:
+            return
+        sku_info_records = entry_order_sku_info_result["data"]["records"]
+
+        get_sj_kw_result = self.db_get_kw(2, 5, len(sku_info_records), warehouse_id, to_warehouse_id)
+        if not get_sj_kw_result["code"]:
+            return
+        sj_kw_codes = get_sj_kw_result["data"]
+
+        sku_info_list = [
+            {
+                "skuCode": sku["warehouseSkuCode"],
+                "shelvesLocationCode": kw_codes,
+                "skuQty": sku["planSkuQty"],
+                "abnormalQty": 0
+            } for sku, kw_codes in zip(sku_info_records, sj_kw_codes)
+        ]
+        content["data"].update({"entryOrderId": entry_order_id, "skuList": sku_info_list})
         res = self.call_api(**content)
         return self.formatted_result(res)
 

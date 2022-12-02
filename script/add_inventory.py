@@ -3,6 +3,7 @@ import time
 from utils.log_handler import logger as log
 from cases import *
 from data_generator.transfer_data_generator import WmsTransferDataGenerator
+from data_generator.receipt_data_generator import WmsReceiptDataGenerator
 from data_generator.scm_data_generator import ScmDataGenerator
 
 
@@ -27,19 +28,20 @@ class AddInventory:
     def __init__(self):
         self.scm_data = ScmDataGenerator(scm_app)
         self.transfer_data = WmsTransferDataGenerator(wms_app, wms_transfer, ims_robot)
+        self.receipt_data = WmsReceiptDataGenerator(wms_app, ims_robot)
 
-    def add_in_stock_inventory(self, sale_sku, bom, count, location_ids, warehouse_id, to_warehouse_id):
+    def add_in_stock_inventory(self, sale_sku, bom, count, warehouse_id, to_warehouse_id):
         """
         添加1发货仓现货库存/7中转现货/8备货现货,通过其他入库方式
 
-        @param to_warehouse_id: 目的仓id，备货仓时为''
+        @param to_warehouse_id: 目的仓id
         @param warehouse_id: 所属仓id
-        @param location_ids: 上架库位id，格式：[1496,1505]
         @param count:数量
         @param bom:bom版本
         @param sale_sku:销售sku编码
         """
-        add_res = ims_robot.add_bom_stock(sale_sku, bom, count, location_ids, warehouse_id, to_warehouse_id)
+        add_res = self.receipt_data.create_other_in_order_and_up_shelf(sale_sku, bom, count, warehouse_id,
+                                                                       to_warehouse_id)
         return add_res
 
     def add_transfer_on_way_inventory(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code,
@@ -121,21 +123,27 @@ if __name__ == '__main__':
     data = AddInventory()
 
     # -------------------现货相关------------------------------------------------------------------------------------
-    # spot_sku = "63203684930"
+    # spot_sku = "DJ22GE7041"
     # bom = "A"
-    # count = 1
-    # location_ids = [1496]
-    # warehouse_id = 513
-    # to_warehouse_id = 513
+    # count = 11
+    # location_ids = [257284]
+    # warehouse_id = 515
+    # to_warehouse_id = 0
+    spot_sku = "JJ306J84G7"
+    bom = "A"
+    count = 1
+    location_ids = [48026]
+    warehouse_id = 528
+    to_warehouse_id = 528
     #
     # # 添加1发货仓现货库存，7中转仓现货库存、8备货仓现货库存，都用这个，控制warehouse_id和to_warehouse_id即可，没有
-    # data.add_in_stock_inventory(spot_sku, bom, count, location_ids, warehouse_id, to_warehouse_id)
+    data.add_in_stock_inventory(spot_sku, bom, count, warehouse_id, to_warehouse_id)
 
     # -------------------采购相关------------------------------------------------------------------------------------
-    # purchase_sku_list = ["63203684930"]
-    # purchase_num = 3
-    # delivery_warehouse_code = "ESZF"
-    # to_warehouse_code = "ESZF"
+    # purchase_sku_list = ["DJ22GE7041","DJ730T32F5"]
+    # purchase_num = 10
+    # delivery_warehouse_code = "FSZZZ"
+    # to_warehouse_code = "USNJ02"
     #
     # # 采购在途库存:3直发仓仓采购在途/9中转在途/10备货在途都用这个
     # data.add_purchase_on_way_inventory(purchase_sku_list, purchase_num, delivery_warehouse_code, to_warehouse_code)
@@ -148,18 +156,18 @@ if __name__ == '__main__':
     #
     # # -------------------------------------------------------------------------------------------------------
     # # 调拨参数
-    trans_out_id = 512
-    trans_out_to_id = 0
-    trans_in_id = 513
-    trans_in_to_id = 513
-    trans_sku = "63203684930"
-    bom = "B"
-    trans_num = 2
+    # trans_out_id = 512
+    # trans_out_to_id = 0
+    # trans_in_id = 513
+    # trans_in_to_id = 513
+    # trans_sku = "63203684930"
+    # bom = "B"
+    # trans_num = 2
     #
     # # 调拨在途库存:2调拨在途
     # data.add_transfer_on_way_inventory(trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, trans_sku, bom,
     #                                    trans_num)
     #
     # # 调拨计划库存: 5调拨计划
-    data.add_transfer_plan_inventory(trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, trans_sku, bom,
-                                     trans_num)
+    # data.add_transfer_plan_inventory(trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, trans_sku, bom,
+    #                                  trans_num)

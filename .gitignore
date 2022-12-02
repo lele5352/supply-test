@@ -151,3 +151,5 @@ barcodes/
 .pytest_cache
 /reports/
 /allure-report-files/
+
+/config/__init__.py

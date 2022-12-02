@@ -1,11 +1,11 @@
 prefix_config = {
     # 26环境配置
     'test26': {
-        'ims_service_prefix': 'http://10.0.0.26:28801',
+        'ims': 'http://10.0.0.26:28801',
         'app': 'https://test-26.popicorns.com',
-        'delivery_service_prefix': 'http://10.0.0.26:8330',
-        'receipt_service_prefix': 'http://10.0.0.26:8323',
-        'transfer_service_prefix': 'http://10.0.0.26:8334'
+        'delivery': 'http://10.0.0.26:8330',
+        'receipt': 'http://10.0.0.26:8323',
+        'transfer': 'http://10.0.0.26:8334'
     },
     # 25环境配置
     'test25': {
@@ -28,11 +28,11 @@ prefix_config = {
     },
     # uat环境配置
     'uat': {
-        'ims': 'http://10.0.15.13:28801',
+        'ims': 'http://10.0.15.21:28801',
         'app': 'https://uat-scms.popicorns.com',
-        'delivery': 'http://10.0.15.13:8330',
-        'receipt': 'http://10.0.15.13:8323',
-        'transfer': 'http://10.0.15.13:8334',
+        'delivery': 'http://10.0.15.21:8330',
+        'receipt': 'http://10.0.15.21:8323',
+        'transfer': 'http://10.0.15.21:8334',
         'eta': 'http://10.0.0.159:8701',
     },
 }
@@ -53,7 +53,7 @@ mysql_config = {
     'test26': {
         'user': 'app',
         'passwd': '123456',
-        'host': '10.0.0.26',
+        'host': '10.0.0.163',
         'port': 3306
     },
     'test160': {
@@ -65,7 +65,7 @@ mysql_config = {
     'uat': {
         'user': 'erp',
         'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
-        'host': '10.0.15.13',
-        'port': 3002
+        'host': '10.0.15.21',
+        'port': 3301
     },
 }
