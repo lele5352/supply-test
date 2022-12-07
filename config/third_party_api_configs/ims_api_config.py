@@ -1,3 +1,56 @@
+from config.third_party_api_configs import ApiConfig
+
+
+class IMSForSCMApiConfig:
+    class PurchaseInCreateOrder(ApiConfig):
+        uri_path = "/ims/service/scm/business/goods/sku"
+        method = "post"
+        data = [
+            {
+                "functionType": "26",
+                "idempotentSign": "0",
+                "operateType": "1",
+                "operatorId": 0,
+                "sourceNo": "",
+                "targetWarehouseId": 0,
+                "wareSkuRequestBOS": [
+                    {
+                        "qty": 0,
+                        "wareSkuCode": ""
+                    }
+                ],
+                "warehouseId": 0
+            }
+        ]
+
+    class PurchaseInOrderUpShelf(ApiConfig):
+        uri_path = "/ims/service/wms/business/purchase/into/warehouse"
+        method = "post"
+        data = {
+            "functionType": "1",
+            "goodsSkuList": [
+                {
+                    "bomVersion": "2",
+                    "goodsSkuCode": "",
+                    "wareSkuList": [
+                        {
+                            "bomQty": 4,
+                            "qty": 16,
+                            "storageLocationId": 743,
+                            "storageLocationType": 5,
+                            "wareSkuCode": "W03278514"
+                        }
+                    ]
+                }
+            ],
+            "operateType": "1",
+            "operatorId": 8,
+            "sourceNo": "CG21090310010",
+            "targetWarehouseId": "19",
+            "warehouseId": 19
+        }
+
+
 ims_api_config = {
     "oms_order_block": {
         "uri_path": "/ims/service/oms/business/add/block",

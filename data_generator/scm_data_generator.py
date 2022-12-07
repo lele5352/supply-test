@@ -171,8 +171,6 @@ class ScmDataGenerator:
         if not distribute_order_result["code"]:
             log.error("获取分货单列表失败：%s" % distribute_order_result)
             return
-        # for code in distribute_order_nos:
-        # barcode_generate(code, 'entry_order')
         distribute_order_list = distribute_order_result["data"]["list"]
         distribute_order_list = [
             (

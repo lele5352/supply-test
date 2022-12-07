@@ -10,11 +10,11 @@ from urllib import parse
 class UserBehavior(TaskSet):
     def on_start(self):
         try:
-            data = self.user.user_data_queue.get()
-            user = {"username": data['username'], 'user_id': data['user_id']}
+            account = self.user.user_data_queue.get()
+            user = {"username": account['username'], 'user_id': account['user_id']}
             self.headers = {"user": json.dumps(user)}
 
-            print('login with user: {}, pwd: {}, headers: {}'.format(data['username'], data['password'], self.headers))
+            print('login with user: {}, pwd: {}, headers: {}'.format(account['username'], account['password'], self.headers))
         except queue.Empty:
             print('account data run out, test ended.')
             exit(0)

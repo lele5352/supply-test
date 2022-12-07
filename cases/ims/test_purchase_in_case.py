@@ -9,7 +9,9 @@ from cases import *
 
 @allure.feature("测试模块：采购入库")
 class TestPurchaseInStock(object):
-    fhc_purchase_in_data = get_excel_data("test_data/ims_test_data.xlsx", "fhc_purchase_in")
+    fhc_purchase_in_data = get_excel_data("../../test_data/ims_test_data.xlsx", "fhc_purchase_in")  # 外部调用时的路径
+
+    # fhc_purchase_in_data = get_excel_data("../../test_data/ims_test_data.xlsx", "fhc_purchase_in") # 本文件main下执行时的路径
 
     @allure.story("测试场景：发货仓采购入库")
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
