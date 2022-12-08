@@ -849,9 +849,10 @@ class WMSTransferServiceRobot(ServiceRobot):
         super().__init__("transfer")
 
     def transfer_out_create_demand(self, delivery_warehouse_code, delivery_target_warehouse_code,
-                                   receive_warehouse_code, receive_target_warehouse_code, sale_sku_code, demand_qty,
-                                   demand_type=1, customer_type=1, remark=""):
+                                   receive_warehouse_code, receive_target_warehouse_code, sale_sku_code, bom,
+                                   demand_qty, demand_type=1, customer_type=1, remark=""):
         """
+        @param bom: bom版本
         @param string delivery_warehouse_code: 调出仓库
         @param string receive_warehouse_code: 调入仓库
         @param string delivery_target_warehouse_code: 调出仓库的目的仓，仅调出仓为中转仓时必填
@@ -875,6 +876,7 @@ class WMSTransferServiceRobot(ServiceRobot):
                 "customerType": customer_type,  # 1：普通客户 2 ：大客户
                 "customerRemark": remark,
                 "sourceCode": "ZDH" + str(int(time.time())),
+                "bomVersion": bom
             }
         )
         res_data = self.call_api(**content)
@@ -889,6 +891,7 @@ class WMSTransferServiceRobot(ServiceRobot):
                 trans_in_code,
                 trans_in_to_code,
                 sku,
+                bom,
                 qty)
             if not demand_res["code"]:
                 log.error("创建调拨需求失败")

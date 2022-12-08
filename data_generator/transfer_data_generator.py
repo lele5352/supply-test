@@ -1,6 +1,11 @@
+import time
+
 from cases import *
 
 from utils.log_handler import logger as log
+from utils.barcode_handler import generate
+
+from data_generator.receipt_data_generator import WmsReceiptDataGenerator
 
 
 class WmsTransferDataGenerator:
@@ -8,6 +13,7 @@ class WmsTransferDataGenerator:
         self.wms_app = wms_app
         self.wms_transfer = wms_transfer
         self.ims = ims_robot
+        self.wms_data = WmsReceiptDataGenerator(self.wms_app, self.ims)
 
     def create_transfer_demand(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom,
                                trans_qty, demand_type=1, customer_type=1, remark=''):
@@ -27,38 +33,35 @@ class WmsTransferDataGenerator:
         """
         self.wms_app.common_switch_warehouse(trans_out_id)
 
-        central_inventory = self.ims.dbo.query_central_inventory(sale_sku_code, trans_out_id, trans_out_to_id)
-        # print(central_inventory)
-        # 可用库存不足，需要添加库存，分为2种情况：1-查询不到库存；2-查询到库存，block＞stock
-        if not central_inventory or central_inventory['remain'] <= 0:
-            bom_detail = ims_robot.dbo.query_bom_detail(sale_sku_code, bom)
-            kw_ids = self.wms_app.db_get_kw(1, 5, len(bom_detail), trans_out_id, trans_out_to_id)
-            add_stock_res = self.ims.add_lp_stock_by_other_in(
-                sale_sku_code,
-                bom,
-                trans_qty,
-                kw_ids,
-                trans_out_id,
-                trans_out_to_id)
-            if not add_stock_res:
+        # 判断bom版本库存是否足够
+        is_stock_enough = self.ims.is_bom_stock_enough(sale_sku_code, bom, trans_qty, trans_out_id, trans_out_to_id)
+
+        if not is_stock_enough:
+            add_stock_res = self.wms_data.create_other_in_order_and_up_shelf(
+                sale_sku_code, bom, trans_qty, trans_out_id, trans_out_to_id
+            )
+            if not add_stock_res or add_stock_res.get("code") != 1:
                 log.error('创建调拨需求失败：加库存失败！')
                 return
+
+        # 用户检查库存是否加成功了，加库存需要时间
+        stock_num = 0
+        while stock_num < trans_qty:
+            central_inventory = self.ims.dbo.query_central_inventory(sale_sku_code, trans_out_id, trans_out_to_id)
+            if central_inventory["remain"] < trans_qty:
+                time.sleep(0.2)
+            else:
+                stock_num = central_inventory["remain"]
+
+        # 仓库id转换为code
         trans_out_code = self.wms_app.db_ck_id_to_code(trans_out_id)
         trans_out_to_code = self.wms_app.db_ck_id_to_code(trans_out_to_id)
         trans_in_code = self.wms_app.db_ck_id_to_code(trans_in_id)
         trans_in_to_code = self.wms_app.db_ck_id_to_code(trans_in_to_id)
         # 调用创建调拨需求接口
         create_demand_res = self.wms_transfer.transfer_out_create_demand(
-            trans_out_code,
-            trans_out_to_code,
-            trans_in_code,
-            trans_in_to_code,
-            sale_sku_code,
-            bom,
-            trans_qty,
-            demand_type,
-            customer_type,
-            remark)
+            trans_out_code, trans_out_to_code, trans_in_code, trans_in_to_code, sale_sku_code, bom, trans_qty,
+            demand_type, customer_type, remark)
         if not create_demand_res or create_demand_res['code'] != 1:
             log.error('创建调拨需求失败！')
             return
@@ -95,6 +98,9 @@ class WmsTransferDataGenerator:
             customer_type,
             remark
         )
+        if not demand_no:
+            print('创建调拨拣货单失败：需求创建失败！')
+            return
         # 创建调拨拣货单
         pick_order_res = self.wms_app.transfer_out_create_pick_order([demand_no], 1)
         if not pick_order_res or pick_order_res['code'] != 1:
@@ -102,6 +108,8 @@ class WmsTransferDataGenerator:
             log.error('创建调拨拣货单失败！')
             return
         pick_order_code = pick_order_res['data']
+
+        generate(pick_order_code, "../barcodes/transfer/pick_order/{0}.png".format(pick_order_code))
         print('生成调拨拣货单：%s' % pick_order_code)
         return pick_order_code
 

@@ -96,7 +96,7 @@ class IMSRobot(ServiceRobot):
         kw_diff_num = len(ware_sku_qty_list) - len(sj_location_ids)
         temp = list()
         if kw_diff_num > 0:
-            sj_location_ids.extend([sj_location_ids[-1]]*kw_diff_num)
+            sj_location_ids.extend([sj_location_ids[-1]] * kw_diff_num)
         for (ware_sku, qty), sj_location_id in zip(ware_sku_qty_list, sj_location_ids):
             temp_dict = {
                 "qty": qty,
@@ -1203,14 +1203,12 @@ class IMSRobot(ServiceRobot):
         @param int ck_id: 所属仓库id
         @param int to_ck_id: 目的仓库id
         """
-        wares_inventory_for_goods = self.get_format_expect_wares_inventory_with_kw(ware_sku_qty_list,kw_ids_list, ck_id,
-                                                                                   to_ck_id, 1)
+        wares_inventory_for_goods = self.get_format_expect_wares_inventory_with_kw(ware_sku_qty_list, kw_ids_list,
+                                                                                   ck_id, to_ck_id, 1)
         wares_inventory_for_central = self.get_format_expect_wares_inventory_with_kw(ware_sku_qty_list,
-                                                                                     kw_ids_list,
-                                                                                     ck_id, to_ck_id, 2)
+                                                                                     kw_ids_list, ck_id, to_ck_id, 2)
         wares_inventory = self.get_format_expect_wares_inventory_with_kw(ware_sku_qty_list, kw_ids_list, ck_id,
-                                                                         to_ck_id,
-                                                                         1)
+                                                                         to_ck_id, 1)
 
         expect_goods_inventory = self.get_expect_goods_inventory(wares_inventory_for_goods, ck_id, to_ck_id)
         expect_central_inventory = self.get_expect_central_inventory(wares_inventory_for_central, ck_id, to_ck_id)
@@ -1379,6 +1377,26 @@ class IMSRobot(ServiceRobot):
         # except :
         #     return False
 
+    def is_bom_stock_enough(self, sale_sku, bom, qty, warehouse_id, to_warehouse_id):
+        """
+        是否有指定数量库存
+        @param sale_sku: 销售sku编码
+        @param bom: bom版本
+        @param qty: 数量
+        @param warehouse_id: 仓库id
+        @param to_warehouse_id: 目的id
+        """
+        inventory = self.get_format_wares_inventory_self(sale_sku, warehouse_id, to_warehouse_id)
+        try:
+            bom_inventory = inventory[bom]
+            stock, remain = self.calc_suites(sale_sku, bom, bom_inventory, "location_total")
+            if remain >= qty:
+                return True
+            else:
+                return False
+        except KeyError:
+            return False
+
 
 if __name__ == '__main__':
     ims = IMSRobot()
@@ -1386,5 +1404,6 @@ if __name__ == '__main__':
     # ims.del_stock(["63203684930"])
     # self.add_bom_stock("JF2KB93311", "C", 1, [1496], 513, 513)
     # self.add_bom_stock("JF2KB93311", "D", 1, [1544], 512, '')
-    ware_inventory = [["16338527895A01", 1]]
-    print(ims.get_format_expect_wares_inventory_with_kw(ware_inventory, [1496, 1505], 513, 513, 1))
+    # ware_inventory = [["16338527895A01", 1]]
+    # print(ims.get_format_expect_wares_inventory_with_kw(ware_inventory, [1496, 1505], 513, 513, 1))
+    print(ims.stock_enough_required("63203684930", "C", 999999, 511, 513))
