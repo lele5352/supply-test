@@ -1,6 +1,7 @@
 import time
 
 from utils.log_handler import logger as log
+from utils.barcode_handler import generate
 from cases import scm_app
 
 
@@ -172,14 +173,18 @@ class ScmDataGenerator:
             log.error("获取分货单列表失败：%s" % distribute_order_result)
             return
         distribute_order_list = distribute_order_result["data"]["list"]
-        distribute_order_list = [
+
+        result_distribute_order_list = [
             (
                 _["shippingOrderNo"],
                 _["deliveryWarehouse"],
                 _["destinationWarehouse"]
             ) for _ in distribute_order_list]
-        print('分货单列表：%s' % distribute_order_list)
-        return distribute_order_list
+
+        for distribute_order in result_distribute_order_list:
+            generate(distribute_order[0], "../barcodes/distribute_order/{0}.png".format(distribute_order[0]))
+        print('分货单列表：%s' % result_distribute_order_list)
+        return result_distribute_order_list
 
 
 if __name__ == '__main__':
