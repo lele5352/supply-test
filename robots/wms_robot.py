@@ -11,7 +11,8 @@ from utils.log_handler import logger as log
 
 class WMSAppRobot(AppRobot):
     def __init__(self):
-        super().__init__(WMSDBOperator)
+        self.dbo = WMSDBOperator
+        super().__init__()
 
     def db_ck_id_to_code(self, warehouse_id):
         """
@@ -912,3 +913,4 @@ if __name__ == "__main__":
     # print(wms.get_delivery_order_page(["PRE-CK2211100010"]))
     # print(wms.get_user_info())
     print(wms.delivery_get_pick_data("1881"))
+    print(wms.dbo.query_wait_assign_demands())

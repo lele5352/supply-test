@@ -7,7 +7,8 @@ from dbo.scm_dbo import SCMDBOperator
 
 class SCMRobot(AppRobot):
     def __init__(self):
-        super().__init__(SCMDBOperator)
+        self.dbo = SCMDBOperator
+        super().__init__()
 
     def get_sku_info(self, sale_sku_code):
         """获取供应商产品信息
