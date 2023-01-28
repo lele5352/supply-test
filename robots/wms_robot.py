@@ -532,8 +532,9 @@ class WMSAppRobot(AppRobot):
         res = self.call_api(**content)
         return self.formatted_result(res)
 
-    def delivery_mock_label_callback(self, delivery_order_code, package_list):
+    def delivery_mock_label_callback(self, delivery_order_code, package_list, same_label=False):
         """
+        @param same_label: 是否需要包裹都相同运单号，默认为否
         @param string delivery_order_code: 出库单号
         @param list package_list: 包裹列表
 
@@ -541,19 +542,31 @@ class WMSAppRobot(AppRobot):
         order_list = list()
         count = 0
         content = deepcopy(DeliveryApiConfig.LabelCallBack.get_attributes())
-
-        for package in package_list:
-            count += 1
+        tail_fix = str(int(time.time() * 1000))
+        if same_label:
             temp_order_info = deepcopy(content["data"]["orderList"][0])
             temp_order_info.update({
                 "deliveryNo": delivery_order_code,
-                "packageNoList": [package],
-                "logistyNo": "logistyNo" + str(int(time.time() * 1000 + count)),
-                "barCode": "barCode" + str(int(time.time() * 1000 + count)),
+                "packageNoList": [package for package in package_list],
+                "logistyNo":  "wl" + tail_fix,
+                "barCode": "bc" + tail_fix,
                 "turnOrderNo": str(int(time.time() * 1000)),
                 "drawOrderNo": str(int(time.time() * 1000))
             })
             order_list.append(temp_order_info)
+        else:
+            for package in package_list:
+                count += 1
+                temp_order_info = deepcopy(content["data"]["orderList"][0])
+                temp_order_info.update({
+                    "deliveryNo": delivery_order_code,
+                    "packageNoList": [package],
+                    "logistyNo": "wl" + str(int(time.time() * 1000 + count)),
+                    "barCode": "bc" + str(int(time.time() * 1000 + count)),
+                    "turnOrderNo": str(int(time.time() * 1000)),
+                    "drawOrderNo": str(int(time.time() * 1000))
+                })
+                order_list.append(temp_order_info)
         content["data"].update(
             {
                 "deliveryNo": delivery_order_code,
@@ -912,5 +925,14 @@ if __name__ == "__main__":
     # wms.delivery_order_assign_stock(["PRE-CK2211100010"])
     # print(wms.get_delivery_order_page(["PRE-CK2211100010"]))
     # print(wms.get_user_info())
-    print(wms.delivery_get_pick_data("1881"))
-    print(wms.dbo.query_wait_assign_demands())
+    # print(wms.delivery_get_pick_data("1881"))
+    # print(wms.dbo.query_wait_assign_demands())
+
+    # order_sku_list = [
+    #     {
+    #         "skuCode": "63203684930A01", "skuName": "酒柜-金色A款08 1/2 X1", "num": 2
+    #     },{
+    #         "skuCode": "63203684930A02", "skuName": "酒柜(金色)07 2/2 X5", "num": 10
+    #     }]
+    # wms.delivery_mock_package_call_back("PRE-CK2301280016",2,order_sku_list)
+    wms.delivery_mock_label_callback("PRE-CK2301280016", ["PRE-BG2301280010", "PRE-BG2301280011"], True)
