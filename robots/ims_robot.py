@@ -8,7 +8,8 @@ from dbo.ims_dbo import IMSDBOperator
 
 class IMSRobot(ServiceRobot):
     def __init__(self):
-        super().__init__("ims", IMSDBOperator)
+        self.dbo = IMSDBOperator
+        super().__init__("ims")
 
     # 采购下单
     def purchase_create_order(self, ware_sku_qty_list, warehouse_id, to_warehouse_id):

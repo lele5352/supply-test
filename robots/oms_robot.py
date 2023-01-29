@@ -7,7 +7,8 @@ from dbo.oms_dbo import OMSDBOperator
 
 class OMSAppRobot(AppRobot):
     def __init__(self):
-        super().__init__(OMSDBOperator)
+        self.dbo = OMSDBOperator
+        super().__init__()
 
     def get_product_info(self, sku_code, sku_type=1, site="US"):
         """
@@ -139,7 +140,8 @@ class OMSAppRobot(AppRobot):
 
 class OMSAppIpRobot(ServiceRobot):
     def __init__(self):
-        super().__init__("oms_app", OMSDBOperator)
+        self.dbo = OMSDBOperator
+        super().__init__("oms_app")
 
     def dispatch_oms_order(self, oms_order_list):
         oms_api_config["dispatch_oms_order"].update({

@@ -15,10 +15,9 @@ class Robot:
     定义基础机器人
     """
 
-    def __init__(self, prefix, headers, db_operator=None):
+    def __init__(self, prefix, headers):
         self.prefix = prefix
         self.headers = headers
-        self.dbo = db_operator
 
     @classmethod
     def content_parse(cls, uri_path, method, data):
@@ -83,12 +82,12 @@ class AppRobot(Robot):
     基础应用层机器人，包含应用机器人初始化及接口调用行为
     """
 
-    def __init__(self, db_operator=None):
+    def __init__(self):
         self.prefix = env_prefix_config.get("app")
-        super().__init__(self.prefix, app_headers, db_operator)
+        super().__init__(self.prefix, app_headers)
 
 
 class ServiceRobot(Robot):
-    def __init__(self, service_name, db_operator=None):
+    def __init__(self, service_name):
         self.prefix = env_prefix_config.get(service_name)
-        super().__init__(self.prefix, service_headers, db_operator)
+        super().__init__(self.prefix, service_headers)
