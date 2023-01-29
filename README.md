@@ -9,10 +9,12 @@
 
     - supply-test 根目录
     - config 配置文件
-        - api_config 接口配置文件夹，存放各系统接口配置文件
-        - sys_config 系统配置文件，用于配置全局变量
-        - __init__ 域名配置和数据库配置
-    - testcase 测试用例,基于api_request编排测试场景
+        - third_party_api_configs 接口配置文件夹，存放各系统接口配置文件
+        - env_config 系统配置文件，用于配置域名配置和数据库配置
+        - server_config 服务器账号、日志路径
+        - __init__ 账号配置、环境配置引入
+    - testcase 测试用例,基于api_request编排测试场景（预期废弃，迁移到cases）
+    - cases 测试用例,基于api_request编排测试场景
     - data_generator 基于api_request编排业务流程，生成业务数据
     - script 脚本文件夹，存放脚本
 
