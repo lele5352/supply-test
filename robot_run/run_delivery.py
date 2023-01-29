@@ -163,6 +163,9 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail, flow_
     if flow_flag == "call_package":
         return "Success", None
 
+    # 生成包裹是异步，有延迟，睡眠1秒
+    time.sleep(1)
+
     # 创建拣货单
     create_pick_order_result = wms_app.delivery_create_pick_order(delivery_order_code, prod_type)
     if not create_pick_order_result["code"]:
@@ -283,4 +286,4 @@ def run_delivery(delivery_order_code, warehouse_id, flow_flag=None):
 
 
 if __name__ == "__main__":
-    print(run_delivery("PRE-CK2301290007", 513, "confirm_pick"))
+    print(run_delivery("PRE-CK2301290010", 513, "confirm_pick"))
