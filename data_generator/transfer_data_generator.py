@@ -46,12 +46,6 @@ class WmsTransferDataGenerator:
                 return
 
         # 用户检查库存是否加成功了，加库存需要时间
-        # stock_num = 0
-        # while stock_num < trans_qty:
-        #     central_inventory = self.ims.dbo.query_central_inventory(sale_sku_code, trans_out_id, trans_out_to_id)
-        #     if central_inventory["remain"] < trans_qty:
-        #         time.sleep(0.2)
-
         until(120, 0.1)(
             lambda: trans_qty <= self.ims.dbo.query_central_inventory(
                 sale_sku_code, trans_out_id, trans_out_to_id).get("remain", 0)
