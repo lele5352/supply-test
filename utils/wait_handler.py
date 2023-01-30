@@ -3,11 +3,11 @@ import time
 from utils.log_handler import logger as log
 
 
-def until(try_times, gap):
+def until(try_times: int, gap: [int, float]):
     """等待装饰器，运行等待时间，func返回值为真或超过重试次数时退出
 
     :param int try_times: 运行次数
-    :param int gap: 每次等待时间
+    :param int,float gap: 每次等待时间，单位秒，可以是整数或浮点数
     """
 
     def wrapper(func):
@@ -25,11 +25,11 @@ def until(try_times, gap):
     return wrapper
 
 
-def until_false(try_times, gap):
+def until_false(try_times: int, gap: [int, float]):
     """等待装饰器，运行等待时间，func返回值为假时退出
 
     :param int try_times: 运行次数
-    :param int gap: 每次等待时间
+    :param int,flaat gap: 每次等待时间，单位秒，可以是整数或浮点数
     """
 
     def wrapper(func):
