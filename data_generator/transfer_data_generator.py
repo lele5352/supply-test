@@ -4,6 +4,7 @@ from cases import *
 
 from utils.log_handler import logger as log
 from utils.barcode_handler import generate
+from utils.wait_handler import until
 
 from data_generator.receipt_data_generator import WmsReceiptDataGenerator
 
@@ -45,13 +46,10 @@ class WmsTransferDataGenerator:
                 return
 
         # 用户检查库存是否加成功了，加库存需要时间
-        stock_num = 0
-        while stock_num < trans_qty:
-            central_inventory = self.ims.dbo.query_central_inventory(sale_sku_code, trans_out_id, trans_out_to_id)
-            if central_inventory["remain"] < trans_qty:
-                time.sleep(0.2)
-            else:
-                stock_num = central_inventory["remain"]
+        until(120, 0.1)(
+            lambda: trans_qty <= self.ims.dbo.query_central_inventory(
+                sale_sku_code, trans_out_id, trans_out_to_id).get("remain", 0)
+        )()
 
         # 仓库id转换为code
         trans_out_code = self.wms_app.db_ck_id_to_code(trans_out_id)
@@ -215,6 +213,6 @@ if __name__ == '__main__':
     transfer_data = WmsTransferDataGenerator(wms_app, wms_transfer, ims_robot)
     demand_qty = 1
     # transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
-    # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930',"A", 10)
-    transfer_data.create_transfer_out_order(512, 0, 513, 513, '63203684930', "B", 1)
-    transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)
+    transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', "A", 10)
+    # transfer_data.create_transfer_out_order(512, 0, 513, 513, '63203684930', "B", 1)
+    # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)
