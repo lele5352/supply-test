@@ -249,7 +249,7 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail, flow_
 def run_delivery(delivery_order_code, warehouse_id, flow_flag=None):
     """
     执行销售出库发货流程
-    @param flow_flag: 流程执行标志，默认为空，执行全部
+    @param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
     @param warehouse_id: 所属仓库id
     @param delivery_order_code: 销售出库单号列表
     @return:
@@ -286,4 +286,8 @@ def run_delivery(delivery_order_code, warehouse_id, flow_flag=None):
 
 
 if __name__ == "__main__":
-    print(run_delivery("PRE-CK2301290010", 513, "confirm_pick"))
+    delivery_order_code = "PRE-CK2301290010"
+    warehouse_id = 513
+    flag = "confirm_pick"
+    result, info = run_delivery(delivery_order_code, warehouse_id, flag)
+    print("出库单 {} 执行发货流程 {} 结果：{}，执行信息：{}".format(delivery_order_code, flag, result, info))
