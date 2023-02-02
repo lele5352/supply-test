@@ -11,6 +11,17 @@ class FMSAppRobot(AppRobot):
         self.dbo = FMSDBOperator
         super().__init__()
 
+    def get_fee_item_list(self):
+        """
+        查询 费用项 列表
+        """
+        content = deepcopy(
+            fms_api_config.FeeItemApi.FeeItemList.get_attributes()
+        )
+        res = self.call_api(**content)
+
+        return [] if not res.get("data") else res.get("data")
+
     def save_not_sea_expect_fee_item(self, **param):
         """
         保存 非海运 预估费用项
@@ -20,7 +31,7 @@ class FMSAppRobot(AppRobot):
             fms_api_config.ExpectFeeItemApi.NotSeaExpectFeeItemSave.get_attributes()
         )
         if not param:
-            log.debug("保存费用项参数不能为空")
+            log.error("保存费用项参数不能为空")
             return None
 
         content["data"].update(**param)
@@ -43,7 +54,7 @@ class FMSAppRobot(AppRobot):
 
         return [] if not res.get("data") else res.get("data")
 
-    
+
 
 
 
