@@ -1,3 +1,20 @@
+from config.third_party_api_configs import ApiConfig
+
+
+class OMSApiConfig:
+    class GetFollowOrderPage(ApiConfig):
+        uri_path = "/api/ec-oms-api/order/trackOrder/page"
+        method = "post"
+        data = {"current": 1, "size": 10, "sortKey": "follow_time", "direction": 1, "itemSkuCode": "",
+                "salesOrderNo": "",
+                "orderNo": "", "siteCode": "", "buyerName": "", "platformCodeList": [], "deliveryWarehouseCode": [],
+                "country": [], "excludeCountry": [], "relateSalesOrderNos": "", "intercept": "",
+                "interceptTypeList": [],
+                "followOrderTypeList": [], "buyerId": "", "followTimeStart": "", "followTimeEnd": "",
+                "payTimeStart": "",
+                "payTimeEnd": ""}
+
+
 oms_api_config = {
     "get_product_info": {
         "uri_path": "/ec-oms-api/salesorder/listProduct",
@@ -83,9 +100,12 @@ oms_api_config = {
         "uri_path": "/ec-oms-api/order/page",
         "method": "post",
         "data": {"current": 1, "size": 10, "sortKey": "follow_time", "direction": 1, "orderNos": "",
-                 "salesOrderNos": "SO2209200051", "salesOutNos": "", "siteCodes": "", "buyerId": "", "provinceName": "",
-                 "city": "", "postalCodes": "", "email": "", "itemSkuCodes": "", "skuLike": "", "relateOrderNos": [],
-                 "createUsername": "", "relateSalesOrderNos": "", "orderSources": [], "address": "", "buyerName": "",
+                 "salesOrderNos": "SO2209200051", "salesOutNos": "", "siteCodes": "", "buyerId": "",
+                 "provinceName": "",
+                 "city": "", "postalCodes": "", "email": "", "itemSkuCodes": "", "skuLike": "",
+                 "relateOrderNos": [],
+                 "createUsername": "", "relateSalesOrderNos": "", "orderSources": [], "address": "",
+                 "buyerName": "",
                  "salesOrderRemarks": "", "remark": "", "logisticsInfo": "", "visualWarehouseCodes": [],
                  "actualWarehouseCodes": [], "orderQtyType": [], "laborType": [], "orderStatus": [],
                  "salesOutStatus": [], "platforms": [], "stores": [], "countryCodes": [], "excludeCountryCodes": [],
