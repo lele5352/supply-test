@@ -21,8 +21,8 @@
             }
             
             xmind_config = {
-                'xmind_file_path': '/Users/linzhongjie/Documents/爆米/测试用例/fms2.7 & wms.xmind',
-                'excel_file_path': '/Users/linzhongjie/Documents/爆米/测试用例/'
+                'xmind_file_path': '',
+                'excel_file_path': ''
             }
             
             console_log = False  # 日志是否输出到控制台配置，默认否
