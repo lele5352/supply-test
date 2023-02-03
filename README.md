@@ -6,10 +6,11 @@
     4.修改config目录下 __init__.py 文件,配置要对接的环境和登录用户信息，具体如下：
 
         在__init__.py文件中，写入以下内容：
+
             from config.env_config import prefix_config, mysql_config
             
             # 指定环境：'test160'/'test25'/'test26'/'uat'
-            env = 填上方注释中的对应环境变量
+            env = 'test160'
             
             env_prefix_config = env_config.prefix_config.get(env)
             db_config = env_config.mysql_config.get(env)
@@ -18,6 +19,13 @@
                 'username': '', # 你的账号
                 'password': '' # 你的密码
             }
+            
+            xmind_config = {
+                'xmind_file_path': '',
+                'excel_file_path': ''
+            }
+            
+            console_log = False  # 日志是否输出到控制台配置，默认否
 
 模块说明：
 

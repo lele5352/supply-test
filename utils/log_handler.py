@@ -1,33 +1,84 @@
-import logging.handlers
-import datetime
-import time
-import os
-logger = logging.getLogger('supply_log')
-logger.setLevel(logging.INFO)
+from loguru._logger import Core, Logger
+import sys as _sys
 
-# log_path是存放日志的路径
-time_str = time.strftime('%Y%m%d', time.localtime(time.time()))
-lib_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../logs'))
-# 如果不存在这个logs文件夹，就自动创建一个
-if not os.path.exists(lib_path):
-    os.mkdir(lib_path)
-# 日志文件的地址
-all_log_name = lib_path + '/' + 'all' + '_' + time_str + '.log'
-error_log_name = lib_path + '/' + 'error' + '_' + time_str + '.log'
-# 全部log
-rf_handler = logging.FileHandler(all_log_name)
-rf_handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
+log_level = 'INFO'
+all_path = "../logs/all_{time:YYYY-MM-DD}.log"
+error_path = "../logs/error_{time:YYYY-MM-DD}.log"
 
-# 错误log
-f_handler = logging.FileHandler(error_log_name)
-f_handler.setLevel(logging.ERROR)
-f_handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(filename)s[:%(lineno)d] - %(message)s"))
+try:
+    from config import console_log
+except ImportError:
+    console_log = False
 
-logger.addHandler(rf_handler)
-logger.addHandler(f_handler)
 
-if __name__ == "__main__":
-    logger.debug('test1')
-    logger.warning('test2')
-    logger.error('test3')
-    logger.critical('test4')
+NoConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, None, {})
+ConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, None, {})
+
+NoConsoleLog.add(all_path, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level=log_level)
+NoConsoleLog.add(error_path, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level='ERROR')
+
+ConsoleLog.add(_sys.stderr)
+ConsoleLog.add(all_path, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level=log_level)
+ConsoleLog.add(error_path, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level='ERROR')
+
+
+class OutputLog:
+    """
+    执行日志输出类，根据参数执行是否将日志输出到控制台
+    当前只定义最常用的四种级别日志输出：info, error, debug, warning
+    """
+
+    @staticmethod
+    def info(message, sys_out=console_log, **kwargs):
+        """打印 info 级别日志
+        :param message: 日志信息
+        :param sys_out: bool类型，默认从config取值；
+                        True 日志同时输出到文件和控制台，False 只输出到文件
+        """
+        if sys_out:
+            ConsoleLog.info(message, **kwargs)
+        else:
+            NoConsoleLog.info(message, **kwargs)
+
+    @staticmethod
+    def error(message, sys_out=console_log, **kwargs):
+        """打印 error 级别日志
+        :param message: 日志信息
+        :param sys_out: bool类型，默认从config取值；
+                        True 日志同时输出到文件和控制台，False 只输出到文件
+        """
+        if sys_out:
+            ConsoleLog.error(message, **kwargs)
+        else:
+            NoConsoleLog.error(message, **kwargs)
+
+    @staticmethod
+    def debug(message, sys_out=console_log, **kwargs):
+        """打印 debug 级别日志
+        :param message: 日志信息
+        :param sys_out: bool类型，默认从config取值；
+                        True 日志同时输出到文件和控制台，False 只输出到文件
+        """
+        if sys_out:
+            ConsoleLog.debug(message, **kwargs)
+        else:
+            NoConsoleLog.debug(message, **kwargs)
+
+    @staticmethod
+    def warning(message, sys_out=console_log, **kwargs):
+        """打印 warning 级别日志
+        :param message: 日志信息
+        :param sys_out: bool类型，默认从config取值；
+                        True 日志同时输出到文件和控制台，False 只输出到文件
+        """
+        if sys_out:
+            ConsoleLog.warning(message, **kwargs)
+        else:
+            NoConsoleLog.warning(message, **kwargs)
+
+
+logger = OutputLog
+
+
+
+
