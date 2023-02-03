@@ -1,7 +1,7 @@
 import time
 from copy import deepcopy
 from robots.robot import AppRobot, ServiceRobot
-from config.third_party_api_configs.oms_api_config import oms_api_config
+from config.third_party_api_configs.oms_api_config import oms_api_config, OMSApiConfig
 from dbo.oms_dbo import OMSDBOperator
 
 
@@ -30,6 +30,20 @@ class OMSAppRobot(AppRobot):
         res_data.update({
             "data": res_data["data"]["records"][0]
         })
+        return self.formatted_result(res_data)
+
+    def get_follow_order_page(self, oms_no):
+        """
+        根据oms单号查询跟单列表数据
+        @return : oms的跟单信息
+        """
+        content = deepcopy(OMSApiConfig.GetFollowOrderPage.get_attributes())
+        content['data'].update(
+            {
+                "orderNo": oms_no
+            }
+        )
+        res_data = self.call_api(**content)
         return self.formatted_result(res_data)
 
     def get_warehouse_info(self, warehouse_id):
@@ -85,7 +99,19 @@ class OMSAppRobot(AppRobot):
         res_data = self.call_api(**oms_api_config["create_sale_order"])
         return self.formatted_result(res_data)
 
-    def query_oms_order(self, sale_order_no):
+    def query_oms_order_by_oms_no(self, oms_order_no):
+        """
+        @param oms_order_no: oms单号
+        @return: list
+        """
+        oms_api_config["query_oms_order"]["data"].update({"orderNos": oms_order_no})
+        res_data = self.call_api(**oms_api_config["query_oms_order"])
+        res_data.update({
+            "data": res_data['data']['records']
+        })
+        return self.formatted_result(res_data)
+
+    def query_oms_order_by_sale_no(self, sale_order_no):
         """
         @param sale_order_no: 销售单号
         @return: list
@@ -169,3 +195,8 @@ class OMSAppIpRobot(ServiceRobot):
         """
         res_data = self.call_api(**oms_api_config["push_order_to_wms"])
         return self.formatted_result(res_data)
+
+
+if __name__ == '__main__':
+    oms = OMSAppRobot()
+    print(oms.get_follow_order_page("OMS2209270111"))
