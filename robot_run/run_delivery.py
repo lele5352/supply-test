@@ -1,6 +1,7 @@
 import time
 
 from cases import *
+from utils.log_handler import logger
 
 
 def get_wait_delivery_data():
@@ -286,8 +287,9 @@ def run_delivery(delivery_order_code, warehouse_id, flow_flag=None):
 
 
 if __name__ == "__main__":
-    delivery_order_code = "PRE-CK2301290010"
-    warehouse_id = 513
-    flag = "confirm_pick"
+    delivery_order_code = "PRE-CK2212090002"
+    warehouse_id = 539
+    flag = "call_label"
     result, info = run_delivery(delivery_order_code, warehouse_id, flag)
-    print("出库单 {} 执行发货流程 {} 结果：{}，执行信息：{}".format(delivery_order_code, flag, result, info))
+    logger.info("出库单 {} 执行发货流程 {} 结果：{}，执行信息：{}".format(delivery_order_code, flag, result, info),
+                sys_out=True)
