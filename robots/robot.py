@@ -27,7 +27,7 @@ class Robot:
             "data": data
         }
 
-    def call_api(self, uri_path, method, data, files="") -> dict:
+    def call_api(self, uri_path, method, data=None, files=None) -> dict:
         req_url = urljoin(self.prefix, uri_path)
 
         if method == "post":
