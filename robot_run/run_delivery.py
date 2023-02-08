@@ -2,6 +2,7 @@ import time
 
 from cases import *
 from utils.log_handler import logger
+from utils.wait_handler import until
 
 
 def get_wait_delivery_data():
@@ -55,8 +56,8 @@ def run_front_label_delivery(delivery_order_info, delivery_order_detail, flow_fl
     if flow_flag == "call_package":
         return "Success", None
 
-    # 生成包裹是异步，有延迟，睡眠1秒
-    time.sleep(1)
+    # 生成包裹是异步，有延迟，等待包裹数据生成
+    until(99, 0.2)(lambda: wms_app.dbo.query_delivery_order_package_info(delivery_order_code) is not None)()
 
     if express_state != 2:
         # 模拟面单回调
@@ -164,8 +165,8 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail, flow_
     if flow_flag == "call_package":
         return "Success", None
 
-    # 生成包裹是异步，有延迟，睡眠1秒
-    time.sleep(1)
+    # 生成包裹是异步，有延迟，等待包裹数据生成
+    until(99, 0.2)(lambda: wms_app.dbo.query_delivery_order_package_info(delivery_order_code) is not None)()
 
     # 创建拣货单
     create_pick_order_result = wms_app.delivery_create_pick_order(delivery_order_code, prod_type)
@@ -287,8 +288,8 @@ def run_delivery(delivery_order_code, warehouse_id, flow_flag=None):
 
 
 if __name__ == "__main__":
-    delivery_order_code = "PRE-CK2212090002"
-    warehouse_id = 539
+    delivery_order_code = "PRE-CK2302020011"
+    warehouse_id = 513
     flag = "call_label"
     result, info = run_delivery(delivery_order_code, warehouse_id, flag)
     logger.info("出库单 {} 执行发货流程 {} 结果：{}，执行信息：{}".format(delivery_order_code, flag, result, info),
