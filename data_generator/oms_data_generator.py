@@ -2,13 +2,13 @@ import time
 
 from utils.wait_handler import until
 from cases import *
-
+from utils.log_handler import logger
 
 def create_sale_order(order_sku_info_list):
     """
     创建销售出库单
-    @param list order_sku_info_list: 销售sku及数量的数组，格式：[{"sku_code":"","qty":1,"bom":"A","warehouse_id":""}]
-    @return: sale_order_no，销售出库单号
+    :param list order_sku_info_list: 销售sku及数量的数组，格式：[{"sku_code":"","qty":1,"bom":"A","warehouse_id":""}]
+    :return: sale_order_no，销售出库单号
     """
     create_result = oms_app.create_sale_order(order_sku_info_list)
     if not create_result['code']:
@@ -29,7 +29,7 @@ def create_wms_sale_outbound_order(order_sku_info_list):
         return
     oms_order_list = query_oms_order_result.get('data')
     oms_order_no_list = [record['orderNo'] for record in oms_order_list]
-    oms_order_no_str = "\n".join(oms_order_no_list)
+    # oms_order_no_str = "\n".join(oms_order_no_list)
     # 根据销售订单号找出oms单号执行审单
     # 执行审单
     dispatch_result = oms_app_ip.dispatch_oms_order(oms_order_no_list)
@@ -114,6 +114,7 @@ def create_wms_sale_outbound_order(order_sku_info_list):
         "delivery_warehouse_code": record['deliveryWarehouseCode'],
         "sale_out_no": record['salesOutNo']
     } for record in oms_order_list]
+
     return {sale_order_no: ck_order_list}
 
 

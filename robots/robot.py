@@ -52,7 +52,9 @@ class Robot:
 
     @classmethod
     def formatted_result(cls, res_data):
-        if res_data["code"] == 200:
+        if not res_data:
+            return cls.report(0, "操作失败", None)
+        elif res_data.get("code") == 200:
             return cls.report(1, "操作成功,msg:%s" % res_data["message"], res_data["data"])
         elif res_data.get("data") and res_data.get("message"):
             return cls.report(0, "操作失败,msg:%s" % res_data["message"], res_data["data"])

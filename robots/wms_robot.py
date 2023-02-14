@@ -108,7 +108,7 @@ class WMSAppRobot(AppRobot):
         """
         根据仓库编码获取仓库信息
         :param str warehouse_id : 仓库id
-        @return : 仓库的信息
+        :return : 仓库的信息
         """
         content = deepcopy(BaseApiConfig.GetWarehouseInfoById.get_attributes())
         content["uri_path"] += warehouse_id
@@ -158,7 +158,7 @@ class WMSAppRobot(AppRobot):
         :param int num: 新建的库位数
         :param int warehouse_id: 所属仓库id
         :param int target_warehouse_id: 目的仓id
-        @return: list 创建出来的库位列表
+        :return: list 创建出来的库位列表
         """
         if warehouse_id == target_warehouse_id or target_warehouse_id == 0:
             target_warehouse_id = ""
@@ -432,7 +432,7 @@ class WMSAppRobot(AppRobot):
         """
         提交预收货单
         :param pre_receive_order_list: 预收货单号列表
-        @return:
+        :return:
         """
         content = deepcopy(ReceiptApiConfig.SubmitPreReceiveOrder.get_attributes())
         content["data"].update({
@@ -445,7 +445,7 @@ class WMSAppRobot(AppRobot):
         """
         上架交接
         :param kw_codes: 上架交接的库位编码列表
-        @return:
+        :return:
         """
         content = deepcopy(ReceiptApiConfig.HandoverToUpShelf.get_attributes())
         content["data"].update(
@@ -461,7 +461,7 @@ class WMSAppRobot(AppRobot):
         整托上架
         :param sj_kw_code: 上架库位
         :param old_kw_code: 原库位，可以是收货库位或者质检库位
-        @return:
+        :return:
         """
         content = deepcopy(ReceiptApiConfig.UpShelfWholeLocation.get_attributes())
         content["data"].update(
@@ -476,7 +476,7 @@ class WMSAppRobot(AppRobot):
     def receipt_complete_upshelf(self):
         """
         上架完成
-        @return:
+        :return:
         """
         content = deepcopy(ReceiptApiConfig.CompleteUpShelf.get_attributes())
         res = self.call_api(**content)
@@ -485,7 +485,7 @@ class WMSAppRobot(AppRobot):
     def receipt_location_detail(self, kw_code):
         """
         查询库位明细数据
-        @return:
+        :return:
         """
         content = deepcopy(ReceiptApiConfig.LocationDetail.get_attributes())
         content["uri_path"] = content["uri_path"] % kw_code
@@ -496,7 +496,7 @@ class WMSAppRobot(AppRobot):
         """
         销售出库单详情
         :param list delivery_order_code_list: 销售出库单编码列表
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.DeliveryOrderPage.get_attributes())
         content["data"].update({
@@ -509,7 +509,7 @@ class WMSAppRobot(AppRobot):
         """
         销售出库单详情
         :param int delivery_order_id: 销售出库单id
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.DeliveryOrderDetail.get_attributes())
         content["uri_path"] = content["uri_path"].format(delivery_order_id)
@@ -523,7 +523,7 @@ class WMSAppRobot(AppRobot):
         """
         销售出库单分配库存
         :param list delivery_order_code_list: 销售出库单号列表
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.AssignStock.get_attributes())
         content["data"].update({
@@ -581,7 +581,7 @@ class WMSAppRobot(AppRobot):
         :param transport_type: 运输方式1快递，2卡车
         :param delivery_order_sku_list: 出库单sku列表
         :param delivery_order_code: 销售出库单号
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.PackageCallBack.get_attributes())
         content["data"].update({
@@ -600,7 +600,7 @@ class WMSAppRobot(AppRobot):
         创建拣货单
         :param prod_type: 0前置面单；1后置面单
         :param delivery_order_code: 销售出库单编码
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.CreatePickOrder.get_attributes())
         if prod_type == 0:
@@ -626,7 +626,7 @@ class WMSAppRobot(AppRobot):
         """
         拣货单分配拣货人
         :param pick_order_code: 拣货单编码
-        @return:
+        :return:
         """
         user_info = self.get_user_info()
         content = deepcopy(DeliveryApiConfig.AssignPickUser.get_attributes())
@@ -642,7 +642,7 @@ class WMSAppRobot(AppRobot):
         """
         获取拣货单拣货信息
         :param pick_order_id: 销售出库单id
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.GetToPickData.get_attributes())
         content["uri_path"] %= pick_order_id
@@ -655,7 +655,7 @@ class WMSAppRobot(AppRobot):
         :param lost_list: 拣货异常的sku列表
         :param normal_list: 正常拣货的sku列表
         :param pick_order_code: 销售出库单编码
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.PickOrderConfirmPick.get_attributes())
         content["data"].update({
@@ -669,7 +669,7 @@ class WMSAppRobot(AppRobot):
         """
         获取销售出库单的包裹方案信息
         :param delivery_order_code: 销售出库单编码
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.DeliveryPackageInfo.get_attributes())
         content['uri_path'] %= delivery_order_code
@@ -683,7 +683,7 @@ class WMSAppRobot(AppRobot):
         """
         销售出库单维护包裹
         :param package_info: 销售出库单的包裹信息
-        @return:
+        :return:
         """
         package_info_list = list()
         content = deepcopy(DeliveryApiConfig.DeliverySavePackage.get_attributes())
@@ -717,7 +717,7 @@ class WMSAppRobot(AppRobot):
         销售出库单复核
         :param abnormal_list: 存在拦截、取消的出库单
         :param normal_list: 正常的出库单
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.DeliveryOrderReview.get_attributes())
         content["data"].update({
@@ -731,7 +731,7 @@ class WMSAppRobot(AppRobot):
         :param normal_codes: 不存在拦截、取消的出库单编码列表
         :param normal_ids: 不存在拦截、取消的出库单id列表
         :param abnormal_list: 存在拦截、取消的出库单
-        @return:
+        :return:
         """
         content = deepcopy(DeliveryApiConfig.DeliveryOrderShipping.get_attributes())
         content["data"].update(
@@ -743,7 +743,7 @@ class WMSAppRobot(AppRobot):
         """
         其他入库添加sku时获取sku信息
         :param ware_sku_code_list:仓库sku编码列表
-        @return:info list
+        :return:info list
         """
         content = deepcopy(OtherInApiConfig.GetSkuInfo.get_attributes())
         content["data"].update(
@@ -755,7 +755,7 @@ class WMSAppRobot(AppRobot):
         """
         创建其他入库单
         :param sku_info_list:查找到的仓库sku的信息列表
-        @return:
+        :return:
         """
         content = deepcopy(OtherInApiConfig.CreateOtherInOrder.get_attributes())
         now = int(time.time() * 1000)
@@ -775,7 +775,7 @@ class WMSAppRobot(AppRobot):
         获取其他入库单信息
         :param entry_order_code: 入库单编码
         :param entry_order_id: 入库单id
-        @return:
+        :return:
         """
         content = deepcopy(OtherInApiConfig.GetOtherInOrderSkuInfoByEntryOrderCode.get_attributes())
         now = int(time.time() * 1000)
@@ -793,7 +793,7 @@ class WMSAppRobot(AppRobot):
         提交其他入库单
         :param entry_order_code: 入库单编码
         :param entry_order_id: 入库单id
-        @return:
+        :return:
         """
         entry_order_sku_info_result = self.other_in_get_order_sku_info(entry_order_code, entry_order_id)
         if not entry_order_sku_info_result["code"]:
@@ -832,7 +832,7 @@ class WMSAppRobot(AppRobot):
         :param to_warehouse_id: 目的仓id
         :param entry_order_code: 入库单编码
         :param entry_order_id: 入库单id
-        @return:
+        :return:
         """
         content = deepcopy(OtherInApiConfig.PutOnTheShelf.get_attributes())
         entry_order_sku_info_result = self.other_in_get_order_sku_info(entry_order_code, entry_order_id)

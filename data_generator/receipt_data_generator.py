@@ -11,11 +11,11 @@ class WmsReceiptDataGenerator:
     def create_other_in_order(self, sale_sku_code, bom, qty, warehouse_id):
         """
         创建其他其他入库单
-        @param warehouse_id:仓库id
-        @param bom: bom版本
-        @param sale_sku_code: 销售sku编码
-        @param qty: 套数
-        @return:
+        :param warehouse_id:仓库id
+        :param bom: bom版本
+        :param sale_sku_code: 销售sku编码
+        :param qty: 套数
+        :return:
         """
         # 切换仓库
         switch_res = self.wms_app.common_switch_warehouse(warehouse_id)
@@ -57,12 +57,12 @@ class WmsReceiptDataGenerator:
     def create_other_in_order_and_up_shelf(self, sale_sku_code, bom, qty, warehouse_id, to_warehouse_id):
         """
         创建其他入库单并执行提交和上架
-        @param to_warehouse_id: 目的仓id
-        @param warehouse_id: 仓库id
-        @param sale_sku_code: 销售sku编码
-        @param bom: bom版本
-        @param qty: 套数
-        @return:
+        :param to_warehouse_id: 目的仓id
+        :param warehouse_id: 仓库id
+        :param sale_sku_code: 销售sku编码
+        :param bom: bom版本
+        :param qty: 套数
+        :return:
         """
         create_order_res = self.create_other_in_order(sale_sku_code, bom, qty, warehouse_id)
         if not create_order_res["code"]:

@@ -30,8 +30,8 @@ def get_wait_purchase_order():
 def run_purchase(purchase_order_no):
     """
     执行缺货需求确认到发货完成全流程
-    @param purchase_order_no:采购单编码
-    @return:
+    :param purchase_order_no:采购单编码
+    :return:
     """
     purchase_order_page_result = scm_app.get_purchase_order_page(purchase_order_no=purchase_order_no)
     if not purchase_order_page_result["code"]:
