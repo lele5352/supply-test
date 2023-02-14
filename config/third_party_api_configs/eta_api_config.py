@@ -4,7 +4,7 @@ from config.third_party_api_configs import ApiConfig
 class ETAApiConfig:
     class GetAvailableStock(ApiConfig):
         uri_path = "/mall/availableStock"
-        method = "post"
+        method = "POST"
         data = {
             "current": 1,
             "size": 1000,
@@ -12,7 +12,7 @@ class ETAApiConfig:
 
     class GetGoodsETA(ApiConfig):
         uri_path = "/mall/calculate"
-        method = "post"
+        method = "POST"
         data = {
             "countryCode": "26",
             "siteCode": "0",
@@ -22,12 +22,12 @@ class ETAApiConfig:
 
     class CountryDeliveryWarehouses(ApiConfig):
         uri_path = "/mall/country"
-        method = "get"
+        method = "GET"
         data = ""
 
     class GetTradeSelfGoodsEtA(ApiConfig):
         uri_path = "/mall/eta/trade/self"
-        method = "post"
+        method = "POST"
         data = {
             "countryCode": "",
             "skuInfos": [
@@ -41,12 +41,12 @@ class ETAApiConfig:
 
     class GetCountryList(ApiConfig):
         uri_path = "/mall/getList"
-        method = "post"
+        method = "POST"
         data = {"countryCode": ""}
 
     class GetInventory(ApiConfig):
         uri_path = "/mall/inventory/get"
-        method = "post"
+        method = "POST"
         data = {
             "abroadFlag": 0,  # 海外仓标识：0全美(包含国内仓)，1海外仓，2国内仓
             "countryCode": "",
@@ -56,13 +56,13 @@ class ETAApiConfig:
 
     class GetDistributeWarehousesByCountryAndZipcode(ApiConfig):
         uri_path = "/mall/warehouses"
-        method = "post"
+        method = "POST"
         data = [
         ]
 
     class GetDistributeWarehousesByFourParams(ApiConfig):
         uri_path = "/mall/warehouses/sku"
-        method = "post"
+        method = "POST"
         data = [
             {
                 "countryCode": "",

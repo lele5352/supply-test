@@ -51,7 +51,7 @@ class BaseApi:
     class ProviderList(ApiConfig):
         """服务商列表查询"""
         uri_path = '/api/ec-fms-api/fms/api/common/all/service/provider'
-        method = "get"
+        method = "GET"
 
     class ChannelList(ApiConfig):
         """渠道列表查询"""
@@ -86,7 +86,7 @@ class FeeItemApi:
     class FeeItemPage(ApiConfig):
         """费用项列表分页查询"""
         uri_path = '/api/ec-fms-api/fms/fee-item/page'
-        method = "post"
+        method = "POST"
         data = {"feeItemName": "", "feeItemType": [], "feeItemCategory": "", "pageSize": 10, "pageNumber": 1,
                 "total": 99}
 

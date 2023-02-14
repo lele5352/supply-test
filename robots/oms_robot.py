@@ -18,7 +18,8 @@ class OMSAppRobot(AppRobot):
         @param str site: 站点
         @return : sku的信息
         """
-        oms_api_config['get_product_info']['data'].update(
+        content = deepcopy(OMSApiConfig.GetProductInfo.get_attributes())
+        content['data'].update(
             {
                 "type": sku_type,
                 "skuCode": sku_code,
@@ -26,10 +27,15 @@ class OMSAppRobot(AppRobot):
                 "t": int(time.time() * 1000)
             }
         )
-        res_data = self.call_api(**oms_api_config['get_product_info'])
-        res_data.update({
-            "data": res_data["data"]["records"][0]
-        })
+        res_data = self.call_api(**content)
+        try:
+            res_data.update({
+                "data": res_data["data"]["records"][0]
+            })
+        except TypeError:
+            res_data.update({
+                "data": []
+            })
         return self.formatted_result(res_data)
 
     def get_follow_order_page(self, oms_no):

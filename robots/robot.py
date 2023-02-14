@@ -21,13 +21,13 @@ class Robot:
 
     def call_api(self, uri_path, method, data=None, files=None) -> dict:
         url = urljoin(self.prefix, uri_path)
-        if method == "get":
-            response = requests.get(url, headers=self.headers)
-        elif method == "post":
+        if method == "GET":
+            response = requests.get(url, params=data, headers=self.headers)
+        elif method == "POST":
             response = requests.post(url, json=data, headers=self.headers, files=files)
-        elif method == "put":
+        elif method == "PUT":
             response = requests.put(url, json=data, headers=self.headers)
-        elif method == "delete":
+        elif method == "DELETE":
             response = requests.delete(url, headers=self.headers)
         else:
             raise ValueError("Invalid request method")

@@ -4,7 +4,7 @@ from config.third_party_api_configs import ApiConfig
 class SCMApiConfig:
     class GetProductInfo(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/common/getProductPage"
-        method = "post"
+        method = "POST"
         data = {
             "pageNumber": 1,
             "pageSize": 10,
@@ -14,12 +14,12 @@ class SCMApiConfig:
 
     class ShortageDemandBatchConfirm(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/lackDemand/batchConfirm"
-        method = "put"
+        method = "PUT"
         data = ["1465875421462663183"]
 
     class StockPlanSubmit(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/stockPlan/submit"
-        method = "post"
+        method = "POST"
         data = {
             "baseInfo": {
                 "destinationWarehouse": "USLA01",
@@ -30,7 +30,7 @@ class SCMApiConfig:
 
     class StockPlanAudit(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/stockPlan/batchAudit"
-        method = "put"
+        method = "PUT"
         data = {
             "ids": ["1469197356305092610"],
             "isPass": True,
@@ -39,7 +39,7 @@ class SCMApiConfig:
 
     class GetPurchaseDemandPage(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseDemand/page"
-        method = "post"
+        method = "POST"
         data = {
             "pageNumber": 1,
             "pageSize": 50,
@@ -55,27 +55,27 @@ class SCMApiConfig:
 
     class GetPurchaseDemandDetail(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseDemand/getDetail/"
-        method = "get"
+        method = "GET"
         data = ""
 
     class BatchGetPurchaseDemandDetail(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseDemand/getBatchDetail"
-        method = "post"
+        method = "POST"
         data = ""
 
     class ConfirmAndGeneratePurchaseOrder(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseDemand/confirmAndGeneratePurchaseOrder"
-        method = "put"
+        method = "PUT"
         data = []
 
     class GetPurchaseOrderDetail(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseOrder/getAllDetail/%s"
-        method = "get"
+        method = "GET"
         data = ""
 
     class GetPurchaseOrderPage(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseOrder/page"
-        method = "post"
+        method = "POST"
         data = {"pageNumber": 1, "pageSize": 10, "total": 1, "status": [], "destinationWarehouse": "",
                 "deliveryWarehouse": "", "qualityInspectionType": -1, "arrivalStatus": [-1], "payStatus": [-1],
                 "dispatchStatus": [-1], "supplierAcceptStatus": -1, "tracerId": "", "field": None, "type": None,
@@ -83,12 +83,12 @@ class SCMApiConfig:
 
     class PurchaseOrderUpdate(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseOrder/update"
-        method = "put"
+        method = "PUT"
         data = ""
 
     class PurchaseOrderBatchAudit(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseOrder/batchAudit"
-        method = "put"
+        method = "PUT"
         data = {
             "ids": ["1469197356305092610"],
             "isPass": True,
@@ -97,12 +97,12 @@ class SCMApiConfig:
 
     class PurchaseOrderBatchBuy(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseOrder/batchBuy"
-        method = "put"
+        method = "PUT"
         data = ["1469197356305092610"]
 
     class GetPurchaseOrderDeliveryDetail(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseOrder/getDeliveryDetailPage"
-        method = "post"
+        method = "POST"
         data = {
             "ids": [],
             "pageNumber": 1,
@@ -112,17 +112,17 @@ class SCMApiConfig:
 
     class GenerateDistributeOrder(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseOrder/generateDistributeOrder"
-        method = "post"
+        method = "POST"
         data = []
 
     class PurchaseOrderDelivery(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/purchaseOrder/distributeOrderSubmit"
-        method = "post"
+        method = "POST"
         data = {}
 
     class GetDistributeOrderPage(ApiConfig):
         uri_path = "/api/ec-scm-api/scm/api/shipping-order/page"
-        method = "post"
+        method = "POST"
         data = {
             "pageNumber": 1,
             "pageSize": 10,
