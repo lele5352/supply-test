@@ -1,8 +1,7 @@
-import time
-
 from utils.wait_handler import until
 from cases import *
 from utils.log_handler import logger
+
 
 def create_sale_order(order_sku_info_list):
     """
@@ -11,7 +10,7 @@ def create_sale_order(order_sku_info_list):
     :return: sale_order_no，销售出库单号
     """
     create_result = oms_app.create_sale_order(order_sku_info_list)
-    if not create_result['code']:
+    if oms_app.is_data_empty(create_result):
         return
     # 提取销售单号，从data中直接提取
     sale_order_no = create_result.get('data')
@@ -23,31 +22,33 @@ def create_wms_sale_outbound_order(order_sku_info_list):
     sale_order_no = create_sale_order(order_sku_info_list)
     if not sale_order_no:
         return
+
     # 根据销售单号查询oms单，从data中直接提取
     query_oms_order_result = oms_app.query_oms_order_by_sale_no(sale_order_no)
-    if not query_oms_order_result['code']:
+    if oms_app.is_data_empty(query_oms_order_result):
         return
+
     oms_order_list = query_oms_order_result.get('data')
     oms_order_no_list = [record['orderNo'] for record in oms_order_list]
-    # oms_order_no_str = "\n".join(oms_order_no_list)
+
     # 根据销售订单号找出oms单号执行审单
-    # 执行审单
     dispatch_result = oms_app_ip.dispatch_oms_order(oms_order_no_list)
-    if not dispatch_result['code']:
+    if not oms_app.is_success(dispatch_result):
         return
-    # 审单之后可能会拆单，需要再根据销售单号从新查出来oms单
-    # 根据销售单号查询oms单，从data中直接提取
+
+    # 审单之后可能会拆单，需要再根据销售单号从新查出来oms单,从data中直接提取
     query_oms_order_result = oms_app.query_oms_order_by_sale_no(sale_order_no)
-    if not query_oms_order_result['code']:
+    if oms_app.is_data_empty(query_oms_order_result):
         return
     oms_order_list = query_oms_order_result.get('data')
+
     # 添加库存
     follow_order_list = list()
     # 为了确保订单有库存下发，提前根据订单添加库存
     for oms_order in oms_order_list:
         order_id = oms_order["id"]
         order_sku_items_result = oms_app.query_oms_order_sku_items(order_id)
-        if not order_sku_items_result['code']:
+        if oms_app.is_data_empty(order_sku_items_result):
             return
 
         order_sku_items = order_sku_items_result.get("data")
@@ -78,11 +79,11 @@ def create_wms_sale_outbound_order(order_sku_info_list):
                 warehouse_id = list(filter(lambda x: x["warehouseCode"] == warehouse_code, warehouse_list))[0].get(
                     "warehouseId")
             get_kw_result = wms_app.db_get_kw(1, 5, len(order_sku_info_list), warehouse_id, warehouse_id)
-            if not get_kw_result["code"]:
+            if oms_app.is_data_empty(get_kw_result):
                 return
             kw_ids = get_kw_result.get('data')
             add_stock_result = ims_robot.add_bom_stock(sku_code, bom, qty, kw_ids, warehouse_id, warehouse_id)
-            if not add_stock_result["code"]:
+            if oms_app.is_data_empty(add_stock_result):
                 return
 
             # 构造跟单参数
@@ -91,7 +92,7 @@ def create_wms_sale_outbound_order(order_sku_info_list):
 
     # 执行跟单
     follow_result = oms_app_ip.oms_order_follow(follow_order_list)
-    if not follow_result["code"]:
+    if not oms_app.is_success(follow_result):
         return
     # 跟单是异步操作，需要等待跟单完成,通过查询oms单状态是否为已预占待下发，满足才可执行下发
     for order in oms_order_no_list:
@@ -100,7 +101,7 @@ def create_wms_sale_outbound_order(order_sku_info_list):
 
     # 执行订单下发
     push_result = oms_app_ip.push_order_to_wms()
-    if not push_result["code"]:
+    if oms_app.is_data_empty(push_result):
         return
 
     # 订单下发也是异步，需要等待下发执行完成，通过查询oms单是否有出库单号确认是否下发成功
@@ -114,7 +115,7 @@ def create_wms_sale_outbound_order(order_sku_info_list):
         "delivery_warehouse_code": record['deliveryWarehouseCode'],
         "sale_out_no": record['salesOutNo']
     } for record in oms_order_list]
-
+    logger.info("生成数据销售订单：{}，对应出库单：{}".format(sale_order_no, ck_order_list), True)
     return {sale_order_no: ck_order_list}
 
 
@@ -123,8 +124,5 @@ if __name__ == '__main__':
     #         {"sku_code": "63203684930", "qty": 3, "bom": "A", "warehouse_id": "520"}]
     # data = [{"sku_code": "63203684930", "qty": 2, "bom": "A", "warehouse_id": "513"},
     #         {"sku_code": "67330337129", "qty": 2, "bom": "A", "warehouse_id": "513"}]
-    start = time.time()
     data = [{"sku_code": "63203684930", "qty": 2, "bom": "B", "warehouse_id": "513"}]
-    print(create_wms_sale_outbound_order(data))
-    end = time.time()
-    print("花费{}秒".format(round(end-start)))
+    create_wms_sale_outbound_order(data)
