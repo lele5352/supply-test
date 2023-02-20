@@ -41,14 +41,39 @@ class Robot:
 
     @classmethod
     def is_data_empty(cls, response_data):
+        result = False
         if not response_data:
-            return True
-        elif response_data.get("data", None) is None:
-            return True
-        elif len(response_data.get("data").get("records")) == 0:
-            return True
+            result = True
+
+        data = response_data.get("data")
+        if not data:
+            result = True
+
+        if isinstance(data, str):
+            result = False if len(data) > 0 else True
+
+        if isinstance(data, dict):
+            if data.get("records"):
+                result = False if len(data.get("records") > 0) else True
+            else:
+                result = False
+        if isinstance(data, list):
+            result = False if len(data) > 0 else True
+        return result
+
+    @classmethod
+    def is_success(cls, response_data):
+        if not response_data:
+            result = False
         else:
-            return False
+            code = response_data.get("code")
+            if not code:
+                result = False
+            elif code == 1:
+                result = True
+            else:
+                result = False
+        return result
 
     @classmethod
     def formatted_result(cls, res_data):
