@@ -27,7 +27,7 @@ class Robot:
             "data": data
         }
 
-    def call_api(self, uri_path, method, data, files="") -> dict:
+    def call_api(self, uri_path, method, data=None, files="") -> dict:
         req_url = urljoin(self.prefix, uri_path)
 
         if method == "post":
@@ -42,6 +42,7 @@ class Robot:
         result_data = res.json()
         log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
         log.info("请求内容：%s" % json.dumps({"method": method, "url": req_url, "data": data}, ensure_ascii=False))
+        log.info(f"traceId: {res.headers.get('Trace-Id')}")
         log.info("响应内容：" + json.dumps(result_data, ensure_ascii=False))
         log.info(
             "-------------------------------------------------我是分隔符-------------------------------------------------")

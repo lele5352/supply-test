@@ -166,7 +166,18 @@ class WMSDBOperator:
         items = [model_to_dict(item) for item in items]
         return items
 
+    @classmethod
+    def get_delivery_order_code_list(cls, limit=100):
+        """
+        获取出库单号列表
+        """
+        items = TdoDeliveryOrder.select(TdoDeliveryOrder.delivery_order_code).where(
+            TdoDeliveryOrder.del_flag == 0).limit(limit)
 
-if __name__ == "__main__":
-    dbo = WMSDBOperator()
-    print(dbo.query_warehouse_config())
+        if not items:
+            return None
+
+        return [model_to_dict(i, only=[TdoDeliveryOrder.delivery_order_code])
+                for i in items]
+
+
