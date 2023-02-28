@@ -19,7 +19,7 @@ class WmsReceiptDataGenerator:
         """
         # 切换仓库
         switch_res = self.wms_app.common_switch_warehouse(warehouse_id)
-        if not switch_res["code"]:
+        if not self.wms_app.is_success(switch_res):
             print("切换仓库失败")
             return
 
@@ -29,7 +29,7 @@ class WmsReceiptDataGenerator:
             return
         ware_sku_codes = list(bom_detail.keys())
         get_sku_info_res = self.wms_app.other_in_get_sku_info(ware_sku_codes)
-        if not get_sku_info_res["code"]:
+        if not self.wms_app.is_success(get_sku_info_res):
             print("查询销售sku对应仓库sku信息失败")
             return
 
@@ -65,7 +65,7 @@ class WmsReceiptDataGenerator:
         :return:
         """
         create_order_res = self.create_other_in_order(sale_sku_code, bom, qty, warehouse_id)
-        if not create_order_res["code"]:
+        if not wms_app.is_success(create_order_res):
             print("创建其他入库单失败")
             return
         entry_order_code = create_order_res["data"]["entryOrderCode"]

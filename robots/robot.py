@@ -46,6 +46,7 @@ class Robot:
             result = True
 
         data = response_data.get("data")
+
         if not data:
             result = True
 
@@ -53,10 +54,12 @@ class Robot:
             result = False if len(data) > 0 else True
 
         if isinstance(data, dict):
-            if data.get("records"):
-                result = False if len(data.get("records") > 0) else True
+            if data.__contains__("records"):
+                result = len(data.get("records")) <= 0
+            elif data.__contains__("list"):
+                result = len(data.get("list")) <= 0
             else:
-                result = False
+                result = True
         if isinstance(data, list):
             result = False if len(data) > 0 else True
         return result

@@ -38,7 +38,7 @@ class SCMRobot(AppRobot):
         sale_sku_info_list = list()
         for sale_sku in sale_sku_list:
             sku_info_result = self.get_sku_info(sale_sku)
-            if not sku_info_result["code"]:
+            if self.is_data_empty(sku_info_result):
                 log.error("获取销售sku%s信息失败" % sale_sku)
                 continue
             sku_info = sku_info_result['data']["list"][0]
