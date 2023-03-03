@@ -45,9 +45,9 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
         return False, "Fail to get up shelf warehouse location!"
     sj_kw_codes = get_sj_kw_result['data']
 
-    for sku, kw in zip(receive_sku_list, sh_kw_codes):
+    for sku, sh_kw in zip(receive_sku_list, sh_kw_codes):
         sku.update({
-            "locationCode": kw,
+            "locationCode": sh_kw,
             "skuNumber": sku['totalNumber']
         })
     receive_result = wms_app.receipt_confirm_receive(entry_order_code, pre_receive_order_code, receive_sku_list)
@@ -66,7 +66,6 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
 
     # 如果需要质检则先执行质检交接，再执行质检流程
     if need_quality_check:
-        total_zj_kws = list()
         # 执行质检交接
         handover_result = wms_app.receipt_handover_to_quality_check(sh_kw_codes)
         if not wms_app.is_success(handover_result):
@@ -75,31 +74,29 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
         # 质检流程
         # 最终要组装出来提交质检的数据
         quality_check_sku_list = list()
+        get_zj_kw_result = wms_app.db_get_kw(2, 2, len(sh_kw_codes), warehouse_id, to_warehouse_id)
+        if not wms_app.is_success(get_zj_kw_result):
+            return False, "Fail to get receipt warehouse quality check location!"
+        zj_kw_codes = get_zj_kw_result.get("data")
         # 获取收货库位待质检sku信息
-        for kw in sh_kw_codes:
-            location_detail = wms_app.receipt_get_quality_check_location_detail(kw)
+        for sh_kw, zj_kw in zip(sh_kw_codes, zj_kw_codes):
+            location_detail = wms_app.receipt_get_quality_check_location_detail(sh_kw)
             if not wms_app.is_success(location_detail):
                 return False, "Fail to get quality check location detail!"
             location_receipt_infos = location_detail.get("data").get("receiptInfos")
-
-            get_zj_kw_result = wms_app.db_get_kw(2, 2, len(location_receipt_infos), warehouse_id, to_warehouse_id)
-            if not wms_app.is_success(get_zj_kw_result):
-                return False, "Fail to get receipt warehouse quality check location!"
-            zj_kw_codes = get_zj_kw_result.get("data")
-            total_zj_kws.extend(filter(lambda x: x not in total_zj_kws, zj_kw_codes))
             # 按库位下的逐个sku提交质检信息
-            for receipt_info, zj_kw_code in zip(location_receipt_infos, zj_kw_codes):
+            for receipt_info in location_receipt_infos:
                 received_order_code = receipt_info.get("receiptOrderCode")
                 for sku_info in receipt_info.get("skuInfos"):
                     # 录入质检结果，输入良品数量和质检库位，提交后会绑定收货库位、质检库位、收货单关系
                     sku_code = sku_info.get("skuCode")
                     qty = sku_info.get("qcStayNumber")
 
-                    bind_result = wms_app.receipt_quality_location_bind(kw, zj_kw_code, received_order_code)
+                    bind_result = wms_app.receipt_quality_location_bind(sh_kw, zj_kw, received_order_code)
                     if not wms_app.is_success(bind_result):
                         return False, "Fail to bind quality check location and received location！"
                     quality_check_sku_list.append({
-                        "receiveLocationCode": kw,
+                        "receiveLocationCode": sh_kw,
                         "entryOrderCode": entry_order_code,
                         "receiveOrderCode": received_order_code,
                         "skuCode": sku_code,
@@ -109,7 +106,7 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
                         "height": 0,
                         "width": 0,
                         "weight": 0,
-                        "qcLocationCode": zj_kw_code
+                        "qcLocationCode": zj_kw
                     })
         # 提交质检
         quality_check_submit_result = wms_app.receipt_quality_check_submit(quality_check_sku_list)
@@ -121,7 +118,7 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
             return True, entry_order_code
 
         # 如果执行了质检，上架交接就用质检库位交接
-        sh_kw_codes = total_zj_kws
+        sh_kw_codes = zj_kw_codes
 
     # 上架交接
     handover_result = wms_app.receipt_handover_to_upshelf(sh_kw_codes)
@@ -147,5 +144,5 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
 
 
 if __name__ == '__main__':
-    wms = run_receive('FH2303036536', False)
+    wms = run_receive('FH2303032931', True)
     print(wms)
