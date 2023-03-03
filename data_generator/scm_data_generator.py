@@ -6,7 +6,7 @@ from cases import scm_app
 
 
 class ScmDataGenerator:
-    def __init__(self, scm_app):
+    def __init__(self):
         self.scm_app = scm_app
 
     def create_stock_plan(self, sale_sku_list, num, delivery_warehouse_code, target_warehouse_code):
@@ -188,7 +188,7 @@ class ScmDataGenerator:
 
 
 if __name__ == '__main__':
-    scm = ScmDataGenerator(scm_app)
+    scm = ScmDataGenerator()
 
     # scm.create_purchase_order(["14093131604"], 10, 'ESBH', '')
     # scm.create_stock_plan(['14093131604'], 10 ,'ESBH', '')

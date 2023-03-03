@@ -4,7 +4,7 @@ from utils.log_handler import logger as log
 
 
 class WmsReceiptDataGenerator:
-    def __init__(self, wms_app, ims_robot):
+    def __init__(self):
         self.wms_app = wms_app
         self.ims = ims_robot
 
@@ -81,5 +81,5 @@ class WmsReceiptDataGenerator:
 
 
 if __name__ == '__main__':
-    receipt_data = WmsReceiptDataGenerator(wms_app, ims_robot)
+    receipt_data = WmsReceiptDataGenerator()
     print(receipt_data.create_other_in_order_and_up_shelf("JJ306J84G7", "A", 2, 543, 543))

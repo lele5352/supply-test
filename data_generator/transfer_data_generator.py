@@ -10,7 +10,7 @@ from data_generator.receipt_data_generator import WmsReceiptDataGenerator
 
 
 class WmsTransferDataGenerator:
-    def __init__(self, wms_app, wms_transfer, ims_robot):
+    def __init__(self):
         self.wms_app = wms_app
         self.wms_transfer = wms_transfer
         self.ims = ims_robot
@@ -85,16 +85,8 @@ class WmsTransferDataGenerator:
         self.wms_app.common_switch_warehouse(trans_out_id)
         # 生成调拨需求
         demand_no = self.create_transfer_demand(
-            trans_out_id,
-            trans_out_to_id,
-            trans_in_id,
-            trans_in_to_id,
-            sale_sku_code,
-            bom,
-            demand_qty,
-            demand_type,
-            customer_type,
-            remark
+            trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom, demand_qty, demand_type,
+            customer_type, remark
         )
         if not demand_no:
             print('创建调拨拣货单失败：需求创建失败！')
@@ -129,16 +121,8 @@ class WmsTransferDataGenerator:
         """
         # 生成调拨需求
         demand_no = self.create_transfer_demand(
-            trans_out_id,
-            trans_out_to_id,
-            trans_in_id,
-            trans_in_to_id,
-            sale_sku_code,
-            bom,
-            demand_qty,
-            demand_type,
-            customer_type,
-            remark
+            trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom, demand_qty, demand_type,
+            customer_type, remark
         )
         if not demand_no:
             print('创建调拨拣货单失败')
@@ -210,9 +194,9 @@ class WmsTransferDataGenerator:
 
 
 if __name__ == '__main__':
-    transfer_data = WmsTransferDataGenerator(wms_app, wms_transfer, ims_robot)
-    demand_qty = 1
-    # transfer_data.create_transfer_out_order(512, '', 513, 513, '63203684930', 2)
-    transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', "A", 10)
-    # transfer_data.create_transfer_out_order(512, 0, 513, 513, '63203684930', "B", 1)
+    transfer_data = WmsTransferDataGenerator()
+    demand_qty = 10
+    transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', "B", 2)
+    # transfer_data.create_transfer_demand(512, '', 514, 514, '63203684930', "B", 10)
+    # transfer_data.create_transfer_out_order(512, '', 514, 514, '63203684930', "B", 10)
     # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)
