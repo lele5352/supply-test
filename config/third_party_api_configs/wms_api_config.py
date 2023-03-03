@@ -405,6 +405,47 @@ class ReceiptApiConfig:
         method = "POST"
         data = {"predictReceiptOrderCodeList": []}
 
+    class HandoverToQualityCheck(ApiConfig):
+        uri_path = "/api/ec-wms-api/receivegoodshandover/confirm"
+        method = "POST"
+        data = {
+            "locationCodes": ["SH1667739868494", "SH1667739868078"],
+            "qualityType": 1
+        }
+
+    class QualityCheckLocationDetail(ApiConfig):
+        uri_path = "/api/ec-wms-api/qualitycheck/location/detail"
+        method = "GET"
+        data = {"locationCode": ""}
+
+    class QualityCheckLocationBind(ApiConfig):
+        uri_path = "/api/ec-wms-api/qualitycheck/qc/location"
+        method = "POST"
+        data = {
+            "receiveLocationCode": "SH1667739868494",
+            "qcLocationCode": "ZJKW-001",
+            "receiveOrderCode": "SH2303030002"
+        }
+
+    class QualityCheckSubmit(ApiConfig):
+        uri_path = "/api/ec-wms-api/qualitycheck/save"
+        method = "POST"
+        data = {
+            "skuList": [{
+                "receiveLocationCode": "SH1667739868078",
+                "entryOrderCode": "RK2303030011",
+                "receiveOrderCode": "SH2303030002",
+                "skuCode": "63203684930B01",
+                "qcResult": 0,
+                "number": 1,
+                "length": 0,
+                "height": 0,
+                "width": 0,
+                "weight": 0,
+                "qcLocationCode": "ZJKW-001"
+            }]
+        }
+
     class HandoverToUpShelf(ApiConfig):
         uri_path = "/api/ec-wms-api/receivegoodshandover/confirmUpShelf"
         method = "POST"

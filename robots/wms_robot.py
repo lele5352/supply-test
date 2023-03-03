@@ -456,6 +456,36 @@ class WMSAppRobot(AppRobot):
         res = self.call_api(**content)
         return self.formatted_result(res)
 
+    def receipt_handover_to_quality_check(self, kw_codes):
+        """
+        上架交接
+        :param kw_codes: 质检交接的库位编码列表
+        :return:
+        """
+        content = deepcopy(ReceiptApiConfig.HandoverToQualityCheck.get_attributes())
+        content["data"].update(
+            {
+                "locationCodes": kw_codes
+            }
+        )
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def receipt_get_quality_check_location_detail(self, kw_code):
+        """
+        获取收货库位中待质检sku信息
+        :param kw_code: 收货库位编码
+        :return:
+        """
+        content = deepcopy(ReceiptApiConfig.QualityCheckLocationDetail.get_attributes())
+        content["data"].update(
+            {
+                "locationCode": kw_code
+            }
+        )
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
     def receipt_upshelf_whole_location(self, old_kw_code, sj_kw_code):
         """
         整托上架
@@ -489,6 +519,36 @@ class WMSAppRobot(AppRobot):
         """
         content = deepcopy(ReceiptApiConfig.LocationDetail.get_attributes())
         content["uri_path"] = content["uri_path"] % kw_code
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def receipt_quality_location_bind(self, sh_kw_code, zj_kw_code, received_order_code):
+        """
+        录入质检结果时绑定质检库位、收货库位、收货单
+        :param sh_kw_code: 收货库位编码
+        :param zj_kw_code: 质检库位编码
+        :param received_order_code: 收货单编码
+        :return:
+        """
+        content = deepcopy(ReceiptApiConfig.QualityCheckLocationBind.get_attributes())
+        content["data"].update({
+            "receiveLocationCode": sh_kw_code,
+            "qcLocationCode": zj_kw_code,
+            "receiveOrderCode": received_order_code
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def receipt_quality_check_submit(self, sku_list):
+        """
+        录入质检结构后提交质检
+        :param sku_list: 提交质检的sku信息列表
+        :return:
+        """
+        content = deepcopy(ReceiptApiConfig.QualityCheckSubmit.get_attributes())
+        content["data"].update({
+            "skuList": sku_list
+        })
         res = self.call_api(**content)
         return self.formatted_result(res)
 
@@ -548,7 +608,7 @@ class WMSAppRobot(AppRobot):
             temp_order_info.update({
                 "deliveryNo": delivery_order_code,
                 "packageNoList": [package for package in package_list],
-                "logistyNo":  "wl" + tail_fix,
+                "logistyNo": "wl" + tail_fix,
                 "barCode": "bc" + tail_fix,
                 "turnOrderNo": str(int(time.time() * 1000)),
                 "drawOrderNo": str(int(time.time() * 1000))

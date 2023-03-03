@@ -118,7 +118,7 @@ class WMSDBOperator:
     @classmethod
     def query_demand_detail(cls, demand_code):
         """
-        获取未分配的调拨需求数据
+        获取指定的调拨需求数据
         :param demand_code: 调拨需求编码
         :return: 查询结果数据，字典格式
         """
@@ -135,6 +135,19 @@ class WMSDBOperator:
         :return: 查询结果数据，字典格式
         """
         items = EnEntryOrder.select().where(EnEntryOrder.state == 1, EnEntryOrder.type == 0, EnEntryOrder.del_flag == 0)
+        if not items:
+            return
+        items = [model_to_dict(item) for item in items]
+        return items
+
+    @classmethod
+    def query_receive_entry_order_detail(cls, distribute_order_code):
+        """
+        获取入库单数据
+        :return: 查询结果数据，字典格式
+        """
+        items = EnEntryOrder.select().where(EnEntryOrder.distribute_order_code == distribute_order_code,
+                                            EnEntryOrder.del_flag == 0)
         if not items:
             return
         items = [model_to_dict(item) for item in items]

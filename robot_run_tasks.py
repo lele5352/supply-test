@@ -14,7 +14,7 @@ def robot_run_receive():
         return
     for (order_code, ck_id, to_ck_id) in entry_order_list:
         print("正在执行收货仓：{0}，分货单：{1}的采购入库流程".format(wms_app.db_ck_id_to_code(ck_id), order_code))
-        result, info = run_receive(order_code, ck_id, to_ck_id)
+        result, info = run_receive(order_code, False)
         print("执行结果：{0}；对应分货单号：{1}；错误信息：{2}".format(result, order_code, info))
 
 
@@ -25,9 +25,7 @@ def robot_run_transfer():
         return
     for (demand_code, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, warehouse_code) in demands_list:
         print("正在执行仓库：{0}、调拨需求编码为：{1} 的调拨流程".format(warehouse_code, demand_code))
-        result, info = run_transfer(
-            demand_code, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id
-        )
+        result, info = run_transfer(demand_code)
         print("执行结果：{0}；对应调拨需求编码：{1}；错误信息：{2}".format(result, demand_code, info))
 
 

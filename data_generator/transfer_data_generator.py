@@ -7,6 +7,7 @@ from utils.barcode_handler import generate
 from utils.wait_handler import until
 
 from data_generator.receipt_data_generator import WmsReceiptDataGenerator
+from robot_run.run_transfer import run_transfer
 
 
 class WmsTransferDataGenerator:
@@ -14,7 +15,7 @@ class WmsTransferDataGenerator:
         self.wms_app = wms_app
         self.wms_transfer = wms_transfer
         self.ims = ims_robot
-        self.wms_data = WmsReceiptDataGenerator(self.wms_app, self.ims)
+        self.wms_data = WmsReceiptDataGenerator()
 
     def create_transfer_demand(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom,
                                trans_qty, demand_type=1, customer_type=1, remark=''):
@@ -92,19 +93,19 @@ class WmsTransferDataGenerator:
             print('创建调拨拣货单失败：需求创建失败！')
             return
         # 创建调拨拣货单
-        pick_order_res = self.wms_app.transfer_out_create_pick_order([demand_no], 1)
-        if not pick_order_res or pick_order_res['code'] != 1:
+        result, order_no = run_transfer(demand_no, "create_pick_order")
+        if not result:
             print('创建调拨拣货单失败！')
             log.error('创建调拨拣货单失败！')
             return
-        pick_order_code = pick_order_res['data']
+        pick_order_code = order_no
 
         generate(pick_order_code, "../barcodes/transfer/pick_order/{0}.png".format(pick_order_code))
         print('生成调拨拣货单：%s' % pick_order_code)
         return pick_order_code
 
-    def create_transfer_out_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom,
-                                  demand_qty, demand_type=1, customer_type=1, remark=''):
+    def create_handover_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom,
+                              demand_qty, demand_type=1, customer_type=1, remark=''):
         """
         生成调拨出库单
 
@@ -127,76 +128,16 @@ class WmsTransferDataGenerator:
         if not demand_no:
             print('创建调拨拣货单失败')
             return
-        # 创建调拨拣货单
-        create_pick_order_result = self.wms_app.transfer_out_create_pick_order([demand_no], 1)
-        if not create_pick_order_result['code']:
-            return
-        pick_order_code = create_pick_order_result['data']
-
-        # 分配调拨拣货人
-        pick_order_assign_result = self.wms_app.transfer_out_pick_order_assign([pick_order_code], 'admin', 1)
-        if not pick_order_assign_result['code']:
-            return
-        # 获取调拨拣货单详情数据
-        pick_order_details_result = self.wms_app.transfer_out_pick_order_detail(pick_order_code)
-        if not pick_order_details_result['code']:
-            return
-        pick_order_details = pick_order_details_result['data']['details']
-
-        # 获取拣货单sku详情数据
-        pick_sku_list = self.wms_app.transfer_get_pick_sku_list(pick_order_details)
-
-        # 调拨拣货单确认拣货-纸质
-        confirm_pick_result = self.wms_app.transfer_out_confirm_pick(pick_order_code, pick_order_details)
-        if not confirm_pick_result['code']:
-            return
-        get_trans_out_tp_kw_ids_result = self.wms_app.db_get_kw(1, 3, len(pick_sku_list), trans_out_id,
-                                                                trans_out_to_id)
-        trans_out_tp_kw_ids = get_trans_out_tp_kw_ids_result['data']
-        # 调拨拣货单按需装托提交
-        submit_tray_result = self.wms_app.transfer_out_submit_tray(pick_order_code, pick_order_details,
-                                                                   trans_out_tp_kw_ids)
-        if not submit_tray_result['code']:
-            return
-        # 查看整单获取已装托的托盘
-        tray_detail_result = self.wms_app.transfer_out_pick_order_tray_detail(pick_order_code)
-        tray_code_list = [tray['storageLocationCode'] for tray in tray_detail_result['data']]
-
-        # 获取生成的调拨出库单号
-        finish_result = self.wms_app.transfer_out_finish_packing(pick_order_code, tray_code_list)
-        if not finish_result['code']:
-            return
-        transfer_out_order_no = finish_result['data']
-
-        # 获取调拨出库单明细
-        transfer_out_order_detail_result = self.wms_app.transfer_out_order_detail(transfer_out_order_no)
-        if not transfer_out_order_detail_result['code']:
-            return
-        transfer_out_order_detail = transfer_out_order_detail_result['data']['details']
-
-        # 从调拨出库单明细中提取箱单和库位编码对应关系
-        details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail]
-        sorted_details = sorted(details, key=lambda a: a[1])
-        # 按箱单和托盘对应逐个复核
-        for box_no, tray_code in details:
-            review_result = self.wms_app.transfer_out_order_review(box_no, tray_code)
-            if not review_result['code']:
-                return
-        for detail in details:
-            bind_result = self.wms_app.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
-            handover_no = bind_result['data']['handoverNo']
-
-        delivery_result = self.wms_app.transfer_out_delivery(handover_no)
-        if not delivery_result['code']:
-            return
-        print("创建调拨出库成功,调拨出库单号：%s" % transfer_out_order_no)
-        return True
+        # 执行调拨流程到发货交接节点
+        result, order_no = run_transfer(demand_no, "handover")
+        print("创建调拨出库成功,调拨交接单号：%s" % order_no)
+        return order_no
 
 
 if __name__ == '__main__':
     transfer_data = WmsTransferDataGenerator()
     demand_qty = 10
-    transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', "B", 2)
+    # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', "B", 2)
     # transfer_data.create_transfer_demand(512, '', 514, 514, '63203684930', "B", 10)
-    # transfer_data.create_transfer_out_order(512, '', 514, 514, '63203684930', "B", 10)
-    # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', 2)
+    transfer_data.create_handover_order(512, '', 514, 514, '63203684930', "B", 10)
+    # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930',"B", 2)
