@@ -4,22 +4,22 @@ from utils.log_handler import logger as log
 
 
 class WmsReceiptDataGenerator:
-    def __init__(self, wms_app, ims_robot):
+    def __init__(self):
         self.wms_app = wms_app
         self.ims = ims_robot
 
     def create_other_in_order(self, sale_sku_code, bom, qty, warehouse_id):
         """
         创建其他其他入库单
-        @param warehouse_id:仓库id
-        @param bom: bom版本
-        @param sale_sku_code: 销售sku编码
-        @param qty: 套数
-        @return:
+        :param warehouse_id:仓库id
+        :param bom: bom版本
+        :param sale_sku_code: 销售sku编码
+        :param qty: 套数
+        :return:
         """
         # 切换仓库
         switch_res = self.wms_app.common_switch_warehouse(warehouse_id)
-        if not switch_res["code"]:
+        if not self.wms_app.is_success(switch_res):
             print("切换仓库失败")
             return
 
@@ -29,7 +29,7 @@ class WmsReceiptDataGenerator:
             return
         ware_sku_codes = list(bom_detail.keys())
         get_sku_info_res = self.wms_app.other_in_get_sku_info(ware_sku_codes)
-        if not get_sku_info_res["code"]:
+        if not self.wms_app.is_success(get_sku_info_res):
             print("查询销售sku对应仓库sku信息失败")
             return
 
@@ -57,15 +57,15 @@ class WmsReceiptDataGenerator:
     def create_other_in_order_and_up_shelf(self, sale_sku_code, bom, qty, warehouse_id, to_warehouse_id):
         """
         创建其他入库单并执行提交和上架
-        @param to_warehouse_id: 目的仓id
-        @param warehouse_id: 仓库id
-        @param sale_sku_code: 销售sku编码
-        @param bom: bom版本
-        @param qty: 套数
-        @return:
+        :param to_warehouse_id: 目的仓id
+        :param warehouse_id: 仓库id
+        :param sale_sku_code: 销售sku编码
+        :param bom: bom版本
+        :param qty: 套数
+        :return:
         """
         create_order_res = self.create_other_in_order(sale_sku_code, bom, qty, warehouse_id)
-        if not create_order_res["code"]:
+        if not wms_app.is_success(create_order_res):
             print("创建其他入库单失败")
             return
         entry_order_code = create_order_res["data"]["entryOrderCode"]
@@ -81,5 +81,5 @@ class WmsReceiptDataGenerator:
 
 
 if __name__ == '__main__':
-    receipt_data = WmsReceiptDataGenerator(wms_app, ims_robot)
+    receipt_data = WmsReceiptDataGenerator()
     print(receipt_data.create_other_in_order_and_up_shelf("JJ306J84G7", "A", 2, 543, 543))

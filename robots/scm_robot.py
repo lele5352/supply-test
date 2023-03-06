@@ -12,8 +12,8 @@ class SCMRobot(AppRobot):
 
     def get_sku_info(self, sale_sku_code):
         """获取供应商产品信息
-        @param string sale_sku_code:销售出库单编码
-        @return:
+        :param string sale_sku_code:销售出库单编码
+        :return:
         """
         content = deepcopy(SCMApiConfig.GetProductInfo.get_attributes())
         content["data"].update({"skuCode": sale_sku_code})
@@ -23,8 +23,8 @@ class SCMRobot(AppRobot):
     def shortage_demand_batch_confirm(self, shortage_demand_id_list):
         """
         缺货需求批量确认
-        @param list shortage_demand_id_list:缺货需求id列表
-        @return:
+        :param list shortage_demand_id_list:缺货需求id列表
+        :return:
         """
         content = deepcopy(SCMApiConfig.ShortageDemandBatchConfirm.get_attributes())
         content.update({"data": shortage_demand_id_list})
@@ -38,7 +38,7 @@ class SCMRobot(AppRobot):
         sale_sku_info_list = list()
         for sale_sku in sale_sku_list:
             sku_info_result = self.get_sku_info(sale_sku)
-            if not sku_info_result["code"]:
+            if self.is_data_empty(sku_info_result):
                 log.error("获取销售sku%s信息失败" % sale_sku)
                 continue
             sku_info = sku_info_result['data']["list"][0]
@@ -69,9 +69,9 @@ class SCMRobot(AppRobot):
 
     def get_purchase_demand_id(self, order_no, status=None):
         """获取生成的采购需求id列表
-        @param status: 采购需求状态
-        @param list order_no: 备货计划单号或缺货需求编码
-        @return:采购需求id列表
+        :param status: 采购需求状态
+        :param list order_no: 备货计划单号或缺货需求编码
+        :return:采购需求id列表
         """
         content = deepcopy(SCMApiConfig.GetPurchaseDemandPage.get_attributes())
         content["data"].update({

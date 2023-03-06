@@ -4,27 +4,25 @@ from config.third_party_api_configs import ApiConfig
 class BaseApiConfig:
     class GetWarehouseInfo(ApiConfig):
         uri_path = "/warehouse/bycode/"
-        method = "get"
-        data = {}
+        method = "GET"
 
     class GetWarehouseInfoById(ApiConfig):
         uri_path = "ec-wms-api/warehouse/"
-        method = "get"
-        data = {}
+        method = "GET"
 
     class GetSwitchWarehouseList(ApiConfig):
         uri_path = "/api/ec-wms-api/data/permission/user/list"
-        method = "get"
+        method = "GET"
         data = {"t": 1640053950389}
 
     class SwitchDefaultWarehouse(ApiConfig):
         uri_path = "/api/ec-wms-api/data/permission/switchdefault"
-        method = "put"
+        method = "PUT"
         data = {"dataPermId": 854}
 
     class CreateLocation(ApiConfig):
         uri_path = "/api/ec-wms-api/location/save"
-        method = "post"
+        method = "POST"
         data = {
             "belongWarehouseId": 19,  # 所属仓库
             "belongWarehouseAreaId": 15,  # 所属库区
@@ -41,13 +39,13 @@ class BaseApiConfig:
 class OtherInApiConfig:
     class GetSkuInfo(ApiConfig):
         uri_path = "/api/ec-wms-api/entryorder/addSkuInfoPage"
-        method = "post"
+        method = "POST"
         data = {"skuCode": None, "skuCodeLike": None, "skuName": None, "saleSkuCode": None, "saleSkuCodeLike": None,
                 "size": 10, "current": 1}
 
     class CreateOtherInOrder(ApiConfig):
         uri_path = "/api/ec-wms-api/entryorder"
-        method = "post"
+        method = "POST"
         data = {"entryOrderType": 3, "eta": 1669873281000, "supplierCode": None, "fromOrderCode": None, "remark": None,
                 "qualityType": 0, "timestamp": 1669873281000, "logisticsInfoList": [], "skuInfoList": [
                 {"warehouseSkuCode": "JFO91L3917A01", "planSkuQty": 1, "warehouseSkuName": "包装方案名称1 1/1 X1",
@@ -58,7 +56,7 @@ class OtherInApiConfig:
 
     class SubmitOtherInOrder(ApiConfig):
         uri_path = "/api/ec-wms-api/entryorder"
-        method = "put"
+        method = "PUT"
         data = {"entryOrderId": "85846", "entryOrderType": 3, "eta": 1669824000000, "supplierCode": None,
                 "fromOrderCode": None, "qualityType": 0, "remark": None, "logisticsInfoList": [], "skuInfoList": [
                 {"warehouseSkuCode": "JFO91L3917A01", "planSkuQty": 2, "warehouseSkuName": "包装方案名称1",
@@ -69,12 +67,12 @@ class OtherInApiConfig:
 
     class GetOtherInOrderSkuInfoByEntryOrderCode(ApiConfig):
         uri_path = "/api/ec-wms-api/entryorder/getSkuInfoByEntryCode"
-        method = "post"
+        method = "POST"
         data = {"size": 100, "current": 1, "entryOrderCode": "RK2212010004", "entryOrderId": "85848"}
 
     class PutOnTheShelf(ApiConfig):
         uri_path = "/api/ec-wms-api/entryorder/putOnTheShelf"
-        method = "post"
+        method = "POST"
         data = {"entryOrderId": 85847, "skuList": [
             {"skuCode": "JFO91L3917A01", "shelvesLocationCode": "NJ01-A01-101", "skuQty": "1", "abnormalQty": 0}]}
 
@@ -82,7 +80,7 @@ class OtherInApiConfig:
 class TransferApiConfig:
     class CreateTransferDemand(ApiConfig):
         uri_path = "/transferDemand/create"
-        method = "post"
+        method = "POST"
         data = {
             "receiveWarehouseCode": "LA01",
             "receiveTargetWarehouseCode": "",
@@ -101,27 +99,27 @@ class TransferApiConfig:
 
     class CreateTransferPickOrder(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/picking/create"
-        method = "post"
+        method = "POST"
         data = {"demandCodes": ["XQ2201250017"], "pickType": 1}
 
     class TransferPickOrderAssign(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/picking/assignPickUser"
-        method = "post"
+        method = "POST"
         data = {"pickOrderNos": ["DJH2201250008"], "pickUsername": "李强", "pickUserId": "3"}
 
     class TransferConfirmPick(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/picking/doPicking"
-        method = "post"
+        method = "POST"
         data = {"pickOrderNo": ["DJH2201250008"], "details": []}
 
     class TransferPickOrderDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/picking/detail/%s"
-        method = "get"
+        method = "GET"
         data = {"t": 1643333857384}
 
     class TransferSubmitTray(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/pda/submitTrayInfo"
-        method = "post"
+        method = "POST"
         data = [{
             "storageLocationCode": "TPKW-001",
             "pickOrderNo": "DJH2201290004",
@@ -136,12 +134,12 @@ class TransferApiConfig:
 
     class TransferPickOrderTrayDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/tray/detail?pickOrderNo=%s"
-        method = "get"
+        method = "GET"
         data = ""
 
     class TransferFinishPacking(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/pda/finishPacking"
-        method = "post"
+        method = "POST"
         data = {
             "pickOrderNo": "",
             "storageLocationCodes": []
@@ -149,12 +147,11 @@ class TransferApiConfig:
 
     class TransferOutOrderDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/handover/boxes?transferOutNo=%s"
-        method = "get"
-        data = ""
+        method = "GET"
 
     class TransferOutOrderReview(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/box/review/submit"
-        method = "post"
+        method = "POST"
         data = {
             "boxNo": "DC2202070002-1",
             "storageLocationCode": "TPKW-001"
@@ -162,7 +159,7 @@ class TransferApiConfig:
 
     class TransferBoxBind(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/handover/bind"
-        method = "post"
+        method = "POST"
         data = {
             "boxNo": "DC2202070002-1",
             "handoverNo": "",
@@ -171,17 +168,17 @@ class TransferApiConfig:
 
     class TransferDelivery(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/handover/delivery/confirm"
-        method = "post"
+        method = "POST"
         data = {"handoverNo": ""}
 
     class TransferInReceived(ApiConfig):
         uri_path = "/api/ec-wms-api/transferIn/handover/received/confirm"
-        method = "post"
+        method = "POST"
         data = {"handoverNo": ""}
 
     class TransferBoxUpShelf(ApiConfig):
         uri_path = "/api/ec-wms-api/transferIn/input/box/shelf"
-        method = "post"
+        method = "POST"
         data = {
             "boxNo": "DC2202070021-1",
             "storageLocationCode": "SJKW-001"
@@ -191,7 +188,7 @@ class TransferApiConfig:
 class OtherEntryOrderApiConfig:
     class CreateOtherEntryOrder(ApiConfig):
         uri_path = "/api/ec-wms-api/entryorder"
-        method = "put"
+        method = "PUT"
         data = {
             "receiveWarehouseCode": "LA01",
             "deliveryWarehouseCode": "FSBH",
@@ -209,7 +206,7 @@ class OtherEntryOrderApiConfig:
 class DeliveryApiConfig:
     class DeliveryOrderPage(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order/page"
-        method = "post"
+        method = "POST"
         data = {"deliveryOrderCodeList": ["PRE-CK2211100010"], "saleOrderCodeList": None, "packageCodeList": None,
                 "expressOrderCodeList": None, "skuCodeList": None, "saleSkuCodeList": None, "stateList": [],
                 "prodType": None, "expressOrderState": None, "packageState": None, "hasPackage": None,
@@ -221,17 +218,17 @@ class DeliveryApiConfig:
 
     class DeliveryOrderDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order/info/{0}"
-        method = "get"
+        method = "GET"
         data = {"t": 1668051101602}
 
     class AssignStock(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order/stock-assign/v2"
-        method = "post"
+        method = "POST"
         data = {"deliveryOrderCodes": ["PRE-CK2211060001"]}
 
     class PackageCallBack(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order-api/push-plan"
-        method = "post"
+        method = "POST"
         data = {
             "deliveryNo": "PRE-CK2211090021",
             "status": 1,
@@ -276,7 +273,7 @@ class DeliveryApiConfig:
 
     class LabelCallBack(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order-api/push-express-order/v2"
-        method = "post"
+        method = "POST"
         data = {
             "deliveryNo": "PRE-CK2205050011",
             "orderList": [
@@ -312,23 +309,23 @@ class DeliveryApiConfig:
 
     class CreatePickOrder(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order/create-pick-order"
-        method = "put"
+        method = "PUT"
         data = {"singleDeliveryOrderCodes": ["PRE-CK2211130002"], "singleMaxQty": 1, "singlePickType": 0,
                 "multiDeliveryOrderCodes": [], "multiPickType": 0}
 
     class AssignPickUser(ApiConfig):
         uri_path = "/api/ec-wms-api/pick-order/set-pick-user"
-        method = "post"
+        method = "POST"
         data = {"pickOrderCodeList": ["XJH2211130002"], "userId": 418, "userName": "许宏伟"}
 
     class GetToPickData(ApiConfig):
         uri_path = "/api/ec-wms-api/pick-order/to-pick/%s"
-        method = "get"
+        method = "GET"
         data = {"t": 0}
 
     class PickOrderConfirmPick(ApiConfig):
         uri_path = "/api/ec-wms-api/pick-order/save-pick-result"
-        method = "put"
+        method = "PUT"
         data = {
             "pickOrderCode": "XJH2211130005",
             "normalList": [{"deliveryOrderCode": "PRE-CK2211130006", "skuCode": "67330337129A01",
@@ -337,7 +334,7 @@ class DeliveryApiConfig:
 
     class DeliverySavePackage(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order/save-package"
-        method = "post"
+        method = "POST"
         data = {
             "deliveryOrderCode": "PRE-CK2211130021",
             "packageInfoList": [
@@ -356,24 +353,24 @@ class DeliveryApiConfig:
 
     class DeliveryPackageInfo(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order/package-info/%s"
-        method = "get"
+        method = "GET"
         data = {"t": 0}
 
     class DeliveryOrderReview(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order/re-confirm"
-        method = "post"
+        method = "POST"
         data = {"unNormalList": [], "normalList": []}
 
     class DeliveryOrderShipping(ApiConfig):
         uri_path = "/api/ec-wms-api/delivery-order/shipping"
-        method = "post"
+        method = "POST"
         data = {"normalIdList": [15025], "normalCodeList": ["PRE-CK2211130010"], "unNormalList": []}
 
 
 class ReceiptApiConfig:
     class EntryOrderPage(ApiConfig):
         uri_path = "/api/ec-wms-api/entryorder/page"
-        method = "post"
+        method = "POST"
         data = {"sortField": [{"field": "create_time", "type": "DESC"}], "entryOrderCode": None,
                 "entryOrderType": None,
                 "entryOrderState": None, "likeLogisticsCompanyName": None, "warehouseSkuCodeList": None,
@@ -384,12 +381,11 @@ class ReceiptApiConfig:
 
     class EntryOrderDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/receivegoods/order/detail?entryOrderCode=%s"
-        method = "get"
-        data = {}
+        method = "GET"
 
     class PreReceiveOrder(ApiConfig):
         uri_path = "/api/ec-wms-api/receivegoods/save/preReceiptOrder"
-        method = "post"
+        method = "POST"
         data = {
             "entryOrderCode": "RK2210210001",
             "predictReceiptOrderCode": "YSH2210240001",
@@ -406,25 +402,64 @@ class ReceiptApiConfig:
 
     class SubmitPreReceiveOrder(ApiConfig):
         uri_path = "/api/ec-wms-api/receivegoods/submit/preReceiptOrder"
-        method = "post"
+        method = "POST"
         data = {"predictReceiptOrderCodeList": []}
+
+    class HandoverToQualityCheck(ApiConfig):
+        uri_path = "/api/ec-wms-api/receivegoodshandover/confirm"
+        method = "POST"
+        data = {
+            "locationCodes": ["SH1667739868494", "SH1667739868078"],
+            "qualityType": 1
+        }
+
+    class QualityCheckLocationDetail(ApiConfig):
+        uri_path = "/api/ec-wms-api/qualitycheck/location/detail"
+        method = "GET"
+        data = {"locationCode": ""}
+
+    class QualityCheckLocationBind(ApiConfig):
+        uri_path = "/api/ec-wms-api/qualitycheck/qc/location"
+        method = "POST"
+        data = {
+            "receiveLocationCode": "SH1667739868494",
+            "qcLocationCode": "ZJKW-001",
+            "receiveOrderCode": "SH2303030002"
+        }
+
+    class QualityCheckSubmit(ApiConfig):
+        uri_path = "/api/ec-wms-api/qualitycheck/save"
+        method = "POST"
+        data = {
+            "skuList": [{
+                "receiveLocationCode": "SH1667739868078",
+                "entryOrderCode": "RK2303030011",
+                "receiveOrderCode": "SH2303030002",
+                "skuCode": "63203684930B01",
+                "qcResult": 0,
+                "number": 1,
+                "length": 0,
+                "height": 0,
+                "width": 0,
+                "weight": 0,
+                "qcLocationCode": "ZJKW-001"
+            }]
+        }
 
     class HandoverToUpShelf(ApiConfig):
         uri_path = "/api/ec-wms-api/receivegoodshandover/confirmUpShelf"
-        method = "post"
+        method = "POST"
         data = {"locationCodes": ["ZJKW-001"]}
 
     class UpShelfWholeLocation(ApiConfig):
         uri_path = "/api/ec-wms-api/upshelfV2/location/entireUpshelf"
-        method = "post"
+        method = "POST"
         data = {"upshelfLocationCode": "KW-SJQ-01", "oldLocationCode": "TX-ZJ001"}
 
     class CompleteUpShelf(ApiConfig):
         uri_path = "/api/ec-wms-api/upshelfV2/location/confirmUpshelf"
-        method = "post"
-        data = {}
+        method = "POST"
 
     class LocationDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/upshelfV2/location/detail?locationCodes=%s"
-        method = "post"
-        data = {}
+        method = "POST"

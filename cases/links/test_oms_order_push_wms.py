@@ -23,7 +23,7 @@ class TestOMSOrderPushWMS(object):
             sale_order_no = create_result.get('data')
 
             # 根据销售单号查询oms单，从data中直接提取
-            query_oms_order_result = oms_app.query_oms_order(sale_order_no)
+            query_oms_order_result = oms_app.query_oms_order_by_sale_no(sale_order_no)
             assert query_oms_order_result['code'] == expected
 
             oms_order_list = query_oms_order_result.get('data')

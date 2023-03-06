@@ -4,7 +4,7 @@ from config.third_party_api_configs import ApiConfig
 class OMSApiConfig:
     class GetFollowOrderPage(ApiConfig):
         uri_path = "/api/ec-oms-api/order/trackOrder/page"
-        method = "post"
+        method = "POST"
         data = {"current": 1, "size": 10, "sortKey": "follow_time", "direction": 1, "itemSkuCode": "",
                 "salesOrderNo": "",
                 "orderNo": "", "siteCode": "", "buyerName": "", "platformCodeList": [], "deliveryWarehouseCode": [],
@@ -14,12 +14,10 @@ class OMSApiConfig:
                 "payTimeStart": "",
                 "payTimeEnd": ""}
 
-
-oms_api_config = {
-    "get_product_info": {
-        "uri_path": "/ec-oms-api/salesorder/listProduct",
-        "method": "get",
-        "data": {
+    class GetProductInfo(ApiConfig):
+        uri_path = "/api/ec-oms-api/salesorder/listProduct"
+        method = "GET"
+        data = {
             "current": 1,
             "size": 10,
             "type": 1,
@@ -28,15 +26,17 @@ oms_api_config = {
             "siteCode": "US",
             "t": 1663229253518
         }
-    },
+
+
+oms_api_config = {
     "get_warehouse_info": {
         "uri_path": "/ec-oms-api/base/actual/getWarehouseList",
-        "method": "get",
+        "method": "GET",
         "data": {}
     },
     "create_sale_order": {
         "uri_path": "/ec-oms-api/salesorder/addSalesOrder",
-        "method": "post",
+        "method": "POST",
         "data": {
             "orderType": 1,
             "shipType": 2,
@@ -98,7 +98,7 @@ oms_api_config = {
     },
     "query_oms_order": {
         "uri_path": "/ec-oms-api/order/page",
-        "method": "post",
+        "method": "POST",
         "data": {"current": 1, "size": 10, "sortKey": "follow_time", "direction": 1, "orderNos": "",
                  "salesOrderNos": "SO2209200051", "salesOutNos": "", "siteCodes": "", "buyerId": "",
                  "provinceName": "",
@@ -117,32 +117,32 @@ oms_api_config = {
     },
     "dispatch_oms_order": {
         "uri_path": "/auto/verification/execute",
-        "method": "post",
+        "method": "POST",
         "data": []
     },
     "query_oms_order_detail": {
         "uri_path": "/ec-oms-api/order/getOrder/%s",
-        "method": "get",
+        "method": "GET",
         "data": []
     },
     "query_oms_order_sku_items": {
         "uri_path": "/ec-oms-api/order/getOrder/item/%s",
-        "method": "get",
+        "method": "GET",
         "data": []
     },
     "push_order_to_wms": {
         "uri_path": "/order/issue",
-        "method": "post",
+        "method": "POST",
         "data": ""
     },
     "oms_order_follow": {
         "uri_path": "/order/follow",
-        "method": "post",
+        "method": "POST",
         "data": [{"skuCode": "demoData", "bomVersion": "demoData"}]
     },
     "query_common_warehouse": {
         "uri_path": "/ec-oms-api/virtual/warehouse/page",
-        "method": "post",
+        "method": "POST",
         "data": {"virtualWarehouseCodes": [], "warehouseCodes": [], "current": 1, "size": 10}
     },
 }

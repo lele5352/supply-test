@@ -13,12 +13,13 @@ class OMSAppRobot(AppRobot):
     def get_product_info(self, sku_code, sku_type=1, site="US"):
         """
         根据sku编码、sku类型、站点获取sku信息
-        @param str sku_code : 销售sku编码，
-        @param int sku_type: sku类型:1:销售sku;2:部件sku
-        @param str site: 站点
-        @return : sku的信息
+        :param str sku_code : 销售sku编码，
+        :param int sku_type: sku类型:1:销售sku;2:部件sku
+        :param str site: 站点
+        :return : sku的信息
         """
-        oms_api_config['get_product_info']['data'].update(
+        content = deepcopy(OMSApiConfig.GetProductInfo.get_attributes())
+        content['data'].update(
             {
                 "type": sku_type,
                 "skuCode": sku_code,
@@ -26,16 +27,21 @@ class OMSAppRobot(AppRobot):
                 "t": int(time.time() * 1000)
             }
         )
-        res_data = self.call_api(**oms_api_config['get_product_info'])
-        res_data.update({
-            "data": res_data["data"]["records"][0]
-        })
+        res_data = self.call_api(**content)
+        try:
+            res_data.update({
+                "data": res_data["data"]["records"][0]
+            })
+        except TypeError:
+            res_data.update({
+                "data": []
+            })
         return self.formatted_result(res_data)
 
     def get_follow_order_page(self, oms_no):
         """
         根据oms单号查询跟单列表数据
-        @return : oms的跟单信息
+        :return : oms的跟单信息
         """
         content = deepcopy(OMSApiConfig.GetFollowOrderPage.get_attributes())
         content['data'].update(
@@ -49,8 +55,8 @@ class OMSAppRobot(AppRobot):
     def get_warehouse_info(self, warehouse_id):
         """
         根据仓库id获取仓库信息
-        @param warehouse_id: 仓库id
-        @return:
+        :param warehouse_id: 仓库id
+        :return:
         """
         oms_api_config["get_warehouse_info"]["data"].update({"t": int(time.time() * 1000)})
         res_data = self.call_api(**oms_api_config["get_warehouse_info"])
@@ -66,8 +72,8 @@ class OMSAppRobot(AppRobot):
     def create_sale_order(self, order_sku_info_list):
         """
         创建销售单
-        @param list order_sku_info_list: 销售sku及数量的数组，格式：[{"sku_code":"","qty":1,"bom":"A","warehouse_id":""}]
-        @return:创建结果
+        :param list order_sku_info_list: 销售sku及数量的数组，格式：[{"sku_code":"","qty":1,"bom":"A","warehouse_id":""}]
+        :return:创建结果
         """
 
         temp_items_data_list = []
@@ -101,8 +107,8 @@ class OMSAppRobot(AppRobot):
 
     def query_oms_order_by_oms_no(self, oms_order_no):
         """
-        @param oms_order_no: oms单号
-        @return: list
+        :param oms_order_no: oms单号
+        :return: list
         """
         oms_api_config["query_oms_order"]["data"].update({"orderNos": oms_order_no})
         res_data = self.call_api(**oms_api_config["query_oms_order"])
@@ -113,8 +119,8 @@ class OMSAppRobot(AppRobot):
 
     def query_oms_order_by_sale_no(self, sale_order_no):
         """
-        @param sale_order_no: 销售单号
-        @return: list
+        :param sale_order_no: 销售单号
+        :return: list
         """
         oms_api_config["query_oms_order"]["data"].update({"salesOrderNos": sale_order_no})
         res_data = self.call_api(**oms_api_config["query_oms_order"])
@@ -125,8 +131,8 @@ class OMSAppRobot(AppRobot):
 
     def query_oms_order_detail(self, oms_order_id):
         """
-        @param oms_order_id: oms单id
-        @return: list
+        :param oms_order_id: oms单id
+        :return: list
         """
         temp = deepcopy(oms_api_config["query_oms_order_detail"])
         temp.update({
@@ -139,8 +145,8 @@ class OMSAppRobot(AppRobot):
 
     def query_oms_order_sku_items(self, oms_order_id):
         """
-        @param oms_order_id: oms单id
-        @return: list
+        :param oms_order_id: oms单id
+        :return: list
         """
         temp = deepcopy(oms_api_config["query_oms_order_sku_items"])
         temp.update({
@@ -153,8 +159,8 @@ class OMSAppRobot(AppRobot):
     def query_common_warehouse(self, common_warehouse_code):
         """
         查询共享仓信息
-        @param common_warehouse_code: 共享仓编码
-        @return: list
+        :param common_warehouse_code: 共享仓编码
+        :return: list
         """
         oms_api_config["query_common_warehouse"]["data"].update({
             "virtualWarehouseCodes": [common_warehouse_code]
@@ -179,8 +185,8 @@ class OMSAppIpRobot(ServiceRobot):
     def oms_order_follow(self, follow_list):
         """
         执行跟单
-        @param follow_list: [{"skuCode": "demoData", "bomVersion": "demoData"}]
-        @return:
+        :param follow_list: [{"skuCode": "demoData", "bomVersion": "demoData"}]
+        :return:
         """
         oms_api_config["oms_order_follow"].update({
             "data": follow_list
@@ -191,7 +197,7 @@ class OMSAppIpRobot(ServiceRobot):
     def push_order_to_wms(self):
         """
         下发订单
-        @return:
+        :return:
         """
         res_data = self.call_api(**oms_api_config["push_order_to_wms"])
         return self.formatted_result(res_data)

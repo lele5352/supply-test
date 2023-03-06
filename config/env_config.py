@@ -26,6 +26,16 @@ prefix_config = {
         'oms_app': 'http://10.0.0.160:8826',
         'eta': 'http://10.0.0.159:8701',
     },
+    'test189': {
+        'ims': 'http://10.0.0.189:28801',
+        'app': 'https://test189.popicorns.com',
+        'wms_base': 'http://10.0.0.189:8321',
+        'delivery': 'http://10.0.0.189:8330',
+        'receipt': 'http://10.0.0.189:8323',
+        'transfer': 'http://10.0.0.189:8334',
+        'oms_app': 'http://10.0.0.189:8826',
+        'eta': 'http://10.0.0.189:8701',
+    },
     # uat环境配置
     'uat': {
         'ims': 'http://10.0.15.21:28801',

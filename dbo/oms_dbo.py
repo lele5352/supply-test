@@ -9,7 +9,7 @@ class OMSDBOperator:
     def set_oms_order_create_time(cls, oms_no):
         """
         设置订单创建时间为1个小时之前
-        @param oms_no: oms单号
+        :param oms_no: oms单号
         """
         one_hour_ago = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((time.time() - 3601)))
         OmsOrder.update(create_time=one_hour_ago).where(OmsOrder.order_no == oms_no).execute()

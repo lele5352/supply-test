@@ -4,7 +4,7 @@ from config.third_party_api_configs import ApiConfig
 class IMSForSCMApiConfig:
     class PurchaseInCreateOrder(ApiConfig):
         uri_path = "/ims/service/scm/business/goods/sku"
-        method = "post"
+        method = "POST"
         data = [
             {
                 "functionType": "26",
@@ -25,7 +25,7 @@ class IMSForSCMApiConfig:
 
     class PurchaseInOrderUpShelf(ApiConfig):
         uri_path = "/ims/service/wms/business/purchase/into/warehouse"
-        method = "post"
+        method = "POST"
         data = {
             "functionType": "1",
             "goodsSkuList": [
@@ -54,7 +54,7 @@ class IMSForSCMApiConfig:
 ims_api_config = {
     "oms_order_block": {
         "uri_path": "/ims/service/oms/business/add/block",
-        "method": "post",
+        "method": "POST",
         "data": {
             "functionType": "4",
             "goodsSkuList": [
@@ -71,7 +71,7 @@ ims_api_config = {
     },
     "purchase_create_order": {
         "uri_path": "/ims/service/scm/business/goods/sku",
-        "method": "post",
+        "method": "POST",
         "data": [
             {
                 "functionType": "26",
@@ -92,12 +92,12 @@ ims_api_config = {
     },
     "cancel_purchase_order_delivery": {
         "uri_path": "/ims/service/scm/business/finish/sku",
-        "method": "post",
+        "method": "POST",
         "data": []
     },
     "purchase_into_warehouse": {
         "uri_path": "/ims/service/wms/business/purchase/into/warehouse",
-        "method": "post",
+        "method": "POST",
         "data": {
             "functionType": "1",
             "goodsSkuList": [
@@ -124,7 +124,7 @@ ims_api_config = {
     },
     "qualified_goods_other_into_warehouse": {
         "uri_path": "/ims/service/wms/business/other/into/warehouse",
-        "method": "post",
+        "method": "POST",
         "data": [
             {
                 "functionType": "2",
@@ -146,7 +146,7 @@ ims_api_config = {
     },
     "unqualified_goods_other_into_warehouse": {
         "uri_path": "/ims/service/wms/business/bad/into/warehouse",
-        "method": "post",
+        "method": "POST",
         "data": [
             {
                 "functionType": "2",
@@ -168,7 +168,7 @@ ims_api_config = {
     },
     "delivery_order_block": {
         "uri_path": "/ims/service/wms/business/add/sale/block",
-        "method": "post",
+        "method": "POST",
         "data":
             {
                 "bomVersion": "",
@@ -185,7 +185,7 @@ ims_api_config = {
     },
     "assign_location_stock": {
         "uri_path": "/ims/service/wms/business/distribute/ware/block",
-        "method": "post",
+        "method": "POST",
         "data": [
             {
                 "functionType": "4",
@@ -209,7 +209,7 @@ ims_api_config = {
     },
     "confirm_pick": {
         "uri_path": "/ims/service/wms/business/pick/ware/sku",
-        "method": "post",
+        "method": "POST",
         "data": {
             "functionType": "15",
             "operateType": "4",
@@ -232,7 +232,7 @@ ims_api_config = {
     },
     "delivery_out": {
         "uri_path": "/ims/service/wms/business/out/of/stock",
-        "method": "post",
+        "method": "POST",
         "data": [
             {
                 "functionType": "17",
@@ -258,7 +258,7 @@ ims_api_config = {
     },
     "cancel_oms_order_block": {
         "uri_path": "/ims/service/oms/business/rollback/block",
-        "method": "post",
+        "method": "POST",
         "data": {
             "blockBookId": "",
             "functionType": "8",
@@ -269,7 +269,7 @@ ims_api_config = {
     },
     "cancel_block_before_pick": {
         "uri_path": "/ims/service/wms/business/rollback/ware/block",
-        "method": "post",
+        "method": "POST",
         "data": {
             "functionType": "8",
             "operateType": "2",
@@ -280,7 +280,7 @@ ims_api_config = {
     },
     "cancel_block_after_pick": {
         "uri_path": "/ims/service/wms/business/rollback/pick/ware",
-        "method": "post",
+        "method": "POST",
         "data": {
             "functionType": "8",
             "operateType": "2",
@@ -308,7 +308,7 @@ ims_api_config = {
     },
     "qualified_goods_other_out_block": {
         "uri_path": "/ims/service/wms/business/distribute/transfer/block",
-        "method": "post",
+        "method": "POST",
         "data": [
             {
                 "functionType": "5",
@@ -330,7 +330,7 @@ ims_api_config = {
     },
     "only_cancel_location_block": {
         "uri_path": "/ims/service/wms/business/rollback/location/block",
-        "method": "post",
+        "method": "POST",
         "data":
             {
                 "blockBookId": "",
@@ -343,7 +343,7 @@ ims_api_config = {
     },
     "unqualified_goods_other_out_block": {
         "uri_path": "/ims/service/wms/business/distribute/bad/block",
-        "method": "post",
+        "method": "POST",
         "data": [
             {
                 "functionType": "5",
@@ -365,7 +365,7 @@ ims_api_config = {
     },
     "qualified_goods_other_out_delivery_goods": {
         "uri_path": "/ims/service/wms/business/out/of/other/stock",
-        "method": "post",
+        "method": "POST",
         "data": [
             {
                 "functionType": "39",
@@ -387,7 +387,7 @@ ims_api_config = {
     },
     "unqualified_goods_other_out_delivery_goods": {
         "uri_path": "/ims/service/wms/business/out/of/bad",
-        "method": "post",
+        "method": "POST",
         "data": [
             {
                 "functionType": "39",
@@ -408,17 +408,17 @@ ims_api_config = {
     },
     "get_import_stock_excel_data": {
         "uri_path": "/ims/service/init/data/parsing/excel/instock",
-        "method": "post",
+        "method": "POST",
         "data": ""
     },
     "import_stock_excel_data": {
         "uri_path": "/ims/service/init/data/import/ware/sku/stock",
-        "method": "post",
+        "method": "POST",
         "data": ""
     },
     "cancel_unqualified_goods_other_out_block": {
         "uri_path": "/ims/service/wms/business/rollback/bad/block",
-        "method": "post",
+        "method": "POST",
         "data": {
             "blockBookId": "",
             "functionType": 40,
@@ -429,7 +429,7 @@ ims_api_config = {
     },
     "cancel_qualified_goods_other_out_block": {
         "uri_path": "/ims/service/wms/business/rollback/other/block",
-        "method": "post",
+        "method": "POST",
         "data": {
             "blockBookId": "",
             "functionType": 40,
@@ -440,7 +440,7 @@ ims_api_config = {
     },
     "turn_to_unqualified_goods": {
         "uri_path": "/ims/service/stock/manage/bad",
-        "method": "post",
+        "method": "POST",
         "data":
             {
                 "fromStorageLocationId": 153,
@@ -458,7 +458,7 @@ ims_api_config = {
     },
     "move_stock": {
         "uri_path": "/ims/service/common/move/stock",
-        "method": "post",
+        "method": "POST",
         "data":
             {
                 "functionType": "6",

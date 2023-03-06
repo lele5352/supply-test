@@ -2,6 +2,7 @@ import time
 
 from cases import *
 from utils.log_handler import logger
+from utils.wait_handler import until
 
 
 def get_wait_delivery_data():
@@ -22,10 +23,10 @@ def get_wait_delivery_data():
 def run_front_label_delivery(delivery_order_info, delivery_order_detail, flow_flag=None):
     """
     执行前置面单销售出库单发货流程
-    @param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
-    @param delivery_order_detail: 出库单详情
-    @param delivery_order_info: 销售出库单信息
-    @return
+    :param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
+    :param delivery_order_detail: 出库单详情
+    :param delivery_order_info: 销售出库单信息
+    :return
     """
     delivery_order_code = delivery_order_info["deliveryOrderCode"]
     delivery_order_id = delivery_order_info["deliveryOrderId"]
@@ -55,8 +56,8 @@ def run_front_label_delivery(delivery_order_info, delivery_order_detail, flow_fl
     if flow_flag == "call_package":
         return "Success", None
 
-    # 生成包裹是异步，有延迟，睡眠1秒
-    time.sleep(1)
+    # 生成包裹是异步，有延迟，等待包裹数据生成
+    until(99, 0.2)(lambda: wms_app.dbo.query_delivery_order_package_info(delivery_order_code) is not None)()
 
     if express_state != 2:
         # 模拟面单回调
@@ -127,10 +128,10 @@ def run_front_label_delivery(delivery_order_info, delivery_order_detail, flow_fl
 def run_backend_label_delivery(delivery_order_info, delivery_order_detail, flow_flag=None):
     """
     执行后置面单销售出库单发货流程
-    @param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
-    @param delivery_order_detail: 销售出库单详情
-    @param delivery_order_info: 销售出库单信息
-    @return:
+    :param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
+    :param delivery_order_detail: 销售出库单详情
+    :param delivery_order_info: 销售出库单信息
+    :return:
     """
     delivery_order_code = delivery_order_info["deliveryOrderCode"]
     delivery_order_id = delivery_order_info["deliveryOrderId"]
@@ -164,8 +165,8 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail, flow_
     if flow_flag == "call_package":
         return "Success", None
 
-    # 生成包裹是异步，有延迟，睡眠1秒
-    time.sleep(1)
+    # 生成包裹是异步，有延迟，等待包裹数据生成
+    until(99, 0.2)(lambda: wms_app.dbo.query_delivery_order_package_info(delivery_order_code) is not None)()
 
     # 创建拣货单
     create_pick_order_result = wms_app.delivery_create_pick_order(delivery_order_code, prod_type)
@@ -222,6 +223,7 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail, flow_
         label_call_back_result = wms_app.delivery_mock_label_callback(delivery_order_code, package_list)
         if not label_call_back_result["code"]:
             return "Fail", "Fail to mock label call back!"
+
     # 如果流程标识为生成面单，则执行就返回，中断流程
     if flow_flag == "call_label":
         return "Success", None
@@ -250,10 +252,10 @@ def run_backend_label_delivery(delivery_order_info, delivery_order_detail, flow_
 def run_delivery(delivery_order_code, warehouse_id, flow_flag=None):
     """
     执行销售出库发货流程
-    @param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
-    @param warehouse_id: 所属仓库id
-    @param delivery_order_code: 销售出库单号列表
-    @return:
+    :param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
+    :param warehouse_id: 所属仓库id
+    :param delivery_order_code: 销售出库单号列表
+    :return:
     """
     switch_result = wms_app.common_switch_warehouse(warehouse_id)
     if not switch_result["code"]:
@@ -287,8 +289,8 @@ def run_delivery(delivery_order_code, warehouse_id, flow_flag=None):
 
 
 if __name__ == "__main__":
-    delivery_order_code = "PRE-CK2212090002"
-    warehouse_id = 539
+    delivery_order_code = "PRE-CK2302140008"
+    warehouse_id = 513
     flag = "call_label"
     result, info = run_delivery(delivery_order_code, warehouse_id, flag)
     logger.info("出库单 {} 执行发货流程 {} 结果：{}，执行信息：{}".format(delivery_order_code, flag, result, info),

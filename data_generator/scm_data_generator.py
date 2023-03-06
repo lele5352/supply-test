@@ -6,18 +6,18 @@ from cases import scm_app
 
 
 class ScmDataGenerator:
-    def __init__(self, scm_app):
+    def __init__(self):
         self.scm_app = scm_app
 
     def create_stock_plan(self, sale_sku_list, num, delivery_warehouse_code, target_warehouse_code):
         """
         生成备货计划数据
 
-        @param list sale_sku_list: 销售sku编码的数组
-        @param int num: 采购的套数
-        @param string delivery_warehouse_code: 收货仓库编码
-        @param string target_warehouse_code: 目的仓库编码
-        @return: 备货计划id、备货计划单号
+        :param list sale_sku_list: 销售sku编码的数组
+        :param int num: 采购的套数
+        :param string delivery_warehouse_code: 收货仓库编码
+        :param string target_warehouse_code: 目的仓库编码
+        :return: 备货计划id、备货计划单号
         """
         plan_res = self.scm_app.stock_plan_submit(sale_sku_list, num, delivery_warehouse_code, target_warehouse_code)
         if not plan_res['code']:
@@ -33,11 +33,11 @@ class ScmDataGenerator:
         """
         创建备货计划并执行审核，生成采购需求
 
-        @param list sale_sku_list: 销售sku编码的数组
-        @param int num: 采购的套数
-        @param string delivery_warehouse_code: 收货仓库编码
-        @param string target_warehouse_code: 目的仓库编码
-        @return: 采购需求id列表，备货计划单号
+        :param list sale_sku_list: 销售sku编码的数组
+        :param int num: 采购的套数
+        :param string delivery_warehouse_code: 收货仓库编码
+        :param string target_warehouse_code: 目的仓库编码
+        :return: 采购需求id列表，备货计划单号
         """
         # 创建备货计划
         plan_id, plan_no = self.create_stock_plan(sale_sku_list, num, delivery_warehouse_code, target_warehouse_code)
@@ -61,11 +61,11 @@ class ScmDataGenerator:
         """
         创建备货计划并执行审核，生成采购需求,采购需求确认并生单，生成采购单
 
-        @param list sale_sku_list: 销售sku编码的数组
-        @param int num: 采购的套数
-        @param string delivery_warehouse_code: 收货仓库编码
-        @param string target_warehouse_code: 目的仓库编码
-        @return: 采购单号列表、采购单id列表
+        :param list sale_sku_list: 销售sku编码的数组
+        :param int num: 采购的套数
+        :param string delivery_warehouse_code: 收货仓库编码
+        :param string target_warehouse_code: 目的仓库编码
+        :return: 采购单号列表、采购单id列表
         """
         # 创建备货计划
         demand_ids, plan_no = self.create_purchase_demand(sale_sku_list, num, delivery_warehouse_code,
@@ -94,11 +94,11 @@ class ScmDataGenerator:
         """
         生成采购订单，并批量发货生成分货单,最终推送WMS生成采购入库单
 
-        @param list sale_sku_list: 销售sku编码的数组
-        @param int num: 采购的套数
-        @param string delivery_warehouse_code: 收货仓库编码
-        @param string target_warehouse_code: 目的仓库编码
-        @return: list 分货单列表
+        :param list sale_sku_list: 销售sku编码的数组
+        :param int num: 采购的套数
+        :param string delivery_warehouse_code: 收货仓库编码
+        :param string target_warehouse_code: 目的仓库编码
+        :return: list 分货单列表
         """
         purchase_order_list = self.create_purchase_order(
             sale_sku_list,
@@ -135,11 +135,11 @@ class ScmDataGenerator:
         """
         生成采购订单，并批量发货生成分货单,最终推送WMS生成采购入库单
 
-        @param list sale_sku_list: 销售sku编码的数组
-        @param int num: 采购的套数
-        @param string delivery_warehouse_code: 收货仓库编码
-        @param string target_warehouse_code: 目的仓库编码
-        @return: list 分货单列表
+        :param list sale_sku_list: 销售sku编码的数组
+        :param int num: 采购的套数
+        :param string delivery_warehouse_code: 收货仓库编码
+        :param string target_warehouse_code: 目的仓库编码
+        :return: list 分货单列表
         """
         # 调用创建待发货采购单
         purchase_order_nos, purchase_order_ids = self.create_wait_delivery_purchase_order(sale_sku_list, num,
@@ -188,7 +188,7 @@ class ScmDataGenerator:
 
 
 if __name__ == '__main__':
-    scm = ScmDataGenerator(scm_app)
+    scm = ScmDataGenerator()
 
     # scm.create_purchase_order(["14093131604"], 10, 'ESBH', '')
     # scm.create_stock_plan(['14093131604'], 10 ,'ESBH', '')
