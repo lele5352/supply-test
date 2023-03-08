@@ -1,5 +1,4 @@
 import random
-import requests
 from robots.robot import AppRobot
 from dbo.fms_dbo import FMSDBOperator
 from dbo.wms_dbo import WMSDBOperator
