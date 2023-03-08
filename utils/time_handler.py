@@ -257,6 +257,11 @@ class HumanDateTime(object):
         return abs(self.dt.timestamp() - type(self)(any_dt).dt.timestamp()) <= seconds
 
     def astimezone(self, tz):
+        """
+        返回指定时区的时间对象
+        :param str tz: 标准时区，如 America/New_York，Asia/Shanghai 等
+        :return : HumanDateTime 对象
+        """
         try:
             dt_tz = timezone(tz)
         except UnknownTimeZoneError:
