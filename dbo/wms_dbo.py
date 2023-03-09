@@ -1,5 +1,6 @@
 from models.wms_model import *
 from playhouse.shortcuts import model_to_dict
+from utils.log_handler import logger
 
 
 class WMSDBOperator:
@@ -193,4 +194,38 @@ class WMSDBOperator:
         return [model_to_dict(i, only=[TdoDeliveryOrder.delivery_order_code])
                 for i in items]
 
+    @classmethod
+    def get_workday_calendar(cls, warehouse_id, start_time, end_time):
+        """
+        获取仓库工作日
+        :param warehouse_id: 仓库id
+        :param start_time: 开始时间
+        :param end_time: 结束时间
+        """
+        try:
+            relation = BaseWorkdayConfigRelation.get(
+                BaseWorkdayConfigRelation.warehouse_id == warehouse_id,
+                BaseWorkdayConfigRelation.del_flag == 0
+            )
+        except BaseWorkdayConfigRelation.DoesNotExist:
+            logger.info(f"查询不到该仓库的工作日配置，warehouse_id: {warehouse_id}")
+            return None
+        else:
+            workday = BaseWorkdayCalendar.select().where(
+                (BaseWorkdayCalendar.workday_config_id == relation.workday_config_id) &
+                (BaseWorkdayCalendar.dt >= start_time) & (BaseWorkdayCalendar.dt <= end_time)
+            )
 
+            return [i.dt for i in workday]
+
+    @classmethod
+    def get_warehouse_timezone(cls, warehouse_id):
+        """
+        获取仓库时区
+        """
+        try:
+            info = BaseWarehouse.get_by_id(warehouse_id)
+        except BaseWarehouse.DoesNotExist:
+            raise ValueError("仓库id不存在")
+        else:
+            return info.time_zone

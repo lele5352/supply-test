@@ -1,5 +1,4 @@
 from peewee import *
-
 from config import db_config
 
 database = MySQLDatabase('supply_wms', **db_config)
@@ -51,8 +50,10 @@ class BaseWarehouse(BaseModel):
     locate_region = IntegerField(null=True)
     operate_mode = CharField(null=True)
     prop_info = TextField(null=True)
+    self_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     short_warehouse_name = CharField(null=True)
     state = IntegerField(index=True, null=True)
+    time_zone = CharField(null=True)
     type = IntegerField(index=True, null=True)
     update_time = DateTimeField(null=True)
     update_user_id = BigIntegerField(null=True)
@@ -80,6 +81,8 @@ class BaseWarehouseAddress(BaseModel):
     district_name = CharField(null=True)
     email = CharField(null=True)
     id = BigAutoField()
+    latitude = DecimalField(null=True)
+    longitude = DecimalField(null=True)
     phone = CharField(null=True)
     postcode = CharField(null=True)
     province_code = CharField(null=True)
@@ -210,11 +213,54 @@ class BaseWarehouseLocation(BaseModel):
         table_name = 'base_warehouse_location'
 
 
+class BaseWorkdayCalendar(BaseModel):
+    dd = IntegerField(null=True)
+    dt = CharField()
+    id = BigAutoField()
+    mm = IntegerField(null=True)
+    workday_config_id = BigIntegerField(null=True)
+    yyyy = IntegerField(null=True)
+
+    class Meta:
+        table_name = 'base_workday_calendar'
+
+
+class BaseWorkdayConfig(BaseModel):
+    country_code = CharField()
+    country_name = CharField()
+    create_time = DateTimeField(null=True)
+    create_user_id = BigIntegerField(null=True)
+    create_username = CharField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    id = BigAutoField()
+    name = CharField()
+    update_time = DateTimeField(null=True)
+    update_user_id = BigIntegerField(null=True)
+    update_username = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+
+    class Meta:
+        table_name = 'base_workday_config'
+
+
+class BaseWorkdayConfigRelation(BaseModel):
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
+    id = BigAutoField()
+    update_time = DateTimeField(null=True)
+    warehouse_code = CharField(null=True)
+    warehouse_id = BigIntegerField(null=True)
+    warehouse_name = CharField(null=True)
+    workday_config_id = BigIntegerField(null=True)
+
+    class Meta:
+        table_name = 'base_workday_config_relation'
+
+
 class EnEntryOrder(BaseModel):
     create_time = DateTimeField(index=True, null=True)
     create_user_id = BigIntegerField(null=True)
     create_username = CharField(null=True)
-    del_flag = IntegerField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     dest_warehouse_code = CharField(null=True)
     dest_warehouse_id = BigIntegerField(null=True)
     distribute_order_code = CharField(null=True)
@@ -251,7 +297,7 @@ class EnEntryOrderDetail(BaseModel):
     create_user_id = BigIntegerField(null=True)
     create_username = CharField(null=True)
     defective_sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
-    del_flag = IntegerField(index=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], index=True, null=True)
     entry_order_id = BigIntegerField(index=True)
     gp_sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     height = DecimalField(null=True)
@@ -1253,6 +1299,8 @@ class TdoDeliveryPackage(BaseModel):
     express_order_id = BigIntegerField(index=True, null=True)
     express_order_state = IntegerField()
     handover_time = DateTimeField(null=True)
+    handover_user_id = BigIntegerField(null=True)
+    handover_username = CharField(null=True)
     height = DecimalField(null=True)
     id = BigAutoField()
     length = DecimalField(null=True)
@@ -1911,7 +1959,7 @@ class TrfBoxOrder(BaseModel):
     storage_location_id = BigIntegerField()
     transfer_in_id = BigIntegerField(null=True)
     transfer_in_no = CharField(null=True)
-    transfer_out_id = BigIntegerField(null=True)
+    transfer_out_id = BigIntegerField(index=True, null=True)
     transfer_out_no = CharField(null=True)
     update_time = DateTimeField(null=True)
     update_user_id = BigIntegerField(null=True)
@@ -2053,7 +2101,9 @@ class TrfDischargeTime(BaseModel):
 
 
 class TrfHandoverOrder(BaseModel):
+    arrive_time = DateTimeField(null=True)
     box_qty = IntegerField(null=True)
+    cabinet_time = DateTimeField(null=True)
     container_no = CharField(null=True)
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
     create_user_id = BigIntegerField(null=True)
@@ -2072,6 +2122,9 @@ class TrfHandoverOrder(BaseModel):
     id = BigAutoField()
     logistics_merchant = CharField(null=True)
     logistics_no = CharField(null=True)
+    logistics_time = DateTimeField(null=True)
+    logistics_user_id = BigIntegerField(null=True)
+    logistics_username = CharField(null=True)
     receive_state = IntegerField(constraints=[SQL("DEFAULT 1")], null=True)
     receive_time = DateTimeField(null=True)
     receive_user_id = BigIntegerField(null=True)
