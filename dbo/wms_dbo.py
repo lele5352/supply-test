@@ -208,8 +208,8 @@ class WMSDBOperator:
                 BaseWorkdayConfigRelation.del_flag == 0
             )
         except BaseWorkdayConfigRelation.DoesNotExist:
-            logger.info(f"查询不到该仓库的工作日配置，warehouse_id: {warehouse_id}")
-            return None
+            logger.error(f"查询不到该仓库的工作日配置，warehouse_id: {warehouse_id}")
+            raise
         else:
             workday = BaseWorkdayCalendar.select().where(
                 (BaseWorkdayCalendar.workday_config_id == relation.workday_config_id) &
@@ -226,6 +226,7 @@ class WMSDBOperator:
         try:
             info = BaseWarehouse.get_by_id(warehouse_id)
         except BaseWarehouse.DoesNotExist:
-            raise ValueError("仓库id不存在")
+            logger.error(f"根据仓库id查询base_warehouse表为空，warehouse_id: {warehouse_id}")
+            raise
         else:
             return info.time_zone

@@ -1031,15 +1031,23 @@ class WMSBaseServiceRobot(ServiceRobot):
         })
         return self.call_api(**content)
 
-    def get_workday_calendar_by_db(self, warehouse_id, start_time, end_time):
+    def get_workday_calendar_by_db(self, warehouse_id, start_time, end_time) -> list:
         """
         从数据库获取仓库节假日
+        :param int warehouse_id: 仓库id
+        :param str start_time: 开始时间
+        :param str end_time: 结束时间
+
+        :return list or None
         """
         return self.dbo.get_workday_calendar(warehouse_id, start_time, end_time)
 
-    def get_warehouse_timezone_by_db(self, warehouse_id):
+    def get_warehouse_timezone_by_db(self, warehouse_id) -> str:
         """
         从数据库获取仓库时区
+        :param int warehouse_id: 仓库id
+
+        :return str
         """
         return self.dbo.get_warehouse_timezone(warehouse_id)
 
