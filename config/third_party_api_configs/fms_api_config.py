@@ -53,6 +53,14 @@ class BaseApi:
         uri_path = '/api/ec-fms-api/fms/api/common/all/service/provider'
         method = "GET"
 
+    class ChannelListByProvider(ApiConfig):
+        """根据服务商查询渠道列表"""
+        uri_path = '/api/ec-fms-api/fms/api/common/list/channel/by/service/provider'
+        method = 'get'
+        data = {
+            "serviceCode": ""
+        }
+
     class ChannelList(ApiConfig):
         """渠道列表查询"""
         uri_path = '/api/ec-fms-api/fms/api/common/all/channel'

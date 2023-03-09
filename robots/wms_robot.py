@@ -979,20 +979,85 @@ class WMSDeliveryServiceRobot(ServiceRobot):
         super().__init__("delivery")
 
 
-if __name__ == "__main__":
-    wms = WMSAppRobot()
-    # print(wms.entry_order_page(["FH2211022680"]))
-    # wms.delivery_order_assign_stock(["PRE-CK2211100010"])
-    # print(wms.get_delivery_order_page(["PRE-CK2211100010"]))
-    # print(wms.get_user_info())
-    # print(wms.delivery_get_pick_data("1881"))
-    # print(wms.dbo.query_wait_assign_demands())
+class WMSBaseServiceRobot(ServiceRobot):
 
-    # order_sku_list = [
-    #     {
-    #         "skuCode": "63203684930B01", "skuName": "酒柜-金色A款08 1/2 X1", "num": 2
-    #     },{
-    #         "skuCode": "63203684930B02", "skuName": "酒柜(金色)07 2/2 X5", "num": 10
-    #     }]
-    # wms.delivery_mock_package_call_back("PRE-CK2302020006",1,order_sku_list)
-    wms.delivery_mock_label_callback("PRE-CK2302020007", ["PRE-BG2302020026"], False)
+    def __init__(self):
+        super().__init__('wms_base')
+        self.dbo = WMSDBOperator
+
+    def get_workday_duration(self, warehouse_id, start_time, end_time) -> dict:
+        """
+        获取节假日时长
+        :param int warehouse_id: 仓库id
+        :param str start_time: 开始时间，北京时间
+        :param str end_time: 结束时间，北京时间
+
+        :return dict: 例子 {
+                        'code': 200, 'message': '',
+                        'data': {'workdays': ['20230301~20230303', '20230306~20230308'],
+                      'duration': '5d', 'startTimeStr': '2023-03-01 18:00:00',
+                      'endTimeStr': '2023-03-08 18:00:00', 'zoneId': 'Asia/Shanghai'}
+                    }
+        """
+        content = deepcopy(BaseApiConfig.WorkdayDuration.get_attributes())
+        content["data"].update(
+            {
+                "warehouseId": warehouse_id,
+                "startTime": start_time,
+                "endTime": end_time
+            }
+        )
+
+        return self.call_api(**content)
+
+    def get_workday_target_time(self, warehouse_id, date_time, duration) -> dict:
+        """
+        根据时长和工作日数据查询目标时间
+        :param int warehouse_id : 仓库id
+        :param str date_time: 开始时间，北京时间
+        :param str duration: 时长，数值带单位，如：60h,30m,1d,1s
+
+        :return dict : 例子 {'code': 200, 'message': '操作成功', 'data':
+        {'dateTimeStr': '2023-03-01 18:00:00', 'duration': '5d',
+        'workdays': ['20230301~20230303', '20230306~20230308'],
+        'targetDateTime': 1678269600000, 'targetDateTimeStr': '2023-03-08 18:00:00',
+        'zoneId': 'Asia/Shanghai'}}
+        """
+        content = deepcopy(BaseApiConfig.WorkdayTargetDateTime.get_attributes())
+        content["data"].update({
+            "warehouseId": warehouse_id,
+            "dateTime": date_time,
+            "duration": duration
+        })
+        return self.call_api(**content)
+
+    def get_workday_calendar_by_db(self, warehouse_id, start_time, end_time):
+        """
+        从数据库获取仓库节假日
+        """
+        return self.dbo.get_workday_calendar(warehouse_id, start_time, end_time)
+
+    def get_warehouse_timezone_by_db(self, warehouse_id):
+        """
+        从数据库获取仓库时区
+        """
+        return self.dbo.get_warehouse_timezone(warehouse_id)
+
+
+# if __name__ == "__main__":
+#     wms = WMSAppRobot()
+#     # print(wms.entry_order_page(["FH2211022680"]))
+#     # wms.delivery_order_assign_stock(["PRE-CK2211100010"])
+#     # print(wms.get_delivery_order_page(["PRE-CK2211100010"]))
+#     # print(wms.get_user_info())
+#     # print(wms.delivery_get_pick_data("1881"))
+#     # print(wms.dbo.query_wait_assign_demands())
+#
+#     # order_sku_list = [
+#     #     {
+#     #         "skuCode": "63203684930B01", "skuName": "酒柜-金色A款08 1/2 X1", "num": 2
+#     #     },{
+#     #         "skuCode": "63203684930B02", "skuName": "酒柜(金色)07 2/2 X5", "num": 10
+#     #     }]
+#     # wms.delivery_mock_package_call_back("PRE-CK2302020006",1,order_sku_list)
+#     wms.delivery_mock_label_callback("PRE-CK2302020007", ["PRE-BG2302020026"], False)

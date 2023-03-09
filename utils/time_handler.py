@@ -2,6 +2,7 @@
 from __future__ import annotations
 from typing import Union
 from datetime import datetime, date, time, timedelta
+from pytz import timezone, UnknownTimeZoneError
 
 
 DATETIME_LIKE_TYPE = Union[datetime, date, time, float, int, str]
@@ -254,6 +255,19 @@ class HumanDateTime(object):
         :rtype: bool
         """
         return abs(self.dt.timestamp() - type(self)(any_dt).dt.timestamp()) <= seconds
+
+    def astimezone(self, tz):
+        """
+        返回指定时区的时间对象
+        :param str tz: 标准时区，如 America/New_York，Asia/Shanghai 等
+        :return : HumanDateTime 对象
+        """
+        try:
+            dt_tz = timezone(tz)
+        except UnknownTimeZoneError:
+            raise ValueError("时区参数错误")
+
+        return type(self)(self.dt.astimezone(tz=dt_tz))
 
     def __lt__(self, other: Union[DATETIME_LIKE_TYPE, HumanDateTime]):
         return self.dt.timestamp() < type(self)(other).dt.timestamp()

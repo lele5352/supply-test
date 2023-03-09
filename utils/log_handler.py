@@ -14,12 +14,12 @@ except ImportError:
 NoConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, None, {})
 ConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, None, {})
 
-NoConsoleLog.add(all_path, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level=log_level)
-NoConsoleLog.add(error_path, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level='ERROR')
+NoConsoleLog.add(all_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level=log_level)
+NoConsoleLog.add(error_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level='ERROR')
 
 ConsoleLog.add(_sys.stderr)
-ConsoleLog.add(all_path, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level=log_level)
-ConsoleLog.add(error_path, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level='ERROR')
+ConsoleLog.add(all_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level=log_level)
+ConsoleLog.add(error_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level='ERROR')
 
 
 class OutputLog:

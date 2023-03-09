@@ -34,6 +34,7 @@ class Robot:
 
         log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
         log.info("请求内容：%s" % json.dumps({"method": method, "url": url, "data": data}, ensure_ascii=False))
+        log.info(f"traceId：{response.headers.get('Trace-Id')}")
         log.info("响应内容：" + json.dumps(response.json(), ensure_ascii=False))
         log.info(
             "-------------------------------------------------我是分隔符-------------------------------------------------")

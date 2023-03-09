@@ -35,6 +35,26 @@ class BaseApiConfig:
             "inventoryDistributeLevel": 2
         }
 
+    class WorkdayDuration(ApiConfig):
+        """获取节假日时长"""
+        uri_path = '/warehouse/workday/duration'
+        method = 'POST'
+        data = {
+            "warehouseId": None,
+            "startTime": "",  # 北京时间，格式 yyyy-MM-dd HH:mm:ss
+            "endTime": ""  # 北京时间，格式 yyyy-MM-dd HH:mm:ss
+        }
+
+    class WorkdayTargetDateTime(ApiConfig):
+        """根据时长和工作日数据查询目标时间"""
+        uri_path = '/warehouse/workday/targetDateTime'
+        method = 'POST'
+        data = {
+            "warehouseId": None,
+            "dateTime": "",  # 北京时间，格式 yyyy-MM-dd HH:mm:ss
+            "duration": ""  # 时长，如 60h,30m,1d,1s"
+        }
+
 
 class OtherInApiConfig:
     class GetSkuInfo(ApiConfig):
