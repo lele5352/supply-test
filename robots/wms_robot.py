@@ -1031,7 +1031,7 @@ class WMSBaseServiceRobot(ServiceRobot):
         })
         return self.call_api(**content)
 
-    def get_workday_calendar_by_db(self, warehouse_id, start_time, end_time) -> list:
+    def get_workday_calendar_by_db(self, warehouse_id, start_time, end_time=None) -> list:
         """
         从数据库获取仓库节假日
         :param int warehouse_id: 仓库id

@@ -195,7 +195,7 @@ class WMSDBOperator:
                 for i in items]
 
     @classmethod
-    def get_workday_calendar(cls, warehouse_id, start_time, end_time):
+    def get_workday_calendar(cls, warehouse_id, start_time, end_time=None):
         """
         获取仓库工作日
         :param warehouse_id: 仓库id
@@ -213,8 +213,13 @@ class WMSDBOperator:
         else:
             workday = BaseWorkdayCalendar.select().where(
                 (BaseWorkdayCalendar.workday_config_id == relation.workday_config_id) &
-                (BaseWorkdayCalendar.dt >= start_time) & (BaseWorkdayCalendar.dt <= end_time)
-            )
+                (BaseWorkdayCalendar.dt >= start_time)
+            ).order_by(BaseWorkdayCalendar.dt.asc())
+
+            if end_time:
+                workday = filter(
+                    lambda x: x.dt <= end_time, workday
+                )
 
             return [i.dt for i in workday]
 
