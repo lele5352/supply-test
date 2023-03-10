@@ -142,30 +142,33 @@ class HumanDateTime(object):
         else:
             raise ValueError(f'时间戳超出范围：{dt_num}')
 
-    @classmethod
-    def today(cls):
+    def today(self):
         """今天零点
 
         :rtype: HumanDateTime
         """
-        return cls(datetime.now().replace(
+        return type(self)(self.dt.replace(
             hour=0, minute=0, second=0, microsecond=0
         ))
 
-    @classmethod
-    def yesterday(cls):
+    def yesterday(self):
         """昨天零点
 
         :rtype: HumanDateTime
         """
-        return cls.today().sub(days=1)
+        dt = type(self)(
+            self.dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        )
+        return dt.add(days=-1)
 
-    @classmethod
-    def tomorrow(cls):
+    def tomorrow(self):
         """明天零点
         :rtype: HumanDateTime
         """
-        return cls.today().add(days=1)
+        dt = type(self)(
+            self.dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        )
+        return dt.add(days=1)
 
     def __init__(self, origin: Union[DATETIME_LIKE_TYPE, HumanDateTime] = None):
         """
