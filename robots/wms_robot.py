@@ -7,8 +7,7 @@ from config.third_party_api_configs.wms_api_config import ReceiptApiConfig, Deli
 from robots.robot import ServiceRobot, AppRobot
 from dbo.wms_dbo import WMSDBOperator
 from utils.log_handler import logger as log
-from  utils.time_handler import HumanDateTime
-
+from utils.time_handler import HumanDateTime
 
 
 class WMSAppRobot(AppRobot):
@@ -1042,6 +1041,15 @@ class WMSBaseServiceRobot(ServiceRobot):
 
         :return list or None
         """
+        if not isinstance(start_time, str):
+            raise TypeError('start_time must be a str type')
+        if end_time and not isinstance(end_time, str):
+            raise TypeError('end_time must be a str type')
+
+        start_time = start_time.split(' ')[0]
+        if end_time:
+            end_time = end_time.split(' ')[0]
+
         return self.dbo.get_workday_calendar(warehouse_id, start_time, end_time)
 
     def get_warehouse_timezone_by_db(self, warehouse_id) -> str:
@@ -1058,22 +1066,25 @@ class WMSBaseServiceRobot(ServiceRobot):
         计算目标时间（根据阈值，仓库，开始时间，计算出对应的过期/临期时间）
         :param int warehouse_id: 仓库id
         :param str date_time: 开始时间 '2023-03-01 00:00:00'
-        :param str duration： 阈值 '60h,1d,2m,20s'
+        :param str duration: 阈值 '60h,1d,2m,20s'
+
         :return dict
         """
 
         # 获取对应仓库时区，将非中国时区的，将开始时间转化成对应时区的时间
         timezone = self.get_warehouse_timezone_by_db(warehouse_id) or "Asia/Shanghai"
 
-        if timezone not in ("Asia/Shanghai"):
+        if timezone != "Asia/Shanghai":
             starttime_by_warehouse_timezone = HumanDateTime(date_time).astimezone(timezone)
         else:
             starttime_by_warehouse_timezone = HumanDateTime(date_time)
 
         # 根据开始时间,获取对应工作日列表
-        warehouse_day_list = self.get_workday_calendar_by_db(warehouse_id,
-                                                             str(starttime_by_warehouse_timezone).split()[0])
-        log.info(f'查询出来对应的工作日列表：{warehouse_day_list}')
+        warehouse_day_list = self.get_workday_calendar_by_db(
+            warehouse_id,
+            str(starttime_by_warehouse_timezone)
+        )
+        log.debug(f'查询出来对应的工作日列表：{warehouse_day_list}')
 
         # 根据阈值转化成秒
         try:
@@ -1083,6 +1094,7 @@ class WMSBaseServiceRobot(ServiceRobot):
             log.info(f'阈值转成秒值为：{duration_seconds}')
         except Exception as err:
             log.error(f'输入得阈值没有按照格式，导致处理错啦，报错原因：{err}')
+            raise
 
         # 算出对应的结束时间
         if str(starttime_by_warehouse_timezone).split()[0] in warehouse_day_list:
@@ -1115,7 +1127,6 @@ class WMSBaseServiceRobot(ServiceRobot):
 
         }
         return result
-
 
 
 # if __name__ == "__main__":
