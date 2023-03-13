@@ -142,6 +142,20 @@ class HumanDateTime(object):
         else:
             raise ValueError(f'时间戳超出范围：{dt_num}')
 
+    def compare_diff_to(self, dt: HumanDateTime):
+        """
+        比较两个HumanDateTime之间的时间差值
+        :param dt: 待比较的HumanDateTime对象
+
+        return int：秒
+        """
+        if not isinstance(dt, HumanDateTime):
+            raise TypeError("dt argument must be an instance of HumanDateTime")
+
+        iter_str, dt_str = str(self), str(dt)
+
+        return self.str_parse(iter_str).timestamp() - self.str_parse(dt_str).timestamp()
+
     def today(self):
         """今天零点
 
@@ -298,3 +312,5 @@ class HumanDateTime(object):
 
     def __repr__(self):
         return f"HumanDateTime(origin={repr(self.origin)}, dt={repr(self.dt)})"
+
+
