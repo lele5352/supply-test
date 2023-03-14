@@ -1090,7 +1090,7 @@ class WMSBaseServiceRobot(ServiceRobot):
         try:
             prod_map = {'d': 24 * 60 * 60, 'm': 60, 'h': 60 * 60}
             number, unit = duration[:-1], duration[-1]
-            duration_seconds = prod_map[unit.lower()] * int(number)
+            duration_seconds = prod_map.get(unit.lower(),1) * int(number)
             log.info(f'阈值转成秒值为：{duration_seconds}')
         except Exception as err:
             log.error(f'输入得阈值没有按照格式，导致处理错啦，报错原因：{err}')
