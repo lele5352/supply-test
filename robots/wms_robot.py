@@ -1075,14 +1075,14 @@ class WMSBaseServiceRobot(ServiceRobot):
         timezone = self.get_warehouse_timezone_by_db(warehouse_id) or "Asia/Shanghai"
 
         if timezone != "Asia/Shanghai":
-            starttime_by_warehouse_timezone = HumanDateTime(date_time).astimezone(timezone)
+            starttime_by_warehouse = HumanDateTime(date_time).astimezone(timezone)
         else:
-            starttime_by_warehouse_timezone = HumanDateTime(date_time)
+            starttime_by_warehouse = HumanDateTime(date_time)
 
         # 根据开始时间,获取对应工作日列表
         warehouse_day_list = self.get_workday_calendar_by_db(
             warehouse_id,
-            str(starttime_by_warehouse_timezone)
+            str(starttime_by_warehouse)
         )
         log.debug(f'查询出来对应的工作日列表：{warehouse_day_list}')
 
@@ -1097,10 +1097,10 @@ class WMSBaseServiceRobot(ServiceRobot):
             raise
 
         # 算出对应的结束时间
-        if str(starttime_by_warehouse_timezone).split()[0] in warehouse_day_list:
-            today_remain_seconds = starttime_by_warehouse_timezone.tomorrow().timestamp() - starttime_by_warehouse_timezone.timestamp()
+        if str(starttime_by_warehouse).split()[0] in warehouse_day_list:
+            today_remain_seconds = starttime_by_warehouse.tomorrow().timestamp() - starttime_by_warehouse.timestamp()
             if today_remain_seconds > duration_seconds:
-                target_time_by_warehouse = starttime_by_warehouse_timezone.add(seconds=duration_seconds)
+                target_time_by_warehouse = starttime_by_warehouse.add(seconds=duration_seconds)
                 target_time_by_cn = HumanDateTime(date_time).add(seconds=duration_seconds)
 
             else:
@@ -1108,19 +1108,19 @@ class WMSBaseServiceRobot(ServiceRobot):
                 remain_senconds = (duration_seconds - today_remain_seconds) - workday_index * 60 * 60 * 24
                 target_time_by_warehouse = HumanDateTime(warehouse_day_list[workday_index + 1]).add(
                     seconds=remain_senconds)
-                actually_duration_seconds = target_time_by_warehouse.compare_diff_to(starttime_by_warehouse_timezone)
+                actually_duration_seconds = target_time_by_warehouse.compare_diff_to(starttime_by_warehouse)
                 target_time_by_cn = HumanDateTime(date_time).add(seconds=actually_duration_seconds)
         else:
 
             workday_index = int(duration_seconds / 60 / 60 // 24)
             remain_senconds = duration_seconds - workday_index * 60 * 60 * 24
             target_time_by_warehouse = HumanDateTime(warehouse_day_list[workday_index]).add(seconds=remain_senconds)
-            actually_duration_seconds = target_time_by_warehouse.compare_diff_to(starttime_by_warehouse_timezone)
+            actually_duration_seconds = target_time_by_warehouse.compare_diff_to(starttime_by_warehouse)
             target_time_by_cn = HumanDateTime(date_time).add(seconds=actually_duration_seconds)
 
         result = {
             "start_time_by_cntimezone": date_time,
-            "start_time_by_warehouse_timezone": str(starttime_by_warehouse_timezone),
+            "start_time_by_warehouse_timezone": str(starttime_by_warehouse),
             "target_time_by_cntimezone": str(target_time_by_cn),
             "target_time_by_warehouse_timezone": str(target_time_by_warehouse),
             "warehouse_timezone": timezone
