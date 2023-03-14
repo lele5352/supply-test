@@ -195,7 +195,7 @@ class WMSDBOperator:
                 for i in items]
 
     @classmethod
-    def get_workday_calendar(cls, warehouse_id, start_time, end_time):
+    def get_workday_calendar(cls, warehouse_id, start_time, end_time=None):
         """
         获取仓库工作日
         :param warehouse_id: 仓库id
@@ -208,13 +208,18 @@ class WMSDBOperator:
                 BaseWorkdayConfigRelation.del_flag == 0
             )
         except BaseWorkdayConfigRelation.DoesNotExist:
-            logger.info(f"查询不到该仓库的工作日配置，warehouse_id: {warehouse_id}")
-            return None
+            logger.error(f"查询不到该仓库的工作日配置，warehouse_id: {warehouse_id}")
+            raise
         else:
             workday = BaseWorkdayCalendar.select().where(
                 (BaseWorkdayCalendar.workday_config_id == relation.workday_config_id) &
-                (BaseWorkdayCalendar.dt >= start_time) & (BaseWorkdayCalendar.dt <= end_time)
-            )
+                (BaseWorkdayCalendar.dt >= start_time)
+            ).order_by(BaseWorkdayCalendar.dt.asc())
+
+            if end_time:
+                workday = filter(
+                    lambda x: x.dt <= end_time, workday
+                )
 
             return [i.dt for i in workday]
 
@@ -226,6 +231,7 @@ class WMSDBOperator:
         try:
             info = BaseWarehouse.get_by_id(warehouse_id)
         except BaseWarehouse.DoesNotExist:
-            raise ValueError("仓库id不存在")
+            logger.error(f"根据仓库id查询base_warehouse表为空，warehouse_id: {warehouse_id}")
+            raise
         else:
             return info.time_zone

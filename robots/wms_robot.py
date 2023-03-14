@@ -7,6 +7,7 @@ from config.third_party_api_configs.wms_api_config import ReceiptApiConfig, Deli
 from robots.robot import ServiceRobot, AppRobot
 from dbo.wms_dbo import WMSDBOperator
 from utils.log_handler import logger as log
+from utils.time_handler import HumanDateTime
 
 
 class WMSAppRobot(AppRobot):
@@ -1031,17 +1032,101 @@ class WMSBaseServiceRobot(ServiceRobot):
         })
         return self.call_api(**content)
 
-    def get_workday_calendar_by_db(self, warehouse_id, start_time, end_time):
+    def get_workday_calendar_by_db(self, warehouse_id, start_time, end_time=None) -> list:
         """
         从数据库获取仓库节假日
+        :param int warehouse_id: 仓库id
+        :param str start_time: 开始时间
+        :param str end_time: 结束时间
+
+        :return list or None
         """
+        if not isinstance(start_time, str):
+            raise TypeError('start_time must be a str type')
+        if end_time and not isinstance(end_time, str):
+            raise TypeError('end_time must be a str type')
+
+        start_time = start_time.split(' ')[0]
+        if end_time:
+            end_time = end_time.split(' ')[0]
+
         return self.dbo.get_workday_calendar(warehouse_id, start_time, end_time)
 
-    def get_warehouse_timezone_by_db(self, warehouse_id):
+    def get_warehouse_timezone_by_db(self, warehouse_id) -> str:
         """
         从数据库获取仓库时区
+        :param int warehouse_id: 仓库id
+
+        :return str
         """
         return self.dbo.get_warehouse_timezone(warehouse_id)
+
+    def get_workday_targetime(self, warehouse_id, date_time, duration):
+        """
+        计算目标时间（根据阈值，仓库，开始时间，计算出对应的过期/临期时间）
+        :param int warehouse_id: 仓库id
+        :param str date_time: 开始时间 '2023-03-01 00:00:00'
+        :param str duration: 阈值 '60h,1d,2m,20s'
+
+        :return dict
+        """
+
+        # 获取对应仓库时区，将非中国时区的，将开始时间转化成对应时区的时间
+        timezone = self.get_warehouse_timezone_by_db(warehouse_id) or "Asia/Shanghai"
+
+        if timezone != "Asia/Shanghai":
+            starttime_by_warehouse = HumanDateTime(date_time).astimezone(timezone)
+        else:
+            starttime_by_warehouse = HumanDateTime(date_time)
+
+        # 根据开始时间,获取对应工作日列表
+        warehouse_day_list = self.get_workday_calendar_by_db(
+            warehouse_id,
+            str(starttime_by_warehouse)
+        )
+        log.debug(f'查询出来对应的工作日列表：{warehouse_day_list}')
+
+        # 根据阈值转化成秒
+        try:
+            prod_map = {'d': 24 * 60 * 60, 'm': 60, 'h': 60 * 60}
+            number, unit = duration[:-1], duration[-1]
+            duration_seconds = prod_map.get(unit.lower(),1) * int(number)
+            log.info(f'阈值转成秒值为：{duration_seconds}')
+        except Exception as err:
+            log.error(f'输入得阈值没有按照格式，导致处理错啦，报错原因：{err}')
+            raise
+
+        # 算出对应的结束时间
+        if str(starttime_by_warehouse).split()[0] in warehouse_day_list:
+            today_remain_seconds = starttime_by_warehouse.tomorrow().timestamp() - starttime_by_warehouse.timestamp()
+            if today_remain_seconds > duration_seconds:
+                target_time_by_warehouse = starttime_by_warehouse.add(seconds=duration_seconds)
+                target_time_by_cn = HumanDateTime(date_time).add(seconds=duration_seconds)
+
+            else:
+                workday_index = int((duration_seconds - today_remain_seconds) / 60 / 60 // 24)
+                remain_senconds = (duration_seconds - today_remain_seconds) - workday_index * 60 * 60 * 24
+                target_time_by_warehouse = HumanDateTime(warehouse_day_list[workday_index + 1]).add(
+                    seconds=remain_senconds)
+                actually_duration_seconds = target_time_by_warehouse.compare_diff_to(starttime_by_warehouse)
+                target_time_by_cn = HumanDateTime(date_time).add(seconds=actually_duration_seconds)
+        else:
+
+            workday_index = int(duration_seconds / 60 / 60 // 24)
+            remain_senconds = duration_seconds - workday_index * 60 * 60 * 24
+            target_time_by_warehouse = HumanDateTime(warehouse_day_list[workday_index]).add(seconds=remain_senconds)
+            actually_duration_seconds = target_time_by_warehouse.compare_diff_to(starttime_by_warehouse)
+            target_time_by_cn = HumanDateTime(date_time).add(seconds=actually_duration_seconds)
+
+        result = {
+            "start_time_by_cntimezone": date_time,
+            "start_time_by_warehouse_timezone": str(starttime_by_warehouse),
+            "target_time_by_cntimezone": str(target_time_by_cn),
+            "target_time_by_warehouse_timezone": str(target_time_by_warehouse),
+            "warehouse_timezone": timezone
+
+        }
+        return result
 
 
 # if __name__ == "__main__":
