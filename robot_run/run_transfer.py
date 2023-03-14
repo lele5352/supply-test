@@ -75,7 +75,7 @@ def run_transfer(demand_code, flow_flag=None):
     if flow_flag == "confirm_pick":
         return True, pick_order_code
 
-    get_trans_out_tp_kw_ids_result = wms_app.db_get_kw(1, 3, len(pick_sku_list), trans_out_id, trans_out_to_id)
+    get_trans_out_tp_kw_ids_result = wms_app.base_get_kw(1, 3, len(pick_sku_list), trans_out_id, trans_out_to_id)
     if not wms_app.is_success(get_trans_out_tp_kw_ids_result):
         return False, "Fail to get trans out tp location!"
 
@@ -143,7 +143,7 @@ def run_transfer(demand_code, flow_flag=None):
     if not wms_app.is_success(switch_warehouse_result):
         return False, "Fail to switch to trans in warehouse!"
 
-    trans_in_sj_kw_ids_result = wms_app.db_get_kw(1, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
+    trans_in_sj_kw_ids_result = wms_app.base_get_kw(1, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
     if not wms_app.is_success(trans_in_sj_kw_ids_result):
         return False, "Fail to get trans in sj location!"
 

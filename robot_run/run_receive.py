@@ -35,12 +35,12 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
     pre_receive_order_code = entry_order_detail.get('predictReceiptOrderCode')
     receive_sku_list = entry_order_detail.get("skuInfos")
 
-    get_sh_kw_result = wms_app.db_get_kw(2, 1, len(receive_sku_list), warehouse_id, to_warehouse_id)
+    get_sh_kw_result = wms_app.base_get_kw(2, 1, len(receive_sku_list), warehouse_id, to_warehouse_id)
     if not wms_app.is_success(get_sh_kw_result):
         return False, "Fail to get receipt warehouse location!"
     sh_kw_codes = get_sh_kw_result['data']
 
-    get_sj_kw_result = wms_app.db_get_kw(2, 5, len(receive_sku_list), warehouse_id, to_warehouse_id)
+    get_sj_kw_result = wms_app.base_get_kw(2, 5, len(receive_sku_list), warehouse_id, to_warehouse_id)
     if not wms_app.is_success(get_sj_kw_result):
         return False, "Fail to get up shelf warehouse location!"
     sj_kw_codes = get_sj_kw_result['data']
@@ -74,7 +74,7 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
         # 质检流程
         # 最终要组装出来提交质检的数据
         quality_check_sku_list = list()
-        get_zj_kw_result = wms_app.db_get_kw(2, 2, len(sh_kw_codes), warehouse_id, to_warehouse_id)
+        get_zj_kw_result = wms_app.base_get_kw(2, 2, len(sh_kw_codes), warehouse_id, to_warehouse_id)
         if not wms_app.is_success(get_zj_kw_result):
             return False, "Fail to get receipt warehouse quality check location!"
         zj_kw_codes = get_zj_kw_result.get("data")

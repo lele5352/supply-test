@@ -59,7 +59,7 @@ class TestOMSOrderPushWMS(object):
                     # 获取到共享仓之后，取其中一个物理仓加库存即可
                     common_warehouse_info = common_warehouse_info_result.get("data")
                     warehouse_id = common_warehouse_info["records"][0]["extResBoList"][0]["warehouseId"]
-                    get_kw_result = wms_app.db_get_kw(1, 5, len(order_sku_info_list), warehouse_id, warehouse_id)
+                    get_kw_result = wms_app.base_get_kw(1, 5, len(order_sku_info_list), warehouse_id, warehouse_id)
                     assert get_kw_result["code"] == expected
 
                     kw_ids = get_kw_result.get('data')

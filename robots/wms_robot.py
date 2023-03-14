@@ -2,8 +2,7 @@ import json
 import time
 from copy import deepcopy
 
-from config.third_party_api_configs.wms_api_config import ReceiptApiConfig, DeliveryApiConfig, BaseApiConfig, \
-    TransferApiConfig, OtherInApiConfig
+from config.third_party_api_configs.wms_api_config import *
 from robots.robot import ServiceRobot, AppRobot
 from dbo.wms_dbo import WMSDBOperator
 from utils.log_handler import logger as log
@@ -70,7 +69,18 @@ class WMSAppRobot(AppRobot):
         package_no_list = [package["package_code"] for package in data]
         return package_no_list
 
-    def db_get_kw(self, return_type, kw_type, num, ck_id, to_ck_id):
+    def db_get_kw(self, kw_type, num, ck_id, to_ck_id):
+        """
+        获取指定库位类型、指定目的仓、指定数量的仓库库位
+        :param int kw_type: 库位类型
+        :param int num: 获取的库位个数
+        :param int ck_id: 库位的所属仓库id
+        :param to_ck_id: 库位的目的仓id
+        """
+        location_data = self.dbo.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
+        return location_data
+
+    def base_get_kw(self, return_type, kw_type, num, ck_id, to_ck_id):
         """
         获取指定库位类型、指定目的仓、指定数量的仓库库位
 
@@ -80,7 +90,7 @@ class WMSAppRobot(AppRobot):
         :param int ck_id: 库位的所属仓库id
         :param to_ck_id: 库位的目的仓id
         """
-        location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
+        location_data = self.db_get_kw(kw_type, num, ck_id, to_ck_id)
 
         if not location_data:
             new_locations = self.base_create_location(num, kw_type, ck_id, to_ck_id)
@@ -901,7 +911,7 @@ class WMSAppRobot(AppRobot):
             return
         sku_info_records = entry_order_sku_info_result["data"]["records"]
 
-        get_sj_kw_result = self.db_get_kw(2, 5, len(sku_info_records), warehouse_id, to_warehouse_id)
+        get_sj_kw_result = self.base_get_kw(2, 5, len(sku_info_records), warehouse_id, to_warehouse_id)
         if not get_sj_kw_result["code"]:
             return
         sj_kw_codes = get_sj_kw_result["data"]

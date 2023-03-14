@@ -78,7 +78,7 @@ def create_wms_sale_outbound_order(order_sku_info_list):
                 warehouse_list = common_warehouse_info["records"][0]["extResBoList"]
                 warehouse_id = list(filter(lambda x: x["warehouseCode"] == warehouse_code, warehouse_list))[0].get(
                     "warehouseId")
-            get_kw_result = wms_app.db_get_kw(1, 5, len(order_sku_info_list), warehouse_id, warehouse_id)
+            get_kw_result = wms_app.base_get_kw(1, 5, len(order_sku_info_list), warehouse_id, warehouse_id)
             if oms_app.is_data_empty(get_kw_result):
                 return
             kw_ids = get_kw_result.get('data')

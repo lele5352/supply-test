@@ -40,11 +40,11 @@ class TestReceive(object):
             receive_sku_list = entry_order_detail.get("skuInfos")
 
         with allure.step("获取闲置状态的收货库位和上架库位"):
-            get_sh_kw_result = wms_app.db_get_kw(2, 1, len(receive_sku_list), warehouse_id, to_warehouse_id)
+            get_sh_kw_result = wms_app.base_get_kw(2, 1, len(receive_sku_list), warehouse_id, to_warehouse_id)
             assert get_sh_kw_result["code"] == expected
             sh_kw_codes = get_sh_kw_result['data']
 
-            get_sj_kw_result = wms_app.db_get_kw(2, 5, len(receive_sku_list), warehouse_id, to_warehouse_id)
+            get_sj_kw_result = wms_app.base_get_kw(2, 5, len(receive_sku_list), warehouse_id, to_warehouse_id)
             assert get_sj_kw_result["code"] == expected
             sj_kw_codes = get_sj_kw_result['data']
 
