@@ -183,7 +183,7 @@ class ScmDataGenerator:
             ) for _ in distribute_order_list]
 
         for distribute_order in result_distribute_order_list:
-            barcode_generate(distribute_order[0], "../barcodes/distribute_order/{0}.png".format(distribute_order[0]))
+            barcode_generate(distribute_order[0], "../codes/barcodes/distribute_order/{0}.png".format(distribute_order[0]))
         for distribute_order in distribute_order_list:
 
             distribute_order_detail = self.scm_app.get_distribute_order_detail(distribute_order["id"])
@@ -197,7 +197,7 @@ class ScmDataGenerator:
                 bom_detail = json.loads(sku_info["bomDetail"])
                 for bom_detail_item in bom_detail:
                     ware_sku_code = bom_detail_item["waresSku"]
-                    save_path = "../qrcodes/{}.png".format("_".join([distribute_order_code, ware_sku_code]))
+                    save_path = "../codes/qrcodes/{}.png".format("_".join([distribute_order_code, ware_sku_code]))
                     sku_label_info = {"SKU_CODE": ware_sku_code, "SOURCE_ORDER_CODE": distribute_order_code}
                     qrcode_generate(json.dumps(sku_label_info), save_path)
         print('分货单列表：%s' % result_distribute_order_list)

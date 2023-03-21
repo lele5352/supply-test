@@ -100,7 +100,7 @@ class WmsTransferDataGenerator:
             return
         pick_order_code = order_no
 
-        barcode_generate(pick_order_code, "../barcodes/transfer/pick_order/{0}.png".format(pick_order_code))
+        barcode_generate(pick_order_code, "../codes/barcodes/transfer/pick_order/{0}.png".format(pick_order_code))
         print('生成调拨拣货单：%s' % pick_order_code)
         return pick_order_code
 
