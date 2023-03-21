@@ -3,7 +3,7 @@ import time
 from cases import *
 
 from utils.log_handler import logger as log
-from utils.barcode_handler import generate
+from utils.code_handler import barcode_generate
 from utils.wait_handler import until
 
 from data_generator.receipt_data_generator import WmsReceiptDataGenerator
@@ -100,7 +100,7 @@ class WmsTransferDataGenerator:
             return
         pick_order_code = order_no
 
-        generate(pick_order_code, "../barcodes/transfer/pick_order/{0}.png".format(pick_order_code))
+        barcode_generate(pick_order_code, "../barcodes/transfer/pick_order/{0}.png".format(pick_order_code))
         print('生成调拨拣货单：%s' % pick_order_code)
         return pick_order_code
 
@@ -138,6 +138,6 @@ if __name__ == '__main__':
     transfer_data = WmsTransferDataGenerator()
     demand_qty = 10
     # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', "B", 2)
-    # transfer_data.create_transfer_demand(512, '', 514, 514, '63203684930', "B", 10)
-    transfer_data.create_handover_order(512, '', 514, 514, '63203684930', "B", 10)
+    transfer_data.create_transfer_demand(511, 513, 513, 513, '63203684930', "B", 1)
+    # transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
     # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930',"B", 2)

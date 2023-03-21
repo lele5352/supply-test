@@ -56,9 +56,7 @@ def create_wms_sale_outbound_order(order_sku_info_list):
         for item in order_sku_items:
             if not (item['deliveryWarehouseId'] and item['bomVersion']):
                 return
-            sku_code = item["itemSkuCode"]
-            qty = item["itemQty"]
-            bom = item['bomVersion']
+            sku_code, qty, bom = item["itemSkuCode"], item["itemQty"], item['bomVersion']
 
             # 获取指定仓库
             warehouse_code = item["warehouseCode"]
@@ -131,5 +129,5 @@ if __name__ == '__main__':
     # data = [{"sku_code": "63203684930", "qty": 2, "bom": "A", "warehouse_id": "513"},
     #         {"sku_code": "67330337129", "qty": 2, "bom": "A", "warehouse_id": "513"}]
     # data = [{"sku_code": "63203684930", "qty": 2, "bom": "B", "warehouse_id": "513"}]
-    data = [{"sku_code": "63203684930", "qty": 2, "bom": "B", "warehouse_id": "587"}]
+    data = [{"sku_code": "63203684930", "qty": 1, "bom": "A", "warehouse_id": "513"}]
     create_wms_sale_outbound_order(data)
