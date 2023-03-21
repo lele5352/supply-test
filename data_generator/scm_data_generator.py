@@ -2,7 +2,7 @@ import json
 import time
 
 from utils.log_handler import logger as log
-from utils.code_handler import barcode_generate, qrcode_generate
+from utils.code_handler import GenerateCode
 from cases import scm_app
 
 
@@ -182,24 +182,19 @@ class ScmDataGenerator:
                 _["destinationWarehouse"]
             ) for _ in distribute_order_list]
 
-        for distribute_order in result_distribute_order_list:
-            barcode_generate(distribute_order[0], "../codes/barcodes/distribute_order/{0}.png".format(distribute_order[0]))
         for distribute_order in distribute_order_list:
-
             distribute_order_detail = self.scm_app.get_distribute_order_detail(distribute_order["id"])
             distribute_order_code = distribute_order_detail["data"]["shippingOrderNo"]
-
+            GenerateCode("barcode", "distribute_order", distribute_order_code)
             if not self.scm_app.is_success(distribute_order_detail):
                 continue
             sku_list = distribute_order_detail.get("data").get("skuInfos").get("list")
             for sku_info in sku_list:
-                sku_code = sku_info["marketSku"]
                 bom_detail = json.loads(sku_info["bomDetail"])
                 for bom_detail_item in bom_detail:
                     ware_sku_code = bom_detail_item["waresSku"]
-                    save_path = "../codes/qrcodes/{}.png".format("_".join([distribute_order_code, ware_sku_code]))
                     sku_label_info = {"SKU_CODE": ware_sku_code, "SOURCE_ORDER_CODE": distribute_order_code}
-                    qrcode_generate(json.dumps(sku_label_info), save_path)
+                    GenerateCode("qrcode", "distribute_order", json.dumps(sku_label_info))
         print('分货单列表：%s' % result_distribute_order_list)
         return result_distribute_order_list
 
