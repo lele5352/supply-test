@@ -142,7 +142,7 @@ cython_debug/
 logs/
 
 # barcodes
-barcodes/
+codes/
 
 # idea
 .idea
