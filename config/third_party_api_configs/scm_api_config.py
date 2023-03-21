@@ -141,3 +141,8 @@ class SCMApiConfig:
             "shippingOrders": [],
             "merchandiser": ""
         }
+
+    class GetDistributeOrderDetail(ApiConfig):
+        uri_path = "/api/ec-scm-api/scm/api/shipping-order/detail"
+        method = "POST"
+        data = {"id": "1637737878908071938", "pageNumber": 1, "pageSize": 10}

@@ -1,7 +1,8 @@
+import json
 import time
 
 from utils.log_handler import logger as log
-from utils.barcode_handler import generate
+from utils.code_handler import barcode_generate, qrcode_generate
 from cases import scm_app
 
 
@@ -182,7 +183,21 @@ class ScmDataGenerator:
             ) for _ in distribute_order_list]
 
         for distribute_order in result_distribute_order_list:
-            generate(distribute_order[0], "../barcodes/distribute_order/{0}.png".format(distribute_order[0]))
+            barcode_generate(distribute_order[0], "../barcodes/distribute_order/{0}.png".format(distribute_order[0]))
+        for distribute_order in distribute_order_list:
+
+            distribute_order_detail = self.scm_app.get_distribute_order_detail(distribute_order["id"])
+            distribute_order_code = distribute_order_detail["data"]["shippingOrderNo"]
+
+            if not self.scm_app.is_success(distribute_order_detail):
+                continue
+            sku_list = distribute_order_detail.get("data").get("skuInfos").get("list")
+            for sku_info in sku_list:
+                sku_code = sku_info["marketSku"]
+                save_path = "../qrcodes/{}.png".format("_".join([distribute_order_code, sku_code]))
+                sku_label_info = {"SKU_CODE": sku_code, "SOURCE_ORDER_CODE": distribute_order_code}
+
+                qrcode_generate(json.dumps(sku_label_info), save_path)
         print('分货单列表：%s' % result_distribute_order_list)
         return result_distribute_order_list
 
@@ -195,4 +210,4 @@ if __name__ == '__main__':
     # scm.create_purchase_demand(['14093131604'], 10, 'ESBH', '')
     # scm.create_wait_delivery_purchase_order(["14093131604"], 10, 'ESBH', '')
 
-    scm.create_distribute_order(["63203684930"], 1, 'ESZZ', 'ESFH')
+    scm.create_distribute_order(["63203684930", "14093131604"], 1, 'ESZZ', 'ESFH')

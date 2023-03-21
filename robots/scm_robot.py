@@ -212,3 +212,13 @@ class SCMRobot(AppRobot):
         res = self.call_api(**content)
         # distribute_order_nos = [distribute_order["shippingOrderNo"] for distribute_order in res["data"]["list"]]
         return self.formatted_result(res)
+
+    def get_distribute_order_detail(self, purchase_order_id):
+        """分货单明细查询"""
+        content = deepcopy(SCMApiConfig.GetDistributeOrderDetail.get_attributes())
+        content["data"].update({
+            "id": purchase_order_id
+        })
+        res = self.call_api(**content)
+        # distribute_order_nos = [distribute_order["shippingOrderNo"] for distribute_order in res["data"]["list"]]
+        return self.formatted_result(res)
