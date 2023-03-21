@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import time
 from threading import Thread
 import json
 
@@ -31,6 +32,7 @@ class GenerateCode:
     def __init__(self, code_type, order_type, code_str):
         self.generate_code(code_type, order_type, code_str)
 
+    @async_call
     def generate_code(self, code_type, order_type, code_str):
         if code_type == "barcode":
             if order_type == "distribute_order":
@@ -59,6 +61,7 @@ class GenerateCode:
             encoder = Code128Encoder(info, options=options)
             encoder.save(asb_save_path)
             # print('Generate bar code success, save to:{}'.format(asb_save_path))
+            print("barcode {}".format(time.time()))
         except Exception as e:
             print('Generate bar code fail:{}'.format(e))
 
@@ -79,9 +82,9 @@ if __name__ == '__main__':
     # code_path = "../barcodes/sku/{}.png".format(code)
     # generate(code, code_path)
 
-    # code = "SH1667739890436"
-    # code_path = "../barcodes/locations/{}.png".format(code)
-    # barcode_generate(code, code_path)
+    code = "SH1667739890436"
+    code_path = "../codes/barcodes/locations/{}.png".format(code)
+    GenerateCode.barcode_generate(code, code_path)
 
-    info = json.dumps({"SKU_CODE": "63203684930J02", "SOURCE_ORDER_CODE": "FH2303211135"})
-    GenerateCode("qrcode", "distribute_order", info)
+    # info = json.dumps({"SKU_CODE": "63203684930J02", "SOURCE_ORDER_CODE": "FH2303211135"})
+    # GenerateCode("qrcode", "distribute_order", info)
