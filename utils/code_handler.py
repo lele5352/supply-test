@@ -61,7 +61,6 @@ class GenerateCode:
             encoder = Code128Encoder(info, options=options)
             encoder.save(asb_save_path)
             # print('Generate bar code success, save to:{}'.format(asb_save_path))
-            print("barcode {}".format(time.time()))
         except Exception as e:
             print('Generate bar code fail:{}'.format(e))
 
