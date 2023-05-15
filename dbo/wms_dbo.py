@@ -119,11 +119,24 @@ class WMSDBOperator:
     @classmethod
     def query_demand_detail(cls, demand_code):
         """
-        获取指定的调拨需求数据
+        获取指定的调拨需求明细数据
         :param demand_code: 调拨需求编码
         :return: 查询结果数据，字典格式
         """
         items = TrfTransferDemandDetail.select().where(TrfTransferDemandDetail.demand_code == demand_code)
+        if not items:
+            return
+        items = [model_to_dict(item) for item in items]
+        return items
+
+    @classmethod
+    def query_demand(cls, demand_code):
+        """
+        获取指定的调拨需求数据
+        :param demand_code: 调拨需求编码
+        :return: 查询结果数据，字典格式
+        """
+        items = TrfTransferDemand.select().where(TrfTransferDemand.demand_code == demand_code)
         if not items:
             return
         items = [model_to_dict(item) for item in items]

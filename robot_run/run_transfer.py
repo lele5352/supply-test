@@ -30,7 +30,7 @@ def run_transfer(demand_code, flow_flag=None):
     :param demand_code: 调拨需求编码
     :param flow_flag: 流程标识，默认为空，执行全部；可选标识：create_pick_order,confirm_pick,submit_tray,finish_review,handover,received
     """
-    demand_data = wms_app.dbo.query_demand_detail(demand_code)
+    demand_data = wms_app.dbo.query_demand(demand_code)
     trans_out_id = demand_data[0].get("warehouse_id")
     trans_out_to_id = demand_data[0].get("delivery_target_warehouse_id")
     trans_in_id = demand_data[0].get("receive_warehouse_id")
