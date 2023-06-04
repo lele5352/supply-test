@@ -1,86 +1,80 @@
-import decimal
+from utils.tms_cal_items import *
 
 
-def round_up(num, precision):
-    num_decimal = decimal.Decimal(str(num))
-    precision_decimal = decimal.Decimal(str(precision))
-    rounded_decimal = num_decimal.quantize(precision_decimal, rounding=decimal.ROUND_CEILING)
-    return rounded_decimal
+class GoodsCalItem:
+    def __init__(self, goods_info, goods_unit, channel_unit, weight_rounding, weight_precision, size_rounding,
+                 size_precision):
+        self.source_unit = goods_unit
+        self.target_unit = channel_unit
+        self.weight_rounding = weight_rounding
+        self.weight_precision = weight_precision
+        self.size_rounding = size_rounding
+        self.size_precision = size_precision
+        self.goods_info = goods_info
+        self.tms_items = TMSCalcItems(**self.goods_info)
+
+    def origin_result(self):
+        return {
+            "重量": {"num": self.goods_info.get("weight"), "num_type": "weight"},
+            "最长边": {"num": self.tms_items.longest_side(), "num_type": "size"},
+            "次长边": {"num": self.tms_items.mid_side(), "num_type": "size"},
+            "最短边": {"num": self.tms_items.shortest_side(), "num_type": "size"},
+            "围长": {"num": self.tms_items.girth(), "num_type": "size"},
+            "周长": {"num": self.tms_items.perimeter(), "num_type": "size"},
+            "两边长": {"num": self.tms_items.two_sides_length(), "num_type": "size"},
+            "体积": {"num": self.tms_items.volume(), "num_type": "volume"}
+        }
+
+    def unit_changed_result(self):
+        return {
+            x: UnitChange.change(self.origin_result().get(x).get("num"), self.origin_result().get(x).get("num_type"),
+                                 self.source_unit, self.target_unit) for x in
+            self.origin_result()
+        }
+
+    def rounded_result(self):
+        temp_dict = dict()
+
+        for item in self.unit_changed_result():
+            if item == "重量":
+                if self.weight_rounding == "向上取整":
+                    temp_dict[item] = Rounding.round_up(self.unit_changed_result().get(item), self.weight_precision)
+                elif self.weight_rounding == "向下取整":
+                    temp_dict[item] = Rounding.round_down(self.unit_changed_result().get(item), self.weight_precision)
+                else:
+                    temp_dict[item] = Rounding.round_half_up(self.unit_changed_result().get(item),
+                                                             self.weight_precision)
+            else:
+                if self.size_rounding == "向上取整":
+                    temp_dict[item] = Rounding.round_up(self.unit_changed_result().get(item), self.size_precision)
+
+                elif self.size_rounding == "向下取整":
+                    temp_dict[item] = Rounding.round_down(self.unit_changed_result().get(item), self.size_precision)
+                else:
+                    temp_dict[item] = Rounding.round_half_up(self.unit_changed_result().get(item), self.size_precision)
+        return temp_dict
 
 
-def round_down(num, precision):
-    num_decimal = decimal.Decimal(str(num))
-    precision_decimal = decimal.Decimal(str(precision))
-    rounded_decimal = num_decimal.quantize(precision_decimal, rounding=decimal.ROUND_FLOOR)
-    return rounded_decimal
+if __name__ == '__main__':
+    goods_info = {
+        "weight": 99.2,
+        "length": 12.49,
+        "width": 99.50,
+        "height": 30.11
+    }
+    goods_unit = "gj"
+    channel_unit = "gj"
+    channel_weight_rounding = "向上取整"
+    channel_weight_rounding_precision = 1
+    channel_size_rounding = "向下取整"
+    channel_size_rounding_precision = 0.5
 
-
-def round_half_up(num, precision):
-    num_decimal = decimal.Decimal(str(num))
-    precision_decimal = decimal.Decimal(str(precision))
-    rounded_decimal = num_decimal.quantize(precision_decimal, rounding=decimal.ROUND_HALF_EVEN)
-    return rounded_decimal
-
-
-def calculate(method, num, precision):
-    if method == "向上取整":
-        return round_up(num, precision)
-    elif method == "向下取整":
-        return round_down(num, precision)
-    elif method == "四舍五入":
-        return round_half_up(num, precision)
-    else:
-        pass
-
-
-def unit_change(number, source_unit, target_unit):
-    """
-
-    @param number: 参数值
-    @param source_unit: 被转换单位
-    @param target_unit: 目标单位
-    @return:
-    """
-    # 浮点数计算会有精度丢失问题，取整6位小数处理
-    if source_unit == target_unit:
-        return round(number, 6)
-    if source_unit == "cm" and target_unit == "in":
-        return round(number * 0.393700787402, 6)
-    elif source_unit == "in" and target_unit == "cm":
-        return round(number * 2.539950, 6)
-    elif source_unit == "cm3" and target_unit == "in3":
-        return round(number * 0.0610238, 6)
-    elif source_unit == "in3" and target_unit == "cm3":
-        return round(number * 16.387037, 6)
-    elif source_unit == "kg" and target_unit == "lb":
-        return round(number * 2.204622, 6)
-    elif source_unit == "lb" and target_unit == "kg":
-        return round(number * 0.453592, 6)
-
-
-class UnitChange:
-    class InternationalToImperial:
-        @classmethod
-        def length(cls, number):
-            return number * 0.393700787402
-
-        @classmethod
-        def volume(cls, number):
-            return number * 0.0610238
-
-        @classmethod
-        def weight(cls, number):
-            return number * 2.204622
-
-    class ImperialToInternational:
-        @classmethod
-        def length(cls, number):
-            return number * 2.539950
-
-        @classmethod
-        def volume(cls, number):
-            return number * 16.387037
-
-        @classmethod
-        def weight(cls, number):
-            return number * 0.453592
+    item = GoodsCalItem(goods_info, goods_unit, channel_unit, channel_weight_rounding,
+                        channel_weight_rounding_precision, channel_size_rounding, channel_size_rounding_precision)
+    print("货物单位:{},渠道单位:{},渠道重量取整方式:{},重量取整精度:{};尺寸取整方式:{},尺寸取整精度:{}".format(
+        goods_unit, channel_unit, channel_weight_rounding, channel_weight_rounding_precision, channel_size_rounding,
+        channel_size_rounding_precision
+    ))
+    for i in item.origin_result():
+        print("{}单位转换&取整前:{},单位换算取整后:{}".format(i, item.origin_result().get(i).get("num"),
+                                                              item.rounded_result().get(i)))
