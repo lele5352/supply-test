@@ -78,3 +78,6 @@ if __name__ == '__main__':
     for i in item.origin_result():
         print("{}单位转换&取整前:{},单位换算取整后:{}".format(i, item.origin_result().get(i).get("num"),
                                                               item.rounded_result().get(i)))
+
+    for i in item.origin_result():
+        print("{}:{}".format(i,item.rounded_result().get(i)))
