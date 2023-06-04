@@ -27,9 +27,11 @@ class GoodsCalItem:
 
     def unit_changed_result(self):
         return {
-            x: UnitChange.change(self.origin_result().get(x).get("num"), self.origin_result().get(x).get("num_type"),
-                                 self.source_unit, self.target_unit) for x in
-            self.origin_result()
+            x: UnitChange.change(
+                self.origin_result().get(x).get("num"),
+                self.origin_result().get(x).get("num_type"),
+                self.source_unit, self.target_unit)
+            for x in self.origin_result()
         }
 
     def rounded_result(self):
@@ -57,17 +59,17 @@ class GoodsCalItem:
 
 if __name__ == '__main__':
     goods_info = {
-        "weight": 99.2,
-        "length": 12.49,
-        "width": 99.50,
-        "height": 30.11
+        "weight": 99.99,
+        "length": 9.9,
+        "width": 31.9,
+        "height": 89.9
     }
-    goods_unit = "gj"
+    goods_unit = "yz"
     channel_unit = "gj"
     channel_weight_rounding = "向上取整"
     channel_weight_rounding_precision = 1
-    channel_size_rounding = "向下取整"
-    channel_size_rounding_precision = 0.5
+    channel_size_rounding = "向上取整"
+    channel_size_rounding_precision = 1
 
     item = GoodsCalItem(goods_info, goods_unit, channel_unit, channel_weight_rounding,
                         channel_weight_rounding_precision, channel_size_rounding, channel_size_rounding_precision)
@@ -77,7 +79,7 @@ if __name__ == '__main__':
     ))
     for i in item.origin_result():
         print("{}单位转换&取整前:{},单位换算取整后:{}".format(i, item.origin_result().get(i).get("num"),
-                                                              item.rounded_result().get(i)))
+                                                              item.unit_changed_result().get(i)))
 
     for i in item.origin_result():
-        print("{}:{}".format(i,item.rounded_result().get(i)))
+        print("{}:{}".format(i, item.unit_changed_result().get(i)))
