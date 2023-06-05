@@ -6,26 +6,32 @@ class Rounding:
 
     @classmethod
     def round_up(cls, num, precision):
-        """按指定精度向上取整"""
         num_decimal = decimal.Decimal(str(num))
         precision_decimal = decimal.Decimal(str(precision))
-        rounded_decimal = num_decimal.quantize(precision_decimal, rounding=decimal.ROUND_CEILING)
+        factor = decimal.Decimal(1) / precision_decimal
+        rounded_decimal = (num_decimal * factor).to_integral_value(rounding=decimal.ROUND_CEILING)
+        rounded_decimal /= factor
+        rounded_decimal = rounded_decimal.quantize(precision_decimal, rounding=decimal.ROUND_CEILING)
         return rounded_decimal
 
     @classmethod
     def round_down(cls, num, precision):
-        """按指定精度向下取整"""
         num_decimal = decimal.Decimal(str(num))
         precision_decimal = decimal.Decimal(str(precision))
-        rounded_decimal = num_decimal.quantize(precision_decimal, rounding=decimal.ROUND_FLOOR)
+        factor = decimal.Decimal(1) / precision_decimal
+        rounded_decimal = (num_decimal * factor).to_integral_value(rounding=decimal.ROUND_FLOOR)
+        rounded_decimal /= factor
+        rounded_decimal = rounded_decimal.quantize(precision_decimal, rounding=decimal.ROUND_FLOOR)
         return rounded_decimal
 
     @classmethod
     def round_half_up(cls, num, precision):
-        """按指定精度四舍五入"""
         num_decimal = decimal.Decimal(str(num))
         precision_decimal = decimal.Decimal(str(precision))
-        rounded_decimal = num_decimal.quantize(precision_decimal, rounding=decimal.ROUND_HALF_EVEN)
+        factor = decimal.Decimal(1) / precision_decimal
+        rounded_decimal = (num_decimal * factor).to_integral_value(rounding=decimal.ROUND_HALF_EVEN)
+        rounded_decimal /= factor
+        rounded_decimal = rounded_decimal.quantize(precision_decimal, rounding=decimal.ROUND_HALF_EVEN)
         return rounded_decimal
 
 
