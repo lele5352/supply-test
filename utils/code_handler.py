@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import time
 from threading import Thread
 import json
 
@@ -24,8 +23,10 @@ def create_folder(folder):
     if not os.path.exists(abs_folder):
         try:
             os.makedirs(abs_folder)
-        except Exception as e:
-            print('Create folder fail:{}'.format(e))
+        except FileExistsError:
+            pass
+        except PermissionError:
+            print("permission denied!")
 
 
 class GenerateCode:
@@ -50,6 +51,7 @@ class GenerateCode:
                     "_".join([distribute_order_code, ware_sku_code])))
             else:
                 pass
+            print("条码/二维码生成完成，内容：{}".format(code_str))
 
     @classmethod
     def barcode_generate(cls, info, save_path):
@@ -81,7 +83,7 @@ if __name__ == '__main__':
     # code_path = "../barcodes/sku/{}.png".format(code)
     # generate(code, code_path)
 
-    code = "SH1667739890436"
+    code = "SH1667739882960"
     code_path = "../codes/barcodes/locations/{}.png".format(code)
     GenerateCode.barcode_generate(code, code_path)
 
