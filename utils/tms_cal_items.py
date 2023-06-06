@@ -125,6 +125,16 @@ class TMSCalcItems:
         """体积=长*宽*高"""
         return self.longest_side() * self.mid_side() * self.shortest_side()
 
-    def density(self):
+    def density(self, unit_change=False):
         """美卡托盘密度"""
-        return self.weight / self.volume * 1728
+        if unit_change:
+            weight = UnitChange.change(self.weight, "weight", "gj", "yz")
+            volume = UnitChange.change(self.volume(), "volume", "gj", "yz")/1728
+            density = weight / volume
+            return density
+        return self.weight / self.volume() * 1728
+
+
+if __name__ == '__main__':
+    items = TMSCalcItems(490, 99, 189, 31)
+    print(items.density())
