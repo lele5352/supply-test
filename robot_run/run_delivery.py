@@ -5,6 +5,14 @@ from utils.log_handler import logger
 from utils.wait_handler import until
 
 
+class DeliveryFlow:
+    assign_stock = "assign_stock"
+    confirm_pick = "confirm_pick"
+    call_package = "call_package"
+    call_label = "call_label"
+    finish_review = "finish_review"
+
+
 def get_wait_delivery_data():
     data = wms_app.dbo.query_wait_delivery_order()
 
@@ -289,9 +297,10 @@ def run_delivery(delivery_order_code, warehouse_id, flow_flag=None):
 
 
 if __name__ == "__main__":
-    delivery_order_code = "PRE-CK2302140008"
+    delivery_order_code = "PRE-CK2302140013"
     warehouse_id = 513
-    flag = "call_label"
+    flag = DeliveryFlow.call_label
     result, info = run_delivery(delivery_order_code, warehouse_id, flag)
     logger.info("出库单 {} 执行发货流程 {} 结果：{}，执行信息：{}".format(delivery_order_code, flag, result, info),
                 sys_out=True)
+

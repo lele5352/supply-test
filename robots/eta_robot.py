@@ -22,7 +22,12 @@ class ETARobot(ServiceRobot):
 
     def get_goods_eta(self, country_code, site_code, sku_codes, zip_code):
         """获取商品非自提ETA（商城用）
-        :param list sku_codes : 销售sku编码数组
+        :param list sku_codes : 销售sku编码数组，示例：[
+            {
+                "skuCode": "J040522-2-WHITE",
+                "warehouseCode": "USLA02" # 可为空，为空不指定仓库，返回邮编可发组全部可发仓自提eta
+                }
+            ]
         :param string country_code : 国家编码
         :param string site_code : 站点编码，如US
         :param string zip_code : 邮编
@@ -95,28 +100,3 @@ class ETARobot(ServiceRobot):
         })
         res = self.call_api(**content)
         return res
-
-
-if __name__ == '__main__':
-    eta_robot = ETARobot()
-    site = 'US'
-    country_code = 'MX'
-    sku_code_list = ['14093131604']
-    zip_code = '1234'
-    sku_info = [{"skuCode": "14093131604", "warehouseCode": ""}]
-    inputs = [
-        {
-            "countryCode": country_code,
-            "siteCode": site,
-            "skuCode": "14093131604",
-            "zipCode": zip_code
-        }
-    ]
-    print(eta_robot.get_available_stock([]))
-    print(eta_robot.get_goods_eta(country_code, site, sku_code_list, zip_code))
-    print(eta_robot.get_all_country_warehouses())
-    print(eta_robot.get_trade_self_goods_eta(country_code, site, sku_info, zip_code))
-    print(eta_robot.get_all_warehouses(country_code))
-    print(eta_robot.get_inventory(1, country_code))
-    print(eta_robot.get_distribute_warehouses_info_by_country_and_zipcode(country_code, zip_code))
-    print(eta_robot.get_distribute_warehouses_info_by_four_params(inputs))
