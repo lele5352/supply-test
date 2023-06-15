@@ -1,5 +1,5 @@
-from utils.rounding_handler import *
 from utils.unit_change_handler import *
+from utils.rounding_handler import *
 
 
 class TMSCalcItems:
@@ -45,9 +45,14 @@ class TMSCalcItems:
         """体积=长*宽*高"""
         return self.longest_side() * self.mid_side() * self.shortest_side()
 
+    def volume_weight(self, precision):
+        """体积重=(长*宽*高)/体积重系数"""
+        return round(self.volume() / precision, 2)
+
     def density(self, unit_change=False):
         """美卡托盘密度"""
         if unit_change:
+            # 判断是否需要换算单位，若货物信息的单位为国际单位，则需要换算，传True
             weight = UnitChange.change(self.weight, "weight", "gj", "yz")
             volume = UnitChange.change(self.volume(), "volume", "gj", "yz") / 1728
             density = weight / volume
@@ -113,12 +118,46 @@ class GoodsMeasurementItems:
         return temp_dict
 
 
+def package_calc(goods_info_list, precision):
+    temp_result = [0, 0, 0]
+    temp_weight = 0
+    for length, width, height, weight in goods_info_list:
+        sides = [length, width, height]
+        sides.sort(reverse=True)
+        temp_result = [max(temp_result[0], sides[0]), max(temp_result[1], sides[1]), temp_result[2] + sides[2]]
+        temp_result.sort(reverse=True)
+        temp_weight += weight
+    temp_result.append(round(temp_weight, 6))
+    items = TMSCalcItems(temp_result[3], temp_result[0], temp_result[1], temp_result[2])
+    grith = items.girth()
+    volume_weight = items.volume_weight(precision)
+    temp_result.extend([grith, volume_weight])
+
+    return temp_result
+
+
 if __name__ == '__main__':
+    # no_pack_goods_list = [
+    #     (22.2, 99.9, 33.3, 9.99),
+    #     (22.2, 55.5, 33.3, 1.22),
+    #     (22.2, 55.5, 33.3, 1.22),
+    #     (11.1, 55.5, 44.4, 3.11),
+    #     (11.1, 55.5, 44.4, 3.11)
+    #
+    # ]
+    # pack_goods_list = [
+    #     (11.1, 55.5, 44.4, 3.11),
+    #     (22.2, 55.5, 33.3, 1.22),
+    #     (22.2, 55.5, 33.3, 1.22)
+    #
+    # ]
+    # print(package_calc(no_pack_goods_list, 2000))
+    # print(package_calc(pack_goods_list, 2200))
     goods_info = {
-        "weight": 99.00,
-        "length": 9.0,
-        "width": 31.0,
-        "height": 89.0
+            "weight": 99.00,
+            "length": 9.0,
+            "width": 31.0,
+            "height": 89.0
     }
     # 货物单位
     goods_unit = "yz"
