@@ -11,8 +11,8 @@ except ImportError:
     console_log = False
 
 
-NoConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, None, {})
-ConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, None, {})
+NoConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, [], {})
+ConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, [], {})
 
 NoConsoleLog.add(all_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level=log_level)
 NoConsoleLog.add(error_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level='ERROR')
