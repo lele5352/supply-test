@@ -1,6 +1,6 @@
 from utils.rounding_handler import *
 from utils.unit_change_handler import *
-
+from dbo.tms_base_dbo import TMSBaseDBOperator
 
 class TMSCalcItems:
     def __init__(self, weight, length, width, height):
@@ -115,23 +115,6 @@ class GoodsMeasurementItems:
                     temp_dict[item] = Rounding.round_half_up(self.unit_changed_items().get(item), self.size_precision)
         return temp_dict
 
-
-def package_calc(goods_info_list, precision):
-    temp_result = [0, 0, 0]
-    temp_weight = 0
-    for length, width, height, weight in goods_info_list:
-        sides = [length, width, height]
-        sides.sort(reverse=True)
-        temp_result = [max(temp_result[0], sides[0]), max(temp_result[1], sides[1]), temp_result[2] + sides[2]]
-        temp_result.sort(reverse=True)
-        temp_weight += weight
-    temp_result.append(round(temp_weight, 6))
-    items = TMSCalcItems(temp_result[3], temp_result[0], temp_result[1], temp_result[2])
-    grith = items.girth()
-    volume_weight = items.volume_weight(precision)
-    temp_result.extend([grith, volume_weight])
-
-    return temp_result
 
 
 if __name__ == '__main__':

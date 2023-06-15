@@ -1,7 +1,7 @@
 from peewee import *
-from config import db_config
+from config import scms_db_config
 
-database = MySQLDatabase('supply_wms', **db_config)
+database = MySQLDatabase('supply_wms', **scms_db_config)
 
 
 class UnknownField(object):
