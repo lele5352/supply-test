@@ -9,7 +9,6 @@ class TMSBaseDBOperator:
         :params string key_name: 字典键名称
         :return: 查询结果数据，字典格式
         """
-
         item = BaseDict.get_or_none(BaseDict.label_key == key_name)
         if not item:
             return
