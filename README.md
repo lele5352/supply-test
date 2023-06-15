@@ -13,7 +13,8 @@
             env = 'test160'
             
             env_prefix_config = env_config.prefix_config.get(env)
-            db_config = env_config.mysql_config.get(env)
+            scms_db_config = env_config.mysql_config.get(env).get("scms")
+            tms_db_config = env_config.mysql_config.get(env).get("tms")
             
             user = {
                 'username': '', # 你的账号
