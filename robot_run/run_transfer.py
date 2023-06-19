@@ -131,6 +131,10 @@ def run_transfer(demand_code, flow_flag=None):
 
         handover_no = bind_result['data']['handoverNo']
 
+    # 如果流程标识为生成交接单，则执行就返回，中断流程
+    if flow_flag == "bind":
+        return True, handover_no
+
     delivery_result = wms_app.transfer_out_delivery(handover_no)
     if not wms_app.is_success(delivery_result):
         return False, "Fail to ship trans out order!"

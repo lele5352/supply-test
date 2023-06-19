@@ -380,6 +380,48 @@ class WMSAppRobot(AppRobot):
         bind_res = self.call_api(**content)
         return self.formatted_result(bind_res)
 
+    def transfer_handover_order(self, **kwargs):
+        content = deepcopy(TransferApiConfig.TransferHandoverOrder.get_attributes())
+        content["data"].update(
+            {
+                "current": kwargs.get('current', 1),
+                "size": kwargs.get('size', 10),
+                "boxNo": kwargs.get('boxNo', []),
+                "handoverNo": kwargs.get('handoverNo', ""),
+                "transferOutNo": kwargs.get('transferOutNo', ""),
+                "state": kwargs.get('state', ""),
+                "receiveWarehouseCode": kwargs.get('receiveWarehouseCode', ""),
+                "startUpdateTime": kwargs.get('startUpdateTime', ""),
+                "endUpdateTime": kwargs.get('endUpdateTime', ""),
+                "saleSkuCodes": kwargs.get('saleSkuCodes', []),
+                "skuCodes": kwargs.get('skuCodes', []),
+                "sortField": kwargs.get('sortField',
+                                        [{"field": "create_time", "type": "DESC"}, {"field": "id", "type": "DESC"}]),
+                "handoverNos": kwargs.get('handover_ids', [])
+            }
+        )
+        handover_list = self.call_api(**content)
+        return self.formatted_result(handover_list)
+
+    def transfer_out_update_delivery_config(self, handover_id, container_no, so_number, express_type=1,
+                                            express_type_idx=0):
+        content = deepcopy(TransferApiConfig.TransferDeliveryUpdate.get_attributes())
+        content["data"].update(
+            {
+                "ids": [handover_id],
+                "expressTypeIndex": express_type_idx,
+                "logisticsMerchant": "CEO",
+                "logisticsNo": "",
+                "remark": "",
+                "eta": int(time.time() * 1000),
+                "containerNo": container_no,
+                "soNumber": so_number,
+                "expressType": express_type
+            }
+        )
+        update_res = self.call_api(**content)
+        return self.formatted_result(update_res)
+
     def transfer_out_delivery(self, handover_no):
         content = deepcopy(TransferApiConfig.TransferDelivery.get_attributes())
         content["data"].update({"handoverNo": handover_no})
@@ -402,6 +444,11 @@ class WMSAppRobot(AppRobot):
             })
         up_shelf_res = self.call_api(**content)
         return self.formatted_result(up_shelf_res)
+
+    def transfer_cabinet_list(self):
+        content = deepcopy(TransferApiConfig.TransferCabinetList.get_attributes())
+        cabinet_list = self.call_api(**content)
+        return self.formatted_result(cabinet_list)
 
     def receipt_entry_order_page(self, distribute_order_code_list):
         """
