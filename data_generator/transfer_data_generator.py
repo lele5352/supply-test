@@ -1,3 +1,4 @@
+import random
 import time
 
 from cases import *
@@ -165,14 +166,14 @@ class WmsTransferDataGenerator:
         order_detail = self.wms_app.transfer_handover_order(handover_ids=[order_no]).get('data').get('records')[0]
         handover_id = order_detail.get('id')
         # 获取海运柜号信息并更新
-        cabinet_info = self.wms_app.transfer_cabinet_list().get('data')[0]
+        cabinet_info = random.choice(self.wms_app.transfer_cabinet_list().get('data'))
         container_no = cabinet_info.get('cabinetNumber')
-        so_number = cabinet_info.get('SoNumber')
+        so_number = cabinet_info.get('soNumber')
         # print("更新海运柜号，{}".format(cabinet_info))
         self.wms_app.transfer_out_update_delivery_config(handover_id, container_no, so_number)
         # print("完成调拨发货")
-        self.wms_app.transfer_out_delivery(handover_id)
-        print('交接单号:{},交接单id:{},海柜号:{},订舱号:{}'.format(order_no, handover_id, container_no, so_number))
+        self.wms_app.transfer_out_delivery(order_no)
+        print('交接单号:{},交接单id:{},海柜信息:{}'.format(order_no, handover_id, cabinet_info))
         return order_no
 
 
@@ -187,12 +188,12 @@ if __name__ == '__main__':
 
     # sku_list = ['JF067T801S', 'JF31665XD8', 'JF954856UJ', 'JF389G7H75', 'P31559628', 'BPJF067T801SB01']
     sku_list = ['JF067T801S', 'JF31665XD8']
+    # sku_list = ['JF067T801S']
     th_list = []
     for sku in sku_list:
         th = threading.Thread(target=transfer_data.create_cabinet_order, args=(
-            512, '', 513, 513, sku, "A", 1))
+            515, 515, 542, 542, sku, "A", 1))
         th.start()
         th_list.append(th)
-        print(th.name, '开始')
     for th in th_list:
         th.join()
