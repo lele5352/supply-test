@@ -2,7 +2,6 @@ import random
 import time
 import concurrent.futures
 
-
 from cases import *
 
 from utils.log_handler import logger as log
@@ -137,7 +136,7 @@ class WmsTransferDataGenerator:
         return order_no
 
     def create_cabinet_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code_list, bom,
-                             demand_qty, demand_type=1, customer_type=1, remark=''):
+                             demand_qty, demand_type=1, customer_type=1, remark='', process_flag='bind'):
         """
         生成海柜单
 
@@ -151,7 +150,9 @@ class WmsTransferDataGenerator:
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         :param bom: bom版本
+        :param process_flag: 流程标志位： bind，submit
         """
+
         def bind_sub_pick(sku_code):
             demand_no = self.create_transfer_demand(
                 trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sku_code, bom, demand_qty, demand_type,
@@ -161,8 +162,9 @@ class WmsTransferDataGenerator:
                 print("创建调拨拣货单失败")
                 return
             # 执行调拨流程到扫货绑定交接单
-            result, order_no = run_transfer(demand_no, "bind")
-            return order_no
+            result, _order_no = run_transfer(demand_no, "bind")
+            return _order_no
+
         # 生成调拨需求
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             to_do = []
@@ -172,28 +174,31 @@ class WmsTransferDataGenerator:
                 to_do.append(future)
             for future in concurrent.futures.as_completed(to_do):  # 并发执行
                 order_no = future.result()
-            # 获取交接货单id
-            order_detail = self.wms_app.transfer_handover_order(handover_ids=[order_no]).get('data').get('records')[0]
-            handover_id = order_detail.get('id')
-            # 获取海运柜号信息并更新
-            cabinet_info = random.choice(self.wms_app.transfer_cabinet_list().get('data'))
-            container_no = cabinet_info.get('cabinetNumber')
-            so_number = cabinet_info.get('soNumber')
-            # print("更新海运柜号，{}".format(cabinet_info))
-            self.wms_app.transfer_out_update_delivery_config(handover_id, container_no, so_number)
-            # print("完成调拨发货")
-            self.wms_app.transfer_out_delivery(order_no)
-            print('交接单号:{},交接单id:{},海柜信息:{}'.format(order_no, handover_id, cabinet_info))
             return order_no
+
+    def submit_cabinet_order(self, order_no):
+        # 获取交接货单id
+        order_detail = self.wms_app.transfer_handover_order(handover_ids=[order_no]).get('data').get('records')[0]
+        handover_id = order_detail.get('id')
+        # 获取海运柜号信息并更新
+        cabinet_info = random.choice(self.wms_app.transfer_cabinet_list().get('data'))
+        container_no = cabinet_info.get('cabinetNumber')
+        so_number = cabinet_info.get('soNumber')
+        self.wms_app.transfer_out_update_delivery_config(handover_id, container_no, so_number)
+        self.wms_app.transfer_out_delivery(order_no)
+        print('交接单号:{},交接单id:{},海柜信息:{}'.format(order_no, handover_id, cabinet_info))
 
 
 if __name__ == '__main__':
     transfer_data = WmsTransferDataGenerator()
-    demand_qty = 10
     # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', "B", 2)
     # transfer_data.create_transfer_demand(511, 513, 513, 513, '63203684930', "B", 1)
     # transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
     # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930',"B", 2)
     # sku_list = ['JF067T801S', 'JF31665XD8', 'JF954856UJ', 'JF389G7H75', 'P31559628', 'BPJF067T801SB01']
-    sku_list = ['JF067T801S', 'JF31665XD8','JF067T801S', 'JF31665XD8','JF067T801S', 'JF31665XD8','JF067T801S', 'JF31665XD8','JF067T801S', 'JF31665XD8']
-    transfer_data.create_cabinet_order(515, 515, 542, 542, sku_list, "A", 1)
+    sku_list = [
+        'JF067T801S', 'JF31665XD8', 'JF067T801S', 'JF31665XD8', 'JF067T801S', 'JF31665XD8', 'JF067T801S',
+        'JF31665XD8', 'JF067T801S', 'JF31665XD8']
+    transfer_data.create_cabinet_order(515, 515, 542, 542, sku_list, "A", 1)  # 扫描当前sku并绑定到发货单
+    order = transfer_data.create_cabinet_order(515, 515, 542, 542, sku_list, "B", 1)  # 扫描当前sku并绑定到发货单
+    transfer_data.submit_cabinet_order(order)
