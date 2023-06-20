@@ -181,7 +181,8 @@ class WmsTransferDataGenerator:
         order_detail = self.wms_app.transfer_handover_order(handover_ids=[order_no]).get('data').get('records')[0]
         handover_id = order_detail.get('id')
         # 获取海运柜号信息并更新
-        cabinet_info = random.choice(self.wms_app.transfer_cabinet_list().get('data'))
+        cabinet_info = random.choice(
+            [cabinet for cabinet in self.wms_app.transfer_cabinet_list().get('data') if cabinet.get('cabinetNumber')])
         container_no = cabinet_info.get('cabinetNumber')
         so_number = cabinet_info.get('soNumber')
         self.wms_app.transfer_out_update_delivery_config(handover_id, container_no, so_number)
@@ -196,9 +197,30 @@ if __name__ == '__main__':
     # transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
     # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930',"B", 2)
     # sku_list = ['JF067T801S', 'JF31665XD8', 'JF954856UJ', 'JF389G7H75', 'P31559628', 'BPJF067T801SB01']
+    """
+    退税商品：
+    销售SKU：
+    JF067T801S,供应商：coco测试
+    JF31665XD8,供应商：coco测试
+    
+    零部件商品：
+    P52601628 关联的SKU：JF067T801S 供应商：coco测试
+    
+    非退税商品：
+    销售SKU：
+    JF954856UJ,供应商：coco雪1
+    JF389G7H75,供应商：coco雪1
+    
+    零部件商品：
+    P31559628   关联的SKU：JF954856UJ 供应商：coco雪1
+    
+    内部BOM，供应商为空：
+    BPJF067T801SB01
+    """
     sku_list = [
-        'JF067T801S', 'JF31665XD8', 'JF067T801S', 'JF31665XD8', 'JF067T801S', 'JF31665XD8', 'JF067T801S',
+        # 'JF067T801S', 'JF31665XD8', 'JF067T801S', 'JF31665XD8', 'JF067T801S', 'JF31665XD8', 'JF067T801S',
         'JF31665XD8', 'JF067T801S', 'JF31665XD8']
-    transfer_data.create_cabinet_order(515, 515, 542, 542, sku_list, "A", 1)  # 扫描当前sku并绑定到发货单
-    order = transfer_data.create_cabinet_order(515, 515, 542, 542, sku_list, "B", 1)  # 扫描当前sku并绑定到发货单
+    order = transfer_data.create_cabinet_order(515, 515, 542, 542, sku_list, "A", 1)  # 扫描当前sku并绑定到发货单
+    # order = transfer_data.create_cabinet_order(515, 515, 542, 542, sku_list, "B", 1)  # 扫描当前sku并绑定到发货单
+    # order = 'DBJJ2306190025'
     transfer_data.submit_cabinet_order(order)
