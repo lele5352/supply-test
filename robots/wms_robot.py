@@ -93,8 +93,8 @@ class WMSAppRobot(AppRobot):
         """
         location_data = self.db_get_kw(kw_type, num, ck_id, to_ck_id)
         if force:
-            location_data = self.base_create_location(num, kw_type, ck_id, to_ck_id)
-            return self.report(1, True, location_data)
+            new_data = self.base_create_location(num, kw_type, ck_id, to_ck_id)
+            location_data = [WMSDBOperator.query_warehouse_location_info_by_code(data) for data in new_data]
         elif not location_data:
             new_locations = self.base_create_location(num, kw_type, ck_id, to_ck_id)
             if not new_locations:
