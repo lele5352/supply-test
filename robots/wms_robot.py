@@ -80,7 +80,7 @@ class WMSAppRobot(AppRobot):
         location_data = self.dbo.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
         return location_data
 
-    def base_get_kw(self, return_type, kw_type, num, ck_id, to_ck_id):
+    def base_get_kw(self, return_type, kw_type, num, ck_id, to_ck_id, force=False):
         """
         获取指定库位类型、指定目的仓、指定数量的仓库库位
 
@@ -89,10 +89,13 @@ class WMSAppRobot(AppRobot):
         :param int num: 获取的库位个数
         :param int ck_id: 库位的所属仓库id
         :param to_ck_id: 库位的目的仓id
+        :param bool force: 默认不会强制创建新库位
         """
         location_data = self.db_get_kw(kw_type, num, ck_id, to_ck_id)
-
-        if not location_data:
+        if force:
+            location_data = self.base_create_location(num, kw_type, ck_id, to_ck_id)
+            return self.report(1, True, location_data)
+        elif not location_data:
             new_locations = self.base_create_location(num, kw_type, ck_id, to_ck_id)
             if not new_locations:
                 print("无库位，创建库位失败！")
