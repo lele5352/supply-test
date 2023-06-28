@@ -1,7 +1,5 @@
-import random
 import time
 import concurrent.futures
-
 from cases import *
 
 from utils.log_handler import logger as log
@@ -216,6 +214,11 @@ class WmsTransferDataGenerator:
 
 if __name__ == '__main__':
     transfer_data = WmsTransferDataGenerator()
+    # demand_qty = 10
+    # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', "B", 2)
+    # transfer_data.create_transfer_demand(511, 513, 513, 513, '63203684930', "B", 1)
+    # transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
+    # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930',"B", 2)
     multi_sku_list = [
         'JF067T801S', 'JF31665XD8', 'JF954856UJ', 'JF389G7H75', 'P52601628', 'JF954856UJ', 'JF389G7H75', 'JF68Z9301V',
         'JF067T801S', 'JF31665XD8', 'JF40130HR7', 'JFW95751S0', 'HWIT187548', 'HW9W44M768', 'HW332S63I7', 'HW1711P3M7',
