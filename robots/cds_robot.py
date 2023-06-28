@@ -67,11 +67,51 @@ class CDSAppRobot(AppRobot):
         return self.formatted_result(res)
 
     def get_declaration(self, **kwargs):
-        """海柜单: 保存/保存并生单/重新生单
+        """报关单: 获取列表
         :param dict kwargs: 查询条件
         :return:
         """
         content = deepcopy(DeclarationApiConfig.GetDeclaration.get_attributes())
+        content["data"].update(kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def get_goods(self, **kwargs):
+        """商品申报信息: 获取列表
+        :param dict kwargs: 查询条件
+        :return:
+        """
+        content = deepcopy(GoodsApiConfig.GetGoods.get_attributes())
+        content["data"].update(kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def add_good(self, **kwargs):
+        """商品申报信息: 获取列表
+        :param dict kwargs: 查询条件
+        :return:
+        """
+        content = deepcopy(GoodsApiConfig.AddGood.get_attributes())
+        content["data"].update(kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def get_taxation(self, **kwargs):
+        """商品税收信息: 获取列表
+        :param dict kwargs: 查询条件
+        :return:
+        """
+        content = deepcopy(TaxationApiConfig.GetTaxation.get_attributes())
+        content["data"].update(kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def add_taxation(self, **kwargs):
+        """商品税收信息: 获取列表
+        :param dict kwargs: 查询条件
+        :return:
+        """
+        content = deepcopy(TaxationApiConfig.AddTaxation.get_attributes())
         content["data"].update(kwargs)
         res = self.call_api(**content)
         return self.formatted_result(res)

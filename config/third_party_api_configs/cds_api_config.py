@@ -175,3 +175,56 @@ class InvoiceApiConfig:
             "pageNumber": 1, "pageSize": 10,
             "sortInfo": {"sortField": "", "sortType": ""}
         }
+
+
+class GoodsApiConfig:
+    class GetGoods(ApiConfig):
+        uri_path = "/api/ec-cds-api/goods/declaration/info/page"
+        method = "POST"
+        data = {
+            "pageNumber": 1, "pageSize": 150,
+            "salesSkuCodeList": [],
+            "salesSkuName": "",
+            "customsCodeList": [],
+            "inspectionFlag": "",
+            "sortInfoList": [{"sortField": "", "sortType": ""}]
+        }
+
+    class AddGood(ApiConfig):
+        uri_path = "/api/ec-cds-api/goods/declaration/info/add"
+        method = "POST"
+        data = {
+            "salesSkuCode": "P31559628",
+            "customsCode": "1000000000",
+            "salesSkuName": "TS零部件测试非退税",
+            "customsName": "自动化脚本生成",
+            "declarationInfo": "自动化脚本生成",
+            "unit": "1",
+            "inspectionFlag": "1"
+        }
+
+
+class TaxationApiConfig:
+    class GetTaxation(ApiConfig):
+        uri_path = "/api/ec-cds-api/taxation/info/page"
+        method = "POST"
+        data = {
+            "pageNumber": 1, "pageSize": 150,
+            "salesSkuCodes": [],
+            "salesSkuNameLike": "",
+            "taxationCodes": [],
+            "taxationNameLike": "",
+            "sortInfoList": [{"sortField": "", "sortType": ""}]
+        }
+
+    class AddTaxation(ApiConfig):
+        uri_path = "/api/ec-cds-api/taxation/info/add"
+        method = "POST"
+        data = {
+            "salesSkuCode": "P31559628",
+            "taxationCode": "1000000000000000000",
+            "salesSkuName": "TS零部件测试非退税",
+            "taxationName": "*automatictest*",
+            "taxationDesc": "自动化脚本生成",
+            "specification": "1*1*1"
+        }

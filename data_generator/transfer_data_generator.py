@@ -212,6 +212,9 @@ class WmsTransferDataGenerator:
                 trans_out_id, trans_out_id, trans_in_id, trans_in_id, sec_sku_list, "A", 1)
             handover_order_list.append(order)
             container_no, so_number = self.submit_cabinet_order(order, container_no, so_number)
+        else:
+            # 单量较小时，可能出现cds后台未同步更新的情况
+            time.sleep(5)
         return handover_order_list
 
 
