@@ -974,6 +974,8 @@ class WMSAppRobot(AppRobot):
         pass
 
 
+
+
 class WMSTransferServiceRobot(ServiceRobot):
     def __init__(self):
         super().__init__("transfer")

@@ -13,7 +13,8 @@
             env = 'test160'
             
             env_prefix_config = env_config.prefix_config.get(env)
-            db_config = env_config.mysql_config.get(env)
+            scms_db_config = env_config.mysql_config.get(env).get("scms")
+            tms_db_config = env_config.mysql_config.get(env).get("tms")
             
             user = {
                 'username': '', # 你的账号
@@ -68,5 +69,6 @@ model生成：
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_ims > models/ims_model.py
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_oms > models/oms_model.py
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_scm > models/scm_model.py
+    python3 -m pwiz -e mysql -H 10.0.0.156 -p 3306 -u erp -P supply_logistics_base > models/tms_base.py
 
 

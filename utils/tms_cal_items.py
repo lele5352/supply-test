@@ -116,23 +116,6 @@ class GoodsMeasurementItems:
         return temp_dict
 
 
-def package_calc(goods_info_list, precision):
-    temp_result = [0, 0, 0]
-    temp_weight = 0
-    for length, width, height, weight in goods_info_list:
-        sides = [length, width, height]
-        sides.sort(reverse=True)
-        temp_result = [max(temp_result[0], sides[0]), max(temp_result[1], sides[1]), temp_result[2] + sides[2]]
-        temp_result.sort(reverse=True)
-        temp_weight += weight
-    temp_result.append(round(temp_weight, 6))
-    items = TMSCalcItems(temp_result[3], temp_result[0], temp_result[1], temp_result[2])
-    grith = items.girth()
-    volume_weight = items.volume_weight(precision)
-    temp_result.extend([grith, volume_weight])
-
-    return temp_result
-
 
 if __name__ == '__main__':
     items = TMSCalcItems(24.31, 66.6, 44.4, 199.9)

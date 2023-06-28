@@ -67,10 +67,20 @@ mysql_config = {
         'port': 3306
     },
     'test160': {
-        'user': 'erp',
-        'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
-        'host': '10.0.0.127',
-        'port': 3306
+        "scms":
+            {
+                'user': 'erp',
+                'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
+                'host': '10.0.0.127',
+                'port': 3306
+            },
+        "tms":
+            {
+                'user': 'erp',
+                'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
+                'host': '10.0.0.156',
+                'port': 3306
+            }
     },
     'uat': {
         'user': 'erp',

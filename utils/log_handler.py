@@ -12,8 +12,8 @@ except ImportError:
     console_log = False
 
 
-NoConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, None, {})
-ConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, None, {})
+NoConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, [], {})
+ConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, [], {})
 
 NoConsoleLog.add(all_path, format=log_format,
                  level=log_level)
