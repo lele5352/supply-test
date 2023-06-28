@@ -594,6 +594,11 @@ class StockOperationApiConfig:
         TO_BAD = 3  # 库内转次
         TO_GOOD = 4  # 库内转良
 
+    class QualityType(Enum):
+        """质量枚举"""
+        BAD = "次品"
+        GOOD = "良品"
+
     class PdaGetInventory(ApiConfig):
         """查询库位sku库存"""
         uri_path = '/api/ec-wms-api/innerLocation/pda/getInventory'
@@ -634,5 +639,19 @@ class StockOperationApiConfig:
                 "count": None,  # 转换数量
                 "skuCode": None,  # 仓库sku编码
                 "quality": "良品"
+            }
+        }
+
+    class MoveToGood(ApiConfig):
+        """转良"""
+        uri_path = '/api/ec-wms-api/innerLocation/pda/moveToGoodLocation'
+        method = 'POST'
+        data = {
+            "desLocationCode": None,
+            "originLocationCode": None,
+            "inventory": {
+                "count": None,
+                "skuCode": None,
+                "quality": "次品"
             }
         }

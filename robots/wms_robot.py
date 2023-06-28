@@ -993,26 +993,35 @@ class WMSAppRobot(AppRobot):
 
         return self.call_api(**content)
 
-    def move_to_bad_location(self, origin_code, des_code, sku_code, move_num):
+    def move_to_location(self, turn_type, origin_code, des_code, sku_code, move_num):
         """
-        良转次
+        良次品 转换
+        :param turn_type: 转换方式：转良、转次
         :param origin_code: 源库位编码
         :param des_code: 目标库位编码
         :param sku_code: 仓库sku编码
         :param move_num: 转换数量
         """
+        if turn_type not in ("转良", "转次"):
+            raise ValueError("turn_type 参数值必须为 转良 或 转次")
+
+        if turn_type == '转良':
+            quality = StockOperationApiConfig.QualityType.BAD.value
+            api_template = StockOperationApiConfig.MoveToGood.get_attributes()
+        else:
+            quality = StockOperationApiConfig.QualityType.GOOD.value
+            api_template = StockOperationApiConfig.MoveToBad.get_attributes()
+
         pre_param = {
             "originLocationCode": origin_code,
             "desLocationCode": des_code,
             "inventory": {
                 "count": move_num,
                 "skuCode": sku_code,
-                "quality": "良品"
+                "quality": quality
             }
         }
-        content = deepcopy(
-            StockOperationApiConfig.MoveToBad.get_attributes()
-        )
+        content = deepcopy(api_template)
         content["data"].update(**pre_param)
 
         return self.call_api(**content)
