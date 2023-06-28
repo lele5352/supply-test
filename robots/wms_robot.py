@@ -929,6 +929,8 @@ class WMSAppRobot(AppRobot):
         return self.formatted_result(res)
 
 
+
+
 class WMSTransferServiceRobot(ServiceRobot):
     def __init__(self):
         super().__init__("transfer")
