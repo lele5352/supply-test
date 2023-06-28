@@ -17,4 +17,4 @@ def create_spu(**kwargs):
 
 
 if __name__ == '__main__':
-    pass
+    create_spu(productName="wenhao_automatic_insert_product")
