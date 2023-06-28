@@ -970,10 +970,52 @@ class WMSAppRobot(AppRobot):
 
         return self.call_api(**content)
 
-    def pda_get_inventory(self, ):
-        pass
+    def pda_get_inventory(self, location_code, sku_code, usage_type):
+        """
+        查询库位sku库存-pda
+        :param location_code: 库位编码
+        :param sku_code: 仓库sku编码
+        :param usage_type: 用途
+        """
+        if not isinstance(usage_type, StockOperationApiConfig.UsageType):
+            raise TypeError('usage_type 必须是 UsageType 枚举')
 
+        content = deepcopy(
+            StockOperationApiConfig.PdaGetInventory.get_attributes()
+        )
+        content.update(
+            {
+                "locationCode": location_code,
+                "skuCode": sku_code,
+                "usage": usage_type.value
+            }
+        )
 
+        return self.call_api(**content)
+
+    def move_to_bad_location(self, origin_code, des_code, sku_code, move_num):
+        """
+        良转次
+        :param origin_code: 源库位编码
+        :param des_code: 目标库位编码
+        :param sku_code: 仓库sku编码
+        :param move_num: 转换数量
+        """
+        pre_param = {
+            "originLocationCode": origin_code,
+            "desLocationCode": des_code,
+            "inventory": {
+                "count": move_num,
+                "skuCode": sku_code,
+                "quality": "良品"
+            }
+        }
+        content = deepcopy(
+            StockOperationApiConfig.MoveToBad.get_attributes()
+        )
+        content["data"].update(**pre_param)
+
+        return self.call_api(**content)
 
 
 class WMSTransferServiceRobot(ServiceRobot):
