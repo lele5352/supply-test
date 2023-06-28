@@ -66,6 +66,16 @@ class CDSAppRobot(AppRobot):
         res = self.call_api(**content)
         return self.formatted_result(res)
 
+    def get_declaration(self, **kwargs):
+        """海柜单: 保存/保存并生单/重新生单
+        :param dict kwargs: 查询条件
+        :return:
+        """
+        content = deepcopy(DeclarationApiConfig.GetDeclaration.get_attributes())
+        content["data"].update(kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
 
 if __name__ == '__main__':
     app = CDSAppRobot()
