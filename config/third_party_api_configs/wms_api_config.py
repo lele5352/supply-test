@@ -1,4 +1,5 @@
 from config.third_party_api_configs import ApiConfig
+from enum import Enum
 
 
 class BaseApiConfig:
@@ -483,3 +484,57 @@ class ReceiptApiConfig:
     class LocationDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/upshelfV2/location/detail?locationCodes=%s"
         method = "POST"
+
+
+class StockOperationApiConfig:
+    """库内管理"""
+
+    class UsageType(Enum):
+        """用途枚举"""
+        BATCH_MOVE = 1  # 批量移库
+        NORMAL_MOVE = 2  # 普通移库
+        TO_BAD = 3  # 库内转次
+        TO_GOOD = 4  # 库内转良
+
+    class PdaGetInventory(ApiConfig):
+        """查询库位sku库存"""
+        uri_path = '/api/ec-wms-api/innerLocation/pda/getInventory'
+        method = 'GET'
+        data = {
+            "locationCode": None,
+            "skuCode": None,
+            "usage": None
+        }
+
+    class ValidateOriginLocation(ApiConfig):
+        """校验原库位"""
+        uri_path = 'api/ec-wms-api/innerLocation/pda/validateOriginLocation'
+        method = 'POST'
+        data = {
+            "locationCode": None,
+            "usage": None
+        }
+
+    class ValidateDesLocation(ApiConfig):
+        """校验目标库位"""
+        uri_path = '/api/ec-wms-api/innerLocation/pda/validateDesLocation'
+        method = 'POST'
+        data = {
+            "desLocationCode": None,  # 目标库位
+            "originLocationCode": None,  # 源库位
+            "usage": None
+        }
+
+    class MoveToBad(ApiConfig):
+        """转次"""
+        uri_path = '/api/ec-wms-api/innerLocation/pda/moveToBadLocation'
+        method = 'POST'
+        data = {
+            "desLocationCode": None,  # 目标库位
+            "originLocationCode": None,  # 源库位
+            "inventory": {
+                "count": None,  # 转换数量
+                "skuCode": None,  # 仓库sku编码
+                "quality": "良品"
+            }
+        }

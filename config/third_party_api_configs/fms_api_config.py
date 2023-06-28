@@ -51,7 +51,7 @@ class BaseApi:
     class ProviderList(ApiConfig):
         """服务商列表查询"""
         uri_path = '/api/ec-fms-api/fms/api/common/all/service/provider'
-        method = "GET"
+        method = "get"
 
     class ChannelListByProvider(ApiConfig):
         """根据服务商查询渠道列表"""

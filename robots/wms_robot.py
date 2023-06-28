@@ -928,6 +928,51 @@ class WMSAppRobot(AppRobot):
         res = self.call_api(**content)
         return self.formatted_result(res)
 
+    def validate_origin_location(self, location_code, usage_type):
+        """
+        校验源库位
+        :param location_code: 库位编码
+        :param usage_type: 用途：批量移库、普通移库、转次、转良
+        """
+        if not isinstance(usage_type, StockOperationApiConfig.UsageType):
+            raise TypeError('usage_type 必须是 UsageType 枚举')
+
+        content = deepcopy(
+            StockOperationApiConfig.ValidateOriginLocation.get_attributes()
+        )
+        content["data"].update({
+            "locationCode": location_code,
+            "usage": usage_type.value
+        })
+
+        return self.call_api(**content)
+
+    def validate_des_location(self, origin_code, des_code, usage_type):
+        """
+        校验目标库位
+        :param origin_code: 源库位编码
+        :param des_code: 目标库位编码
+        :param usage_type: 用途：批量移库、普通移库、转次、转良
+        """
+        if not isinstance(usage_type, StockOperationApiConfig.UsageType):
+            raise TypeError('usage_type 必须是 UsageType 枚举')
+
+        content = deepcopy(
+            StockOperationApiConfig.ValidateDesLocation.get_attributes()
+        )
+        content["data"].update(
+            {
+                "desLocationCode": des_code,
+                "originLocationCode": origin_code,
+                "usage": usage_type.value
+            }
+        )
+
+        return self.call_api(**content)
+
+    def pda_get_inventory(self, ):
+        pass
+
 
 class WMSTransferServiceRobot(ServiceRobot):
     def __init__(self):
@@ -1138,6 +1183,8 @@ class WMSBaseServiceRobot(ServiceRobot):
         }
         return result
 
+
+# call example
 
 # if __name__ == "__main__":
 #     wms = WMSAppRobot()
