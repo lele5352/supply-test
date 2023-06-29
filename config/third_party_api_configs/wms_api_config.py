@@ -1,4 +1,5 @@
 from config.third_party_api_configs import ApiConfig
+from enum import Enum
 
 
 class BaseApiConfig:
@@ -483,3 +484,174 @@ class ReceiptApiConfig:
     class LocationDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/upshelfV2/location/detail?locationCodes=%s"
         method = "POST"
+
+
+class StockOperationApiConfig:
+    """库内作业相关"""
+    class InventoryProcessOrderCreate(ApiConfig):
+        """新增盘点单"""
+        uri_path = '/api/ec-wms-api/inventoryProcessOrder/create'
+        method = 'POST'
+        data = {
+            "inventoryProcessLatitude": 0,  # 盘点类型(0-常规盘点;1-短拣盘点;2-抽盘)
+            "inventoryProcessRange": 0,     # 盘点维度(0-库位;1-SKU)
+            "inventoryProcessType": 0,      # 盘点范围(0-库位;1-库存+SKU)
+            "locDetails": [                 # 盘点单库位详情(盘点纬度是库位时，不能为空)--非必须
+                {
+                    "locCode": "KW-SJQ-3150"
+                }
+            ],
+            "skuDetails": [                  # 盘点单SKU详情(盘点纬度是SKU时，不能为空)--非必须
+                {
+                    "locCode": "ut est incididunt aute deserunt",
+                    "skuCode": "elit deserunt cupidatat laboris"
+                },
+                {
+                    "locCode": "enim",
+                    "skuCode": "in"
+                }
+            ]
+        }
+
+    class InventoryProcessOrderGenerateTask(ApiConfig):
+        """盘点单生成盘点任务"""
+        uri_path = '/api/ec-wms-api/inventoryProcessOrder/generateTask'
+        method = 'POST'
+        data = {
+                "inventoryProcessOrderNo": "PD2301310012",  #盘点单号
+                "operationMode": 1,     #作业类型(0-PDA盘点;1-纸质单盘点)
+                "maxQty": 1     #每个任务最大数量
+        }
+
+    class InventoryProcessAssign(ApiConfig):
+        """盘点任务分配操作人员"""
+        uri_path = '/api/ec-wms-api/inventoryProcessTask/assign'
+        method = 'POST'
+        data = {
+                "inventoryProcessTaskNo": [     #盘点任务号，支持批量
+                    "PD2301310003_T1-1"
+                ],
+                "inventoryProcessUserId": 308,      #盘点人ID
+                "inventoryProcessUsername": "黄乐乐",      #盘点人名称
+                "source": 1
+        }
+
+    class InventoryProcessPrint(ApiConfig):
+        """盘点任务打印，触发库存快照生成，以便继续操作盘点任务单据"""
+        uri_path = '/api/ec-wms-api/inventoryProcessTask/print?'
+        method = 'GET'
+        data = {
+                "inventoryProcessTaskNo": "PD2301310003_T1",    #盘点任务单号
+                "t": 1675135653934      #当前时间戳
+        }
+
+    class InventoryProcessPrintTimes(ApiConfig):
+        """打印次数"""
+        uri_path = '/api/ec-wms-api/inventoryProcessTask/printTimes?'
+        method = 'GET'
+        data = {
+            "inventoryProcessTaskNo": "PD2301310003_T1",  # 盘点任务单号
+            "t": 1675135653934  # 当前时间戳
+        }
+
+    class InventoryProcessTaskDetailPage(ApiConfig):
+        """获取盘点任务单详情页"""
+        uri_path = '/api/ec-wms-api/inventoryProcessTask/detailPage'
+        method = 'POST'
+        data = {
+            "inventoryProcessTaskId": "1905",   #盘点任务单id
+            "size": 10000,
+            "current": 1
+        }
+
+    class InventoryProcessCommit(ApiConfig):
+        """盘点任务录入--提交"""
+        uri_path = '/api/ec-wms-api/inventoryProcessTask/detailPage'
+        method = 'POST'
+        data = {
+            "inventoryProcessTaskNo": "PD2301160033_T1-1",      #盘点任务单号
+            "commitDetails": [{     #盘点明细
+                "skuCode": "28265130025A01",
+                "locCode": "KW-SJQ-3000",
+                "inventoryProcessTaskNo": "PD2301160033_T1-1",
+                "inventoryProcessTaskDetailId": 4609,
+                "inventoryProcessQty": 3,       #盘点实际数量
+                "inventoryStartQty": 3      #盘点开始数量
+            }, {
+                "skuCode": "J020053-11A01",
+                "locCode": "KW-SJQ-3000",
+                "inventoryProcessTaskNo": "PD2301160033_T1-1",
+                "inventoryProcessTaskDetailId": 4610,
+                "inventoryProcessQty": 7,
+                "inventoryStartQty": 7
+            }]
+        }
+
+    class UsageType(Enum):
+        """用途枚举"""
+        BATCH_MOVE = 1  # 批量移库
+        NORMAL_MOVE = 2  # 普通移库
+        TO_BAD = 3  # 库内转次
+        TO_GOOD = 4  # 库内转良
+
+    class QualityType(Enum):
+        """质量枚举"""
+        BAD = "次品"
+        GOOD = "良品"
+
+    class PdaGetInventory(ApiConfig):
+        """查询库位sku库存"""
+        uri_path = '/api/ec-wms-api/innerLocation/pda/getInventory'
+        method = 'GET'
+        data = {
+            "locationCode": None,
+            "skuCode": None,
+            "usage": None
+        }
+
+    class ValidateOriginLocation(ApiConfig):
+        """校验原库位"""
+        uri_path = 'api/ec-wms-api/innerLocation/pda/validateOriginLocation'
+        method = 'POST'
+        data = {
+            "locationCode": None,
+            "usage": None
+        }
+
+    class ValidateDesLocation(ApiConfig):
+        """校验目标库位"""
+        uri_path = '/api/ec-wms-api/innerLocation/pda/validateDesLocation'
+        method = 'POST'
+        data = {
+            "desLocationCode": None,  # 目标库位
+            "originLocationCode": None,  # 源库位
+            "usage": None
+        }
+
+    class MoveToBad(ApiConfig):
+        """转次"""
+        uri_path = '/api/ec-wms-api/innerLocation/pda/moveToBadLocation'
+        method = 'POST'
+        data = {
+            "desLocationCode": None,  # 目标库位
+            "originLocationCode": None,  # 源库位
+            "inventory": {
+                "count": None,  # 转换数量
+                "skuCode": None,  # 仓库sku编码
+                "quality": "良品"
+            }
+        }
+
+    class MoveToGood(ApiConfig):
+        """转良"""
+        uri_path = '/api/ec-wms-api/innerLocation/pda/moveToGoodLocation'
+        method = 'POST'
+        data = {
+            "desLocationCode": None,
+            "originLocationCode": None,
+            "inventory": {
+                "count": None,
+                "skuCode": None,
+                "quality": "次品"
+            }
+        }

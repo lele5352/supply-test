@@ -2,6 +2,7 @@ from loguru._logger import Core, Logger
 import sys as _sys
 
 log_level = 'INFO'
+log_format = "{time:YYYY-MM-DD HH:mm:ss.SSS}|{level}|{message}"
 all_path = "../logs/all_{time:YYYY-MM-DD}.log"
 error_path = "../logs/error_{time:YYYY-MM-DD}.log"
 
@@ -14,12 +15,16 @@ except ImportError:
 NoConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, [], {})
 ConsoleLog = Logger(Core(), None, 0, False, False, False, False, True, [], {})
 
-NoConsoleLog.add(all_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level=log_level)
-NoConsoleLog.add(error_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level='ERROR')
+NoConsoleLog.add(all_path, format=log_format,
+                 level=log_level)
+NoConsoleLog.add(error_path, format=log_format,
+                 level='ERROR')
 
 ConsoleLog.add(_sys.stderr)
-ConsoleLog.add(all_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level=log_level)
-ConsoleLog.add(error_path, format="{time:YYYY-MM-DD HH:mm:ss.SSS} |{level}| {message}", level='ERROR')
+ConsoleLog.add(all_path, format=log_format,
+               level=log_level)
+ConsoleLog.add(error_path, format=log_format,
+               level='ERROR')
 
 
 class OutputLog:

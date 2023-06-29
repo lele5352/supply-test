@@ -928,6 +928,104 @@ class WMSAppRobot(AppRobot):
         res = self.call_api(**content)
         return self.formatted_result(res)
 
+    def validate_origin_location(self, location_code, usage_type):
+        """
+        校验源库位
+        :param location_code: 库位编码
+        :param usage_type: 用途：批量移库、普通移库、转次、转良
+        """
+        if not isinstance(usage_type, StockOperationApiConfig.UsageType):
+            raise TypeError('usage_type 必须是 UsageType 枚举')
+
+        content = deepcopy(
+            StockOperationApiConfig.ValidateOriginLocation.get_attributes()
+        )
+        content["data"].update({
+            "locationCode": location_code,
+            "usage": usage_type.value
+        })
+
+        return self.call_api(**content)
+
+    def validate_des_location(self, origin_code, des_code, usage_type):
+        """
+        校验目标库位
+        :param origin_code: 源库位编码
+        :param des_code: 目标库位编码
+        :param usage_type: 用途：批量移库、普通移库、转次、转良
+        """
+        if not isinstance(usage_type, StockOperationApiConfig.UsageType):
+            raise TypeError('usage_type 必须是 UsageType 枚举')
+
+        content = deepcopy(
+            StockOperationApiConfig.ValidateDesLocation.get_attributes()
+        )
+        content["data"].update(
+            {
+                "desLocationCode": des_code,
+                "originLocationCode": origin_code,
+                "usage": usage_type.value
+            }
+        )
+
+        return self.call_api(**content)
+
+    def pda_get_inventory(self, location_code, sku_code, usage_type):
+        """
+        查询库位sku库存-pda
+        :param location_code: 库位编码
+        :param sku_code: 仓库sku编码
+        :param usage_type: 用途
+        """
+        if not isinstance(usage_type, StockOperationApiConfig.UsageType):
+            raise TypeError('usage_type 必须是 UsageType 枚举')
+
+        content = deepcopy(
+            StockOperationApiConfig.PdaGetInventory.get_attributes()
+        )
+        content.update(
+            {
+                "locationCode": location_code,
+                "skuCode": sku_code,
+                "usage": usage_type.value
+            }
+        )
+
+        return self.call_api(**content)
+
+    def move_to_location(self, turn_type, origin_code, des_code, sku_code, move_num):
+        """
+        良次品 转换
+        :param turn_type: 转换方式：转良、转次
+        :param origin_code: 源库位编码
+        :param des_code: 目标库位编码
+        :param sku_code: 仓库sku编码
+        :param move_num: 转换数量
+        """
+        if turn_type not in ("转良", "转次"):
+            raise ValueError("turn_type 参数值必须为 转良 或 转次")
+
+        if turn_type == '转良':
+            quality = StockOperationApiConfig.QualityType.BAD.value
+            api_template = StockOperationApiConfig.MoveToGood.get_attributes()
+        else:
+            quality = StockOperationApiConfig.QualityType.GOOD.value
+            api_template = StockOperationApiConfig.MoveToBad.get_attributes()
+
+        pre_param = {
+            "originLocationCode": origin_code,
+            "desLocationCode": des_code,
+            "inventory": {
+                "count": move_num,
+                "skuCode": sku_code,
+                "quality": quality
+            }
+        }
+        content = deepcopy(api_template)
+        content["data"].update(**pre_param)
+
+        return self.call_api(**content)
+
 
 class WMSTransferServiceRobot(ServiceRobot):
     def __init__(self):
@@ -1138,6 +1236,8 @@ class WMSBaseServiceRobot(ServiceRobot):
         }
         return result
 
+
+# call example
 
 # if __name__ == "__main__":
 #     wms = WMSAppRobot()
