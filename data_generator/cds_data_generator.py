@@ -1,6 +1,5 @@
 from cases import *
 from transfer_data_generator import WmsTransferDataGenerator
-from utils.log_handler import logger
 
 
 def create_declaration_order(hand_over_no_list=None, cabinet_no_list=None, vesse_booking_no_list=None):
@@ -18,7 +17,6 @@ def create_declaration_order(hand_over_no_list=None, cabinet_no_list=None, vesse
         statusList=["1"]  # 选定待确认状态
     ).get('data')['list']
     cabinet_id_list = [cabinet_info['id'] for cabinet_info in cabinet_list]
-    print(cabinet_id_list)
     for cabinet_id in cabinet_id_list:
         cds_app.confirm_cabinet_order(cabinet_id)
         print('{}发柜完成'.format(cabinet_id))
@@ -47,6 +45,7 @@ def create_declaration_order(hand_over_no_list=None, cabinet_no_list=None, vesse
             {"drawbackType": info['drawbackType'], "seaCabinetGoodsId": info['id']} for info in goods_list_origin
         ]
         cds_app.edit_cabinet_order(sea_cabinet_order_id=cabinet_id, goods_list=goods_list)
+        print('{}生单成功'.format(cabinet_id))
     else:
         declaration_list = cds_app.get_declaration(
             containerNos=cabinet_no_list or [],
