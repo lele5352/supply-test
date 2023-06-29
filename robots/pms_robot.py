@@ -1,8 +1,7 @@
-import time
+from random import randint
 from copy import deepcopy
-from robots.robot import AppRobot, ServiceRobot
+from robots.robot import AppRobot
 from config.third_party_api_configs.pms_api_config import BaseApiConfig
-from dbo.oms_dbo import OMSDBOperator
 
 
 class PMSAppRobot(AppRobot):
@@ -11,6 +10,15 @@ class PMSAppRobot(AppRobot):
 
     def add_product(self, **kwargs):
         content = deepcopy(BaseApiConfig.AddProduct.get_attributes())
+        if 'package_num' in kwargs.keys() and 'single_package_num' in kwargs.keys():
+            single_package_num = kwargs.pop('single_package_num')
+            content["data"]["skuList"][0]['packageInfoList'] = [
+                {
+                    "height": randint(1, 10), "length": randint(1, 10), "width": randint(1, 10),
+                    "weight": randint(1, 10), "packageName": f"package{index}",
+                    "packageNum": single_package_num
+                } for index in range(0, kwargs.pop('package_num'))
+            ]
         content["data"].update(**kwargs)
         res = self.call_api(**content)
         return self.formatted_result(res)
