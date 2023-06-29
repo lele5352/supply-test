@@ -967,6 +967,8 @@ class WMSAppRobot(AppRobot):
                 "usage": usage_type.value
             }
         )
+        return self.call_api(**content)
+
     def inventory_process_order_create(self, **kwargs):
         """
         新增盘点单
@@ -1044,8 +1046,8 @@ class WMSAppRobot(AppRobot):
         """
         content = deepcopy(StockOperationApiConfig.InventoryProcessPrint.get_attributes())
         content["data"].update({
-                "inventoryProcessTaskNo": task_no,
-                "t": self.timestamp
+            "inventoryProcessTaskNo": task_no,
+            "t": self.timestamp
         })
         res = self.call_api(**content)
         return self.formatted_result(res)
@@ -1058,8 +1060,8 @@ class WMSAppRobot(AppRobot):
         """
         content = deepcopy(StockOperationApiConfig.InventoryProcessPrintTimes.get_attributes())
         content["data"].update({
-                "inventoryProcessTaskNo": task_no,
-                "t": self.timestamp
+            "inventoryProcessTaskNo": task_no,
+            "t": self.timestamp
         })
         res = self.call_api(**content)
         return self.formatted_result(res)
@@ -1072,7 +1074,7 @@ class WMSAppRobot(AppRobot):
         """
         content = deepcopy(StockOperationApiConfig.InventoryProcessTaskDetailPage.get_attributes())
         content["data"].update({
-            "inventoryProcessTaskId": taskid,   #盘点任务单id
+            "inventoryProcessTaskId": taskid,  # 盘点任务单id
             "size": 10000,
             "current": 1
         })
@@ -1153,12 +1155,6 @@ class WMSAppRobot(AppRobot):
         })
         res = self.call_api(**content)
         return self.formatted_result(res)
-
-
-
-
-
-        return self.call_api(**content)
 
     def pda_get_inventory(self, location_code, sku_code, usage_type):
         """
@@ -1388,7 +1384,7 @@ class WMSBaseServiceRobot(ServiceRobot):
         try:
             prod_map = {'d': 24 * 60 * 60, 'm': 60, 'h': 60 * 60}
             number, unit = duration[:-1], duration[-1]
-            duration_seconds = prod_map.get(unit.lower(),1) * int(number)
+            duration_seconds = prod_map.get(unit.lower(), 1) * int(number)
             log.info(f'阈值转成秒值为：{duration_seconds}')
         except Exception as err:
             log.error(f'输入得阈值没有按照格式，导致处理错啦，报错原因：{err}')
@@ -1403,16 +1399,16 @@ class WMSBaseServiceRobot(ServiceRobot):
 
             else:
                 workday_index = int((duration_seconds - today_remain_seconds) / 60 / 60 // 24)
-                remain_senconds = (duration_seconds - today_remain_seconds) - workday_index * 60 * 60 * 24
+                remain_seconds = (duration_seconds - today_remain_seconds) - workday_index * 60 * 60 * 24
                 target_time_by_warehouse = HumanDateTime(warehouse_day_list[workday_index + 1]).add(
-                    seconds=remain_senconds)
+                    seconds=remain_seconds)
                 actually_duration_seconds = target_time_by_warehouse.compare_diff_to(starttime_by_warehouse)
                 target_time_by_cn = HumanDateTime(date_time).add(seconds=actually_duration_seconds)
         else:
 
             workday_index = int(duration_seconds / 60 / 60 // 24)
-            remain_senconds = duration_seconds - workday_index * 60 * 60 * 24
-            target_time_by_warehouse = HumanDateTime(warehouse_day_list[workday_index]).add(seconds=remain_senconds)
+            remain_seconds = duration_seconds - workday_index * 60 * 60 * 24
+            target_time_by_warehouse = HumanDateTime(warehouse_day_list[workday_index]).add(seconds=remain_seconds)
             actually_duration_seconds = target_time_by_warehouse.compare_diff_to(starttime_by_warehouse)
             target_time_by_cn = HumanDateTime(date_time).add(seconds=actually_duration_seconds)
 
@@ -1425,7 +1421,6 @@ class WMSBaseServiceRobot(ServiceRobot):
 
         }
         return result
-
 
 # if __name__ == "__main__":
 #     wms = WMSAppRobot()
