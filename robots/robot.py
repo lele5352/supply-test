@@ -14,6 +14,7 @@ class Robot:
     """
     定义基础机器人
     """
+    timestamp = int(time.time() * 1000)   # 时间戳
 
     def __init__(self, prefix=None, headers=None):
         self.headers = headers
