@@ -488,20 +488,21 @@ class ReceiptApiConfig:
 
 class StockOperationApiConfig:
     """库内作业相关"""
+
     class InventoryProcessOrderCreate(ApiConfig):
         """新增盘点单"""
         uri_path = '/api/ec-wms-api/inventoryProcessOrder/create'
         method = 'POST'
         data = {
             "inventoryProcessLatitude": 0,  # 盘点类型(0-常规盘点;1-短拣盘点;2-抽盘)
-            "inventoryProcessRange": 0,     # 盘点维度(0-库位;1-SKU)
-            "inventoryProcessType": 0,      # 盘点范围(0-库位;1-库存+SKU)
-            "locDetails": [                 # 盘点单库位详情(盘点纬度是库位时，不能为空)--非必须
+            "inventoryProcessRange": 0,  # 盘点维度(0-库位;1-SKU)
+            "inventoryProcessType": 0,  # 盘点范围(0-库位;1-库存+SKU)
+            "locDetails": [  # 盘点单库位详情(盘点纬度是库位时，不能为空)--非必须
                 {
-                    "locCode": "KW-SJQ-3150"
+                    "locCode": "KW-SJQ-01"
                 }
             ],
-            "skuDetails": [                  # 盘点单SKU详情(盘点纬度是SKU时，不能为空)--非必须
+            "skuDetails": [  # 盘点单SKU详情(盘点纬度是SKU时，不能为空)--非必须
                 {
                     "locCode": "ut est incididunt aute deserunt",
                     "skuCode": "elit deserunt cupidatat laboris"
@@ -513,14 +514,43 @@ class StockOperationApiConfig:
             ]
         }
 
+    class InventoryProcessOrderPage(ApiConfig):
+        """盘点单列表页查询"""
+        uri_path = '/api/ec-wms-api/inventoryProcessOrder/page'
+        method = 'POST'
+        data = {
+            "inventoryProcessOrderNoLike": "",  # 盘点单号关键字
+            "states": [],  # 状态 (0-新建;10-待盘点;20-盘点中;30-已盘点;40-待处理;50-已完成;60-已取消;70-已关闭)
+            "inventoryProcessType": "",  # 盘点类型 (0-常规盘点;1-短拣盘点;2-抽盘)
+            "stocktakingOrderDimension": "",  # 盘点维度(0-库位;1-SKU)
+            "locCodes": [],
+            "saleSkuCodes": [],
+            "skuCodes": [],
+            "skuNameLike": "",
+            "createUsername": "",
+            "updateUsername": "",
+            "createTimeStart": None,
+            "createTimeEnd": None,
+            "updateTimeStart": None,
+            "updateTimeEnd": None,
+            "sortField": [
+                {
+                    "field": "create_time",
+                    "type": "DESC"
+                }
+            ],
+            "size": 10,
+            "current": 1
+        }
+
     class InventoryProcessOrderGenerateTask(ApiConfig):
         """盘点单生成盘点任务"""
         uri_path = '/api/ec-wms-api/inventoryProcessOrder/generateTask'
         method = 'POST'
         data = {
-                "inventoryProcessOrderNo": "PD2301310012",  #盘点单号
-                "operationMode": 1,     #作业类型(0-PDA盘点;1-纸质单盘点)
-                "maxQty": 1     #每个任务最大数量
+            "inventoryProcessOrderNo": "PD2301310012",  # 盘点单号
+            "operationMode": 1,  # 作业类型(0-PDA盘点;1-纸质单盘点)
+            "maxQty": 1  # 每个任务最大数量
         }
 
     class InventoryProcessAssign(ApiConfig):
@@ -528,12 +558,12 @@ class StockOperationApiConfig:
         uri_path = '/api/ec-wms-api/inventoryProcessTask/assign'
         method = 'POST'
         data = {
-                "inventoryProcessTaskNo": [     #盘点任务号，支持批量
-                    "PD2301310003_T1-1"
-                ],
-                "inventoryProcessUserId": 308,      #盘点人ID
-                "inventoryProcessUsername": "黄乐乐",      #盘点人名称
-                "source": 1
+            "inventoryProcessTaskNo": [  # 盘点任务号，支持批量
+                "PD2301310003_T1-1"
+            ],
+            "inventoryProcessUserId": 308,  # 盘点人ID
+            "inventoryProcessUsername": "黄乐乐",  # 盘点人名称
+            "source": 1
         }
 
     class InventoryProcessPrint(ApiConfig):
@@ -541,8 +571,8 @@ class StockOperationApiConfig:
         uri_path = '/api/ec-wms-api/inventoryProcessTask/print?'
         method = 'GET'
         data = {
-                "inventoryProcessTaskNo": "PD2301310003_T1",    #盘点任务单号
-                "t": 1675135653934      #当前时间戳
+            "inventoryProcessTaskNo": "PD2301310003_T1",  # 盘点任务单号
+            "t": 1675135653934  # 当前时间戳
         }
 
     class InventoryProcessPrintTimes(ApiConfig):
@@ -559,24 +589,24 @@ class StockOperationApiConfig:
         uri_path = '/api/ec-wms-api/inventoryProcessTask/detailPage'
         method = 'POST'
         data = {
-            "inventoryProcessTaskId": "1905",   #盘点任务单id
+            "inventoryProcessTaskId": "1905",  # 盘点任务单id
             "size": 10000,
             "current": 1
         }
 
     class InventoryProcessCommit(ApiConfig):
         """盘点任务录入--提交"""
-        uri_path = '/api/ec-wms-api/inventoryProcessTask/detailPage'
+        uri_path = '/api/ec-wms-api/inventoryProcess/commit'
         method = 'POST'
         data = {
-            "inventoryProcessTaskNo": "PD2301160033_T1-1",      #盘点任务单号
-            "commitDetails": [{     #盘点明细
+            "inventoryProcessTaskNo": "PD2301160033_T1-1",  # 盘点任务单号
+            "commitDetails": [{  # 盘点明细
                 "skuCode": "28265130025A01",
                 "locCode": "KW-SJQ-3000",
                 "inventoryProcessTaskNo": "PD2301160033_T1-1",
                 "inventoryProcessTaskDetailId": 4609,
-                "inventoryProcessQty": 3,       #盘点实际数量
-                "inventoryStartQty": 3      #盘点开始数量
+                "inventoryProcessQty": 3,  # 盘点实际数量
+                "inventoryStartQty": 3  # 盘点开始数量
             }, {
                 "skuCode": "J020053-11A01",
                 "locCode": "KW-SJQ-3000",
@@ -585,6 +615,71 @@ class StockOperationApiConfig:
                 "inventoryProcessQty": 7,
                 "inventoryStartQty": 7
             }]
+        }
+
+    class InventoryProcessOrderGenerateDiff(ApiConfig):
+        """盘点单-生成差异"""
+        uri_path = '/api/ec-wms-api/inventoryProcessOrder/generateDiff'
+        method = 'POST'
+        data = {
+            "inventoryProcessOrderNo": "PD2306280008"
+        }
+
+    class InventoryProcessDiffPage(ApiConfig):
+        """盘点差异单--查询"""
+        uri_path = '/api/ec-wms-api/inventoryProcessDiff/page'
+        method = 'POST'
+        data = {
+            "inventoryProcessDiffNoLike": "",
+            "inventoryProcessOrderNoLike": "",
+            "states": [],
+            "inventoryProcessType": "",
+            "sourceOrderNoLike": "",
+            "inventoryProcessTaskNoLike": "",
+            "locCodes": [],
+            "saleSkuCodes": [],
+            "skuCodes": [],
+            "skuNameLike": "",
+            "createUserId": "",
+            "handleUserId": "",
+            "createTimeStart": None,
+            "createTimeEnd": None,
+            "handleTimeStart": None,
+            "handleTimeEnd": None,
+            "sortField": [
+                {
+                    "field": "create_time",
+                    "type": "DESC"
+                }
+            ],
+            "size": 10,
+            "current": 1
+        }
+
+    class InventoryProcessDiffDetail(ApiConfig):
+        """盘点差异单--处理"""
+        uri_path = '/api/ec-wms-api/inventoryProcessDiff/detail'
+        method = 'GET'
+        data = {
+            "inventoryProcessDiffNo": "CY2306280001",
+            "diffType": 0,  # 0-全部 1-初盘差异 2-复盘差异
+            "t": 1687963488438
+        }
+
+    class InventoryProcessDiffAudit(ApiConfig):
+        """盘点差异单--处理"""
+        uri_path = '/api/ec-wms-api/inventoryProcessDiff/audit'
+        method = 'POST'
+        data = {
+            "inventoryProcessDiffNo": "CY2306280001",
+            "details":
+                [
+                    {
+                        "inventoryProcessDiffDetailId": 71029,
+                        "auditState": 2,  # 1-通过，2-不通过
+                        "auditRemarks": "脚本自动审核"
+                    }
+                ]
         }
 
     class UsageType(Enum):
