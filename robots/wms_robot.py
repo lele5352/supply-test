@@ -967,6 +967,196 @@ class WMSAppRobot(AppRobot):
                 "usage": usage_type.value
             }
         )
+    def inventory_process_order_create(self, **kwargs):
+        """
+        新增盘点单
+        :param kwargs:{
+          "inventoryProcessType": 盘点类型(0-常规盘点;1-短拣盘点;2-抽盘),
+          "inventoryProcessLatitude": 盘点维度(0-库位;1-SKU),
+          "inventoryProcessRange": 盘点范围(0-库位;1-库存+SKU),
+          "locDetails": [   #盘点单库位详情(盘点纬度是库位时，不能为空)
+            {
+              "locCode": 库位编码
+            }
+          ],
+          "skuDetails": [   #盘点单SKU详情(盘点纬度是SKU时，不能为空)
+            {
+              "locCode": 库位编码,
+              "skuCode": sku编码
+            }
+          ]
+        }
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessOrderCreate.get_attributes())
+        content["data"].update(**kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_order_page(self, **kwargs):
+        """
+        盘点单列表页查询
+        :param kwargs: 查询条件的字典对象
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessOrderPage.get_attributes())
+        content["data"].update(**kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_order_generate_task(self, order_no, qyt, operationMode=1):
+        """
+        盘点单生成盘点任务单
+        @param order_no: 盘点单号
+        @param qyt: 每个任务内最大数量
+        @param operationMode: 作业方式  0-PDA操作，1-纸质单
+        @return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessOrderGenerateTask.get_attributes())
+        content["data"].update({
+            "inventoryProcessOrderNo": order_no,
+            "maxQty": qyt,
+            "operationMode": operationMode
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_assign(self, task_no_list, user_id=308, user_name="黄乐乐"):
+        """
+        盘点任务分配人员
+        @param task_no_list：任务单号列表（支持批量）
+        @return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessAssign.get_attributes())
+        content["data"].update({
+            "inventoryProcessTaskNo": task_no_list,
+            "inventoryProcessUserId": user_id,
+            "inventoryProcessUsername": user_name
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_print(self, task_no):
+        """
+        打印盘点任务单
+        :param task_no: 盘点任务单
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessPrint.get_attributes())
+        content["data"].update({
+                "inventoryProcessTaskNo": task_no,
+                "t": self.timestamp
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_print_times(self, task_no):
+        """
+        打印次数
+        :param task_no: 盘点任务单
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessPrintTimes.get_attributes())
+        content["data"].update({
+                "inventoryProcessTaskNo": task_no,
+                "t": self.timestamp
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_task_detail_page(self, taskid):
+        """
+        盘点任务详情页信息
+        :param taskid: 盘点任务单id
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessTaskDetailPage.get_attributes())
+        content["data"].update({
+            "inventoryProcessTaskId": taskid,   #盘点任务单id
+            "size": 10000,
+            "current": 1
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_commit(self, task_no, task_detail):
+        """
+        盘点任务录入--提交
+        :param task_no: 盘点任务单号
+        :param task_detail: 实际盘点明细
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessCommit.get_attributes())
+        content["data"].update({
+            "inventoryProcessTaskNo": task_no,
+            "commitDetails": task_detail
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_generate_diff(self, order_no):
+        """
+        盘点单--生成差异单
+        :param order_no: 盘点单号
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessOrderGenerateDiff.get_attributes())
+        content["data"].update({
+            "inventoryProcessOrderNo": order_no
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_diff_page(self, **kwargs):
+        """
+        差异单列表页-查询
+        :param kwargs: 查询条件对象：{}
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessDiffPage.get_attributes())
+        content["data"].update(**kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_diff_detail(self, diff_no, diffType=0):
+        """
+        差异单-处理
+        :param diffType: 差异单号
+        :param diff_no: 差异明细类型 0-全部 1-初盘差异 2-复盘差异
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessDiffDetail.get_attributes())
+        content["data"].update({
+            "inventoryProcessDiffNo": diff_no,
+            "diffType": diffType,
+            "t": self.timestamp
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def inventory_process_diff_audit(self, diff_no, details):
+        """
+        差异单审核提交
+        :param diff_no: 差异单号
+        :param details:
+                    [{
+                        "inventoryProcessDiffDetailId": 差异单详情id,
+                        "auditState": 审核结果,    #1-通过，2-不通过
+                        "auditRemarks": "脚本自动审核"
+                    }]
+        :return:
+        """
+        content = deepcopy(StockOperationApiConfig.InventoryProcessDiffAudit.get_attributes())
+        content["data"].update({
+            "inventoryProcessDiffNo": diff_no,
+            "details": details
+        })
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+
+
+
 
         return self.call_api(**content)
 
@@ -1236,8 +1426,6 @@ class WMSBaseServiceRobot(ServiceRobot):
         }
         return result
 
-
-# call example
 
 # if __name__ == "__main__":
 #     wms = WMSAppRobot()
