@@ -1,10 +1,8 @@
-import time
-
 from cases import *
 
 from utils.log_handler import logger as log
-from utils.wait_handler import until
 from dbo.warehouse_manage_dbo import WarehouseManageDBOperator
+
 
 class WmsStockingGenerator:
     def __init__(self):
@@ -39,6 +37,7 @@ class WmsStockingGenerator:
             return
         return create_res['data']
 
+
 class WmsStockingProcess(WmsStockingGenerator):
     def wms_stocking_process(self, warehouse_id, now_qty, audit_state, **order_info):
         """
@@ -57,14 +56,14 @@ class WmsStockingProcess(WmsStockingGenerator):
         res = self.wms_app.inventory_process_order_page(**page_kwargs)
         qty = res.get("data")["records"][0]["locQty"]
         self.wms_app.inventory_process_order_generate_task(stocktaking_order_code, qty)
-        tast_list = WarehouseManageDBOperator.stocktaking_task_by_order_code(stocktaking_order_code)
-        # tast_list = [(2109, 'PD2306280008_T2-1')]
-        self.wms_app.inventory_process_assign([i[1] for i in tast_list])
-        for i in tast_list:
+        task_list = WarehouseManageDBOperator.stocktaking_task_by_order_code(stocktaking_order_code)
+        # task_list = [(2109, 'PD2306280008_T2-1')]
+        self.wms_app.inventory_process_assign([i[1] for i in task_list])
+        for i in task_list:
             self.wms_app.inventory_process_print(i[1])
-            #调打印次数接口，变更盘点任务单的状态为：盘点中。以便继续作业
+            # 调打印次数接口，变更盘点任务单的状态为：盘点中。以便继续作业
             self.wms_app.inventory_process_print_times(i[1])
-        for task_item in tast_list:
+        for task_item in task_list:
             res = self.wms_app.inventory_process_task_detail_page(task_item[0])
             task_detail = res.get("data")["records"]
             rep_list = []
@@ -83,7 +82,7 @@ class WmsStockingProcess(WmsStockingGenerator):
                 rep_list.append(item)
 
             self.wms_app.inventory_process_commit(task_item[1], rep_list)
-        #盘点单列表页-生成差异单
+        # 盘点单列表页-生成差异单
         self.wms_app.inventory_process_generate_diff(stocktaking_order_code)
 
         res = self.wms_app.inventory_process_diff_page(**page_kwargs)
@@ -91,22 +90,22 @@ class WmsStockingProcess(WmsStockingGenerator):
 
         res = self.wms_app.inventory_process_diff_detail(diff_no)
         diff_detail = res.get("data")
-        #拼接审核时所需的差异单详情信息
+        # 拼接审核时所需的差异单详情信息
         details = [{"inventoryProcessDiffDetailId": i.get("inventoryProcessDiffDetailId"),
-                        "auditState": audit_state, "auditRemarks": "脚本自动审核"} for i in diff_detail]
+                    "auditState": audit_state, "auditRemarks": "脚本自动审核"} for i in diff_detail]
         self.wms_app.inventory_process_diff_audit(diff_no, details)
 
 
 if __name__ == '__main__':
     wms_stocking = WmsStockingProcess()
     kwargs = {
-            "inventoryProcessLatitude": 0,  # 盘点类型(0-常规盘点;1-短拣盘点;2-抽盘)
-            "inventoryProcessRange": 0,     # 盘点维度(0-库位;1-SKU)
-            "inventoryProcessType": 0,      # 盘点范围(0-库位;1-库存+SKU)
-            "locDetails": [                 # 盘点单库位详情(盘点纬度是库位时，不能为空)--非必须
-                {
-                    "locCode": "KW-SJQ-10"
-                }
-            ]
+        "inventoryProcessLatitude": 0,  # 盘点类型(0-常规盘点;1-短拣盘点;2-抽盘)
+        "inventoryProcessRange": 0,  # 盘点维度(0-库位;1-SKU)
+        "inventoryProcessType": 0,  # 盘点范围(0-库位;1-库存+SKU)
+        "locDetails": [  # 盘点单库位详情(盘点纬度是库位时，不能为空)--非必须
+            {
+                "locCode": "KW-SJQ-10"
+            }
+        ]
     }
     wms_stocking.wms_stocking_process(539, -5, 1, **kwargs)
