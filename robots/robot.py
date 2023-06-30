@@ -14,6 +14,7 @@ class Robot:
     """
     定义基础机器人
     """
+    timestamp = int(time.time() * 1000)   # 时间戳
 
     def __init__(self, prefix=None, headers=None):
         self.headers = headers
@@ -21,6 +22,7 @@ class Robot:
 
     def call_api(self, uri_path, method, data=None, files=None) -> dict:
         url = urljoin(self.prefix, uri_path)
+        method = method.upper()
         if method == "GET":
             response = requests.get(url, params=data, headers=self.headers)
         elif method == "POST":

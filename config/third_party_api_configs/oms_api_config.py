@@ -100,7 +100,7 @@ oms_api_config = {
         "uri_path": "/ec-oms-api/order/page",
         "method": "POST",
         "data": {"current": 1, "size": 10, "sortKey": "follow_time", "direction": 1, "orderNos": "",
-                 "salesOrderNos": "SO2209200051", "salesOutNos": "", "siteCodes": "", "buyerId": "",
+                 "salesOrderNos": "", "salesOutNos": "", "siteCodes": "", "buyerId": "",
                  "provinceName": "",
                  "city": "", "postalCodes": "", "email": "", "itemSkuCodes": "", "skuLike": "",
                  "relateOrderNos": [],

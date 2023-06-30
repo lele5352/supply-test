@@ -178,10 +178,6 @@ class FMSAppRobot(AppRobot):
             self.save_not_sea_expect_fee_item(**data)
 
 
-if __name__ == '__main__':
-
-    FMSAppRobot().auto_save_expect_fee_item(1)
-
 
 
 
