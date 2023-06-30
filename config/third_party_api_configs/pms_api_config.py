@@ -306,3 +306,246 @@ class BaseApiConfig:
                 "skuId": 43456
             }
         ]
+
+    class GetSkuAttribution(ApiConfig):
+        uri_path = "/api/ec-pms/pmssku/detail/{0}"
+        method = "GET"
+
+    class EditSkuAttribution(ApiConfig):
+        uri_path = "/api/ec-pms/pmssku/detail"
+        method = "POST"
+        data = {
+            "pmsSkuAttrVoBaseList": [
+                {
+                    "id": 722951,
+                    "attrId": 4,
+                    "attrName": "\u9762\u76c6\u6750\u8d28",
+                    "usaAttrName": "sink material",
+                    "attrCategory": 1,
+                    "showType": 2,
+                    "baseAttrMallShow": 1,
+                    "originBaseAttrMallShow": None,
+                    "sort": 400,
+                    "originSort": None,
+                    "attrUses": [],
+                    "usaNameOnMall": "sink material",
+                    "isRequired": 2,
+                    "attrList": [
+                        {
+                            "attrDetailId": 1206,
+                            "attrDetailNameUs": "Glass",
+                            "attrDetailName": "\u73bb\u7483",
+                            "attrDetailNameUk": "Glass"
+                        },
+                        {
+                            "attrDetailId": 1211,
+                            "attrDetailNameUs": "Stone Resin",
+                            "attrDetailName": "\u4eba\u9020\u77f3",
+                            "attrDetailNameUk": "Stone Resin"
+                        },
+                        {
+                            "attrDetailId": 1217,
+                            "attrDetailNameUs": "Stainless Steel",
+                            "attrDetailName": "\u4e0d\u9508\u94a2",
+                            "attrDetailNameUk": "Stainless Steel"
+                        },
+                        {
+                            "attrDetailId": 1223,
+                            "attrDetailNameUs": "Kaolin Clay",
+                            "attrDetailName": "\u9ad8\u5cad\u571f",
+                            "attrDetailNameUk": "Kaolin Clay"
+                        },
+                        {
+                            "attrDetailId": 1231,
+                            "attrDetailNameUs": "Ceramic",
+                            "attrDetailName": "\u9676\u74f7\u54c1",
+                            "attrDetailNameUk": "Ceramic"
+                        },
+                        {
+                            "attrDetailId": 1235,
+                            "attrDetailNameUs": "Resin",
+                            "attrDetailName": "\u6811\u8102",
+                            "attrDetailNameUk": "Resin"
+                        },
+                        {
+                            "attrDetailId": 1240,
+                            "attrDetailNameUs": "Marble",
+                            "attrDetailName": "\u5927\u7406\u77f3",
+                            "attrDetailNameUk": "Marble"
+                        },
+                        {
+                            "attrDetailId": 1245,
+                            "attrDetailNameUs": "Brass",
+                            "attrDetailName": "\u5168\u94dc",
+                            "attrDetailNameUk": "Brass"
+                        },
+                        {
+                            "attrDetailId": 1253,
+                            "attrDetailNameUs": "Quartz",
+                            "attrDetailName": "\u77f3\u82f1\u77f3",
+                            "attrDetailNameUk": "Quartz"
+                        },
+                        {
+                            "attrDetailId": 1258,
+                            "attrDetailNameUs": "Stone",
+                            "attrDetailName": "\u5ca9\u677f",
+                            "attrDetailNameUk": "Stone"
+                        }
+                    ],
+                    "attrValueVoList": [
+                        {
+                            "attrDetailId": 1206,
+                            "attrDetailNameUs": "Glass",
+                            "attrDetailName": "\u73bb\u7483",
+                            "attrDetailNameUk": "Glass"
+                        }
+                    ],
+                    "originAttrValueVoList": None,
+                    "modifyStatus": 0,
+                    "usaUnit": None,
+                    "enUnit": None
+                }
+            ],
+            "pmsSkuAttrVoSellList": [
+                {
+                    "id": 1179022,
+                    "attrId": 979,
+                    "attrName": "\u56fe\u7247\u5c5e\u6027\u7b5b\u9009",
+                    "usaAttrName": "image filter test",
+                    "attrCategory": 2,
+                    "showType": 2,
+                    "baseAttrMallShow": 1,
+                    "originBaseAttrMallShow": None,
+                    "sort": None,
+                    "originSort": None,
+                    "attrUses": [],
+                    "usaNameOnMall": "image filter test",
+                    "isRequired": 1,
+                    "attrList": [
+                        {
+                            "attrDetailId": 16736,
+                            "attrDetailNameUs": "one",
+                            "attrDetailName": "1",
+                            "attrDetailNameUk": "one"
+                        },
+                        {
+                            "attrDetailId": 16737,
+                            "attrDetailNameUs": "two",
+                            "attrDetailName": "2",
+                            "attrDetailNameUk": "two"
+                        }
+                    ],
+                    "attrValueVoList": [
+                        {
+                            "attrId": None,
+                            "attrDetailType": 2,
+                            "attrDetailId": 0,
+                            "attrDetailName": "1",
+                            "attrDetailNameUs": "one",
+                            "attrDetailNameUk": "one",
+                            "moreLanguageId": None
+                        }
+                    ],
+                    "originAttrValueVoList": None,
+                    "modifyStatus": 0,
+                    "usaUnit": None,
+                    "enUnit": None,
+                    "zharr": [
+                        {
+                            "attrValueId": "",
+                            "propertiesValue": "one",
+                            "propertiesValueEn": "one",
+                            "propertiesValueZh": "1"
+                        }
+                    ],
+                    "attrDetailNameUk": "one",
+                    "attrDetailNameUs": "one"
+                }
+            ],
+            "pmsSkuVo": {
+                "id": 43487,
+                "spu": "76167253",
+                "productName": "\u6d4b\u8bd5\u5355\u54c1\u5355\u4ef6",
+                "originProductName": "\u6d4b\u8bd5\u5355\u54c1\u5355\u4ef6",
+                "modifyStatus": 1,
+                "spuId": 29399,
+                "sku": "HW69RA7686",
+                "attrCombinedName": "one",
+                "link": None,
+                "mainImg": "https://img.popicorns.com/dev/file/2023/06/27/d76e4266d5854fc5b29a549fec3e082c.jpg",
+                "isSuit": 0,
+                "isSuitText": "\u5426"
+            },
+            "numberAttrParamList": [
+                {
+                    "id": 722949,
+                    "spuId": None,
+                    "attrId": 976,
+                    "attrCategory": 1,
+                    "attrDetailType": None,
+                    "attrDetailId": None,
+                    "attrDetailName": None,
+                    "attrDetailNameUs": None,
+                    "originAttrDetailNameUs": None,
+                    "attrDetailNameUk": None,
+                    "originAttrDetailNameUk": None,
+                    "baseAttrMallShow": 0,
+                    "originBaseAttrMallShow": None,
+                    "usaUnit": "\"(\u82f1\u5bf8)",
+                    "enUnit": "mm(\u6beb\u7c73)",
+                    "sort": 200,
+                    "originSort": None,
+                    "attrUses": [],
+                    "usaNameOnMall": "range test2",
+                    "attrCategoryStr": "\u57fa\u672c\u5c5e\u6027",
+                    "usaAttrName": "range test2",
+                    "modifyStatus": 0,
+                    "isRequired": 1,
+                    "showType": 4,
+                    "originUsaNameOnMall": "range test2"
+                },
+                {
+                    "id": 722950,
+                    "spuId": None,
+                    "attrId": 964,
+                    "attrCategory": 1,
+                    "attrDetailType": None,
+                    "attrDetailId": None,
+                    "attrDetailName": None,
+                    "attrDetailNameUs": None,
+                    "originAttrDetailNameUs": None,
+                    "attrDetailNameUk": None,
+                    "originAttrDetailNameUk": None,
+                    "baseAttrMallShow": 0,
+                    "originBaseAttrMallShow": None,
+                    "usaUnit": "\"(\u82f1\u5bf8)",
+                    "enUnit": "mm(\u6beb\u7c73)",
+                    "sort": 300,
+                    "originSort": None,
+                    "attrUses": [],
+                    "usaNameOnMall": "range test",
+                    "attrCategoryStr": "\u57fa\u672c\u5c5e\u6027",
+                    "usaAttrName": "range test",
+                    "modifyStatus": 0,
+                    "isRequired": 1,
+                    "showType": 4,
+                    "originUsaNameOnMall": "range test"
+                }
+            ],
+            "pmsSkuModityInfoVoList": [
+                {
+                    "attrId": 4,
+                    "usaAttrName": "sink material"
+                },
+                {
+                    "attrId": 979,
+                    "usaAttrName": "image filter test"
+                }
+            ],
+            "operateFlag": 2
+        }
+
+    class ApproveSkuAttribution(ApiConfig):
+        uri_path = "/api/ec-pms/pmssku/detail/approve"
+        method = "POST"
+        data = {"auditResult": "1", "remark": "", "skuIds": [43487]}
