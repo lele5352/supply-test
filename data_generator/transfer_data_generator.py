@@ -219,10 +219,10 @@ class WmsTransferDataGenerator:
         return handover_order_list
 
     def create_entry_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom,
-                           demand_qty, demand_type=1, customer_type=1, remark='', stage=None):
+                           demand_qty, stage=None):
         demand_no = self.create_transfer_demand(
-            trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom, demand_qty, demand_type,
-            customer_type, remark
+            trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom, demand_qty, demand_type=1,
+            customer_type=1, remark=''
         )
         if not demand_no:
             print('创建调拨拣货单失败')
@@ -237,8 +237,43 @@ class WmsTransferDataGenerator:
 if __name__ == '__main__':
     transfer_data = WmsTransferDataGenerator()
     # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930',"B", 2)
-    # 调拨入库逻辑：传入stage为received，即可在目的仓生成在途库存，返回调拨交接单号；不传则生成可销售库存
-    print(transfer_data.create_entry_order(542, 542, 539, 539, 'HW19VK2911', "A", 1, stage='received'))
+
+    # 调拨入库逻辑：传入stage为received，在目的仓生成在途库存，手动上架即可； stage不传则生成可销售库存，无需手动上架
+    warehouse = [
+        {"warehouseId": 543,
+         "warehouseNameCn": "新泽西1号仓"},
+        {"warehouseId": 542,
+         "warehouseNameCn": "洛杉矶1号仓"},
+        {"warehouseId": 540,
+         "warehouseNameCn": "法国1号仓"},
+        {"warehouseId": 539,
+         "warehouseNameCn": "英国1号仓"},
+        {"warehouseId": 532,
+         "warehouseNameCn": "英国2号仓"},
+        {"warehouseId": 531,
+         "warehouseNameCn": "亚特兰大1号仓"},
+        {"warehouseId": 530,
+         "warehouseNameCn": "休斯顿1号仓"},
+        {"warehouseId": 529,
+         "warehouseNameCn": "洛杉矶2号仓"},
+        {"warehouseId": 528,
+         "warehouseNameCn": "新泽西2号仓"},
+        {"warehouseId": 522,
+         "warehouseNameCn": "法国1号仓-b"},
+        {"warehouseId": 521,
+         "warehouseNameCn": "英国1号仓-a"},
+        {"warehouseId": 518,
+         "warehouseNameCn": "新泽西1号仓-a"},
+        {"warehouseId": 517,
+         "warehouseNameCn": "洛杉矶1号仓-1a"}
+    ]
+    sale_sku_code = 'HW3418I56A'
+    in_warehouse = 539
+    out_warehouse = 542
+    # print(transfer_data.create_entry_order(
+    #     out_warehouse, out_warehouse, in_warehouse, in_warehouse, sale_sku_code, "A", 1, stage='received'))
+    print(transfer_data.create_entry_order(
+        out_warehouse, out_warehouse, in_warehouse, in_warehouse, sale_sku_code, "A", 5))
 
     # 生成cds海柜单逻辑
     # multi_sku_list = [
