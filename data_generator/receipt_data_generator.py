@@ -84,5 +84,3 @@ if __name__ == '__main__':
     receipt_data = WmsReceiptDataGenerator()
     print(receipt_data.create_other_in_order_and_up_shelf("JJ306J84G7", "A", 2, 543, 543))
 
-
-
