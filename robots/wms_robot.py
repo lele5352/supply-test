@@ -80,7 +80,7 @@ class WMSAppRobot(AppRobot):
         location_data = self.dbo.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
         return location_data
 
-    def base_get_kw(self, return_type, kw_type, num, ck_id, to_ck_id):
+    def base_get_kw(self, return_type, kw_type, num, ck_id, to_ck_id, force=False):
         """
         获取指定库位类型、指定目的仓、指定数量的仓库库位
 
@@ -89,10 +89,13 @@ class WMSAppRobot(AppRobot):
         :param int num: 获取的库位个数
         :param int ck_id: 库位的所属仓库id
         :param to_ck_id: 库位的目的仓id
+        :param bool force: 默认不会强制创建新库位
         """
         location_data = self.db_get_kw(kw_type, num, ck_id, to_ck_id)
-
-        if not location_data:
+        if force:
+            new_data = self.base_create_location(num, kw_type, ck_id, to_ck_id)
+            location_data = [WMSDBOperator.query_warehouse_location_info_by_code(data) for data in new_data]
+        elif not location_data:
             new_locations = self.base_create_location(num, kw_type, ck_id, to_ck_id)
             if not new_locations:
                 print("无库位，创建库位失败！")
@@ -380,6 +383,48 @@ class WMSAppRobot(AppRobot):
         bind_res = self.call_api(**content)
         return self.formatted_result(bind_res)
 
+    def transfer_handover_order(self, **kwargs):
+        content = deepcopy(TransferApiConfig.TransferHandoverOrder.get_attributes())
+        content["data"].update(
+            {
+                "current": kwargs.get('current', 1),
+                "size": kwargs.get('size', 10),
+                "boxNo": kwargs.get('boxNo', []),
+                "handoverNo": kwargs.get('handoverNo', ""),
+                "transferOutNo": kwargs.get('transferOutNo', ""),
+                "state": kwargs.get('state', ""),
+                "receiveWarehouseCode": kwargs.get('receiveWarehouseCode', ""),
+                "startUpdateTime": kwargs.get('startUpdateTime', ""),
+                "endUpdateTime": kwargs.get('endUpdateTime', ""),
+                "saleSkuCodes": kwargs.get('saleSkuCodes', []),
+                "skuCodes": kwargs.get('skuCodes', []),
+                "sortField": kwargs.get('sortField',
+                                        [{"field": "create_time", "type": "DESC"}, {"field": "id", "type": "DESC"}]),
+                "handoverNos": kwargs.get('handover_ids', [])
+            }
+        )
+        handover_list = self.call_api(**content)
+        return self.formatted_result(handover_list)
+
+    def transfer_out_update_delivery_config(self, handover_id, container_no, so_number, express_type=1,
+                                            express_type_idx=0):
+        content = deepcopy(TransferApiConfig.TransferDeliveryUpdate.get_attributes())
+        content["data"].update(
+            {
+                "ids": [handover_id],
+                "expressTypeIndex": express_type_idx,
+                "logisticsMerchant": "CEO",
+                "logisticsNo": "",
+                "remark": "",
+                "eta": int(time.time() * 1000),
+                "containerNo": container_no,
+                "soNumber": so_number,
+                "expressType": express_type
+            }
+        )
+        update_res = self.call_api(**content)
+        return self.formatted_result(update_res)
+
     def transfer_out_delivery(self, handover_no):
         content = deepcopy(TransferApiConfig.TransferDelivery.get_attributes())
         content["data"].update({"handoverNo": handover_no})
@@ -402,6 +447,11 @@ class WMSAppRobot(AppRobot):
             })
         up_shelf_res = self.call_api(**content)
         return self.formatted_result(up_shelf_res)
+
+    def transfer_cabinet_list(self):
+        content = deepcopy(TransferApiConfig.TransferCabinetList.get_attributes())
+        cabinet_list = self.call_api(**content)
+        return self.formatted_result(cabinet_list)
 
     def receipt_entry_order_page(self, distribute_order_code_list):
         """

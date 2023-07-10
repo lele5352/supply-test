@@ -187,6 +187,40 @@ class TransferApiConfig:
             "receiveWarehouseCode": ""
         }
 
+    class TransferDeliveryUpdate(ApiConfig):
+        uri_path = "/api/ec-wms-api/transferOut/handover/logistics/update/v2"
+        method = "POST"
+        data = {
+            "ids": [4458],
+            "expressTypeIndex": 0,
+            "logisticsMerchant": "CEO",
+            "logisticsNo": "",
+            "remark": "",
+            "eta": 1686844800000,
+            "containerNo": "gh2306160002",
+            "soNumber": "147201135985",
+            "expressType": 1
+        }
+
+    class TransferHandoverOrder(ApiConfig):
+        uri_path = '/api/ec-wms-api/transferOut/handover/page'
+        method = "POST"
+        data = {
+            "current": 1,
+            "size": 10,
+            "boxNo": [],
+            "handoverNo": "",
+            "transferOutNo": "",
+            "state": "",
+            "receiveWarehouseCode": "",
+            "startUpdateTime": "",
+            "endUpdateTime": "",
+            "saleSkuCodes": [],
+            "skuCodes": [],
+            "sortField": [{"field": "create_time", "type": "DESC"}, {"field": "id", "type": "DESC"}],
+            "handoverNos": []
+        }
+
     class TransferDelivery(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/handover/delivery/confirm"
         method = "POST"
@@ -204,6 +238,11 @@ class TransferApiConfig:
             "boxNo": "DC2202070021-1",
             "storageLocationCode": "SJKW-001"
         }
+
+    class TransferCabinetList(ApiConfig):
+        uri_path = "/api/ec-wms-api/transferIn/cabinet/list"
+        method = "POST"
+        data = {}
 
 
 class OtherEntryOrderApiConfig:
