@@ -66,12 +66,12 @@ def create_product_bom(sale_sku_code):
 
 
 if __name__ == '__main__':
-    # sale_sku_code = create_spu(productName="测试单品单件", package_num=1, single_package_num=1)
+    sale_sku_code = create_spu(productName="测试单品单件", package_num=1, single_package_num=1)
     # sale_sku_code = create_spu(productName="测试单品多件", package_num=1, single_package_num=3)
     # sale_sku_code = create_spu(productName="测试多品多件", package_num=3, single_package_num=3)
     # create_product_bom(sale_sku_code)
     # 补充库存
-    sale_sku_code = 'KK931075TA'
-    recp_data = WmsReceiptDataGenerator()
-    recp_data.create_other_in_order_and_up_shelf(
-        sale_sku_code=sale_sku_code, bom="A", qty=10, warehouse_id=542, to_warehouse_id=542)
+    # sale_sku_code = 'KK931075TA'
+    # recp_data = WmsReceiptDataGenerator()
+    # recp_data.create_other_in_order_and_up_shelf(
+    #     sale_sku_code=sale_sku_code, bom="A", qty=10, warehouse_id=542, to_warehouse_id=542)
