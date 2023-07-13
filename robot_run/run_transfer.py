@@ -169,4 +169,4 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False):
         up_shelf_result = wms_app.transfer_in_up_shelf(detail[0], sj_kw_code)
         if not wms_app.is_success(up_shelf_result):
             return False, "Fail to up shelf trans in!"
-    return True, None
+    return True, handover_no

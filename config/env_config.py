@@ -18,7 +18,7 @@ prefix_config = {
     # 160环境配置
     'test160': {
         'ims': 'http://10.0.0.159:28801',
-        'app': 'https://test160.popicorns.com',
+        'app': 'https://test-scms.popicorns.com',
         'wms_base': 'http://10.0.0.160:8321',
         'delivery': 'http://10.0.0.160:8330',
         'receipt': 'http://10.0.0.160:8323',
@@ -79,6 +79,22 @@ mysql_config = {
                 'user': 'erp',
                 'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
                 'host': '10.0.0.156',
+                'port': 3306
+            }
+    },
+    'test189': {
+        "scms":
+            {
+                'user': 'erp',
+                'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
+                'host': '10.0.0.190',
+                'port': 3306
+            },
+        "tms":
+            {
+                'user': 'erp',
+                'password': 'sd)*(YSHDG;l)D_FKds:D#&y}',
+                'host': '10.0.0.190',
                 'port': 3306
             }
     },
