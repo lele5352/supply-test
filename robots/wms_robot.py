@@ -98,7 +98,6 @@ class WMSAppRobot(AppRobot):
         elif not location_data:
             new_locations = self.base_create_location(num, kw_type, ck_id, to_ck_id)
             if not new_locations:
-                print("无库位，创建库位失败！")
                 return self.report(0, False, {})
             # 创建完缺口个数的库位后，重新获取库位
             location_data = WMSDBOperator.query_warehouse_locations(kw_type, num, ck_id, to_ck_id)
@@ -194,6 +193,7 @@ class WMSAppRobot(AppRobot):
             area_info = self.dbo.query_warehouse_area_info_by_type(warehouse_id, kw_maps[kw_type][
                 "area_type"])
             if not area_info:
+                log.info("创建库位失败：找不到库区！", True)
                 return
             location_info = {
                 "warehouseLocationCode": kw_maps[kw_type]["code_prefix"] + now,
