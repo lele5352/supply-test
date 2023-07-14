@@ -1,5 +1,5 @@
 from copy import deepcopy
-from config.third_party_api_configs.scm_api_config import SCMApiConfig
+from config.third_party_api_configs.scm_api_config import SCMApiConfig, SupplierApiConfig
 from robots.robot import AppRobot
 from utils.log_handler import logger as log
 from dbo.scm_dbo import SCMDBOperator
@@ -17,6 +17,51 @@ class SCMRobot(AppRobot):
         """
         content = deepcopy(SCMApiConfig.GetProductInfo.get_attributes())
         content["data"].update({"skuCode": sale_sku_code})
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def get_supplier(self, **kwargs):
+        """
+        获取供应商列表
+        """
+        content = deepcopy(SupplierApiConfig.GetSupplier.get_attributes())
+        content["data"].update(**kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def get_supplier_product(self, sale_sku_code, status=-1):
+        """
+        获取供应商商品列表
+        """
+        content = deepcopy(SupplierApiConfig.GetProduct.get_attributes())
+        content["data"].update({"skuCode": sale_sku_code, "status": status})
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def get_supplier_product_detail(self, sale_sku_id):
+        """
+        获取供应商商品详情
+        """
+        content = deepcopy(SupplierApiConfig.GetProductDetail.get_attributes())
+        content["uri_path"] = content["uri_path"].format(sale_sku_id)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def add_supplier_product(self, **kwargs):
+        """
+        获取供应商商品详情
+        """
+        content = deepcopy(SupplierApiConfig.AddProduct.get_attributes())
+        content["data"].update(**kwargs)
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
+    def audit_supplier_product(self, sku_id_list):
+        """
+        获取供应商商品详情
+        """
+        content = deepcopy(SupplierApiConfig.AuditSupplierProduct.get_attributes())
+        content["data"].update({"ids": sku_id_list})
         res = self.call_api(**content)
         return self.formatted_result(res)
 

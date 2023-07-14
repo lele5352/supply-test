@@ -24,11 +24,12 @@ def get_wait_transfer_data():
     return demands_list
 
 
-def run_transfer(demand_code, flow_flag=None):
+def run_transfer(demand_code, flow_flag=None, kw_force=False):
     """
     执行调拨流程，可指定流程节点
     :param demand_code: 调拨需求编码
     :param flow_flag: 流程标识，默认为空，执行全部；可选标识：create_pick_order,confirm_pick,submit_tray,finish_review,handover,received
+    :param kw_force: 强制创建库位
     """
     demand_data = wms_app.dbo.query_demand(demand_code)
     trans_out_id = demand_data[0].get("warehouse_id")
@@ -75,7 +76,8 @@ def run_transfer(demand_code, flow_flag=None):
     if flow_flag == "confirm_pick":
         return True, pick_order_code
 
-    get_trans_out_tp_kw_ids_result = wms_app.base_get_kw(1, 3, len(pick_sku_list), trans_out_id, trans_out_to_id)
+    get_trans_out_tp_kw_ids_result = wms_app.base_get_kw(
+        1, 3, len(pick_sku_list), trans_out_id, trans_out_to_id, force=kw_force)
     if not wms_app.is_success(get_trans_out_tp_kw_ids_result):
         return False, "Fail to get trans out tp location!"
 
@@ -131,6 +133,10 @@ def run_transfer(demand_code, flow_flag=None):
 
         handover_no = bind_result['data']['handoverNo']
 
+    # 如果流程标识为生成交接单，则执行就返回，中断流程
+    if flow_flag == "bind":
+        return True, handover_no
+
     delivery_result = wms_app.transfer_out_delivery(handover_no)
     if not wms_app.is_success(delivery_result):
         return False, "Fail to ship trans out order!"
@@ -163,4 +169,4 @@ def run_transfer(demand_code, flow_flag=None):
         up_shelf_result = wms_app.transfer_in_up_shelf(detail[0], sj_kw_code)
         if not wms_app.is_success(up_shelf_result):
             return False, "Fail to up shelf trans in!"
-    return True, None
+    return True, handover_no
