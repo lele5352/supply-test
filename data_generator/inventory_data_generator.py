@@ -163,17 +163,17 @@ if __name__ == '__main__':
     # -------------------现货相关------------------------------------------------------------------------------------
     # 通过参数模板组装参数
     # params = DataTemplate.spot_data_template("02390406240", "A", 1, 513, 513)
-    params = DataTemplate.spot_data_template("63203684930", "A", 2, 529, 529)
+    # params = DataTemplate.spot_data_template("63203684930", "A", 2, 529, 529)
     # params = DataTemplate.spot_data_template("J040522-2-WHITE", "A", 2, 529, 529)
 
     # # 添加1发货仓现货库存，7中转仓现货库存、8备货仓现货库存，都用这个，控制warehouse_id和to_warehouse_id即可，没有
-    data.add_in_stock_inventory(*params)
+    # data.add_in_stock_inventory(*params)
 
     # -------------------采购相关------------------------------------------------------------------------------------
     # 通过参数模板组装参数
-    # params = DataTemplate.scm_data_template(["02390406240"], 2, "ESZZ", "ESZF")
+    params = DataTemplate.scm_data_template(["02390406240"], 2, "ESZZ", "ESZF")
     # # 采购在途库存:3直发仓仓采购在途/9中转在途/10备货在途都用这个
-    # data.add_purchase_on_way_inventory(*params)
+    data.add_purchase_on_way_inventory(*params)
     #
     # # 采购申购库存:4采购申购/12备货仓申购都用这个
     # data.add_purchase_wait_buy_inventory(*params)

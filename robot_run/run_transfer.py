@@ -1,5 +1,5 @@
 from cases import *
-
+import random
 
 def get_demand_sku_bom(demand_code):
     data = wms_app.dbo.query_demand_detail(demand_code)
@@ -24,12 +24,13 @@ def get_wait_transfer_data():
     return demands_list
 
 
-def run_transfer(demand_code, flow_flag=None, kw_force=False):
+def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None):
     """
     执行调拨流程，可指定流程节点
     :param demand_code: 调拨需求编码
     :param flow_flag: 流程标识，默认为空，执行全部；可选标识：create_pick_order,confirm_pick,submit_tray,finish_review,handover,received
     :param kw_force: 强制创建库位
+    :param list up_shelf_nums: 上架数量设置，支持按列表形式按列表中的数量分多次上架
     """
     demand_data = wms_app.dbo.query_demand(demand_code)
     trans_out_id = demand_data[0].get("warehouse_id")
@@ -132,10 +133,19 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False):
             return False, "Fail to bind box to handover order!"
 
         handover_no = bind_result['data']['handoverNo']
-
     # 如果流程标识为生成交接单，则执行就返回，中断流程
     if flow_flag == "bind":
         return True, handover_no
+
+    # 获取交接货单id
+    order_detail = wms_app.transfer_handover_order(handoverNos=[handover_no]).get('data').get('records')[0]
+    handover_id = order_detail.get('id')
+
+    cabinet_info = random.choice(
+        [cabinet for cabinet in wms_app.transfer_cabinet_list().get('data') if cabinet.get('cabinetNumber')])
+    container_no = cabinet_info.get('cabinetNumber')
+    so_number = cabinet_info.get('soNumber')
+    wms_app.transfer_out_update_delivery_config(handover_id, container_no, so_number)
 
     delivery_result = wms_app.transfer_out_delivery(handover_no)
     if not wms_app.is_success(delivery_result):
@@ -164,9 +174,20 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False):
     if flow_flag == "received":
         return True, handover_no
 
-    # 调拨入库按箱单逐个整箱上架
     for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
-        up_shelf_result = wms_app.transfer_in_up_shelf(detail[0], sj_kw_code)
-        if not wms_app.is_success(up_shelf_result):
-            return False, "Fail to up shelf trans in!"
+        # 如果没有设置上架数量，则调拨入库按箱单逐个整箱上架
+        if not up_shelf_nums:
+            up_shelf_result = wms_app.transfer_in_up_shelf_whole_box(detail[0], sj_kw_code)
+            if not wms_app.is_success(up_shelf_result):
+                return False, "Fail to up shelf trans in!"
+        else:
+            # box_detail_res = wms_app.transfer_in_box_sku_detail(detail[0])
+            # if not wms_app.is_success(box_detail_res):
+            #     return False, "Fail to get box sku detail!"
+            # box_sku_data = box_detail_res.get("data").get("details")
+            # for sku in box_sku_data:
+            #     qty = sku["waresSkuQty"]
+            #     sku_code = sku["waresSkuCode"]
+            #     split_num_list =
+            pass
     return True, handover_no
