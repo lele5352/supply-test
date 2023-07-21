@@ -131,18 +131,18 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
         if not wms_app.is_success(kw_detail_result):
             return False, "Fail to get location received detail!"
 
-        upshelf_result = wms_app.receipt_upshelf_whole_location(sh_kw_code, sj_kw_code)
-        if not wms_app.is_success(upshelf_result):
+        up_shelf_result = wms_app.receipt_upshelf_whole_location(sh_kw_code, sj_kw_code)
+        if not wms_app.is_success(up_shelf_result):
             return False, "Fail to up shelf by location!"
 
     # 最后需要再调用上架完成接口，结束流程
-    complete_upshelf_result = wms_app.receipt_complete_upshelf()
-    if not wms_app.is_success(complete_upshelf_result):
+    complete_up_shelf_result = wms_app.receipt_complete_upshelf()
+    if not wms_app.is_success(complete_up_shelf_result):
         return False, "Fail to complete up shelf!"
 
     return True, entry_order_code
 
 
 if __name__ == '__main__':
-    wms = run_receive('FH2303032931', True)
+    wms = run_receive('FH2306294887', False)
     print(wms)

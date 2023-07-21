@@ -5,7 +5,7 @@ import os
 from data_generator import *
 from data_generator.scm_data_generator import ScmDataGenerator
 
-scm_data = ScmDataGenerator(scm_app)
+scm_data = ScmDataGenerator()
 distribute_order_list = scm_data.create_distribute_order(["63203684930"], 1, 'ESZZ', 'ESFH')
 entry_order_data = [
     (

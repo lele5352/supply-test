@@ -31,7 +31,7 @@ def create_spu(package_num=1, single_package_num=1, up_shelf=True, **kwargs):
     print('审核商品通过，商品进入待售状态')
     if up_shelf:
         pms_app.approve_sku_attribution(sku_id)
-        print('审核sku属性通过，商品进入在售状态')
+        print('审核sku属性通过，商品进入在售状态，sku编码：{}'.format(sku_code))
     # 创建完商品后，scm需要延迟一段时间后才可以拉取到
     time.sleep(5)
     return sku_code
@@ -66,12 +66,12 @@ def create_product_bom(sale_sku_code):
 
 
 if __name__ == '__main__':
-    # create_spu(productName="测试单品单件", package_num=1, single_package_num=1)
-    # create_spu(productName="测试单品多件", package_num=1, single_package_num=3)
-    sale_sku_code = create_spu(productName="测试多品多件", package_num=3, single_package_num=3)
-    # sale_sku = 'HW21834Y7M'
-    create_product_bom(sale_sku_code)
+    sale_sku_code = create_spu(productName="测试单品单件", package_num=1, single_package_num=1)
+    # sale_sku_code = create_spu(productName="测试单品多件", package_num=1, single_package_num=3)
+    # sale_sku_code = create_spu(productName="测试多品多件", package_num=3, single_package_num=3)
+    # create_product_bom(sale_sku_code)
     # 补充库存
-    recp_data = WmsReceiptDataGenerator()
-    recp_data.create_other_in_order_and_up_shelf(
-        sale_sku_code=sale_sku_code, bom="A", qty=10, warehouse_id=542, to_warehouse_id=542)
+    # sale_sku_code = 'KK931075TA'
+    # recp_data = WmsReceiptDataGenerator()
+    # recp_data.create_other_in_order_and_up_shelf(
+    #     sale_sku_code=sale_sku_code, bom="A", qty=10, warehouse_id=542, to_warehouse_id=542)
