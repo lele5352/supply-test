@@ -400,7 +400,7 @@ class WMSAppRobot(AppRobot):
                 "skuCodes": kwargs.get('skuCodes', []),
                 "sortField": kwargs.get('sortField',
                                         [{"field": "create_time", "type": "DESC"}, {"field": "id", "type": "DESC"}]),
-                "handoverNos": kwargs.get('handover_ids', [])
+                "handoverNos": kwargs.get('handoverNos', [])
             }
         )
         handover_list = self.call_api(**content)
