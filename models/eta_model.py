@@ -1,13 +1,17 @@
 from peewee import *
+from config import scms_db_config
 
-database = MySQLDatabase('ec-eta', **{'charset': 'utf8', 'sql_mode': 'PIPES_AS_CONCAT', 'use_unicode': True, 'host': '10.0.0.127', 'port': 3306, 'user': 'erp', 'password': 'sd)*(YSHDG;l)D_FKds:D#&y}'})
+database = MySQLDatabase('ec-eta', **scms_db_config)
+
 
 class UnknownField(object):
     def __init__(self, *_, **__): pass
 
+
 class BaseModel(Model):
     class Meta:
         database = database
+
 
 class CountryArea(BaseModel):
     call_code = CharField(constraints=[SQL("DEFAULT ''")])
@@ -32,6 +36,7 @@ class CountryArea(BaseModel):
     class Meta:
         table_name = 'country_area'
 
+
 class EcWarehouse(BaseModel):
     abroad_flag = IntegerField(constraints=[SQL("DEFAULT 1")], null=True)
     city = CharField(null=True)
@@ -54,6 +59,7 @@ class EcWarehouse(BaseModel):
     class Meta:
         table_name = 'ec_warehouse'
 
+
 class EcWarehouseLanguage(BaseModel):
     city = CharField(null=True)
     contact_information = CharField(null=True)
@@ -72,6 +78,7 @@ class EcWarehouseLanguage(BaseModel):
     class Meta:
         table_name = 'ec_warehouse_language'
 
+
 class EtaEcSkuRelation(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -88,6 +95,7 @@ class EtaEcSkuRelation(BaseModel):
         indexes = (
             (('sku_code', 'user_account'), False),
         )
+
 
 class EtaOnlineSkuSiteLogistics(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
@@ -111,6 +119,7 @@ class EtaOnlineSkuSiteLogistics(BaseModel):
             (('sku_code', 'site_code'), False),
         )
 
+
 class EtaRule(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     create_user = IntegerField(null=True)
@@ -130,6 +139,7 @@ class EtaRule(BaseModel):
     class Meta:
         table_name = 'eta_rule'
 
+
 class EtaRuleLog(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     create_user = IntegerField(null=True)
@@ -148,6 +158,7 @@ class EtaRuleLog(BaseModel):
     class Meta:
         table_name = 'eta_rule_log'
 
+
 class EtaRuleLogisticsTime(BaseModel):
     country_code = CharField(null=True)
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
@@ -164,6 +175,7 @@ class EtaRuleLogisticsTime(BaseModel):
 
     class Meta:
         table_name = 'eta_rule_logistics_time'
+
 
 class EtaRuleOtherTime(BaseModel):
     condition_desc = CharField()
@@ -184,6 +196,7 @@ class EtaRuleOtherTime(BaseModel):
     class Meta:
         table_name = 'eta_rule_other_time'
 
+
 class EtaSkuInventory(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -203,6 +216,7 @@ class EtaSkuInventory(BaseModel):
             (('sku_code', 'warehouse_id'), False),
         )
 
+
 class EtaTransferOrderSku(BaseModel):
     create_time = DateTimeField(null=True)
     date_eta = DateTimeField(null=True)
@@ -219,6 +233,7 @@ class EtaTransferOrderSku(BaseModel):
         indexes = (
             (('target_warehouse_id', 'sku_code'), False),
         )
+
 
 class EtaWarehouseAllocation(BaseModel):
     country_code = CharField()
@@ -238,6 +253,7 @@ class EtaWarehouseAllocation(BaseModel):
             (('country_code', 'state', 'delivery_type', 'del_flag'), True),
         )
 
+
 class EtaWarehouseAllocationLog(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
     create_user = IntegerField(null=True)
@@ -252,6 +268,7 @@ class EtaWarehouseAllocationLog(BaseModel):
 
     class Meta:
         table_name = 'eta_warehouse_allocation_log'
+
 
 class EtaWarehouseAllocationWarehouse(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
@@ -272,6 +289,7 @@ class EtaWarehouseAllocationWarehouse(BaseModel):
         indexes = (
             (('warehouse_allocation_id', 'warehouse_id', 'del_flag'), True),
         )
+
 
 class GoodsSkuInventory(BaseModel):
     available_qty = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -300,36 +318,6 @@ class GoodsSkuInventory(BaseModel):
     class Meta:
         table_name = 'goods_sku_inventory'
 
-class OmsLogisticsCleanInfo(BaseModel):
-    channel_code = CharField(null=True)
-    country_code = CharField()
-    country_name = CharField()
-    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
-    create_user = BigIntegerField(constraints=[SQL("DEFAULT 0")])
-    create_user_name = CharField(constraints=[SQL("DEFAULT ''")])
-    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
-    delivered_at = DateTimeField(null=True)
-    delivery_no = CharField()
-    delivery_time = DateTimeField(null=True)
-    exception_status = IntegerField(null=True)
-    id = BigAutoField()
-    issue_time = DateTimeField(null=True)
-    logistics_no = CharField()
-    postal_code = CharField()
-    re_check_time = DateTimeField(null=True)
-    site_code = CharField()
-    transport_type = IntegerField(null=True)
-    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
-    update_user = BigIntegerField(null=True)
-    update_user_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
-    virtual_warehouse_code = CharField()
-    virtual_warehouse_name = CharField()
-    warehouse_code = CharField(null=True)
-    warehouse_id = BigIntegerField(null=True)
-    warehouse_name = CharField(null=True)
-
-    class Meta:
-        table_name = 'oms_logistics_clean_info'
 
 class OmsSkuBlock(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -340,6 +328,7 @@ class OmsSkuBlock(BaseModel):
 
     class Meta:
         table_name = 'oms_sku_block'
+
 
 class PostCodeGroupAverageEta(BaseModel):
     average_eta_max_customer = IntegerField()
@@ -360,6 +349,7 @@ class PostCodeGroupAverageEta(BaseModel):
     class Meta:
         table_name = 'post_code_group_average_eta'
 
+
 class PostCodeGroupAverageEtaV2(BaseModel):
     average_eta_max_customer = IntegerField()
     average_eta_max_warehouse = IntegerField()
@@ -378,6 +368,7 @@ class PostCodeGroupAverageEtaV2(BaseModel):
 
     class Meta:
         table_name = 'post_code_group_average_eta_v2'
+
 
 class PostCodeGroupAverageEtaV3(BaseModel):
     arrived_warehouse_max = IntegerField()
@@ -401,6 +392,7 @@ class PostCodeGroupAverageEtaV3(BaseModel):
     class Meta:
         table_name = 'post_code_group_average_eta_v3'
 
+
 class PostCodeGroupDeliveryType(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
     delivery_type = IntegerField()
@@ -409,6 +401,7 @@ class PostCodeGroupDeliveryType(BaseModel):
     class Meta:
         table_name = 'post_code_group_delivery_type'
 
+
 class PostCodeGroupDeliveryTypeV2(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
     delivery_type = IntegerField()
@@ -416,6 +409,7 @@ class PostCodeGroupDeliveryTypeV2(BaseModel):
 
     class Meta:
         table_name = 'post_code_group_delivery_type_v2'
+
 
 class PostCodeGroupDeliveryTypeV3(BaseModel):
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -428,6 +422,7 @@ class PostCodeGroupDeliveryTypeV3(BaseModel):
     class Meta:
         table_name = 'post_code_group_delivery_type_v3'
 
+
 class SkuAvailableStock(BaseModel):
     available_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -438,6 +433,7 @@ class SkuAvailableStock(BaseModel):
 
     class Meta:
         table_name = 'sku_available_stock'
+
 
 class SkuAvailableStockV2(BaseModel):
     available_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -450,6 +446,7 @@ class SkuAvailableStockV2(BaseModel):
     class Meta:
         table_name = 'sku_available_stock_v2'
 
+
 class SkuAvailableStockV3(BaseModel):
     available_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
@@ -460,6 +457,7 @@ class SkuAvailableStockV3(BaseModel):
 
     class Meta:
         table_name = 'sku_available_stock_v3'
+
 
 class SkuAvailableStockV4(BaseModel):
     available_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -472,6 +470,7 @@ class SkuAvailableStockV4(BaseModel):
     class Meta:
         table_name = 'sku_available_stock_v4'
 
+
 class SkuDefaultPurchaseDelivery(BaseModel):
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -482,6 +481,7 @@ class SkuDefaultPurchaseDelivery(BaseModel):
 
     class Meta:
         table_name = 'sku_default_purchase_delivery'
+
 
 class WareSkuInventory(BaseModel):
     bom_qty = IntegerField(null=True)
@@ -495,4 +495,3 @@ class WareSkuInventory(BaseModel):
 
     class Meta:
         table_name = 'ware_sku_inventory'
-

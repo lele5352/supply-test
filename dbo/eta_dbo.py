@@ -1,6 +1,7 @@
 import time
 from dbo.oms_dbo import OMSDBOperator
 from models.eta_model import *
+from models.oms_model import OmsLogisticsCleanInfo
 from playhouse.shortcuts import model_to_dict
 
 from utils.random_code import get_random_times
@@ -13,8 +14,7 @@ class ETADBOperator:
                   delivered_at=('2023-07-02 00:00:00', '2023-07-21 00:00:00'),
                   issue_time=('2023-03-01 00:00:00', '2023-07-01 00:00:00'),
                   re_check_time=('2023-03-01 00:00:00', '2023-07-01 00:00:00'),
-                  warehouse_code='LA01', virtual_warehouse_code='OMS_USLA01',
-                  create_time='2023-07-20 00:00:00', update_time=time.time()):
+                  warehouse_code='LA01', virtual_warehouse_code='OMS_USLA01'):
         """
         :param int data_count: 生成的数据条数
         :param str country_code: 国家编码
@@ -27,8 +27,6 @@ class ETADBOperator:
         :param tuple(day,day) issue_time: 下发时间
         :param tuple(day,day) re_check_time: 复核时间
         :param int exception_status: 异常处理状态 默认1 正常 2 待处理 3 已跳过 4 已处理
-        :param timestamp create_time: 创建时间
-        :param timestamp update_time: 更新时间
         """
         # 自动排序时间段字段
         delivery_time = sorted(delivery_time)
@@ -36,7 +34,7 @@ class ETADBOperator:
         issue_time = sorted(issue_time)
         re_check_time = sorted(re_check_time)
         # 过滤不符合预期的数据
-        if exception_status == 3 and delivery_time[1] - issue_time[0] > 15:
+        if exception_status == 3 and delivery_time[1] - issue_time[0] > 15:  # todo: 确认清洗表是否
             raise Exception('已跳过的异常TMS运单，妥投时长超过15天自动过滤')
         if delivered_at[0] < issue_time[1]:
             raise Exception("妥投时间大于下发时间不合理")
@@ -48,10 +46,10 @@ class ETADBOperator:
         for i in range(0, data_count):
             data_source.append(
                 {
-                    "logistics_no": "FAKE_DATA_{}".format(time.time_ns()),  # 运单号
-                    "delivery_no": "FAKE_DATA_{}".format(time.time_ns()),  # 出库单号
-                    "country_code": country_code,  # 国家编码
-                    "country_name": country_info[country_code],  # 国家名称
+                    "logistics_no": "FAKE_DATA_{}_{}".format(i, time.time_ns()),  # 运单号
+                    "delivery_no": "FAKE_DATA_{}_{}".format(i, time.time_ns()),  # 出库单号
+                    "country_code": country_code if country_code != 'UK' else 'GB',  # 国家编码
+                    "country_name": country_info[country_code if country_code != 'UK' else 'GB'],  # 国家名称
                     "site_code": country_code,  # 站点
                     "postal_code": postal_code,  # 邮编
                     "virtual_warehouse_code": virtual_warehouse_code,  # 共享仓编码
@@ -66,13 +64,10 @@ class ETADBOperator:
                     "issue_time": get_random_times(*issue_time),  # 下发时间
                     "re_check_time": get_random_times(*re_check_time),  # 复核时间
                     "exception_status": exception_status,  # 异常处理状态 默认1 正常 2 待处理 3 已跳过 4 已处理
-                    "create_time": create_time,  # 创建时间
-                    "update_time": update_time,  # 更新时间
                     "create_user": 1,  # 创建人id
                     "update_user": 1,  # 更新人id
                     "create_user_name": 'load_data_test_user',  # 创建人名称(昵称)
                     "update_user_name": 'load_data_test_user',  # 更新人名称(昵称)
-                    "del_flag": 0  # 删除标识：1-删除，0-正常，默认为0
                 }
             )
         OmsLogisticsCleanInfo.insert_many(data_source).execute()
@@ -97,5 +92,5 @@ class ETADBOperator:
 
 
 if __name__ == '__main__':
-    ETADBOperator.load_data(1000)
-    ETADBOperator.load_data(1000,country_code='UK', postal_code='10001')
+    # ETADBOperator.load_data(3000)
+    ETADBOperator.load_data(1000, country_code='UK', postal_code='10001')
