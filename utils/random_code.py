@@ -145,6 +145,7 @@ def get_lower_random_code(prefix, suffix_length, count=1, name=None):
 
 
 def get_random_times(start, end, frmt="%Y-%m-%d %H:%M:%S"):
+    start, end = sorted((start, end))
     stime = datetime.datetime.strptime(start, frmt)
     etime = datetime.datetime.strptime(end, frmt)
     return random.random() * (etime - stime) + stime
