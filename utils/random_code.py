@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import random
 import string
 from utils.log_handler import logger
@@ -141,3 +142,9 @@ def get_lower_random_code(prefix, suffix_length, count=1, name=None):
         prefix, suffix_length, count, name,
         random_cls=LowerLetterRandomCode
     )
+
+
+def get_random_times(start, end, frmt="%Y-%m-%d %H:%M:%S"):
+    stime = datetime.datetime.strptime(start, frmt)
+    etime = datetime.datetime.strptime(end, frmt)
+    return random.random() * (etime - stime) + stime
