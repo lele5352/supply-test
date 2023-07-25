@@ -115,6 +115,8 @@ class ScmDataGenerator:
             if not purchase_order_detail_result["code"]:
                 return
             purchase_order_detail = purchase_order_detail_result["data"]
+            purchase_way = json.loads(purchase_order_detail.get("supplierInfo").get("purchaseWay")).get("code")
+            purchase_order_detail["supplierInfo"]["purchaseWay"] = purchase_way
             update_and_submit_to_audit_res = self.scm_app.update_and_submit_purchase_order_to_audit(
                 purchase_order_detail)
             if not update_and_submit_to_audit_res["code"]:
@@ -207,4 +209,4 @@ if __name__ == '__main__':
     # scm.create_purchase_demand(['14093131604'], 10, 'ESBH', '')
     # scm.create_wait_delivery_purchase_order(["14093131604"], 10, 'ESBH', '')
 
-    scm.create_distribute_order(["63203684930", "14093131604"], 1, 'ESZZ', 'ESFH')
+    scm.create_distribute_order(["HW929O38V1"], 20, 'HWBH', '')

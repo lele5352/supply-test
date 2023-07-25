@@ -1,3 +1,4 @@
+import json
 from copy import deepcopy
 from config.third_party_api_configs.scm_api_config import SCMApiConfig, SupplierApiConfig
 from robots.robot import AppRobot
@@ -152,14 +153,22 @@ class SCMRobot(AppRobot):
         if not purchase_demand_detail_result["code"]:
             return {"code": 0, "msg": "获取采购需求明细失败！", "data": ""}
         purchase_demand_detail_list = purchase_demand_detail_result["data"]
+
         for purchase_demand_detail in purchase_demand_detail_list:
-            temp_product_info = purchase_demand_detail["productInfos"]
+            temp_product_info = purchase_demand_detail.get("productInfos")
             product_infos = {
                 "details": temp_product_info,
-                "totalPrice": purchase_demand_detail["totalAmount"]
+                "totalPrice": purchase_demand_detail.get("totalAmount")
             }
+
+            temp_supplier_info = purchase_demand_detail.get("supplierInfo")
+            purchase_way = json.loads(temp_supplier_info.get("purchaseWay")).get("code")
+
             purchase_demand_detail.update({"productInfo": product_infos})
+            purchase_demand_detail["supplierInfo"]["purchaseWay"] = purchase_way
+
             del purchase_demand_detail["productInfos"]
+
         content = deepcopy(SCMApiConfig.ConfirmAndGeneratePurchaseOrder.get_attributes())
         content.update({"data": purchase_demand_detail_list})
         res = self.call_api(**content)
