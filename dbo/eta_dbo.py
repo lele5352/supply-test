@@ -1,3 +1,4 @@
+import json
 import random
 import time
 from dbo.oms_dbo import OMSDBOperator
@@ -10,13 +11,14 @@ from utils.random_code import get_random_times
 
 class ETADBOperator:
     @classmethod
-    def load_data(cls, data_count=1, country_code='US', postal_code='9999', transport_type=None, exception_status=None,
+    def load_data(cls, data_count=1, country_code='US', postal_code='99711', transport_type=None,
+                  exception_status=None, exception_name='',
                   first_appointment_period=('2023-07-05 00:00:00', '2023-07-21 00:00:00'),
                   first_contact_period=('2023-07-05 00:00:00', '2023-07-21 00:00:00'),
                   delivered_period=('2023-07-05 00:00:00', '2023-07-21 00:00:00'),
-                  issue_time_period=('2023-07-01 00:00:00', '2023-07-10 00:00:00'),
-                  re_check_time_period=('2023-07-01 00:00:00', '2023-07-03 00:00:00'),
-                  warehouse_code='LA01', virtual_warehouse_code='OMS_USLA01'):
+                  issue_time_period=('2023-07-01 00:00:00', '2023-07-01 00:00:00'),
+                  re_check_time_period=('2023-07-01 00:00:00', '2023-07-01 00:00:00'),
+                  warehouse_code='USNJ01', virtual_warehouse_code='OMS_USNJ01'):
         """
         :param int data_count: 生成的数据条数
         :param str country_code: 国家编码
@@ -30,6 +32,7 @@ class ETADBOperator:
         :param tuple(day,day) issue_time_period: 下发时间
         :param tuple(day,day) re_check_time_period: 复核时间
         :param int exception_status: 异常处理状态 默认1 正常 2 待处理 3 已跳过 4 已处理
+        :param int exception_name: 异常处理状态 默认1 正常 2 待处理 3 已跳过 4 已处理
         """
         # 自动排序时间段字段
         if exception_status not in (1, 2, 4, None):
@@ -46,11 +49,12 @@ class ETADBOperator:
                 # print('recheck time is later than issue time')
                 continue
             # 确定异常状态和发货方式
-            exception_status_new = exception_status or random.choice([1, 2, 4])
-            transport_type_new = transport_type or random.choice([1, 2])
+            exception_status_new = exception_status if exception_status else random.choice([1, 2, 4])
+            transport_type_new = transport_type if transport_type else random.choice([1, 2])
             # 计算清洗后妥投时间
             delivered_at = get_random_times(*delivered_period)
-            if transport_type == 2 or exception_status in (1, 4):
+            if transport_type_new == 2 or exception_name:
+                # 卡车单或异常单需要同时传入三个时间
                 first_appointment_at = get_random_times(*first_appointment_period)
                 first_contact_at = get_random_times(*first_contact_period)
                 clean_delivered_at = min(first_contact_at, first_appointment_at, delivered_at)
@@ -115,4 +119,4 @@ class ETADBOperator:
 
 if __name__ == '__main__':
     ETADBOperator.load_data(data_count=100)
-    # ETADBOperator.load_data(data_count=1, country_code='UK', postal_code='100001')
+    # ETADBOperator.load_data(data_count=100,virtual_warehouse_code='OMS_USLA01', warehouse_code='USLA02')
