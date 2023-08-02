@@ -38,3 +38,31 @@ class SCMDBOperator:
             return
         items = [model_to_dict(item) for item in items]
         return items
+
+    @classmethod
+    def query_default_purchase_price(cls, sale_sku_code):
+        """
+        获取销售sku 默认采购价
+        :param sale_sku_code: 销售sku编码
+        """
+        try:
+            record = SupplierProduct.select(
+                SupplierProduct.market_sku, SupplierProductPrice.purchase_price
+            ).join(
+                SupplierProductPrice, on=(
+                    (SupplierProduct.id == SupplierProductPrice.supplier_product_id) &
+                    (SupplierProductPrice.is_deleted == 0)
+                )
+            ).where(
+                (SupplierProduct.market_sku == sale_sku_code) & (SupplierProduct.is_deleted == 0) &
+                (SupplierProduct.is_default_supplier == 1)
+            ).get()
+
+        except SupplierProduct.DoesNotExist:
+            raise SupplierProduct.DoesNotExist('供应商产品表查询不到对应的销售sku')
+
+        return {
+            "sku_code": sale_sku_code,
+            "sale_price": record.supplierproductprice.purchase_price
+        }
+
