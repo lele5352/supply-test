@@ -169,6 +169,33 @@ class OMSAppRobot(AppRobot):
         res_data = self.call_api(**oms_api_config["query_common_warehouse"])
         return self.formatted_result(res_data)
 
+    def query_sku_stock_detail(self, sku_code, site_code='US', country='US', postal_code='10001'):
+        """
+        查询sku的可用库存信息
+        :param sku_code: 共享仓编码
+        :param site_code: 站点编码
+        :param country: 国家编码
+        :param postal_code: 邮编
+        :return: list
+        """
+        oms_api_config["product_detail"]["uri"] %= (sku_code, site_code, country, postal_code)
+        res_data = self.call_api(**oms_api_config["query_common_warehouse"])
+        return self.formatted_result(res_data)
+
+    def query_divide_warehouse(self, country='US',  postal_code='10001', transport_type=3):
+        """
+        查询分仓规则
+        :param str country: 国家编码
+        :param str postal_code: 邮编
+        :param int transport_type: 物流方式（1.卡车 2.快递（可跨仓） 3.快读（不可跨仓） 4.快递（可跨仓-LA） 5.国内直发）
+        :return: list
+        """
+        oms_api_config["query_common_warehouse"]["data"].update({
+            "countryCode": [country], "postCodes": [postal_code], "logisticsType": [transport_type]
+        })
+        res_data = self.call_api(**oms_api_config["warehouse_allocation_rule"])
+        return self.formatted_result(res_data)
+
 
 class OMSAppIpRobot(ServiceRobot):
     def __init__(self):
