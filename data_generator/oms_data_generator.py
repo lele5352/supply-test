@@ -21,13 +21,11 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
     # 创建销售订单并自动审单
     sale_order_no = create_sale_order(order_sku_info_list)
     if not sale_order_no:
-        print('创建销售单失败')
         return
 
     # 根据销售单号查询oms单，从data中直接提取
     query_oms_order_result = oms_app.query_oms_order_by_sale_no(sale_order_no)
     if oms_app.is_data_empty(query_oms_order_result):
-        print('oms订单为空')
         return
 
     oms_order_list = query_oms_order_result.get('data')
@@ -36,13 +34,11 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
     # 根据销售订单号找出oms单号执行审单
     dispatch_result = oms_app_ip.dispatch_oms_order(oms_order_no_list)
     if not oms_app.is_success(dispatch_result):
-        print('oms审单失败')
         return
 
     # 审单之后可能会拆单，需要再根据销售单号从新查出来oms单,从data中直接提取
     query_oms_order_result = oms_app.query_oms_order_by_sale_no(sale_order_no)
     if oms_app.is_data_empty(query_oms_order_result):
-        print('oms拆单后订单为空')
         return
     # oms_order_list = query_oms_order_result.get('data')
 
@@ -103,7 +99,6 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
     # 执行跟单
     follow_result = oms_app_ip.oms_order_follow(follow_order_list)
     if not oms_app.is_success(follow_result):
-        print('oms跟单失败')
         return
     # fix: 如果出现审单拆单的情况，用生成的原oms订单无法找到订单，需要通过销售单查询对应oms订单
     # 跟单是异步操作，需要等待跟单完成,通过查询oms单状态是否为已预占待下发，满足才可执行下发
