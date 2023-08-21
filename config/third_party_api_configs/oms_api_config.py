@@ -145,4 +145,14 @@ oms_api_config = {
         "method": "POST",
         "data": {"virtualWarehouseCodes": [], "warehouseCodes": [], "current": 1, "size": 10}
     },
+    "product_detail": {
+        "uri_path": "ec-oms-api/order/productDetail?skuCode=%s&siteCode=%s&country=%s&postalCode=%s",
+        "method": "GET"
+    },
+    "warehouse_allocation_rule": {
+        "uri_path": "/ec-oms-api/warehouseAllocationRule/getByPage",
+        "method": "POST",
+        "data": {"countryCode": ["US"], "postCodes": ["10001"], "logisticsType": [3], "status": 1,
+                 "orderByUpdateTime": 2, "current": 1, "size": 10}
+    }
 }

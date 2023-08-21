@@ -91,6 +91,9 @@ class WMSAppRobot(AppRobot):
         :param to_ck_id: 库位的目的仓id
         :param bool force: 默认不会强制创建新库位
         """
+        # 若不是中转仓类型，同样需要target_warehouse_id为空(缺货需求生成的采购单包含目的仓，但仅有中转仓库位支持dest_warehouse_id)
+        if self.dbo.query_warehouse_info_by_id(ck_id).get('operate_mode') != 1:
+            to_ck_id = ""
         location_data = self.db_get_kw(kw_type, num, ck_id, to_ck_id)
         if force:
             new_data = self.base_create_location(num, kw_type, ck_id, to_ck_id)
