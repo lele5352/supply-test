@@ -2,7 +2,7 @@ from robots.oms_robot import OMSAppRobot, OMSAppIpRobot
 from robots.wms_robot import WMSAppRobot, WMSTransferServiceRobot
 from robots.ims_robot import IMSRobot
 from robots.scm_robot import SCMRobot
-from utils.excel_handler import get_excel_data
+from utils.excel_handler import ExcelTool
 
 ims_robot = IMSRobot()
 
