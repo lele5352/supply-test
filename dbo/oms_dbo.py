@@ -14,6 +14,18 @@ class OMSDBOperator:
         one_hour_ago = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime((time.time() - 3601)))
         OmsOrder.update(create_time=one_hour_ago).where(OmsOrder.order_no == oms_no).execute()
 
+    @classmethod
+    def get_virtual_warehouse_info(cls):
+        """
+        获取虚拟共享仓
+        """
+        items = OmsVirtualWarehouse.select().where(
+            OmsVirtualWarehouse.status == 1)
+        items = {
+            model_to_dict(item)['virtual_warehouse_code']: model_to_dict(item)['virtual_warehouse_name']
+            for item in items}
+        return items
+
 
 if __name__ == '__main__':
     db = OMSDBOperator()

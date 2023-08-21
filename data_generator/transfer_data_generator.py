@@ -211,7 +211,7 @@ class WmsTransferDataGenerator:
         :param int so_number: 默认自动获取订舱号，与海柜号绑定
         """
         # 获取交接货单id
-        order_detail = self.wms_app.transfer_handover_order(handover_ids=[order_no]).get('data').get('records')[0]
+        order_detail = self.wms_app.transfer_handover_order(handoverNos=[order_no]).get('data').get('records')[0]
         handover_id = order_detail.get('id')
         # 获取海运柜号信息并更新
         cabinet_info = random.choice(

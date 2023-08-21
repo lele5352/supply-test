@@ -32,7 +32,8 @@ class DataTemplate:
         return [sale_sku_list, num, delivery_warehouse_code, to_warehouse_code]
 
     @classmethod
-    def transfer_data_template(cls, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, trans_sku, bom, trans_num):
+    def transfer_data_template(cls, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, trans_sku, bom,
+                               trans_num):
         """
         调拨参数模板
         :param bom: bom版本
@@ -97,7 +98,8 @@ class AddInventory:
         :param sale_sku_code:销售sku编码
         """
         add_res = self.transfer_data.create_handover_order(trans_out_id, trans_out_to_id, trans_in_id,
-                                                               trans_in_to_id, sale_sku_code, bom, demand_qty)
+                                                           trans_in_to_id, sale_sku_code, bom, demand_qty)
+
         return add_res
 
     def add_purchase_on_way_inventory(self, sale_sku_list, num, delivery_warehouse_code, to_warehouse_code):
@@ -162,16 +164,16 @@ if __name__ == '__main__':
 
     # -------------------现货相关------------------------------------------------------------------------------------
     # 通过参数模板组装参数
-    # params = DataTemplate.spot_data_template("02390406240", "A", 1, 513, 513)
-    params = DataTemplate.spot_data_template("63203684930", "A", 2, 529, 529)
-    # params = DataTemplate.spot_data_template("J040522-2-WHITE", "A", 2, 529, 529)
+    # params = DataTemplate.spot_data_template("KK931075TA", "A", 799, 540, 540)
+    # params = DataTemplate.spot_data_template("COCOM974W132", "A", 1, 532, 532)
+    # params = DataTemplate.spot_data_template("COCOZE527222", "A", 177, 650, 650)
 
     # # 添加1发货仓现货库存，7中转仓现货库存、8备货仓现货库存，都用这个，控制warehouse_id和to_warehouse_id即可，没有
-    data.add_in_stock_inventory(*params)
+    # data.add_in_stock_inventory(*params)
 
     # -------------------采购相关------------------------------------------------------------------------------------
     # 通过参数模板组装参数
-    # params = DataTemplate.scm_data_template(["02390406240"], 2, "ESZZ", "ESZF")
+    # params = DataTemplate.scm_data_template(["COCOZE527222"], 13, "ESZF", "ESZF")
     # # 采购在途库存:3直发仓仓采购在途/9中转在途/10备货在途都用这个
     # data.add_purchase_on_way_inventory(*params)
     #
@@ -184,9 +186,16 @@ if __name__ == '__main__':
     #
     # # -------------------------------------------------------------------------------------------------------
     # 通过参数模板组装参数
-    # params = DataTemplate.transfer_data_template(512, 0, 513, 513, "02390406240", "A", 2)
+    in_wid = 542
+    out_wid = 543
+    sku_code = "COCOZE527222"
+    params = DataTemplate.transfer_data_template(in_wid, 0, out_wid, out_wid, sku_code, "A", 150)
     # 调拨在途库存:2调拨在途
-    # data.add_transfer_on_way_inventory(*params)
+    #data.add_transfer_on_way_inventory(*params)
+
     #
     # # 调拨计划库存: 5调拨计划
     # data.add_transfer_plan_inventory(*params)
+    transfer_data = WmsTransferDataGenerator()
+    handover_order_no_list = transfer_data.generate_cds_cabin_order(sku_list=[sku_code], step=8, trans_in_id=in_wid,
+                                                                    trans_out_id=out_wid)
