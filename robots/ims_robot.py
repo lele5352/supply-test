@@ -1078,7 +1078,7 @@ class IMSRobot(ServiceRobot):
                 spot_stock, spot_remain = self.calc_suites(sale_sku, bom, inventory, 'location_total')
                 total_spot_stock += spot_stock
                 total_spot_remain += spot_remain
-                if total_spot_stock > 0:
+                if total_spot_stock >= 0:
                     temp_inventory.update({
                         'spot_goods_stock': total_spot_stock,
                         'spot_goods_remain': total_spot_remain
