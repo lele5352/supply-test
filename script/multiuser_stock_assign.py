@@ -3,12 +3,7 @@ from robots import login, switch_warehouse
 import aiohttp
 
 
-async def perform_stock_assign(session, host, user_data):
-
-    username = user_data.get('user_name')
-    password = user_data.get('pwd')
-    order_code = user_data.get('order_code')
-    req_url = f"{host}/api/ec-wms-api/delivery-order/stock-assign/v2"
+def login_and_switch(username, password, warehouse_id):
 
     login_req = {
         "username": username,
@@ -17,7 +12,22 @@ async def perform_stock_assign(session, host, user_data):
 
     # 登录，并切换到用户指定仓库
     headers = login(login_req)
-    switch_warehouse(user_data["warehouse"], headers)
+    rs = switch_warehouse(warehouse_id, headers)
+    if rs == 200:
+        return headers
+
+    return None
+
+
+async def perform_stock_assign(session, host, user_data):
+
+    username = user_data.get('user_name')
+    password = user_data.get('pwd')
+    order_code = user_data.get('order_code')
+    req_url = f"{host}/api/ec-wms-api/delivery-order/stock-assign/v2"
+    headers = login_and_switch(username, password, user_data["warehouse"])
+    if not headers:
+        raise ValueError("登录/切换仓库失败")
 
     # 请求参数组装
     payload = {

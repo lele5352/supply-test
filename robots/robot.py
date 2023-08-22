@@ -6,7 +6,7 @@ import time
 
 from utils.log_handler import logger as log
 from config import env_prefix_config
-from robots import app_headers, service_headers
+from robots import app_headers, service_headers, app_prefix
 from config.third_party_api_configs.ums_api_config import UMSApiConfig
 
 
@@ -120,7 +120,7 @@ class AppRobot(Robot):
     """
 
     def __init__(self):
-        self.prefix = env_prefix_config.get("app")
+        self.prefix = app_prefix
         super().__init__(self.prefix, app_headers)
 
 
