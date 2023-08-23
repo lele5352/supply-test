@@ -6,7 +6,7 @@ import time
 
 from utils.log_handler import logger as log
 from config import env_prefix_config
-from robots import app_headers, service_headers, app_prefix
+from robots import service_headers, app_prefix, login, default_user
 from config.third_party_api_configs.ums_api_config import UMSApiConfig
 
 
@@ -23,6 +23,10 @@ class Robot:
     def call_api(self, uri_path, method, data=None, files=None) -> dict:
         url = urljoin(self.prefix, uri_path)
         method = method.upper()
+
+        log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
+        log.info("请求内容：%s" % json.dumps({"method": method, "url": url, "data": data}, ensure_ascii=False))
+
         if method == "GET":
             response = requests.get(url, params=data, headers=self.headers)
         elif method == "POST":
@@ -34,8 +38,6 @@ class Robot:
         else:
             raise ValueError("Invalid request method")
 
-        log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
-        log.info("请求内容：%s" % json.dumps({"method": method, "url": url, "data": data}, ensure_ascii=False))
         log.info(f"traceId：{response.headers.get('Trace-Id')}")
         log.info("响应内容：" + json.dumps(response.json(), ensure_ascii=False))
         log.info(
@@ -102,24 +104,43 @@ class Robot:
             "data": data
         }
 
-    @classmethod
-    def get_user_info(cls):
+    def get_user_info(self):
         prefix = env_prefix_config.get("app")
         content = deepcopy(UMSApiConfig.UserInfo.get_attributes())
         content["data"].update({
             "t": str(int(time.time() * 1000))
         })
         url = urljoin(prefix, content["uri_path"])
-        res = requests.get(url, headers=app_headers, params=content["data"]).json()
+        res = requests.get(url, headers=self.headers, params=content["data"]).json()
         return res["data"]
+
+
+class MissingPasswordError(Exception):
+    pass
 
 
 class AppRobot(Robot):
     """
     基础应用层机器人，包含应用机器人初始化及接口调用行为
     """
+    def __init__(self, **kwargs):
+        """
+        用传入的用户信息执行登录，未传入时默认取配置的用户
+        :param username
+        :param password
+        """
+        user_name = default_user["username"]
+        password = default_user["password"]
 
-    def __init__(self):
+        if kwargs.get('username'):
+            if not kwargs.get('password'):
+                raise MissingPasswordError("Password is required when username is provided")
+
+            user_name = kwargs.get("username")
+            password = kwargs.get("password")
+
+        app_headers = login(user_name, password)
+
         self.prefix = app_prefix
         super().__init__(self.prefix, app_headers)
 

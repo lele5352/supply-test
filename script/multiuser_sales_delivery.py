@@ -1,9 +1,8 @@
-import asyncio
+import threading
 from robot_run.run_delivery import RunDelivery, WMSAppRobot
 
 
-async def perform_delivery(user_data):
-
+def perform_delivery(user_data):
     user_info = {
         "username": user_data.get("user_name"),
         "password": user_data.get("pwd")
@@ -11,31 +10,34 @@ async def perform_delivery(user_data):
     order_code = user_data.get("order_code")
     warehouse_id = user_data.get("warehouse")
 
-    wms = WMSAppRobot(user_info)
+    wms = WMSAppRobot(**user_info)
     rd = RunDelivery(wms)
     rd.run_delivery(order_code, warehouse_id)
 
 
-async def main():
-
+def main():
     data_list = [
         {
             "user_name": "cj@popicorns.com",
             "pwd": "A123456",
-            "order_code": "PRE-CK2308230021",
+            "order_code": "PRE-CK2308230033",
             "warehouse": 532
         },
         {
             "user_name": "linzhongjie@popicorns.com",
             "pwd": "Aa123456",
-            "order_code": "PRE-CK2308230020",
+            "order_code": "PRE-CK2308230040",
             "warehouse": 532
         }
     ]
 
-    tasks = [perform_delivery(data) for data in data_list]
-    await asyncio.gather(*tasks)
+    threads = [threading.Thread(target=perform_delivery, args=(data,)) for data in data_list]
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

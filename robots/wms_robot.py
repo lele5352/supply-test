@@ -10,9 +10,9 @@ from utils.time_handler import HumanDateTime
 
 
 class WMSAppRobot(AppRobot):
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.dbo = WMSDBOperator
-        super().__init__()
+        super().__init__(**kwargs)
 
     def db_ck_id_to_code(self, warehouse_id):
         """
