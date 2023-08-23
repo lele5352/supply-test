@@ -9,14 +9,15 @@ from cases import *
 
 @allure.feature("测试模块：采购入库")
 class TestPurchaseInStock(object):
-    fhc_purchase_in_data = get_excel_data("../../test_data/ims_test_data.xlsx", "fhc_purchase_in")  # 外部调用时的路径
+    fhc_purchase_in_data = ExcelTool("../../test_data/ims_test_data.xlsx").read_data("fhc_purchase_in", 2)  # 外部调用时的路径
 
-    # fhc_purchase_in_data = get_excel_data("../../test_data/ims_test_data.xlsx", "fhc_purchase_in") # 本文件main下执行时的路径
+    # fhc_purchase_in_data = ExcelTool("../../test_data/ims_test_data.xlsx", "fhc_purchase_in") # 本文件main下执行时的路径
 
     @allure.story("测试场景：发货仓采购入库")
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
     @pytest.mark.parametrize("ware_sku_qty_list,kw_num,warehouse_id,to_warehouse_id,expected,bak", fhc_purchase_in_data)
     def test_fhc_purchase_in_stock(self, ware_sku_qty_list, kw_num, warehouse_id, to_warehouse_id, expected, bak):
+        ware_sku_qty_list = json.loads(ware_sku_qty_list)
         sale_skus = ims_robot.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":

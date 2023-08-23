@@ -440,13 +440,35 @@ class WMSAppRobot(AppRobot):
         received_res = self.call_api(**content)
         return self.formatted_result(received_res)
 
-    def transfer_in_up_shelf(self, box_no, sj_kw_code):
-        content = deepcopy(TransferApiConfig.TransferBoxUpShelf.get_attributes())
+    def transfer_in_up_shelf_whole_box(self, box_no, sj_kw_code):
+        content = deepcopy(TransferApiConfig.TransferWholeBoxUpShelf.get_attributes())
 
         content["data"].update(
             {
                 "boxNo": box_no,
                 "storageLocationCode": sj_kw_code
+            })
+        up_shelf_res = self.call_api(**content)
+        return self.formatted_result(up_shelf_res)
+
+    def transfer_in_up_shelf_box_by_sku(self, box_no, sj_kw_code, details):
+        content = deepcopy(TransferApiConfig.TransferBoxUpShelfBySKU.get_attributes())
+
+        content["data"].update(
+            {
+                "boxNo": box_no,
+                "storageLocationCode": sj_kw_code,
+                "details": details
+            })
+        up_shelf_res = self.call_api(**content)
+        return self.formatted_result(up_shelf_res)
+
+    def transfer_in_box_sku_detail(self, box_no):
+        content = deepcopy(TransferApiConfig.TransferBoxSkuDetail.get_attributes())
+
+        content["data"].update(
+            {
+                "boxNo": box_no
             })
         up_shelf_res = self.call_api(**content)
         return self.formatted_result(up_shelf_res)

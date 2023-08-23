@@ -19,7 +19,18 @@ def robot_run_receive():
 
 
 def robot_run_transfer():
-    demands_list = get_wait_transfer_data()
+    data = wms_app.dbo.query_wait_assign_demands()
+    if not data:
+        return
+    demands_list = [
+        (
+            _['demand_code'],
+            _['warehouse_id'],
+            _['delivery_target_warehouse_id'],
+            _['receive_warehouse_id'],
+            _['receive_target_warehouse_id'],
+            _['delivery_warehouse_code']
+        ) for _ in data]
     if not demands_list:
         print('当前无待分配状态的调拨需求！')
         return

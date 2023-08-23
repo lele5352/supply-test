@@ -8,7 +8,7 @@ from utils.code_handler import GenerateCode
 from utils.wait_handler import until
 
 from data_generator.receipt_data_generator import WmsReceiptDataGenerator
-from robot_run.run_transfer import run_transfer
+from robot_run.run_transfer import run_transfer, TransferProcessNode
 
 
 class WmsTransferDataGenerator:
@@ -94,7 +94,7 @@ class WmsTransferDataGenerator:
             print('创建调拨拣货单失败：需求创建失败！')
             return
         # 创建调拨拣货单
-        result, order_no = run_transfer(demand_no, "create_pick_order")
+        result, order_no = run_transfer(demand_no, TransferProcessNode.assign_stock)
         if not result:
             print('创建调拨拣货单失败！')
             log.error('创建调拨拣货单失败！')
@@ -130,7 +130,7 @@ class WmsTransferDataGenerator:
             print('创建调拨拣货单失败')
             return
         # 执行调拨流程到发货交接节点
-        result, order_no = run_transfer(demand_no, "handover")
+        result, order_no = run_transfer(demand_no, TransferProcessNode.handover)
         print("创建调拨出库成功,调拨交接单号：%s" % order_no)
         return order_no
 
@@ -189,7 +189,7 @@ class WmsTransferDataGenerator:
                 print("创建调拨拣货单失败")
                 return
             # 执行调拨流程到扫货绑定交接单
-            result, _order_no = run_transfer(demand_no, "bind", kw_force=True)
+            result, _order_no = run_transfer(demand_no, TransferProcessNode.bind_box, kw_force=True)
             return _order_no
 
         # 生成调拨需求
@@ -266,9 +266,9 @@ class WmsTransferDataGenerator:
 if __name__ == '__main__':
     transfer_data = WmsTransferDataGenerator()
     demand_qty = 10
-    # transfer_data.create_transfer_demand(512, '', 513, 513, '63203684930', "B", 2)
+    # transfer_data.create_transfer_demand(565, '', 568, 568, '63203684930', "B", 1)
     # transfer_data.create_transfer_demand(511, 513, 513, 513, '63203684930', "B", 1)
-    # transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
-    # transfer_data.create_transfer_pick_order(512, '', 513, 513, '63203684930', "B", 2)
+    transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
+    # transfer_data.create_transfer_pick_order(565, '', 568, 568, '63203684930', "B", 1)
     # transfer_data.create_transfer_in_up_shelf_order(640, 0,642, 642,  "HW25D920D9", "A", 6)
-    transfer_data.create_entry_order(640, 0,642, 642,  "HW25D920D9", "A", 16,"received")
+    # transfer_data.create_entry_order(640, 0,642, 642,  "HW25D920D9", "A", 16,"received")
