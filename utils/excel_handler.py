@@ -1,3 +1,4 @@
+import json
 import openpyxl
 
 
@@ -6,14 +7,14 @@ class ExcelTool:
         self.filename = filename
         self.workbook = openpyxl.load_workbook(self.filename)
 
-    def read_data(self, sheet_name=None, start_row=1):
+    def read_data(self, sheet_name=None, start_row=1, jsonfy=False):
         if sheet_name is None:
             sheet_name = self.workbook.sheetnames[0]
         sheet = self.workbook[sheet_name]
 
         data = []
         for row in sheet.iter_rows(min_row=start_row, values_only=True):
-            data.append(row)
+            data.append([json.loads(cell) if cell else {} for cell in row] if jsonfy else row)
         return data
 
     def write_data(self, data, sheet_name=None, start_row=None):
@@ -35,6 +36,6 @@ class ExcelTool:
 
 if __name__ == '__main__':
     # data = ExcelTool("../test_data/transfer_test_data.xlsx")
-    fhc_cp_other_in_data = ExcelTool("../test_data/ims_test_data.xlsx").read_data("fhc_cp_other_in",2)
-
+    # fhc_cp_other_in_data = ExcelTool("../test_data/ims_test_data.xlsx").read_data("fhc_cp_other_in",2)
+    fhc_cp_other_in_data = ExcelTool("../test_data/link_test_data.xlsx").read_data("oms_to_wms", 2, True)
     print(fhc_cp_other_in_data)
