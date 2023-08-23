@@ -135,7 +135,8 @@ class WmsTransferDataGenerator:
         return order_no
 
     def create_transfer_in_up_shelf_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id,
-                                          sale_sku_code, bom, demand_qty, demand_type=1, customer_type=1, remark=''):
+                                          sale_sku_code, bom, demand_qty, demand_type=1, customer_type=1, remark='',
+                                          up_shelf_mode="box"):
         """
         生成调拨出库单并调拨入库上架完成
 
@@ -149,6 +150,7 @@ class WmsTransferDataGenerator:
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         :param bom: bom版本
+        :param up_shelf_mode: 上架方式,整箱-box，逐件-sku
         """
         # 生成调拨需求
         demand_no = self.create_transfer_demand(
@@ -159,7 +161,7 @@ class WmsTransferDataGenerator:
             print('创建调拨需求失败')
             return
         # 执行调拨流程到发货交接节点
-        result, order_no = run_transfer(demand_no)
+        result, order_no = run_transfer(demand_no, up_shelf_mode=up_shelf_mode)
         print("创建调拨出库成功,调拨交接单号：%s" % order_no)
         return order_no
 
@@ -268,7 +270,7 @@ if __name__ == '__main__':
     demand_qty = 10
     # transfer_data.create_transfer_demand(565, '', 568, 568, '63203684930', "B", 1)
     # transfer_data.create_transfer_demand(511, 513, 513, 513, '63203684930', "B", 1)
-    transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
+    # transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
     # transfer_data.create_transfer_pick_order(565, '', 568, 568, '63203684930', "B", 1)
-    # transfer_data.create_transfer_in_up_shelf_order(640, 0,642, 642,  "HW25D920D9", "A", 6)
+    transfer_data.create_transfer_in_up_shelf_order(512, 0, 565, 0, "HWK8646W27", "A", 5, "sku")
     # transfer_data.create_entry_order(640, 0,642, 642,  "HW25D920D9", "A", 16,"received")

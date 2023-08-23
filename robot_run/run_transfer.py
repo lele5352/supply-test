@@ -12,13 +12,13 @@ class TransferProcessNode:
     received = "received"  # 调入-收货完成
 
 
-def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None):
+def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box"):
     """
     执行调拨流程，可指定流程节点
     :param demand_code: 调拨需求编码
     :param flow_flag: 流程标识，执行到该指定节点中断流程
     :param kw_force: 强制创建库位
-    :param list up_shelf_nums: 上架数量设置，支持按列表形式按列表中的数量分多次上架
+    :param string up_shelf_mode: 上架模式，整箱-box；逐件-sku
     """
     demand_data = wms_app.dbo.query_demand(demand_code)
     trans_out_id = demand_data[0].get("warehouse_id")
@@ -103,10 +103,11 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
     transfer_out_order_detail = transfer_out_order_detail_result['data']['details']
 
     # 从调拨出库单明细中提取箱单和库位编码对应关系
-    details = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail]
-    sorted_details = sorted(details, key=lambda a: a[1])
+    box_kw_map_list = [(_['boxNo'], _['storageLocationCode']) for _ in transfer_out_order_detail]
+    sorted_box_kw_map = sorted(box_kw_map_list, key=lambda a: a[1])
+    box_nos = [_[0] for _ in sorted_box_kw_map]
     # 按箱单和托盘对应逐个复核
-    for box_no, tray_code in details:
+    for box_no, tray_code in box_kw_map_list:
         review_result = wms_app.transfer_out_order_review(box_no, tray_code)
         if not wms_app.is_success(review_result):
             return False, "Fail to review trans out order!"
@@ -115,8 +116,8 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
     if flow_flag == TransferProcessNode.finish_review:
         return True, pick_order_code
 
-    for detail in details:
-        bind_result = wms_app.transfer_out_box_bind(detail[0], '', '')  # 交接单号和收货仓编码实际可以不用传
+    for box_no in box_nos:
+        bind_result = wms_app.transfer_out_box_bind(box_no, '', '')  # 交接单号和收货仓编码实际可以不用传
         if not wms_app.is_success(bind_result):
             return False, "Fail to bind box to handover order!"
 
@@ -147,12 +148,6 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
     if not wms_app.is_success(switch_warehouse_result):
         return False, "Fail to switch to trans in warehouse!"
 
-    trans_in_sj_kw_ids_result = wms_app.base_get_kw(1, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
-    if not wms_app.is_success(trans_in_sj_kw_ids_result):
-        return False, "Fail to get trans in sj location!"
-
-    trans_in_sj_kw_codes = [wms_app.db_kw_id_to_code(kw_id) for kw_id in trans_in_sj_kw_ids_result['data']]
-
     # 调拨入库收货
     receive_result = wms_app.transfer_in_received(handover_no)
     if not wms_app.is_success(receive_result):
@@ -162,20 +157,34 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
     if flow_flag == TransferProcessNode.received:
         return True, handover_no
 
-    for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
+    trans_in_sj_kw_codes_result = wms_app.base_get_kw(2, 5, len(pick_sku_list), trans_in_id, trans_in_to_id)
+    if not wms_app.is_success(trans_in_sj_kw_codes_result):
+        return False, "Fail to get trans in sj location!"
+    trans_in_sj_kw_codes = trans_in_sj_kw_codes_result['data']
+
+    for box_no, sj_kw_code in zip(box_nos, trans_in_sj_kw_codes):
         # 如果没有设置上架数量，则调拨入库按箱单逐个整箱上架
-        if not up_shelf_nums:
-            up_shelf_result = wms_app.transfer_in_up_shelf_whole_box(detail[0], sj_kw_code)
-            if not wms_app.is_success(up_shelf_result):
+        if up_shelf_mode == "box":
+            up_shelf_res = wms_app.transfer_in_up_shelf_whole_box(box_no, sj_kw_code)
+            if not wms_app.is_success(up_shelf_res):
                 return False, "Fail to up shelf trans in!"
+        elif up_shelf_mode == "sku":
+            box_info_res = wms_app.transfer_in_box_scan(box_no)
+            if not wms_app.is_success(box_info_res):
+                return False, "Fail to get box sku detail!"
+            box_sku_data = box_info_res.get("data").get("details")
+            trans_in_no = box_info_res.get("data").get("transferInNo")
+            for sku in box_sku_data:
+                qty = sku["waresSkuQty"]
+                sku_code = sku["waresSkuCode"]
+                detail = [{
+                    "waresSkuCode": sku_code,
+                    "quantity": 1
+                }]
+                for num in range(qty):
+                    up_shelf_res = wms_app.transfer_in_up_shelf_box_by_sku(box_no, sj_kw_code, trans_in_no, detail)
+                    if wms_app.is_success(up_shelf_res):
+                        return False, "Fail to up shelf trans in!"
         else:
-            # box_detail_res = wms_app.transfer_in_box_sku_detail(detail[0])
-            # if not wms_app.is_success(box_detail_res):
-            #     return False, "Fail to get box sku detail!"
-            # box_sku_data = box_detail_res.get("data").get("details")
-            # for sku in box_sku_data:
-            #     qty = sku["waresSkuQty"]
-            #     sku_code = sku["waresSkuCode"]
-            #     split_num_list =
-            pass
+            return False, "unsupported up up shelf mode"
     return True, handover_no

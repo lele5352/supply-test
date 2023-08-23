@@ -231,12 +231,34 @@ class TransferApiConfig:
         method = "POST"
         data = {"handoverNo": ""}
 
-    class TransferBoxUpShelf(ApiConfig):
+    class TransferInBoxUpShelf(ApiConfig):
         uri_path = "/api/ec-wms-api/transferIn/input/box/shelf"
         method = "POST"
         data = {
             "boxNo": "DC2202070021-1",
             "storageLocationCode": "SJKW-001"
+        }
+
+    class TransferInBoxScan(ApiConfig):
+        uri_path = "/api/ec-wms-api/transferIn/input/box/scan/pda"
+        method = "POST"
+        data = {
+            "boxNo": "DC2308230001-1",
+            "type": 2,
+            "hideError": False
+        }
+
+    class TransferBoxUpShelfBySKU(ApiConfig):
+        uri_path = "/api/ec-wms-api/transferIn/input/sku/shelf"
+        method = "POST"
+        data = {
+            "boxNo": "DC2308230001-1",
+            "storageLocationCode": "SJKW001",
+            "transferInNo": "DR2308230001",
+            "details": [{
+                "waresSkuCode": "HWK8646W27A01",
+                "quantity": 1
+            }]
         }
 
     class TransferCabinetList(ApiConfig):
