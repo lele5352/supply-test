@@ -183,7 +183,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
                 }]
                 for num in range(qty):
                     up_shelf_res = wms_app.transfer_in_up_shelf_box_by_sku(box_no, sj_kw_code, trans_in_no, detail)
-                    if wms_app.is_success(up_shelf_res):
+                    if not wms_app.is_success(up_shelf_res):
                         return False, "Fail to up shelf trans in!"
         else:
             return False, "unsupported up up shelf mode"
