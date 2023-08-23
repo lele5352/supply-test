@@ -1,34 +1,22 @@
 from cases import *
 import random
 
-def get_demand_sku_bom(demand_code):
-    data = wms_app.dbo.query_demand_detail(demand_code)
-    bom = data[0]['bom_version']
-    return bom
 
-
-def get_wait_transfer_data():
-    """获取待执行调拨流程的调拨需求"""
-    data = wms_app.dbo.query_wait_assign_demands()
-    if not data:
-        return
-    demands_list = [
-        (
-            _['demand_code'],
-            _['warehouse_id'],
-            _['delivery_target_warehouse_id'],
-            _['receive_warehouse_id'],
-            _['receive_target_warehouse_id'],
-            _['delivery_warehouse_code']
-        ) for _ in data]
-    return demands_list
+class TransferProcessNode:
+    assign_stock = "create_pick_order"  # 调出-分配库存并创建拣货单
+    confirm_pick = "confirm_pick"  # 调出-拣货单拣货完成
+    submit_tray = "submit_tray"  # 调出-装托完成
+    finish_review = "finish_review"  # 调出-装箱复核完成
+    bind_box = "bind"  # 调出-发货交接扫描绑定箱单
+    handover = "handover"  # 调出-发货交接完成
+    received = "received"  # 调入-收货完成
 
 
 def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None):
     """
     执行调拨流程，可指定流程节点
     :param demand_code: 调拨需求编码
-    :param flow_flag: 流程标识，默认为空，执行全部；可选标识：create_pick_order,confirm_pick,submit_tray,finish_review,handover,received
+    :param flow_flag: 流程标识，执行到该指定节点中断流程
     :param kw_force: 强制创建库位
     :param list up_shelf_nums: 上架数量设置，支持按列表形式按列表中的数量分多次上架
     """
@@ -50,7 +38,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
     pick_order_code = create_pick_order_result['data']
 
     # 如果流程标识为创建调拨拣货单，则执行就返回，中断流程
-    if flow_flag == "create_pick_order":
+    if flow_flag == TransferProcessNode.assign_stock:
         return True, pick_order_code
 
     # 分配调拨拣货人
@@ -74,7 +62,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
         return False, "Fail to confirm pick!"
 
     # 如果流程标识为调拨拣货单确认拣货完成，则执行就返回，中断流程
-    if flow_flag == "confirm_pick":
+    if flow_flag == TransferProcessNode.confirm_pick:
         return True, pick_order_code
 
     get_trans_out_tp_kw_ids_result = wms_app.base_get_kw(
@@ -102,7 +90,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
         return False, "Fail to finish tray packing!"
 
     # 如果流程标识为装托完成，则执行就返回，中断流程
-    if flow_flag == "submit_tray":
+    if flow_flag == TransferProcessNode.submit_tray:
         return True, pick_order_code
 
     transfer_out_order_no = finish_result['data']
@@ -124,7 +112,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
             return False, "Fail to review trans out order!"
 
     # 如果流程标识为复核完成，则执行就返回，中断流程
-    if flow_flag == "finish_review":
+    if flow_flag == TransferProcessNode.finish_review:
         return True, pick_order_code
 
     for detail in details:
@@ -134,7 +122,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
 
         handover_no = bind_result['data']['handoverNo']
     # 如果流程标识为生成交接单，则执行就返回，中断流程
-    if flow_flag == "bind":
+    if flow_flag == TransferProcessNode.bind_box:
         return True, handover_no
 
     # 获取交接货单id
@@ -152,7 +140,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
         return False, "Fail to ship trans out order!"
 
     # 如果流程标识为发货交接，则执行就返回，中断流程
-    if flow_flag == "handover":
+    if flow_flag == TransferProcessNode.handover:
         return True, handover_no
 
     switch_warehouse_result = wms_app.common_switch_warehouse(trans_in_id)
@@ -171,7 +159,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_nums=None
         return False, "Fail to receive trans in order!"
 
     # 如果流程标识为发货交接，则执行就返回，中断流程
-    if flow_flag == "received":
+    if flow_flag == TransferProcessNode.received:
         return True, handover_no
 
     for detail, sj_kw_code in zip(sorted_details, trans_in_sj_kw_codes):
