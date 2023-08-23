@@ -105,10 +105,10 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
     # for order in oms_order_no_list:
     #     until(99, 0.5)(
     #         lambda: "已预占待下发" == oms_app.query_oms_order_by_oms_no(order).get("data")[0].get("orderStatusName"))()
-    oms_orders_list_of_sale_order = oms_app.query_oms_order_by_sale_no(sale_order_no).get("data")
     until(99, 0.5)(
         lambda: False not in [
-            True if "已预占待下发" == order.get("orderStatusName") else False for order in oms_orders_list_of_sale_order]
+            True if "已预占待下发" == order.get("orderStatusName") else False for order in
+            oms_app.query_oms_order_by_sale_no(sale_order_no).get("data")]
     )()
     return sale_order_no
 
@@ -123,10 +123,9 @@ def create_wms_sale_outbound_order(order_sku_info_list, auto_add_stock=True):
     # 订单下发也是异步，需要等待下发执行完成，通过查询oms单是否有出库单号确认是否下发成功
     # for order in oms_order_no_list:
     #     until(99, 0.5)(lambda: oms_app.query_oms_order_by_oms_no(order).get("data")[0].get("salesOutNo") is not None)()
-    oms_orders_list_of_sale_order = oms_app.query_oms_order_by_sale_no(sale_order_no).get("data")
     until(99, 0.5)(
-        lambda: None not in [True if order.get("salesOutNo") else False for order in oms_orders_list_of_sale_order]
-    )()
+        lambda: None not in [True if order.get("salesOutNo") else False for order in
+                             oms_app.query_oms_order_by_sale_no(sale_order_no).get("data")])()
 
     # 根据销售单号查询oms单，从data中直接提取发货仓和出库单号
     query_oms_order_result = oms_app.query_oms_order_by_sale_no(sale_order_no)
@@ -146,6 +145,6 @@ if __name__ == '__main__':
     #         {"sku_code": "67330337129", "qty": 2, "bom": "A", "warehouse_id": "513"}]
     # data = [{"sku_code": "63203684930", "qty": 2, "bom": "B", "warehouse_id": "513"}]
     data = [{"sku_code": "KK29O72S66", "qty": 10, "bom": "", "warehouse_id": ""}]
-    create_verified_order(data, False)
-    # create_wms_sale_outbound_order(data, False)
+    # create_verified_order(data, False)
+    create_wms_sale_outbound_order(data, False)
     # [{"skuCode": "KK29O72S66", "bomVersion": "A"}]
