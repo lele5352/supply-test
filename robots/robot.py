@@ -28,7 +28,7 @@ class Robot:
             "DELETE": self.call_delete,
         }
 
-    def call_get(self, url, data):
+    def call_get(self, url, data=None):
         response = requests.get(url, params=data, headers=self.headers)
         return response
 
