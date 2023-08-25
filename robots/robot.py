@@ -9,6 +9,8 @@ from config import env_prefix_config
 from robots import service_headers, app_prefix, login, default_user
 from config.third_party_api_configs.ums_api_config import UMSApiConfig
 
+_cache_headers = {}
+
 
 class Robot:
     """
@@ -19,30 +21,47 @@ class Robot:
     def __init__(self, prefix=None, headers=None):
         self.headers = headers
         self.prefix = prefix
+        self.methods_mapping = {
+            "GET": self.call_get,
+            "POST": self.call_post,
+            "PUT": self.call_put,
+            "DELETE": self.call_delete,
+        }
 
-    def call_api(self, uri_path, method, data=None, files=None) -> dict:
+    def call_get(self, url, data):
+        response = requests.get(url, params=data, headers=self.headers)
+        return response
+
+    def call_post(self, url, data=None, files=None):
+        response = requests.post(url, json=data, files=files, headers=self.headers)
+        return response
+
+    def call_put(self, url, data):
+        response = requests.put(url, json=data, headers=self.headers)
+        return response
+
+    def call_delete(self, url, data=None):
+        response = requests.delete(url, headers=self.headers, params=data)
+        return response
+
+    def call_api(self, uri_path, method, **kwargs) -> dict:
+
         url = urljoin(self.prefix, uri_path)
         method = method.upper()
 
         log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
-        log.info("请求内容：%s" % json.dumps({"method": method, "url": url, "data": data}, ensure_ascii=False))
+        log.info("请求内容：%s" % json.dumps({"method": method, "url": url, "data": kwargs.get('data')}, ensure_ascii=False))
 
-        if method == "GET":
-            response = requests.get(url, params=data, headers=self.headers)
-        elif method == "POST":
-            response = requests.post(url, json=data, headers=self.headers, files=files)
-        elif method == "PUT":
-            response = requests.put(url, json=data, headers=self.headers)
-        elif method == "DELETE":
-            response = requests.delete(url, headers=self.headers)
+        if method in self.methods_mapping:
+            response_data = self.methods_mapping[method](url, **kwargs)
         else:
             raise ValueError("Invalid request method")
 
-        log.info(f"traceId：{response.headers.get('Trace-Id')}")
-        log.info("响应内容：" + json.dumps(response.json(), ensure_ascii=False))
+        log.info(f"traceId：{response_data.headers.get('Trace-Id')}")
+        log.info("响应内容：" + json.dumps(response_data.json(), ensure_ascii=False))
         log.info(
             "-------------------------------------------------我是分隔符-------------------------------------------------")
-        return response.json()
+        return response_data.json()
 
     @classmethod
     def is_data_empty(cls, response_data):
@@ -105,12 +124,12 @@ class Robot:
         }
 
     def get_user_info(self):
-        prefix = env_prefix_config.get("app")
+
         content = deepcopy(UMSApiConfig.UserInfo.get_attributes())
         content["data"].update({
             "t": str(int(time.time() * 1000))
         })
-        url = urljoin(prefix, content["uri_path"])
+        url = urljoin(self.prefix, content["uri_path"])
         res = requests.get(url, headers=self.headers, params=content["data"]).json()
         return res["data"]
 
@@ -139,7 +158,13 @@ class AppRobot(Robot):
             user_name = kwargs.get("username")
             password = kwargs.get("password")
 
-        app_headers = login(user_name, password)
+        if user_name not in _cache_headers:
+            app_headers = login(user_name, password)
+            _cache_headers[user_name] = app_headers
+            log.info(f"用户{user_name} 请求头信息已缓存")
+        else:
+            log.debug(f"读取用户{user_name} 请求头缓存")
+            app_headers = _cache_headers[user_name]
 
         self.prefix = app_prefix
         super().__init__(self.prefix, app_headers)
