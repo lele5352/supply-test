@@ -36,6 +36,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
     if not wms_app.is_success(create_pick_order_result):
         return False, "Fail to create pick order!"
     pick_order_code = create_pick_order_result['data']
+    print('生成调拨拣货单：%s' % pick_order_code)
 
     # 如果流程标识为创建调拨拣货单，则执行就返回，中断流程
     if flow_flag == TransferProcessNode.assign_stock:
@@ -94,6 +95,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
         return True, pick_order_code
 
     transfer_out_order_no = finish_result['data']
+    print('生成调拨出库单：%s' % transfer_out_order_no)
 
     # 获取调拨出库单明细
     transfer_out_order_detail_result = wms_app.transfer_out_order_detail(transfer_out_order_no)
@@ -125,6 +127,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
     # 如果流程标识为生成交接单，则执行就返回，中断流程
     if flow_flag == TransferProcessNode.bind_box:
         return True, handover_no
+    print('生成调拨出库交接单：%s' % handover_no)
 
     # 获取交接货单id
     order_detail = wms_app.transfer_handover_order(handoverNos=[handover_no]).get('data').get('records')[0]
@@ -133,6 +136,8 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
     cabinet_info = random.choice(
         [cabinet for cabinet in wms_app.transfer_cabinet_list().get('data') if cabinet.get('cabinetNumber')])
     container_no = cabinet_info.get('cabinetNumber')
+    print('交接单关联柜号：%s' % container_no)
+
     so_number = cabinet_info.get('soNumber')
     wms_app.transfer_out_update_delivery_config(handover_id, container_no, so_number)
 
@@ -187,4 +192,4 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
                         return False, "Fail to up shelf trans in!"
         else:
             return False, "unsupported up up shelf mode"
-    return True, handover_no
+    return True, trans_in_no
