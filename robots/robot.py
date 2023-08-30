@@ -25,10 +25,10 @@ class Robot:
             "GET": self.call_get,
             "POST": self.call_post,
             "PUT": self.call_put,
-            "DELETE": self.call_delete,
+            "DELETE": self.call_delete
         }
 
-    def call_get(self, url, data):
+    def call_get(self, url, data=None):
         response = requests.get(url, params=data, headers=self.headers)
         return response
 

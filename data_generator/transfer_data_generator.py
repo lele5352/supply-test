@@ -101,7 +101,6 @@ class WmsTransferDataGenerator:
         pick_order_code = order_no
 
         GenerateCode("barcode", "transfer_pick_order", pick_order_code)
-        print('生成调拨拣货单：%s' % pick_order_code)
         return pick_order_code
 
     def create_handover_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id, sale_sku_code, bom,
@@ -130,7 +129,6 @@ class WmsTransferDataGenerator:
             return
         # 执行调拨流程到发货交接节点
         result, order_no = run_transfer(demand_no, TransferProcessNode.handover)
-        print("创建调拨出库成功,调拨交接单号：%s" % order_no)
         return order_no
 
     def create_transfer_in_up_shelf_order(self, trans_out_id, trans_out_to_id, trans_in_id, trans_in_to_id,
@@ -157,11 +155,10 @@ class WmsTransferDataGenerator:
             customer_type, remark
         )
         if not demand_no:
-            print('创建调拨需求失败')
+            # print('创建调拨需求失败')
             return
         # 执行调拨流程到发货交接节点
         result, order_no = run_transfer(demand_no, up_shelf_mode=up_shelf_mode)
-        print("创建调拨出库成功,调拨交接单号：%s" % order_no)
         return order_no
 
 
@@ -172,5 +169,5 @@ if __name__ == '__main__':
     # transfer_data.create_transfer_demand(511, 513, 513, 513, '63203684930', "B", 1)
     # transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
     # transfer_data.create_transfer_pick_order(565, '', 568, 568, '63203684930', "B", 1)
-    transfer_data.create_transfer_in_up_shelf_order(512, 0, 565, 0, "HWK8646W27", "A", 5, "sku")
+    transfer_data.create_transfer_in_up_shelf_order(512, 0, 513, 513, "HWK8646W27", "A", 5,  up_shelf_mode="sku")
     # transfer_data.create_entry_order(640, 0,642, 642,  "HW25D920D9", "A", 16,"received")

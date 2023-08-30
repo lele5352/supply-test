@@ -222,7 +222,7 @@ class WMSAppRobot(AppRobot):
         :param list demand_list: 调拨需求列表
         :param int pick_type: 拣货方式: 1-纸质；2-PDA
         """
-        content = deepcopy(TransferApiConfig.CreateTransferPickOrder.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutCreatePickOrder.get_attributes())
         content["data"].update(
             {"demandCodes": demand_list, "pickType": pick_type, }
         )
@@ -243,7 +243,7 @@ class WMSAppRobot(AppRobot):
         :param int pick_userid: 拣货人id
         :param string pick_username: 拣货人名称
         """
-        content = deepcopy(TransferApiConfig.TransferPickOrderAssign.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutPickOrderAssign.get_attributes())
         content["data"].update(
             {
                 "pickOrderNos": pick_order_list,
@@ -260,7 +260,7 @@ class WMSAppRobot(AppRobot):
         :param string pick_order_code: 调拨拣货单号
         """
         t = int(time.time() * 1000)
-        content = deepcopy(TransferApiConfig.TransferPickOrderDetail.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutPickOrderDetail.get_attributes())
         content.update(
             {
                 "uri_path": content["uri_path"] % pick_order_code,
@@ -283,7 +283,7 @@ class WMSAppRobot(AppRobot):
             "waresSkuCode": detail["waresSkuCode"],
             "realPickQty": detail["shouldPickQty"]
         } for detail in pick_order_details]
-        content = deepcopy(TransferApiConfig.TransferConfirmPick.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutConfirmPick.get_attributes())
         content["data"].update(
             {
                 "pickOrderNo": pick_order_code,
@@ -320,7 +320,7 @@ class WMSAppRobot(AppRobot):
                     }]
                 }
             )
-        content = deepcopy(TransferApiConfig.TransferSubmitTray.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutSubmitTray.get_attributes())
         content.update({"data": tray_info_list})
         submit_tray_res = self.call_api(**content)
         return self.formatted_result(submit_tray_res)
@@ -330,7 +330,7 @@ class WMSAppRobot(AppRobot):
         获取调拨拣货单装托明细
         :param string pick_order_no: 拣货单号
         """
-        content = deepcopy(TransferApiConfig.TransferPickOrderTrayDetail.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutPickOrderTrayDetail.get_attributes())
         content.update(
             {"uri_path": content["uri_path"] % pick_order_no}
         )
@@ -344,7 +344,7 @@ class WMSAppRobot(AppRobot):
         :param string pick_order_no: 拣货单号
         :param list tray_list: 托盘列表
         """
-        content = deepcopy(TransferApiConfig.TransferFinishPacking.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutFinishPacking.get_attributes())
         content["data"].update(
             {
                 "pickOrderNo": pick_order_no,
@@ -375,7 +375,7 @@ class WMSAppRobot(AppRobot):
         return self.formatted_result(review_res)
 
     def transfer_out_box_bind(self, box_no, handover_no, receive_warehouse_code):
-        content = deepcopy(TransferApiConfig.TransferBoxBind.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutBoxBind.get_attributes())
         content["data"].update(
             {
                 "boxNo": box_no,
@@ -387,7 +387,7 @@ class WMSAppRobot(AppRobot):
         return self.formatted_result(bind_res)
 
     def transfer_handover_order(self, **kwargs):
-        content = deepcopy(TransferApiConfig.TransferHandoverOrder.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutHandoverOrder.get_attributes())
         content["data"].update(
             {
                 "current": kwargs.get('current', 1),
@@ -411,7 +411,7 @@ class WMSAppRobot(AppRobot):
 
     def transfer_out_update_delivery_config(self, handover_id, container_no, so_number, express_type=1,
                                             express_type_idx=0):
-        content = deepcopy(TransferApiConfig.TransferDeliveryUpdate.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutDeliveryUpdate.get_attributes())
         content["data"].update(
             {
                 "ids": [handover_id],
@@ -429,7 +429,7 @@ class WMSAppRobot(AppRobot):
         return self.formatted_result(update_res)
 
     def transfer_out_delivery(self, handover_no):
-        content = deepcopy(TransferApiConfig.TransferDelivery.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutDelivery.get_attributes())
         content["data"].update({"handoverNo": handover_no})
         delivery_res = self.call_api(**content)
         return self.formatted_result(delivery_res)
@@ -458,7 +458,7 @@ class WMSAppRobot(AppRobot):
         return self.formatted_result(up_shelf_res)
 
     def transfer_in_up_shelf_box_by_sku(self, box_no, sj_kw_code, trans_in_no, details):
-        content = deepcopy(TransferApiConfig.TransferBoxUpShelfBySKU.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferInBoxUpShelfBySKU.get_attributes())
 
         content["data"].update(
             {
@@ -472,7 +472,7 @@ class WMSAppRobot(AppRobot):
 
 
     def transfer_cabinet_list(self):
-        content = deepcopy(TransferApiConfig.TransferCabinetList.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferInCabinetList.get_attributes())
         cabinet_list = self.call_api(**content)
         return self.formatted_result(cabinet_list)
 
@@ -1305,7 +1305,7 @@ class WMSTransferServiceRobot(ServiceRobot):
         :param int customer_type: 客户类型：1-普通客户；2-大客户
         :param string remark: 备注
         """
-        content = deepcopy(TransferApiConfig.CreateTransferDemand.get_attributes())
+        content = deepcopy(TransferApiConfig.TransferOutCreateDemand.get_attributes())
         content["data"].update(
             {
                 "deliveryWarehouseCode": delivery_warehouse_code,

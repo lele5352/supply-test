@@ -8,20 +8,19 @@ class WmsReceiptDataGenerator:
         self.wms_app = wms_app
         self.ims = ims_robot
 
-    def create_other_in_order(self, sale_sku_code, bom, qty, warehouse_id):
+    def create_other_in_order(self, sale_sku_code, bom, qty):
         """
         创建其他其他入库单
-        :param warehouse_id:仓库id
         :param bom: bom版本
         :param sale_sku_code: 销售sku编码
         :param qty: 套数
         :return:
         """
         # 切换仓库
-        switch_res = self.wms_app.common_switch_warehouse(warehouse_id)
-        if not self.wms_app.is_success(switch_res):
-            print("切换仓库失败")
-            return
+        # switch_res = self.wms_app.common_switch_warehouse(warehouse_id)
+        # if not self.wms_app.is_success(switch_res):
+        #     print("切换仓库失败")
+        #     return
 
         bom_detail = self.ims.dbo.query_bom_detail(sale_sku_code, bom)
         if not bom_detail:
@@ -64,7 +63,7 @@ class WmsReceiptDataGenerator:
         :param qty: 套数
         :return:
         """
-        create_order_res = self.create_other_in_order(sale_sku_code, bom, qty, warehouse_id)
+        create_order_res = self.create_other_in_order(sale_sku_code, bom, qty)
         if not wms_app.is_success(create_order_res):
             print("创建其他入库单失败")
             return
@@ -82,4 +81,5 @@ class WmsReceiptDataGenerator:
 
 if __name__ == '__main__':
     receipt_data = WmsReceiptDataGenerator()
+    wms_app.common_switch_warehouse(543)
     print(receipt_data.create_other_in_order_and_up_shelf("JJ306J84G7", "A", 2, 543, 543))
