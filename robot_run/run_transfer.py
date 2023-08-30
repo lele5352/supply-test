@@ -153,6 +153,12 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
     if not wms_app.is_success(switch_warehouse_result):
         return False, "Fail to switch to trans in warehouse!"
 
+    # 根据调拨出库单获取对应调拨入库单
+    search_result = wms_app.transfer_in_order_page(transfer_out_order_no)
+    if not wms_app.is_success(search_result):
+        return False, "Fail to get transfer in order page data!"
+    transfer_in_no = search_result.get("data").get("transferInNo")
+    print('生成调拨入库单号：%s' % transfer_in_no)
     # 调拨入库收货
     receive_result = wms_app.transfer_in_received(handover_no)
     if not wms_app.is_success(receive_result):
@@ -178,7 +184,6 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
             if not wms_app.is_success(box_info_res):
                 return False, "Fail to get box sku detail!"
             box_sku_data = box_info_res.get("data").get("details")
-            trans_in_no = box_info_res.get("data").get("transferInNo")
             for sku in box_sku_data:
                 qty = sku["waresSkuQty"]
                 sku_code = sku["waresSkuCode"]
@@ -187,9 +192,9 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
                     "quantity": 1
                 }]
                 for num in range(qty):
-                    up_shelf_res = wms_app.transfer_in_up_shelf_box_by_sku(box_no, sj_kw_code, trans_in_no, detail)
+                    up_shelf_res = wms_app.transfer_in_up_shelf_box_by_sku(box_no, sj_kw_code, transfer_in_no, detail)
                     if not wms_app.is_success(up_shelf_res):
                         return False, "Fail to up shelf trans in!"
         else:
             return False, "unsupported up up shelf mode"
-    return True, trans_in_no
+    return True, transfer_in_no

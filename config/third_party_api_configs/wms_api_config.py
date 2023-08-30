@@ -231,6 +231,15 @@ class TransferApiConfig:
         method = "POST"
         data = {"handoverNo": ""}
 
+    class TransferInOrderPage(ApiConfig):
+        uri_path = "/api/ec-wms-api/transferIn/busPage"
+        method = "POST"
+        data = {"sortField": [{"field": "create_time", "type": "DESC"}], "transferInNo": None,
+                "transferOutNo": None, "state": None, "deliveryWarehouseCodeList": None, "handoverNoList": None,
+                "boxNoList": None, "wareSkuCodeList": None, "goodsSkuCodeList": None, "logisticsNoList": None,
+                "containerNoList": None, "receiveTargetWarehouseCodes": None, "category": None, "size": 150,
+                "current": 1}
+
     class TransferInBoxUpShelf(ApiConfig):
         uri_path = "/api/ec-wms-api/transferIn/input/box/shelf"
         method = "POST"
