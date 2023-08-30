@@ -142,18 +142,15 @@ def main():
             item["trans_in_to_id"], item["sale_sku"], item["bom"], item["qty"]
         )
         if item["inventory_type"] == 10:
-            result, info = run_transfer(demand_no, up_shelf_mode=item["up_shelf_mode"])
-            print(result, info)
+            run_transfer(demand_no, up_shelf_mode=item["up_shelf_mode"])
         else:
-            result, info = run_transfer(demand_no, item["flow_flag"])
-            print(result, info)
+            run_transfer(demand_no, item["flow_flag"])
     for item in purchase_stock:
         result_list = scm_data.create_distribute_order(
             item["sale_sku"], item["qty"], item["delivery_warehouse_code"], item["target_warehouse_code"])
         source_order_list = [_[0] for _ in result_list]
         for order in source_order_list:
-            result, info = run_receive(order)
-            print(result, info)
+            run_receive(order)
 
 
 if __name__ == '__main__':
