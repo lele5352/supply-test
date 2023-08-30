@@ -440,6 +440,13 @@ class WMSAppRobot(AppRobot):
         received_res = self.call_api(**content)
         return self.formatted_result(received_res)
 
+    def transfer_in_order_page(self, transfer_out_no):
+        content = deepcopy(TransferApiConfig.TransferInOrderPage.get_attributes())
+        content["data"].update({"transferOutNo": transfer_out_no})
+        received_res = self.call_api(**content)
+        received_res.update({"data": received_res["data"]["records"][0]})
+        return self.formatted_result(received_res)
+
     def transfer_in_box_scan(self, box_no):
         content = deepcopy(TransferApiConfig.TransferInBoxScan.get_attributes())
         content["data"].update({"boxNo": box_no})
@@ -469,7 +476,6 @@ class WMSAppRobot(AppRobot):
             })
         up_shelf_res = self.call_api(**content)
         return self.formatted_result(up_shelf_res)
-
 
     def transfer_cabinet_list(self):
         content = deepcopy(TransferApiConfig.TransferInCabinetList.get_attributes())

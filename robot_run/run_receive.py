@@ -33,6 +33,8 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
 
     entry_order_detail = scan_result.get('data')
     pre_receive_order_code = entry_order_detail.get('predictReceiptOrderCode')
+    print('生成预收货单：%s' % pre_receive_order_code)
+
     receive_sku_list = entry_order_detail.get("skuInfos")
 
     get_sh_kw_result = wms_app.base_get_kw(2, 1, len(receive_sku_list), warehouse_id, to_warehouse_id)
@@ -144,5 +146,5 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
 
 
 if __name__ == '__main__':
-    wms = run_receive('FH2306294887', False)
+    wms = run_receive('FH2308239971', False)
     print(wms)
