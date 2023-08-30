@@ -16,9 +16,9 @@ class Robot:
     """
     定义基础机器人
     """
-    timestamp = int(time.time() * 1000)   # 时间戳
 
     def __init__(self, prefix=None, headers=None):
+        self.user_info = None
         self.headers = headers
         self.prefix = prefix
         self.methods_mapping = {
@@ -27,6 +27,10 @@ class Robot:
             "PUT": self.call_put,
             "DELETE": self.call_delete,
         }
+
+    @property
+    def timestamp(self):
+        return int(time.time() * 1000)  # 时间戳
 
     def call_get(self, url, data=None):
         response = requests.get(url, params=data, headers=self.headers)
@@ -50,7 +54,8 @@ class Robot:
         method = method.upper()
 
         log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
-        log.info("请求内容：%s" % json.dumps({"method": method, "url": url, "data": kwargs.get('data')}, ensure_ascii=False))
+        log.info(
+            "请求内容：%s" % json.dumps({"method": method, "url": url, "data": kwargs.get('data')}, ensure_ascii=False))
 
         if method in self.methods_mapping:
             response_data = self.methods_mapping[method](url, **kwargs)
@@ -125,13 +130,17 @@ class Robot:
 
     def get_user_info(self):
 
-        content = deepcopy(UMSApiConfig.UserInfo.get_attributes())
-        content["data"].update({
-            "t": str(int(time.time() * 1000))
-        })
-        url = urljoin(self.prefix, content["uri_path"])
-        res = requests.get(url, headers=self.headers, params=content["data"]).json()
-        return res["data"]
+        if not self.user_info:
+            content = deepcopy(UMSApiConfig.UserInfo.get_attributes())
+            content["data"].update({
+                "t": str(int(time.time() * 1000))
+            })
+            url = urljoin(self.prefix, content["uri_path"])
+            res = requests.get(url, headers=self.headers, params=content["data"]).json()
+
+            self.user_info = res["data"]
+
+        return self.user_info
 
 
 class MissingPasswordError(Exception):
@@ -142,6 +151,7 @@ class AppRobot(Robot):
     """
     基础应用层机器人，包含应用机器人初始化及接口调用行为
     """
+
     def __init__(self, **kwargs):
         """
         用传入的用户信息执行登录，未传入时默认取配置的用户
@@ -168,6 +178,19 @@ class AppRobot(Robot):
 
         self.prefix = app_prefix
         super().__init__(self.prefix, app_headers)
+
+    def post_excel_import(self, api_path, file_name, file_path):
+        """
+        执行文件上传
+        """
+        upload_headers = self.headers
+        upload_headers.pop("Content-Type", None)
+        url = urljoin(self.prefix, api_path)
+        files = {'file': (file_name, open(file_path, 'rb'))}
+
+        up_rs = requests.post(url=url, headers=upload_headers, files=files)
+
+        return up_rs.json()
 
 
 class ServiceRobot(Robot):
