@@ -22,7 +22,7 @@ prefix_config = {
         'wms_base': 'http://10.0.0.160:8321',
         'delivery': 'http://10.0.0.160:8330',
         'receipt': 'http://10.0.0.160:8323',
-        'transfer': 'http://10.0.0.160:8334',
+        'transfer': 'http://10.0.0.159:8334',
         'oms_app': 'http://10.0.0.160:8826',
         'eta': 'http://10.0.0.159:8701',
     },
