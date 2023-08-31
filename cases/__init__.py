@@ -4,6 +4,7 @@ from robots.wms_robot import WMSAppRobot, WMSTransferServiceRobot
 from robots.ims_robot import IMSRobot
 from robots.scm_robot import SCMRobot
 from robots.pms_robot import PMSAppRobot
+from robots.pwms_robot import PWMSRobot
 from utils.excel_handler import ExcelTool
 
 ims_robot = IMSRobot()
@@ -15,3 +16,4 @@ oms_app_ip = OMSAppIpRobot()
 scm_app = SCMRobot()
 pms_app = PMSAppRobot()
 cds_app = CDSAppRobot()
+pwms_app = PWMSRobot()

@@ -8,6 +8,7 @@ from utils.log_handler import logger as log
 from config import env_prefix_config
 from robots import service_headers, app_prefix, login, default_user
 from config.third_party_api_configs.ums_api_config import UMSApiConfig
+from robots.robot_biz_exception import MissingPasswordError
 
 _cache_headers = {}
 
@@ -143,10 +144,6 @@ class Robot:
         return self.user_info
 
 
-class MissingPasswordError(Exception):
-    pass
-
-
 class AppRobot(Robot):
     """
     基础应用层机器人，包含应用机器人初始化及接口调用行为
@@ -163,7 +160,7 @@ class AppRobot(Robot):
 
         if kwargs.get('username'):
             if not kwargs.get('password'):
-                raise MissingPasswordError("Password is required when username is provided")
+                raise MissingPasswordError
 
             user_name = kwargs.get("username")
             password = kwargs.get("password")
@@ -179,16 +176,39 @@ class AppRobot(Robot):
         self.prefix = app_prefix
         super().__init__(self.prefix, app_headers)
 
-    def post_excel_import(self, api_path, file_name, file_path):
+    def post_excel_import(self, api_path, file_name, file_path, mime):
         """
-        执行文件上传
+        公共方法，执行文件上传
+        :param api_path: 接口路径
+        :param file_name: 文件名
+        :param file_path: 文件路径
+        :param mime: 文件类型: pdf,doc,xlsx,xls,jpeg,png,txt
         """
+        mime_content_type = {
+            "pdf": "application/pdf",
+            "doc": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "xls": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "jpeg": "image/jpeg",
+            "png": "image/png",
+            "txt": "text/plain",
+            # 添加更多的 MIME 类型和相应的文件类型参数映射
+        }
+        if mime not in mime_content_type:
+            log.warning(f"文件类型{mime} 未匹配到映射值，将使用requests库自定义值，这可能导致文件上传错误")
+
         upload_headers = self.headers
-        upload_headers.pop("Content-Type", None)
+        upload_headers.pop("Content-Type", None)  # 移除content-type，requests自动生成boundary参数
         url = urljoin(self.prefix, api_path)
-        files = {'file': (file_name, open(file_path, 'rb'))}
+        files = {
+            "file": (file_name, open(file_path, 'rb'),
+                     mime_content_type.get(mime, None)
+                     )
+        }
 
         up_rs = requests.post(url=url, headers=upload_headers, files=files)
+        log.debug(f"上传文件，请求头：{up_rs.request.headers}")
+        log.debug(f"上传文件，接口响应结果：{up_rs.json()}")
 
         return up_rs.json()
 
