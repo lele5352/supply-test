@@ -80,6 +80,7 @@ class AddInventory:
         :param bom:bom版本
         :param sale_sku:销售sku编码
         """
+        wms_app.common_switch_warehouse(warehouse_id)
         add_res = self.receipt_data.create_other_in_order_and_up_shelf(sale_sku, bom, count, warehouse_id,
                                                                        to_warehouse_id)
         return add_res

@@ -26,7 +26,7 @@ class Robot:
             "GET": self.call_get,
             "POST": self.call_post,
             "PUT": self.call_put,
-            "DELETE": self.call_delete,
+            "DELETE": self.call_delete
         }
 
     @property
@@ -55,8 +55,7 @@ class Robot:
         method = method.upper()
 
         log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
-        log.info(
-            "请求内容：%s" % json.dumps({"method": method, "url": url, "data": kwargs.get('data')}, ensure_ascii=False))
+        log.info("请求内容：%s" % json.dumps({"method": method, "url": url, "data": kwargs.get('data')}, ensure_ascii=False))
 
         if method in self.methods_mapping:
             response_data = self.methods_mapping[method](url, **kwargs)
@@ -148,7 +147,6 @@ class AppRobot(Robot):
     """
     基础应用层机器人，包含应用机器人初始化及接口调用行为
     """
-
     def __init__(self, **kwargs):
         """
         用传入的用户信息执行登录，未传入时默认取配置的用户
