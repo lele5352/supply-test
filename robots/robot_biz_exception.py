@@ -34,3 +34,23 @@ class PlatTransferDemandSaveError(Exception):
     def __init__(self, file_url):
         self.message = f"平台调拨需求导入失败，请下载失败文件查看-> {file_url}"
         super().__init__(self.message)
+
+
+class ConfigImportError(Exception):
+    def __init__(self, config_name):
+
+        error_message = {
+            "rds": "请先在config __init__.py中添加配置：rds_config = env_config.redis_config.get(env)"
+        }
+        self.message = error_message.get(config_name, "import error")
+        super().__init__(self.message)
+
+
+class ConfigNotFoundError(Exception):
+
+    def __init__(self, config_name, proj_name):
+        error_message = {
+            "rds": f"未找到项目 {proj_name} 的redis配置，请先在env_config.py中添加"
+        }
+        self.message = error_message.get(config_name, "import error")
+        super().__init__(self.message)

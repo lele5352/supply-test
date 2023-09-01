@@ -5,10 +5,11 @@ from copy import deepcopy
 import time
 
 from utils.log_handler import logger as log
+from utils.redis_handler import BaseRedisClient
 from config import env_prefix_config
 from robots import service_headers, app_prefix, login, default_user
 from config.third_party_api_configs.ums_api_config import UMSApiConfig
-from robots.robot_biz_exception import MissingPasswordError
+from robots.robot_biz_exception import MissingPasswordError, ConfigImportError, ConfigNotFoundError
 
 _cache_headers = {}
 
@@ -19,6 +20,7 @@ class Robot:
     """
 
     def __init__(self, prefix=None, headers=None):
+        self.rds = None
         self.user_info = None
         self.headers = headers
         self.prefix = prefix
@@ -55,7 +57,8 @@ class Robot:
         method = method.upper()
 
         log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
-        log.info("请求内容：%s" % json.dumps({"method": method, "url": url, "data": kwargs.get('data')}, ensure_ascii=False))
+        log.info(
+            "请求内容：%s" % json.dumps({"method": method, "url": url, "data": kwargs.get('data')}, ensure_ascii=False))
 
         if method in self.methods_mapping:
             response_data = self.methods_mapping[method](url, **kwargs)
@@ -142,11 +145,27 @@ class Robot:
 
         return self.user_info
 
+    def init_redis_client(self, proj_name):
+        """
+        初始化一个redis客户端实例
+        :param proj_name: env_config 配置中的项目名称
+        """
+        try:
+            from config import rds_config
+        except ImportError:
+            raise ConfigImportError("rds")
+
+        if proj_name not in rds_config:
+            raise ConfigNotFoundError("rds", proj_name)
+
+        self.rds = BaseRedisClient(**rds_config[proj_name])
+
 
 class AppRobot(Robot):
     """
     基础应用层机器人，包含应用机器人初始化及接口调用行为
     """
+
     def __init__(self, **kwargs):
         """
         用传入的用户信息执行登录，未传入时默认取配置的用户
@@ -215,3 +234,4 @@ class ServiceRobot(Robot):
     def __init__(self, service_name):
         self.prefix = env_prefix_config.get(service_name)
         super().__init__(self.prefix, service_headers)
+
