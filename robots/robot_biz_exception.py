@@ -12,6 +12,12 @@ class FileImportError(Exception):
         super().__init__(self.message)
 
 
+class InventoryNotEnough(Exception):
+    def __init__(self, sku, warehouse_id):
+        self.message = f"仓库id= {warehouse_id}, sku编码 {sku} 库存不足"
+        super().__init__(self.message)
+
+
 class PlatSkuValueError(Exception):
     def __init__(self, sku):
         self.message = f"{sku} 缺少必需字段，请检查平台sku详情以下字段是否有值：platformCode，storeCode，fnSkuCode"

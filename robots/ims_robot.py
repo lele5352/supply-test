@@ -4,6 +4,7 @@ from robots.robot import ServiceRobot
 from config.third_party_api_configs.ims_api_config import ims_api_config
 from copy import deepcopy
 from dbo.ims_dbo import IMSDBOperator
+from utils.wait_handler import until
 
 
 class IMSRobot(ServiceRobot):
@@ -1378,6 +1379,7 @@ class IMSRobot(ServiceRobot):
         # except :
         #     return False
 
+    @until(50, 0.2)
     def is_bom_stock_enough(self, sale_sku, bom, qty, warehouse_id, to_warehouse_id):
         """
         是否有指定数量库存
