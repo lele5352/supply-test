@@ -14,6 +14,11 @@ class WMSAppRobot(AppRobot):
         self.dbo = WMSDBOperator
         super().__init__(**kwargs)
 
+        # 初始化redis连接
+        self.init_redis_client('scm')
+        if self.rds:
+            self.rds.switch_db(6)
+
     def db_ck_id_to_code(self, warehouse_id):
         """
         根据仓库id获取仓库编码
