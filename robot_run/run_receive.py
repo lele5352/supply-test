@@ -146,5 +146,5 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
 
 
 if __name__ == '__main__':
-    wms = run_receive('FH2308239971', False)
+    wms = run_receive('FH2309011339', False)
     print(wms)

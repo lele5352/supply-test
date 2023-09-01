@@ -169,5 +169,6 @@ if __name__ == '__main__':
     # transfer_data.create_transfer_demand(511, 513, 513, 513, '63203684930', "B", 1)
     # transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
     # transfer_data.create_transfer_pick_order(565, '', 568, 568, '63203684930', "B", 1)
-    transfer_data.create_transfer_in_up_shelf_order(512, 0, 513, 513, "HWK8646W27", "A", 5,  up_shelf_mode="sku")
+    transfer_data.create_transfer_in_up_shelf_order(512, 0, 640, 0, "HW317H2D27", "A", 5,  up_shelf_mode="box")
+    # transfer_data.create_handover_order(512, 0, 513, 513, "HW2R2183Q0", "A", 5)
     # transfer_data.create_entry_order(640, 0,642, 642,  "HW25D920D9", "A", 16,"received")
