@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import time
+from functools import wraps
+
 from utils.log_handler import logger as log
+from threading import Thread
+import json
 
 
 def until(try_times: int, gap: [int, float]):
@@ -21,7 +25,9 @@ def until(try_times: int, gap: [int, float]):
                 else:
                     time.sleep(gap)
             return result
+
         return inner
+
     return wrapper
 
 
@@ -43,5 +49,40 @@ def until_false(try_times: int, gap: [int, float]):
                 else:
                     return result
             return result
+
         return inner
+
     return wrapper
+
+
+def deserialize(func):
+
+    """装饰器，反序列化字符串"""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        data = func(*args, **kwargs)
+        if data:
+            try:
+                # 去除转义字符
+                data = json.loads(data)
+                # 二次转换
+                if isinstance(data, str):
+                    data = json.loads(data)
+
+            except json.JSONDecodeError:
+                log.error("JSON decoding failed")
+
+        return data
+
+    return wrapper
+
+
+def async_call(func):
+    """装饰器，异步线程执行"""
+    def wrapper(*args, **kwargs):
+        Thread(target=func, args=args, kwargs=kwargs).start()
+
+    return wrapper
+

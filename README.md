@@ -15,6 +15,7 @@
             env_prefix_config = env_config.prefix_config.get(env)
             scms_db_config = env_config.mysql_config.get(env).get("scms")
             tms_db_config = env_config.mysql_config.get(env).get("tms")
+            rds_config = env_config.redis_config.get(env)
             
             user = {
                 'username': '', # 你的账号

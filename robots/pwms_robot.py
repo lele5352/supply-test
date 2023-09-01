@@ -5,7 +5,7 @@ from config.third_party_api_configs.pwms_api_config import *
 from robots.robot_biz_exception import *
 from robots.robot import AppRobot
 from robots.bpms_robot import BPMSRobot
-from utils.wait_handler import until
+from utils.custom_wrapper import until
 from utils.log_handler import logger as log
 from openpyxl import Workbook
 

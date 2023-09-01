@@ -4,7 +4,7 @@ from robots.robot import ServiceRobot
 from config.third_party_api_configs.ims_api_config import ims_api_config
 from copy import deepcopy
 from dbo.ims_dbo import IMSDBOperator
-from utils.wait_handler import until
+from utils.custom_wrapper import until
 
 
 class IMSRobot(ServiceRobot):

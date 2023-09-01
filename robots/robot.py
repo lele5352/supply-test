@@ -5,7 +5,7 @@ from copy import deepcopy
 import time
 
 from utils.log_handler import logger as log
-from utils.redis_handler import BaseRedisClient
+from utils.redis_client import BaseRedisClient
 from config import env_prefix_config
 from robots import service_headers, app_prefix, login, default_user
 from config.third_party_api_configs.ums_api_config import UMSApiConfig
