@@ -97,7 +97,7 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
                 order_sku_info["sku_code"], order_sku_info["bom"],
                 order_sku_info["qty"], order_sku_info["warehouse_id"],
                 order_sku_info["warehouse_id"]):
-            raise InventoryNotEnough(order_sku_info["sku_code"], order_sku_info["warehouse_id"])
+            raise InventoryNotEnough(order_sku_info["sku_code"], order_sku_info["bom"], order_sku_info["warehouse_id"])
 
     # 执行跟单
     follow_result = oms_app_ip.oms_order_follow(follow_order_list)

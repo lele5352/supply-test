@@ -13,8 +13,8 @@ class FileImportError(Exception):
 
 
 class InventoryNotEnough(Exception):
-    def __init__(self, sku, warehouse_id):
-        self.message = f"仓库id= {warehouse_id}, sku编码 {sku} 库存不足"
+    def __init__(self, sku, bom, warehouse_id):
+        self.message = f"仓库id= {warehouse_id}, sku编码 {sku} , BOM版本 {bom} 库存不足"
         super().__init__(self.message)
 
 
