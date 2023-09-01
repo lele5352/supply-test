@@ -8,6 +8,7 @@ from utils.log_handler import logger as log
 from config import env_prefix_config
 from robots import service_headers, app_prefix, login, default_user
 from config.third_party_api_configs.ums_api_config import UMSApiConfig
+from robots.robot_biz_exception import MissingPasswordError
 
 _cache_headers = {}
 
@@ -16,9 +17,9 @@ class Robot:
     """
     定义基础机器人
     """
-    timestamp = int(time.time() * 1000)   # 时间戳
 
     def __init__(self, prefix=None, headers=None):
+        self.user_info = None
         self.headers = headers
         self.prefix = prefix
         self.methods_mapping = {
@@ -27,6 +28,10 @@ class Robot:
             "PUT": self.call_put,
             "DELETE": self.call_delete
         }
+
+    @property
+    def timestamp(self):
+        return int(time.time() * 1000)  # 时间戳
 
     def call_get(self, url, data=None):
         response = requests.get(url, params=data, headers=self.headers)
@@ -125,17 +130,17 @@ class Robot:
 
     def get_user_info(self):
 
-        content = deepcopy(UMSApiConfig.UserInfo.get_attributes())
-        content["data"].update({
-            "t": str(int(time.time() * 1000))
-        })
-        url = urljoin(self.prefix, content["uri_path"])
-        res = requests.get(url, headers=self.headers, params=content["data"]).json()
-        return res["data"]
+        if not self.user_info:
+            content = deepcopy(UMSApiConfig.UserInfo.get_attributes())
+            content["data"].update({
+                "t": str(int(time.time() * 1000))
+            })
+            url = urljoin(self.prefix, content["uri_path"])
+            res = requests.get(url, headers=self.headers, params=content["data"]).json()
 
+            self.user_info = res["data"]
 
-class MissingPasswordError(Exception):
-    pass
+        return self.user_info
 
 
 class AppRobot(Robot):
@@ -153,7 +158,7 @@ class AppRobot(Robot):
 
         if kwargs.get('username'):
             if not kwargs.get('password'):
-                raise MissingPasswordError("Password is required when username is provided")
+                raise MissingPasswordError
 
             user_name = kwargs.get("username")
             password = kwargs.get("password")
@@ -168,6 +173,42 @@ class AppRobot(Robot):
 
         self.prefix = app_prefix
         super().__init__(self.prefix, app_headers)
+
+    def post_excel_import(self, api_path, file_name, file_path, mime):
+        """
+        公共方法，执行文件上传
+        :param api_path: 接口路径
+        :param file_name: 文件名
+        :param file_path: 文件路径
+        :param mime: 文件类型: pdf,doc,xlsx,xls,jpeg,png,txt
+        """
+        mime_content_type = {
+            "pdf": "application/pdf",
+            "doc": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "xls": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "jpeg": "image/jpeg",
+            "png": "image/png",
+            "txt": "text/plain",
+            # 添加更多的 MIME 类型和相应的文件类型参数映射
+        }
+        if mime not in mime_content_type:
+            log.warning(f"文件类型{mime} 未匹配到映射值，将使用requests库自定义值，这可能导致文件上传错误")
+
+        upload_headers = self.headers
+        upload_headers.pop("Content-Type", None)  # 移除content-type，requests自动生成boundary参数
+        url = urljoin(self.prefix, api_path)
+        files = {
+            "file": (file_name, open(file_path, 'rb'),
+                     mime_content_type.get(mime, None)
+                     )
+        }
+
+        up_rs = requests.post(url=url, headers=upload_headers, files=files)
+        log.debug(f"上传文件，请求头：{up_rs.request.headers}")
+        log.debug(f"上传文件，接口响应结果：{up_rs.json()}")
+
+        return up_rs.json()
 
 
 class ServiceRobot(Robot):

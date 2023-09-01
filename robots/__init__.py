@@ -34,25 +34,28 @@ def login(user_name, password):
     key = res['data']
     begin = '-----BEGIN PUBLIC KEY-----\n'
     end = '\n-----END PUBLIC KEY-----'
+
+    public_key = begin + key + end
+    # 加密密码并更新密码为加密后的
+    encrypt_password = encrypt_data(password, public_key)
+    data = login_content['data']
+    data.update(
+        {
+            "password": encrypt_password,
+            "username": user_name
+        }
+    )
+    url = urljoin(app_prefix, login_content['uri_path'])
+
     try:
-        public_key = begin + key + end
-        # 加密密码并更新密码为加密后的
-        encrypt_password = encrypt_data(password, public_key)
-        data = login_content['data']
-        data.update(
-            {
-                "password": encrypt_password,
-                "username": user_name
-            }
-        )
-        url = urljoin(app_prefix, login_content['uri_path'])
         login_res = requests.post(url, json=data).json()
         authorization_str = login_res['data']['tokenHead'] + ' ' + login_res['data']['token']
         headers = {'Content-Type': 'application/json;charset=UTF-8', "Authorization": authorization_str}
-        return headers
-    except Exception as e:
-        log.error('账号登录失败！', e)
-        return None
+
+    except KeyError:
+        raise KeyError('账号登录失败！')
+
+    return headers
 
 
 def get_service_headers():
