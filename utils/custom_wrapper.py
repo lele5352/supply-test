@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 from functools import wraps
-
+import jsonpath_rw_ext as jsre
 from utils.log_handler import logger as log
 from threading import Thread
 import json
@@ -63,6 +63,8 @@ def deserialize(func):
     def wrapper(*args, **kwargs):
 
         data = func(*args, **kwargs)
+        log.debug(f"{func.__name__} returned: {data}")
+
         if data:
             try:
                 # 去除转义字符
@@ -85,4 +87,41 @@ def async_call(func):
         Thread(target=func, args=args, kwargs=kwargs).start()
 
     return wrapper
+
+
+def extract_json(json_path):
+    """
+    装饰器，接收一个 json path 字符串，提取指定的值
+    可用于通用的接口返回，提取结果
+    被装饰的函数必须保证返回结果是可以被 json.loads() 解析的有效 JSON 数据类型
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # 执行被装饰的函数
+            result = func(*args, **kwargs)
+            log.debug(f"{func.__name__} returned: {result}")
+
+            try:
+                # 使用 jsonpath_rw_ext 解析 JSON path
+                jsonpath_expr = jsre.parse(json_path)
+                matches = [match.value for match in jsonpath_expr.find(result)]
+
+                if not matches:
+                    log.debug(f"No match found for JSON path: {json_path}")
+
+                return matches[0] if len(matches) == 1 else matches
+
+            except Exception as e:
+                raise ValueError(f"Failed to extract JSON path '{json_path}': {str(e)}")
+
+        return wrapper
+
+    return decorator
+
+
+
+
+
+
 
