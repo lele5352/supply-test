@@ -105,3 +105,16 @@ mysql_config = {
         'port': 3301
     },
 }
+
+
+redis_config = {
+
+    "test160": {
+        "scm": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True
+        }
+    }
+
+}

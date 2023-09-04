@@ -198,3 +198,22 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
         else:
             return False, "unsupported up up shelf mode"
     return True, transfer_in_no
+
+
+class PlatTransfer:
+    """
+    平台调拨
+    """
+    def __init__(self, app_entity=None):
+        self.pwms_app = app_entity or pwms_app
+
+    def create_transfer_demand(self, sku_code, demand_qty, delivery_warehouse,
+                               receive_warehouse, target_warehouse=None):
+        """
+        创建平台调拨需求
+        """
+        self.pwms_app.write_template(sku_code, demand_qty,
+                                     delivery_warehouse, target_warehouse, receive_warehouse)
+        import_url = self.pwms_app.excel_import()
+        self.pwms_app.import_save(import_url)
+        self.pwms_app.check_status()
