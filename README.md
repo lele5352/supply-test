@@ -15,6 +15,7 @@
             env_prefix_config = env_config.prefix_config.get(env)
             scms_db_config = env_config.mysql_config.get(env).get("scms")
             tms_db_config = env_config.mysql_config.get(env).get("tms")
+            rds_config = env_config.redis_config.get(env)
             
             user = {
                 'username': '', # 你的账号
@@ -27,6 +28,26 @@
             }
             
             console_log = False  # 日志是否输出到控制台配置，默认否
+
+使用redis:
+
+    1.在 config目录下，env_config 文件中，添加redis配置
+    2.在 config目录下，__init__.py文件中，添加配置 rds_config = env_config.redis_config.get(env)
+    3.在继承了Robot的对应业务Robot类中初始化redis连接，并且执行切换db，例子如下：
+
+        class WMSAppRobot(AppRobot):
+
+            def __init__(self, **kwargs):
+                self.dbo = WMSDBOperator
+                super().__init__(**kwargs)
+        
+                # 初始化redis连接
+                self.init_redis_client('scm')
+                if self.rds:
+                    self.rds.switch_db(6)
+        
+        初始化完成后，即可通过 self.rds 调用 get(),hget(),hgetall() 等方法操作redis
+
 
 模块说明：
 

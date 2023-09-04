@@ -1,6 +1,7 @@
-from utils.wait_handler import until
+from utils.custom_wrapper import until
 from cases import *
 from utils.log_handler import logger
+from robots.robot_biz_exception import InventoryNotEnough
 
 
 def create_sale_order(order_sku_info_list):
@@ -42,9 +43,7 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
         return
     # oms_order_list = query_oms_order_result.get('data')
 
-    # 添加库存
     follow_order_list = list()
-    # 为了确保订单有库存下发，提前根据订单添加库存
     for oms_order in oms_order_list:
         order_id = oms_order["id"]
         order_sku_items_result = oms_app.query_oms_order_sku_items(order_id)
@@ -57,6 +56,8 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
             if not (item['deliveryWarehouseId'] and item['bomVersion']):
                 return
             sku_code, qty, bom = item["itemSkuCode"], item["itemQty"], item['bomVersion']
+
+            # 添加库存
             if auto_add_stock:
                 # 若库存不足指定增加库存（默认）
                 # 获取指定仓库
@@ -91,10 +92,12 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
 
     # 加库存是异步，需要检查库存是否满足
     for order_sku_info in order_sku_info_list:
-        until(99, 0.5)(lambda: ims_robot.is_bom_stock_enough(
-            order_sku_info["sku_code"], order_sku_info["bom"],
-            order_sku_info["qty"], order_sku_info["warehouse_id"],
-            order_sku_info["warehouse_id"]) is True)()
+        # 库存不足时，直接抛异常
+        if not ims_robot.is_bom_stock_enough(
+                order_sku_info["sku_code"], order_sku_info["bom"],
+                order_sku_info["qty"], order_sku_info["warehouse_id"],
+                order_sku_info["warehouse_id"]):
+            raise InventoryNotEnough(order_sku_info["sku_code"], order_sku_info["bom"], order_sku_info["warehouse_id"])
 
     # 执行跟单
     follow_result = oms_app_ip.oms_order_follow(follow_order_list)
@@ -116,6 +119,10 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
 def create_wms_sale_outbound_order(order_sku_info_list, auto_add_stock=True):
     # 新建销售出库单
     sale_order_no = create_verified_order(order_sku_info_list, auto_add_stock)
+
+    if not sale_order_no:
+        raise ValueError("create_verified_order 返回的销售单号为空，请检查")
+
     push_result = oms_app_ip.push_order_to_wms()
     if oms_app.is_data_empty(push_result):
         return
@@ -144,7 +151,7 @@ if __name__ == '__main__':
     # data = [{"sku_code": "63203684930", "qty": 2, "bom": "A", "warehouse_id": "513"},
     #         {"sku_code": "67330337129", "qty": 2, "bom": "A", "warehouse_id": "513"}]
     # data = [{"sku_code": "63203684930", "qty": 2, "bom": "B", "warehouse_id": "513"}]
-    data = [{"sku_code": "KK29O72S66", "qty": 10, "bom": "", "warehouse_id": ""}]
+    data = [{"sku_code": "HW855K290Z", "qty": 5, "bom": "A", "warehouse_id": "532"}]
     # create_verified_order(data, False)
     create_wms_sale_outbound_order(data, False)
     # [{"skuCode": "KK29O72S66", "bomVersion": "A"}]

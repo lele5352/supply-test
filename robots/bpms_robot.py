@@ -2,12 +2,14 @@ from copy import deepcopy
 
 from config.third_party_api_configs.bpms_api_config import *
 from robots.robot import AppRobot
+from utils.custom_wrapper import extract_json
 
 
 class BPMSRobot(AppRobot):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    @extract_json("$.data.records")
     def plat_product_page(self, sku_code, store_code=None, fn_sku_code=None, page_no=1):
         """
         查询平台sku列表
@@ -27,10 +29,4 @@ class BPMSRobot(AppRobot):
         if fn_sku_code:
             content["data"]["param"]["fnSkuCodeList"] = [fn_sku_code]
 
-        rs = self.call_api(**content)
-        rs_list = None
-
-        if rs.get("data"):
-            rs_list = rs["data"]["records"]
-
-        return rs_list
+        return self.call_api(**content)
