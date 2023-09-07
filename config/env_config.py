@@ -110,11 +110,36 @@ mysql_config = {
 redis_config = {
 
     "test160": {
+        "wms": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True,
+            "db": 6
+        },
+        "bpms": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True,
+            "db": 15
+        },
+        "ec_base": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True,
+            "db": 0
+        },
         "scm": {
             "host": "10.0.0.127",
             "port": 6379,
-            "decode_responses": True
-        }
+            "decode_responses": True,
+            "db": 15
+        },
+        "wms_base": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True,
+            "db": 1
+        },
     }
 
 }
