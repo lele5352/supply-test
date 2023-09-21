@@ -209,4 +209,4 @@ if __name__ == '__main__':
     # scm.create_purchase_demand(['14093131604'], 10, 'ESBH', '')
     # scm.create_wait_delivery_purchase_order(["14093131604"], 10, 'ESBH', '')
 
-    scm.create_distribute_order(["HW929O38V1"], 20, 'HWBH', '')
+    scm.create_distribute_order(["HW929O38V1"], 1, 'LINBH01', '')

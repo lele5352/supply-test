@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from custom_wrapper import async_call
+from utils.custom_wrapper import async_call
 import json
 
 from pystrich.code128 import Code128Encoder
