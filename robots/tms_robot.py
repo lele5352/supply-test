@@ -291,9 +291,6 @@ class HomaryTMS(ServiceRobot):
         self.build_packages(req, transport_type, **kwargs)
         self.build_pick_info(req, **kwargs)
 
-        content = deepcopy(TMSApiConfig.SyncOrder.get_attributes())
-        content["data"] = req
-
         return req
 
     def do_trial(self, req_data):
