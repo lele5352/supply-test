@@ -3,7 +3,7 @@ class UnitChange:
 
     @classmethod
     def cm_to_in(cls, number):
-        return number * 0.393700787402
+        return number * 0.393707
 
     @classmethod
     def cm3_to_in3(cls, number):
@@ -11,11 +11,11 @@ class UnitChange:
 
     @classmethod
     def kg_to_lb(cls, number):
-        return number * 2.204622
+        return number * 2.2046226
 
     @classmethod
     def in_to_cm(cls, number):
-        return number * 2.539950
+        return number * 2.53995
 
     @classmethod
     def in3_to_cm3(cls, number):
@@ -23,10 +23,11 @@ class UnitChange:
 
     @classmethod
     def lb_to_kg(cls, number):
-        return number * 0.453592
+        return number * 0.4535924
 
     @classmethod
     def change(cls, num, num_type, source_unit, target_unit):
+
         """执行转换"""
         if source_unit == target_unit:
             return num
