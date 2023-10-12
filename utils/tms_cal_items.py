@@ -118,7 +118,12 @@ class GoodsMeasurementItems:
 
 if __name__ == '__main__':
 
-    package = (8.1, 40.6, 40.5, 40.3)
+    goods_info = {
+        "weight": 359.5,
+        "length": 112,
+        "width": 31.59,
+        "height": 229.919
+    }
 
-    data = TMSCalcItems(*package)
-    print(data.density(True))
+    items = GoodsMeasurementItems(goods_info, "gj", "yz", "向上取整", 0.1, "四舍五入", 0.01)
+    print(items.rounded_result())

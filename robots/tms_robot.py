@@ -1,11 +1,14 @@
 import json
 from copy import deepcopy
-from config.third_party_api_configs.tms_api_config import TMSApiConfig
-from robots.robot import AppRobot
+from config.third_party_api_configs.tms_api_config \
+    import TMSApiConfig, UnitType, TransportType
+from robots.robot import AppRobot, ServiceRobot
 from dbo.tms_dbo import TMSBaseDBOperator
 from utils.tms_cal_items import TMSCalcItems
 from utils.unit_change_handler import UnitChange
+from utils.time_handler import HumanDateTime
 from utils.log_handler import logger
+import uuid
 
 
 class TMSRobot(AppRobot):
@@ -96,22 +99,210 @@ class TMSRobot(AppRobot):
         return temp_result
 
 
-if __name__ == '__main__':
-    tms = TMSRobot()
-    goods_info = {
-        "goods_unit": "imperial",
-        "goods_list": [
-            (18.65, 99.9, 66.6, 55.5),
-            (18.66, 99.9, 66.6, 55.5),
-            (18.65, 100, 66.6, 55.5),
-            (18.65, 99.9, 66.7, 55.5),
-            (18.65, 99.9, 66.6, 55.6),
+class HomaryTMS(ServiceRobot):
+    """
+    爆米物流应用
+    """
+
+    def __init__(self):
+        super().__init__('homary_tms')
+
+    @staticmethod
+    def build_address(body, address_id, trial_country, address_type=None):
+        """
+        组织地址参数
+        """
+        address_data = TMSApiConfig.TrialAddress.get_attributes()
+        try:
+            trial_address = address_data[trial_country]
+        except KeyError:
+            raise AssertionError(f'{trial_country} 无对应试算地址配置')
+
+        body["address"] = trial_address
+        body["address"]["receiveAddressId"] = address_id
+
+        if address_type:
+            body["address"]["addressType"] = address_type
+
+    @staticmethod
+    def build_packages(body, transport_type, **kwargs):
+        """
+        组装包裹信息
+        Args:
+            body: 参数字典
+            transport_type: 运输方式
+
+        Keyword Args:
+            prod_name: 货物名称
+            weight: 重量
+            length: 长
+            width: 宽
+            height: 高
+            category: 货物品类
+            goods_desc: 货物描述
+            channel_id: 渠道id
+        """
+        goods = [
+            {
+                "prodName": kwargs.get("prod_name", "JF128Z202IF01"),
+                "qty": 1,
+                "weight": kwargs.get("weight", 3.9),
+                "length": kwargs.get("length", 29.9),
+                "height": kwargs.get("height", 29.9),
+                "width": kwargs.get("width", 31.9)
+            }
         ]
-    }
-    destination_info = {
-        "country": "US",
-        "province": "NJ",
-        "city": "Newark",
-        "zipcode": "07108"
-    }
-    print(tms.is_express_valid(goods_info, destination_info))
+
+        pack_key = 'expressPacks'
+        if transport_type == TransportType.TRACK.value:
+            pack_key = 'carTrayDetails'
+
+        body[pack_key] = [
+            {
+                "weight": kwargs.get("weight", 3.9),
+                "length": kwargs.get("length", 29.9),
+                "height": kwargs.get("height", 29.9),
+                "width": kwargs.get("height", 31.9),
+                "goodsDetails": goods
+            }
+        ]
+
+        for _ in body[pack_key]:
+            # 包裹指定渠道下单
+            if kwargs.get('channel_id'):
+                if not isinstance(kwargs.get('channel_id'), int):
+                    raise AssertionError("渠道id 类型必须为 int")
+
+                _['channelId'] = kwargs.get('channel_id')
+
+            # 快递/卡车 ，字段参数不同
+            if transport_type == TransportType.EXPRESS.value:
+                _['packName'] = '测试包裹'
+                _['sourcePackCode'] = kwargs.get('source_pack_code', '测试包裹号123')
+            else:
+                _['prodName'] = '测试托盘'
+                _['qty'] = 1
+                _['category'] = kwargs.get("category")
+                _['goodsDesc'] = kwargs.get("goods_desc")
+
+    @staticmethod
+    def build_pick_info(body, **kwargs):
+        """
+        组装提货信息
+        Args:
+            body: 参数字典
+
+        Keyword Args:
+            pick_date: 提货日期，未传时，默认为 10天后
+            min_pick: 最小提货时间
+            max_pick: 最大提货时间
+            min_delivery: 最小送货时间
+            max_delivery: 最大送货时间
+            insure_category: 投保类目
+            insure_price: 投保金额
+            insure_currency: 投保币种
+        """
+        body["pickInfo"] = {
+            "pickDate": kwargs.get('pick_date', HumanDateTime().add(days=10).human_time()),
+            "minPickTime": kwargs.get('min_pick', '08:00'),
+            "maxPickTime": kwargs.get('max_pick', '17:00'),
+            "minDeliveryTime": kwargs.get('min_delivery', '08:00'),
+            "maxDeliveryTime": kwargs.get('max_delivery', '17:00'),
+            "insureProdCategory": kwargs.get('insure_category'),
+            "insurePrice": kwargs.get('insure_price'),
+            "insureGoodsCurrency": kwargs.get('insure_currency')
+        }
+
+    def do_trial(self, transport_type, address_id, trial_country, **kwargs):
+        """
+        试算，同步接口
+        Args:
+            transport_type: 运输方式 1-快递；2-卡车
+            address_id: 仓库地址id
+            trial_country: 试算地址区域 US 美国 DE 德国 FR 法国
+
+        Keyword Args:
+            channel_id: 渠道id，类型为 tuple or int
+            forward_flag: 正向订单标志 true:正向 false:逆向
+            unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
+            address_type: 地址类型
+            prod_name: 货物名称
+            weight: 重量
+            length: 长
+            width: 宽
+            height: 高
+            category: 货物品类
+
+        """
+        req = {
+            "transportType": transport_type,
+            "unit": kwargs.get('unit', UnitType.NATIONAL.value),
+            "forwardFlag": kwargs.get('forward_flag', False),
+            "channelIds": []
+        }
+
+        channels = kwargs.get('channel_id')
+        if isinstance(channels, tuple):
+            req["channelIds"].extend(list(channels))
+        elif isinstance(channels, int):
+            req["channelIds"].append(channels)
+
+        self.build_address(req, address_id, trial_country, kwargs.get('address_type'))
+        self.build_packages(req, transport_type, **kwargs)
+
+        content = deepcopy(TMSApiConfig.SyncTrial.get_attributes())
+        content["data"] = req
+
+        return self.call_api(**content)
+
+    def do_order(self, transport_type, address_id, trial_country, **kwargs):
+        """
+        下单，同步接口
+        Args:
+            transport_type: 运输方式 1-快递；2-卡车
+            address_id: 仓库地址id
+            trial_country: 试算地址区域 US 美国 DE 德国 FR 法国
+
+        Keyword Args:
+            channel_id: 渠道id
+            forward_flag: 正向订单标志 true:正向 false:逆向
+            pick_date: 提货日期
+            source_pack_code: 来源包裹号
+            unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
+            address_type: 地址类型
+            prod_name: 货物名称
+            weight: 重量
+            length: 长
+            width: 宽
+            height: 高
+            category: 货物品类
+        """
+        req = {
+            "idempotentId": str(uuid.uuid4()),
+            "transportType": transport_type,
+            "unit": kwargs.get('unit', UnitType.NATIONAL.value),
+            "forwardFlag": kwargs.get('forward_flag', False),
+            "sourceOrderCode": kwargs.get('source_order_code', '自动测试单'),
+            "assignChannelFlag": False
+        }
+
+        # 如果有传渠道id，则认定为 指定渠道下单
+        if kwargs.get('channel_id'):
+            req["assignChannelFlag"] = True
+
+        self.build_address(req, address_id, trial_country, kwargs.get('address_type'))
+        self.build_packages(req, transport_type, **kwargs)
+        self.build_pick_info(req, **kwargs)
+
+        content = deepcopy(TMSApiConfig.SyncOrder.get_attributes())
+        content["data"] = req
+
+        return self.call_api(**content)
+
+
+
+
+
+
+
+
