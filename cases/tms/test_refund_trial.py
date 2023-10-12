@@ -3,7 +3,8 @@ import allure
 from cases import homary_tms
 from config.third_party_api_configs.tms_api_config import TransportType
 
-express_trial_data = (
+# GLS 测试渠道
+gls_trial_data = (
     # 仓库地址id，渠道id
     (170, 77),
 )
@@ -12,7 +13,7 @@ express_trial_data = (
 @allure.feature("测试模块：客退试算-快递")
 class TestExpressTrial:
     @allure.story('测试场景：快递试算，使用US地址，预期成功')
-    @pytest.mark.parametrize("warehouse_address, channel_id", express_trial_data)
+    @pytest.mark.parametrize("warehouse_address, channel_id", gls_trial_data)
     def test_us_express_trial(self, warehouse_address, channel_id):
 
         with allure.step("执行试算"):
@@ -26,7 +27,7 @@ class TestExpressTrial:
             assert trial_result.get('code', 500) == 200, "断言 http status=200 失败"
 
     @allure.story('测试场景：快递试算，使用FR地址，预期失败（配送区域不可达）')
-    @pytest.mark.parametrize("warehouse_address, channel_id", express_trial_data)
+    @pytest.mark.parametrize("warehouse_address, channel_id", gls_trial_data)
     def test_trial_fail_reach(self, warehouse_address, channel_id):
 
         with allure.step("执行试算"):
@@ -40,7 +41,7 @@ class TestExpressTrial:
             assert trial_result.get('message') == '无可用渠道', "断言 配送区域不可达 失败"
 
     @allure.story('测试场景：快递试算，使用US地址，预期失败（限制规则不可发）')
-    @pytest.mark.parametrize("warehouse_address, channel_id", express_trial_data)
+    @pytest.mark.parametrize("warehouse_address, channel_id", gls_trial_data)
     def test_trial_fail_limit(self, warehouse_address, channel_id):
 
         with allure.step("执行试算"):
@@ -55,7 +56,7 @@ class TestExpressTrial:
             assert trial_result.get('message') == '无可用渠道', "断言 限制规则不可发 失败"
 
     @allure.story('测试场景：快递试算，本地成本价计算')
-    @pytest.mark.parametrize("warehouse_address, channel_id", express_trial_data)
+    @pytest.mark.parametrize("warehouse_address, channel_id", gls_trial_data)
     def test_trial_fee(self, warehouse_address, channel_id):
 
         with allure.step("执行试算，试算结果正常返回"):
