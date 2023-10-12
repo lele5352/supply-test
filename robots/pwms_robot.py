@@ -84,9 +84,9 @@ class PWMSRobot(AppRobot):
         if not sku_list:
             raise PlatSkuNotFoundError(sku_code)
 
-        for sku in sku_list:
+        for i, sku in enumerate(sku_list):
             row = []
-            order_code = f"TS-FBA-{self.timestamp}"
+            order_code = f"TS-FBA-{self.timestamp}-{i+1}"
             try:
                 row.extend([order_code, delivery_warehouse, target_warehouse, receive_warehouse,
                             sku["platformCode"], sku["storeCode"], sku["fnSkuCode"], sku_code, demand_qty])

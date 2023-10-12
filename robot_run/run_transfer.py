@@ -206,12 +206,27 @@ class PlatTransfer:
     """
     def __init__(self, app_entity=None):
         self.pwms_app = app_entity or pwms_app
+        self.wms_app = wms_app
+
+    def check_warehouse_code(self, *warehouse_code):
+        """
+        检查仓库编码是否存在
+        """
+        for code in warehouse_code:
+            if code and not self.wms_app.dbo.query_warehouse_info_by_code(code):
+                raise AssertionError(f'仓库编码 {code} 不存在')
 
     def create_transfer_demand(self, sku_code, demand_qty, delivery_warehouse,
                                receive_warehouse, target_warehouse=None):
         """
         创建平台调拨需求
+        :param sku_code: 销售sku编码
+        :param demand_qty: 需求数量
+        :param delivery_warehouse: 发货仓库编码
+        :param receive_warehouse: 收货仓库编码
+        :param target_warehouse: 目的仓库编码
         """
+        self.check_warehouse_code(delivery_warehouse, receive_warehouse, target_warehouse)
         self.pwms_app.write_template(sku_code, demand_qty,
                                      delivery_warehouse, target_warehouse, receive_warehouse)
         import_url = self.pwms_app.excel_import()

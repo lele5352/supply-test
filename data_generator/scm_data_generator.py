@@ -204,11 +204,9 @@ class ScmDataGenerator:
 if __name__ == '__main__':
     scm = ScmDataGenerator()
 
-    # scm.create_purchase_order(["HW2J1X2884","HW9493FU49"], 1, 'ESBH2', '')
+    # scm.create_purchase_order(["14093131604"], 10, 'ESBH', '')
     # scm.create_stock_plan(['14093131604'], 10 ,'ESBH', '')
     # scm.create_purchase_demand(['14093131604'], 10, 'ESBH', '')
-    # scm.create_wait_delivery_purchase_order(["HW2J1X2884","HW9493FU49"], 1, 'ESBH2', '')
+    # scm.create_wait_delivery_purchase_order(["14093131604"], 10, 'ESBH', '')
 
-    # scm.create_distribute_order(["HWK8646W27"], 15, 'ESBH', '')
-    scm.create_distribute_order(["14093131604"], 10, 'ESBH', '')
-
+    scm.create_distribute_order(["HW929O38V1"], 20, 'HWBH', '')
