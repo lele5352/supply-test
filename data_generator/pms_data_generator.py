@@ -1,8 +1,6 @@
 import time
 
 from cases import *
-from receipt_data_generator import WmsReceiptDataGenerator
-
 
 def create_spu(package_num=1, single_package_num=1, up_shelf=True, **kwargs):
     """
@@ -66,7 +64,7 @@ def create_product_bom(sale_sku_code):
 
 
 if __name__ == '__main__':
-    sale_sku_code = create_spu(productName="测试单品单件", package_num=1, single_package_num=1)
+    sale_sku_code = create_spu(productName="测试单品单件", package_num=2, single_package_num=1)
     # sale_sku_code = create_spu(productName="测试单品多件", package_num=1, single_package_num=3)
     # sale_sku_code = create_spu(productName="测试多品多件", package_num=3, single_package_num=3)
     # create_product_bom(sale_sku_code)

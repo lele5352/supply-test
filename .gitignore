@@ -153,3 +153,4 @@ codes/
 /allure-report-files/
 
 /config/__init__.py
+/test_data/plat_import_template.xlsx

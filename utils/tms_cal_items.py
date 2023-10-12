@@ -204,22 +204,9 @@ class Cost_price_conversion:
          }
 
 
-
 if __name__ == '__main__':
-    items = TMSCalcItems(24.31, 66.6, 44.4, 199.9)
-    no_pack_goods_list = [
-        (22.2, 99.9, 33.3, 9.99),
-        (22.2, 55.5, 33.3, 1.22),
-        (22.2, 55.5, 33.3, 1.22),
-        (11.1, 55.5, 44.4, 3.11),
-        (11.1, 55.5, 44.4, 3.11)
 
-    ]
-    pack_goods_list = [
-        (11.1, 55.5, 44.4, 3.11),
-        (22.2, 55.5, 33.3, 1.22),
-        (22.2, 55.5, 33.3, 1.22)
+    package = (8.1, 40.6, 40.5, 40.3)
 
-    ]
-    print(package_calc(no_pack_goods_list, 2000))
-    print(package_calc(pack_goods_list, 2200))
+    data = TMSCalcItems(*package)
+    print(data.density(True))

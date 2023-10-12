@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from threading import Thread
+from utils.custom_wrapper import async_call
 import json
 
 from pystrich.code128 import Code128Encoder
@@ -9,13 +9,6 @@ import segno
 distribute_order_code_path = "../codes/barcodes/distribute_order/{0}.png"
 transfer_pick_order_code_path = "../codes/barcodes/transfer/pick_order/{0}.png"
 distribute_order_ware_sku_label_path = "../codes/qrcodes/{0}.png"
-
-
-def async_call(fn):
-    def wrapper(*args, **kwargs):
-        Thread(target=fn, args=args, kwargs=kwargs).start()
-
-    return wrapper
 
 
 def create_folder(folder):
