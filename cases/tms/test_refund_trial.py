@@ -1,3 +1,7 @@
+"""
+测试客退试算
+"""
+
 import pytest
 import allure
 from cases import homary_tms
@@ -16,13 +20,16 @@ class TestExpressTrial:
     @pytest.mark.parametrize("warehouse_address, channel_id", gls_trial_data)
     def test_us_express_trial(self, warehouse_address, channel_id):
 
-        with allure.step("执行试算"):
-            trial_result = homary_tms.do_trial(
+        with allure.step("组织试算参数"):
+            req = homary_tms.build_trial_body(
                 TransportType.EXPRESS.value,
                 warehouse_address,
                 'US',
                 channel_id=channel_id
             )
+
+        with allure.step("执行试算"):
+            trial_result = homary_tms.do_trial(req)
 
             assert trial_result.get('code', 500) == 200, "断言 http status=200 失败"
 
@@ -30,13 +37,16 @@ class TestExpressTrial:
     @pytest.mark.parametrize("warehouse_address, channel_id", gls_trial_data)
     def test_trial_fail_reach(self, warehouse_address, channel_id):
 
-        with allure.step("执行试算"):
-            trial_result = homary_tms.do_trial(
+        with allure.step("组织试算参数"):
+            req = homary_tms.build_trial_body(
                 TransportType.EXPRESS.value,
                 warehouse_address,
                 'FR',
                 channel_id=channel_id
             )
+
+        with allure.step("执行试算"):
+            trial_result = homary_tms.do_trial(req)
 
             assert trial_result.get('message') == '无可用渠道', "断言 配送区域不可达 失败"
 
@@ -44,8 +54,8 @@ class TestExpressTrial:
     @pytest.mark.parametrize("warehouse_address, channel_id", gls_trial_data)
     def test_trial_fail_limit(self, warehouse_address, channel_id):
 
-        with allure.step("执行试算"):
-            trial_result = homary_tms.do_trial(
+        with allure.step("组织试算参数"):
+            req = homary_tms.build_trial_body(
                 TransportType.EXPRESS.value,
                 warehouse_address,
                 'US',
@@ -53,27 +63,35 @@ class TestExpressTrial:
                 weight=21
             )
 
+        with allure.step("执行试算"):
+            trial_result = homary_tms.do_trial(req)
+
             assert trial_result.get('message') == '无可用渠道', "断言 限制规则不可发 失败"
 
     @allure.story('测试场景：快递试算，本地成本价计算')
     @pytest.mark.parametrize("warehouse_address, channel_id", gls_trial_data)
     def test_trial_fee(self, warehouse_address, channel_id):
 
-        with allure.step("执行试算，试算结果正常返回"):
-            trial_result = homary_tms.do_trial(
+        weight = 10
+
+        with allure.step("组织试算参数"):
+            req = homary_tms.build_trial_body(
                 TransportType.EXPRESS.value,
                 warehouse_address,
                 'US',
                 channel_id=channel_id,
-                weight=10
+                weight=weight
             )
+
+        with allure.step("执行试算"):
+            trial_result = homary_tms.do_trial(req)
             assert trial_result.get('code', 500) == 200, "断言 http status=200 失败"
 
         with allure.step("成本价计算结果检查（使用成本价规则id：111）"):
 
             尾程其他杂费 = 5.00
             尾程基础运费 = 10.00
-            尾程超重量附加费 = round(1.5 * 10, 2)
+            尾程超重量附加费 = round(1.5 * weight, 2)
 
             try:
                 logistics_prices = trial_result["data"]["expressPrices"]["dividedPackageSolution"][0]["logisticsPrices"]

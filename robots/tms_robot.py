@@ -110,7 +110,7 @@ class HomaryTMS(ServiceRobot):
     @staticmethod
     def build_address(body, address_id, trial_country, address_type=None):
         """
-        组织地址参数
+        组装地址参数
         """
         address_data = TMSApiConfig.TrialAddress.get_attributes()
         try:
@@ -213,9 +213,9 @@ class HomaryTMS(ServiceRobot):
             "insureGoodsCurrency": kwargs.get('insure_currency')
         }
 
-    def do_trial(self, transport_type, address_id, trial_country, **kwargs):
+    def build_trial_body(self, transport_type, address_id, trial_country, **kwargs):
         """
-        试算，同步接口
+        试算参数组装
         Args:
             transport_type: 运输方式 1-快递；2-卡车
             address_id: 仓库地址id
@@ -250,14 +250,11 @@ class HomaryTMS(ServiceRobot):
         self.build_address(req, address_id, trial_country, kwargs.get('address_type'))
         self.build_packages(req, transport_type, **kwargs)
 
-        content = deepcopy(TMSApiConfig.SyncTrial.get_attributes())
-        content["data"] = req
+        return req
 
-        return self.call_api(**content)
-
-    def do_order(self, transport_type, address_id, trial_country, **kwargs):
+    def build_order_body(self, transport_type, address_id, trial_country, **kwargs):
         """
-        下单，同步接口
+        下单参数组装
         Args:
             transport_type: 运输方式 1-快递；2-卡车
             address_id: 仓库地址id
@@ -297,12 +294,24 @@ class HomaryTMS(ServiceRobot):
         content = deepcopy(TMSApiConfig.SyncOrder.get_attributes())
         content["data"] = req
 
+        return req
+
+    def do_trial(self, req_data):
+        """
+        试算同步接口请求
+        :param req_data: 请求参数体
+        """
+        content = deepcopy(TMSApiConfig.SyncTrial.get_attributes())
+        content["data"] = req_data
+
         return self.call_api(**content)
 
+    def do_order(self, req_data):
+        """
+        下单同步接口请求
+        :param req_data: 请求参数体
+        """
+        content = deepcopy(TMSApiConfig.SyncOrder.get_attributes())
+        content["data"] = req_data
 
-
-
-
-
-
-
+        return self.call_api(**content)
