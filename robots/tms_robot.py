@@ -190,11 +190,12 @@ class HomaryTMS(ServiceRobot):
                         "prodName": "测试托盘",
                         "qty": 1,
                         "category": kwargs.get("category"),
-                        "goodsDesc": kwargs.get("goods_desc")
+                        "goodsDesc": kwargs.get("goods_desc"),
+                        'goodsDetails': goods
                     }
                 ]
             }
-            body[pack_key].update(good_specs)
+            body[pack_key]['trays'][0].update(good_specs)
 
             if channel_id:
                 body[pack_key]["channelId"] = channel_id
@@ -209,6 +210,12 @@ class HomaryTMS(ServiceRobot):
                 }
             ]
             body[pack_key][0].update(good_specs)
+
+            if transport_type != TransportType.TRACK.value:
+                body[pack_key][0]['packName'] = '测试包裹'
+            else:
+                body[pack_key][0]['prodName'] = '测试托盘'
+                body[pack_key][0]['qty'] = 1
 
             if channel_id:
                 for _ in body[pack_key]:
