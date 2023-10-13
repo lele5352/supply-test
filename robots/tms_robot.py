@@ -151,7 +151,7 @@ class HomaryTMS(ServiceRobot):
             build_type: 方法类型 1 试算 2 下单
 
         Keyword Args:
-            prod_name: 货物名称
+            prod_name: 货物名称，仓库sku
             weight: 重量
             length: 长
             width: 宽
@@ -160,28 +160,33 @@ class HomaryTMS(ServiceRobot):
             goods_desc: 货物描述
             channel_id: 渠道id
         """
+        # 包裹参数里指定的channel_id，必须是int类型
         if kwargs.get('channel_id'):
             if not isinstance(kwargs.get('channel_id'), int):
                 raise AssertionError("渠道id 类型必须为 int")
 
         channel_id = kwargs.get('channel_id', None)
 
+        # 初始化货物规格：包裹长宽高重量/托盘长宽高重量
         good_specs = {
             "weight": kwargs.get("weight", 3.9),
             "length": kwargs.get("length", 29.9),
             "height": kwargs.get("height", 29.9),
             "width": kwargs.get("width", 31.9)
         }
+        # 货物信息
         goods = [
             {
                 "prodName": kwargs.get("prod_name", "J04CJ000483BA02"),
                 "qty": 1
             }
         ]
+        # 填充货物规格属性
         goods[0].update(good_specs)
 
         pack_key = 'expressPacks'
 
+        # 卡车下单，托盘信息是 dict 类型，快递试算/快递下单/卡车试算，都是 list
         if transport_type == TransportType.TRACK.value and build_type != 1:
             pack_key = 'carTray'
             body[pack_key] = {
@@ -201,6 +206,7 @@ class HomaryTMS(ServiceRobot):
                 body[pack_key]["channelId"] = channel_id
 
         else:
+            # 这堆 if else 为了兼容 卡车/快递 的接口字段命名和类型不一致...
             if transport_type == TransportType.TRACK.value:
                 pack_key = 'carTrayDetails'
 
@@ -332,6 +338,7 @@ class HomaryTMS(ServiceRobot):
     def do_trial(self, req_data):
         """
         试算同步接口请求
+        yapi 接口文档   https://yapi.popicorns.com/project/437/interface/api/38305
         :param req_data: 请求参数体
         """
         content = deepcopy(TMSApiConfig.SyncTrial.get_attributes())
@@ -342,6 +349,7 @@ class HomaryTMS(ServiceRobot):
     def do_order(self, req_data):
         """
         下单同步接口请求
+        yapi 接口文档   https://yapi.popicorns.com/project/437/interface/api/38308
         :param req_data: 请求参数体
         """
         content = deepcopy(TMSApiConfig.SyncOrder.get_attributes())
