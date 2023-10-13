@@ -31,6 +31,19 @@ class TMSCalcItems:
         """围长"""
         return self.longest_side() + (self.mid_side() + self.shortest_side()) * 2
 
+    def girth_origin(self):
+        """围长,原始的 长+(宽+高)×2"""
+        return self.length + (self.width + self.height) * 2
+
+    def perimeter_origin(self):
+        """三边长，原始长度  """
+        return self.length + self.width + self.height
+
+    def casual_two_sides_length(self):
+        """任意两边长，长+宽；长+高；宽+高"""
+        return {"长+宽": self.length + self.width, "长+高": self.length + self.height,
+                "高+宽": self.width + self.height}
+
     def perimeter(self):
         """周长"""
         return self.longest_side() + self.mid_side() + self.shortest_side()
@@ -115,15 +128,96 @@ class GoodsMeasurementItems:
                     temp_dict[item] = Rounding.round_half_up(self.unit_changed_items().get(item), self.size_precision)
         return temp_dict
 
+class CostPriceConversion:
+    """成本价货物计量项信息"""
+    """
+            :param goods_info: dict {"weight": None, "length": None, "width":None, "height": None}
+            :param goods_unit: string 国际单位 gj 英制单位 yz
+            :param channel_unit: string 国际单位 gj 英制单位 yz
+            :param weight_rounding: string 取整方式 "向上取整" "向下取整"
+            :param weight_precision: string 取整精度 0.1 0.5 之类的
+            :param size_rounding: string 取整方式 "向上取整" "向下取整"
+            :param size_precision: string 取整精度 0.1 0.5 之类的
+            """
+
+    def __init__(self, goods_info, goods_unit, channel_unit, weight_rounding, weight_precision, size_rounding,
+                 size_precision):
+        self.source_unit = goods_unit
+        self.target_unit = channel_unit
+        self.weight_rounding = weight_rounding
+        self.weight_precision = weight_precision
+        self.size_rounding = size_rounding
+        self.size_precision = size_precision
+        self.goods_info = goods_info
+
+
+    def unit_changed_items(self):
+        """
+        返回国际，英制单位的转化，{'weight': 27.0, 'length': 5.3, 'height': 5.3, 'width': 44.7}
+        """
+        temp_data=dict()
+        for k,v in self.goods_info.items():
+            num_type="size" if k != "size" else "weight"
+
+            temp_data.update({k: UnitChange.change(
+                v,num_type,
+                self.source_unit, self.target_unit)})
+        print(temp_data)
+        return temp_data
+
+
+    def rounded_result(self):
+        temp_dict = dict()
+
+        """ 进行精度的转化 """
+        for k_item,v_item in self.unit_changed_items().items():
+                if k_item == "weight":
+                    if self.weight_rounding == "向上取整":
+                        temp_dict[k_item] = float(Rounding.round_up(v_item, self.weight_precision))
+                        print(temp_dict)
+                    elif self.weight_rounding == "向下取整":
+                        temp_dict[k_item] = float(Rounding.round_down(v_item, self.weight_precision))
+                    else:
+                        temp_dict[k_item] = float(Rounding.round_half_up(v_item,
+                                                             self.weight_precision))
+                else:
+                     if self.size_rounding == "向上取整":
+                         temp_dict[k_item] = float(Rounding.round_up(v_item, self.size_precision))
+
+                     elif self.size_rounding == "向下取整":
+                         temp_dict[k_item] = float(Rounding.round_down(v_item, self.size_precision))
+                     else:
+                         temp_dict[k_item] = float(Rounding.round_half_up(v_item, self.size_precision))
+
+        """ 用转化后的数值，计算其围长，三边长，体积等 """
+        tms_items = TMSCalcItems(**temp_dict)
+
+        return {
+            "单位_度转化完的原始数据":temp_dict,
+            "重量": temp_dict.get("weight"),
+            "最长边": tms_items.longest_side(),
+            "次长边": tms_items.mid_side(),
+            "最短边": tms_items.shortest_side(),
+            "围长": tms_items.girth_origin(),
+            "三边长": tms_items.perimeter_origin(),
+            "两边长": tms_items.casual_two_sides_length(),
+            "体积": tms_items.volume()
+         }
+
 
 if __name__ == '__main__':
 
     goods_info = {
-        "weight": 359.5,
-        "length": 112,
-        "width": 31.59,
-        "height": 229.919
-    }
+        "weight":12.22,
+        "length": 13.32,
 
-    items = GoodsMeasurementItems(goods_info, "gj", "yz", "向上取整", 0.1, "四舍五入", 0.01)
-    print(items.rounded_result())
+        "height":13.32,
+        "width": 113.48
+    }
+    result= CostPriceConversion(goods_info,"gj","yz","向上取整",0.5,"向上取整",0.1)
+
+    # print(result.unit_changed_items())
+    print(result.rounded_result())
+
+    # print(package_calc(no_pack_goods_list, 2000))
+    # print(package_calc(pack_goods_list, 2200))
