@@ -1,20 +1,41 @@
-import openpyxl
 import json
+import openpyxl
 
 
-def get_excel_data(file, sheet_name=''):
-    file = openpyxl.load_workbook(file)
-    a = file.active
-    if sheet_name:
-        a = file[sheet_name]
-    d = []
-    for x in range(2, a.max_row + 1):
-        c = []
-        for y in range(1, a.max_column + 1):
-            if y == 1:
-                c.append(json.loads(a.cell(row=x, column=y).value))
-            else:
-                c.append(a.cell(row=x, column=y).value)
-        tup = tuple(c)
-        d.append(tup)
-    return d
+class ExcelTool:
+    def __init__(self, filename):
+        self.filename = filename
+        self.workbook = openpyxl.load_workbook(self.filename)
+
+    def read_data(self, sheet_name=None, start_row=1, jsonfy=False):
+        if sheet_name is None:
+            sheet_name = self.workbook.sheetnames[0]
+        sheet = self.workbook[sheet_name]
+
+        data = []
+        for row in sheet.iter_rows(min_row=start_row, values_only=True):
+            data.append([json.loads(cell) if cell else {} for cell in row] if jsonfy else row)
+        return data
+
+    def write_data(self, data, sheet_name=None, start_row=None):
+        if sheet_name is None:
+            sheet_name = 'Sheet1'
+
+        if sheet_name not in self.workbook.sheetnames:
+            self.workbook.create_sheet(sheet_name)
+        sheet = self.workbook[sheet_name]
+
+        if start_row is None:
+            start_row = sheet.max_row + 1
+
+        for row_data in data:
+            sheet.append(row_data)
+
+        self.workbook.save(self.filename)
+
+
+if __name__ == '__main__':
+    # data = ExcelTool("../test_data/transfer_test_data.xlsx")
+    # fhc_cp_other_in_data = ExcelTool("../test_data/ims_test_data.xlsx").read_data("fhc_cp_other_in",2)
+    fhc_cp_other_in_data = ExcelTool("../test_data/link_test_data.xlsx").read_data("oms_to_wms", 2, True)
+    print(fhc_cp_other_in_data)

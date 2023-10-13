@@ -22,9 +22,10 @@ prefix_config = {
         'wms_base': 'http://10.0.0.160:8321',
         'delivery': 'http://10.0.0.160:8330',
         'receipt': 'http://10.0.0.160:8323',
-        'transfer': 'http://10.0.0.160:8334',
+        'transfer': 'http://10.0.0.159:8334',
         'oms_app': 'http://10.0.0.160:8826',
         'eta': 'http://10.0.0.159:8701',
+        'homary_tms': 'http://10.0.0.158:6540'
     },
     'test189': {
         'ims': 'http://10.0.0.189:28801',
@@ -104,4 +105,42 @@ mysql_config = {
         'host': '10.0.15.21',
         'port': 3301
     },
+}
+
+
+redis_config = {
+
+    "test160": {
+        "wms": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True,
+            "db": 6
+        },
+        "bpms": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True,
+            "db": 15
+        },
+        "ec_base": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True,
+            "db": 0
+        },
+        "scm": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True,
+            "db": 15
+        },
+        "wms_base": {
+            "host": "10.0.0.127",
+            "port": 6379,
+            "decode_responses": True,
+            "db": 1
+        },
+    }
+
 }

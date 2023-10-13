@@ -8,18 +8,19 @@ from cases import *
 
 @allure.feature("测试模块：其他入库")
 class TestOtherInStock(object):
-    fhc_cp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "fhc_cp_other_in")
-    bhc_cp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "bhc_cp_other_in")
-    zzc_cp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "zzc_cp_other_in")
-    fhc_lp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "fhc_lp_other_in")
-    bhc_lp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "bhc_lp_other_in")
-    zzc_lp_other_in_data = get_excel_data("test_data/ims_test_data.xlsx", "zzc_lp_other_in")
+    fhc_cp_other_in_data = ExcelTool("../../test_data/ims_test_data.xlsx").read_data("fhc_cp_other_in", 2)
+    bhc_cp_other_in_data = ExcelTool("../../test_data/ims_test_data.xlsx").read_data("bhc_cp_other_in", 2)
+    zzc_cp_other_in_data = ExcelTool("../../test_data/ims_test_data.xlsx").read_data("zzc_cp_other_in", 2)
+    fhc_lp_other_in_data = ExcelTool("../../test_data/ims_test_data.xlsx").read_data("fhc_lp_other_in", 2)
+    bhc_lp_other_in_data = ExcelTool("../../test_data/ims_test_data.xlsx").read_data("bhc_lp_other_in", 2)
+    zzc_lp_other_in_data = ExcelTool("../../test_data/ims_test_data.xlsx").read_data("zzc_lp_other_in", 2)
 
     # @pytest.mark.skip("调试，暂时跳过")
     @allure.story("测试场景：发货仓其他入库，上架次品")
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
     @pytest.mark.parametrize("ware_sku_qty_list,kw_num,warehouse_id,to_warehouse_id,expected,bak", fhc_cp_other_in_data)
     def test_fhc_cp_other_in_stock(self, ware_sku_qty_list, kw_num, warehouse_id, to_warehouse_id, expected, bak):
+        ware_sku_qty_list = json.loads(ware_sku_qty_list)
         sale_skus = ims_robot.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
@@ -45,6 +46,7 @@ class TestOtherInStock(object):
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
     @pytest.mark.parametrize("ware_sku_qty_list,kw_num,warehouse_id,to_warehouse_id,expected,bak", bhc_cp_other_in_data)
     def test_bhc_cp_other_in_stock(self, ware_sku_qty_list, kw_num, warehouse_id, to_warehouse_id, expected, bak):
+        ware_sku_qty_list = json.loads(ware_sku_qty_list)
         sale_skus = ims_robot.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
@@ -70,6 +72,7 @@ class TestOtherInStock(object):
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
     @pytest.mark.parametrize("ware_sku_qty_list,kw_num,warehouse_id,to_warehouse_id,expected,bak", zzc_cp_other_in_data)
     def test_zzc_cp_other_in_stock(self, ware_sku_qty_list, kw_num, warehouse_id, to_warehouse_id, expected, bak):
+        ware_sku_qty_list = json.loads(ware_sku_qty_list)
         sale_skus = ims_robot.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
@@ -95,6 +98,7 @@ class TestOtherInStock(object):
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
     @pytest.mark.parametrize("ware_sku_qty_list,kw_num,warehouse_id,to_warehouse_id,expected,bak", fhc_lp_other_in_data)
     def test_fhc_lp_other_in_stock(self, ware_sku_qty_list, kw_num, warehouse_id, to_warehouse_id, expected, bak):
+        ware_sku_qty_list = json.loads(ware_sku_qty_list)
         sale_skus = ims_robot.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
@@ -120,6 +124,7 @@ class TestOtherInStock(object):
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
     @pytest.mark.parametrize("ware_sku_qty_list,kw_num,warehouse_id,to_warehouse_id,expected,bak", bhc_lp_other_in_data)
     def test_bhc_lp_other_in_stock(self, ware_sku_qty_list, kw_num, warehouse_id, to_warehouse_id, expected, bak):
+        ware_sku_qty_list = json.loads(ware_sku_qty_list)
         sale_skus = ims_robot.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":
@@ -144,6 +149,7 @@ class TestOtherInStock(object):
     @allure.severity(allure.severity_level.BLOCKER)  # p0阻塞级用例
     @pytest.mark.parametrize("ware_sku_qty_list,kw_num,warehouse_id,to_warehouse_id,expected,bak", zzc_lp_other_in_data)
     def test_zzc_lp_other_in_stock(self, ware_sku_qty_list, kw_num, warehouse_id, to_warehouse_id, expected, bak):
+        ware_sku_qty_list = json.loads(ware_sku_qty_list)
         sale_skus = ims_robot.get_sale_skus(ware_sku_qty_list)
 
         if kw_num == "one":

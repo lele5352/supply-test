@@ -99,7 +99,7 @@ class OtherInApiConfig:
 
 
 class TransferApiConfig:
-    class CreateTransferDemand(ApiConfig):
+    class TransferOutCreateDemand(ApiConfig):
         uri_path = "/transferDemand/create"
         method = "POST"
         data = {
@@ -118,27 +118,27 @@ class TransferApiConfig:
             "demandType": 1  # 1:按需调拨需求 2：备货调拨需求
         }
 
-    class CreateTransferPickOrder(ApiConfig):
+    class TransferOutCreatePickOrder(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/picking/create"
         method = "POST"
         data = {"demandCodes": ["XQ2201250017"], "pickType": 1}
 
-    class TransferPickOrderAssign(ApiConfig):
+    class TransferOutPickOrderAssign(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/picking/assignPickUser"
         method = "POST"
         data = {"pickOrderNos": ["DJH2201250008"], "pickUsername": "李强", "pickUserId": "3"}
 
-    class TransferConfirmPick(ApiConfig):
+    class TransferOutConfirmPick(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/picking/doPicking"
         method = "POST"
         data = {"pickOrderNo": ["DJH2201250008"], "details": []}
 
-    class TransferPickOrderDetail(ApiConfig):
+    class TransferOutPickOrderDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/picking/detail/%s"
         method = "GET"
         data = {"t": 1643333857384}
 
-    class TransferSubmitTray(ApiConfig):
+    class TransferOutSubmitTray(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/pda/submitTrayInfo"
         method = "POST"
         data = [{
@@ -153,12 +153,12 @@ class TransferApiConfig:
                 "skuQty": 10
             }]}]
 
-    class TransferPickOrderTrayDetail(ApiConfig):
+    class TransferOutPickOrderTrayDetail(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/tray/detail?pickOrderNo=%s"
         method = "GET"
         data = ""
 
-    class TransferFinishPacking(ApiConfig):
+    class TransferOutFinishPacking(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/pda/finishPacking"
         method = "POST"
         data = {
@@ -178,7 +178,7 @@ class TransferApiConfig:
             "storageLocationCode": "TPKW-001"
         }
 
-    class TransferBoxBind(ApiConfig):
+    class TransferOutBoxBind(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/handover/bind"
         method = "POST"
         data = {
@@ -187,7 +187,7 @@ class TransferApiConfig:
             "receiveWarehouseCode": ""
         }
 
-    class TransferDeliveryUpdate(ApiConfig):
+    class TransferOutDeliveryUpdate(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/handover/logistics/update/v2"
         method = "POST"
         data = {
@@ -202,7 +202,7 @@ class TransferApiConfig:
             "expressType": 1
         }
 
-    class TransferHandoverOrder(ApiConfig):
+    class TransferOutHandoverOrder(ApiConfig):
         uri_path = '/api/ec-wms-api/transferOut/handover/page'
         method = "POST"
         data = {
@@ -221,7 +221,7 @@ class TransferApiConfig:
             "handoverNos": []
         }
 
-    class TransferDelivery(ApiConfig):
+    class TransferOutDelivery(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/handover/delivery/confirm"
         method = "POST"
         data = {"handoverNo": ""}
@@ -231,7 +231,16 @@ class TransferApiConfig:
         method = "POST"
         data = {"handoverNo": ""}
 
-    class TransferBoxUpShelf(ApiConfig):
+    class TransferInOrderPage(ApiConfig):
+        uri_path = "/api/ec-wms-api/transferIn/busPage"
+        method = "POST"
+        data = {"sortField": [{"field": "create_time", "type": "DESC"}], "transferInNo": None,
+                "transferOutNo": None, "state": None, "deliveryWarehouseCodeList": None, "handoverNoList": None,
+                "boxNoList": None, "wareSkuCodeList": None, "goodsSkuCodeList": None, "logisticsNoList": None,
+                "containerNoList": None, "receiveTargetWarehouseCodes": None, "category": None, "size": 150,
+                "current": 1}
+
+    class TransferInBoxUpShelf(ApiConfig):
         uri_path = "/api/ec-wms-api/transferIn/input/box/shelf"
         method = "POST"
         data = {
@@ -239,7 +248,29 @@ class TransferApiConfig:
             "storageLocationCode": "SJKW-001"
         }
 
-    class TransferCabinetList(ApiConfig):
+    class TransferInBoxScan(ApiConfig):
+        uri_path = "/api/ec-wms-api/transferIn/input/box/scan/pda"
+        method = "POST"
+        data = {
+            "boxNo": "DC2308230001-1",
+            "type": 2,
+            "hideError": False
+        }
+
+    class TransferInBoxUpShelfBySKU(ApiConfig):
+        uri_path = "/api/ec-wms-api/transferIn/input/sku/shelf"
+        method = "POST"
+        data = {
+            "boxNo": "DC2308230001-1",
+            "storageLocationCode": "SJKW001",
+            "transferInNo": "DR2308230001",
+            "details": [{
+                "waresSkuCode": "HWK8646W27A01",
+                "quantity": 1
+            }]
+        }
+
+    class TransferInCabinetList(ApiConfig):
         uri_path = "/api/ec-wms-api/transferIn/cabinet/list"
         method = "POST"
         data = {}

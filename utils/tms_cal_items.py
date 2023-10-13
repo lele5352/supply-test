@@ -41,8 +41,8 @@ class TMSCalcItems:
 
     def casual_two_sides_length(self):
         """任意两边长，长+宽；长+高；宽+高"""
-        return {"长+宽":self.length + self.width,"长+高":self.length + self.height,"高+宽":self.width+self.height}
-
+        return {"长+宽": self.length + self.width, "长+高": self.length + self.height,
+                "高+宽": self.width + self.height}
 
     def perimeter(self):
         """周长"""
@@ -224,4 +224,3 @@ if __name__ == '__main__':
 
     # print(package_calc(no_pack_goods_list, 2000))
     # print(package_calc(pack_goods_list, 2200))
-# 105.3
