@@ -12,6 +12,7 @@ gls_trial_data = (
     # 仓库地址id，渠道id
     (170, 77),
 )
+# Fedex 测试仓库地址id 153
 
 
 @allure.feature("测试模块：客退试算-快递")
@@ -22,7 +23,7 @@ class TestExpressTrial:
 
         with allure.step("组织试算参数"):
             req = homary_tms.build_trial_body(
-                TransportType.EXPRESS.value,
+                TransportType.EXPRESS,
                 warehouse_address,
                 'US',
                 channel_id=channel_id
@@ -39,7 +40,7 @@ class TestExpressTrial:
 
         with allure.step("组织试算参数"):
             req = homary_tms.build_trial_body(
-                TransportType.EXPRESS.value,
+                TransportType.EXPRESS,
                 warehouse_address,
                 'FR',
                 channel_id=channel_id
@@ -56,7 +57,7 @@ class TestExpressTrial:
 
         with allure.step("组织试算参数"):
             req = homary_tms.build_trial_body(
-                TransportType.EXPRESS.value,
+                TransportType.EXPRESS,
                 warehouse_address,
                 'US',
                 channel_id=channel_id,
@@ -76,7 +77,7 @@ class TestExpressTrial:
 
         with allure.step("组织试算参数"):
             req = homary_tms.build_trial_body(
-                TransportType.EXPRESS.value,
+                TransportType.EXPRESS,
                 warehouse_address,
                 'US',
                 channel_id=channel_id,

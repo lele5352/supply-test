@@ -1,13 +1,14 @@
 import json
 from copy import deepcopy
 from config.third_party_api_configs.tms_api_config \
-    import TMSApiConfig, UnitType, TransportType
+    import TMSApiConfig, UnitType, TransportType, AddressType
 from robots.robot import AppRobot, ServiceRobot
 from dbo.tms_dbo import TMSBaseDBOperator
 from utils.tms_cal_items import TMSCalcItems
 from utils.unit_change_handler import UnitChange
 from utils.time_handler import HumanDateTime
 from utils.log_handler import logger
+from utils.check_util import check_isinstance
 import uuid
 
 
@@ -103,20 +104,22 @@ class HomaryTMS(ServiceRobot):
     """
     爆米物流应用
 
+    示例：
         初始化类
             >> t = HomaryTMS()
-        调用试算
-            >> express_trial_body = t.build_trial_body(1, 153, 'US') # 生成快递试算参数
-            >> t.do_trial(express_trial_body)  # 执行快递试算
 
-            >> track_trial_body = t.build_trial_body(2, 153, 'US') # 生成卡车试算参数
+        生成参数
+            >> express_trial_body = t.build_trial_body(1, 170, 'US') # 生成快递试算参数
+            >> track_trial_body = t.build_trial_body(2, 170, 'US') # 生成卡车试算参数
+            >> express_order_body = t.build_order_body(1, 170, 'US') # 生成快递下单参数
+            >> track_order_body = t.build_order_body(2, 170, 'US') # 生成卡车下单参数
+
+        调用试算
+            >> t.do_trial(express_trial_body)  # 执行快递试算
             >> t.do_trial(track_trial_body)  # 执行卡车试算
 
         调用下单
-            >> express_order_body = t.build_order_body(1, 153, 'US') # 生成快递下单参数
             >> t.do_order(express_order_body)  # 执行快递下单
-
-            >> track_order_body = t.build_order_body(2, 153, 'US') # 生成卡车下单参数
             >> t.do_order(track_order_body)  # 执行卡车下单
 
     """
@@ -125,7 +128,7 @@ class HomaryTMS(ServiceRobot):
         super().__init__('homary_tms')
 
     @staticmethod
-    def build_address(body, address_id, trial_country, address_type=None):
+    def build_address(body, address_id, trial_country, address_type):
         """
         组装地址参数
         """
@@ -137,9 +140,7 @@ class HomaryTMS(ServiceRobot):
 
         body["address"] = trial_address
         body["address"]["receiveAddressId"] = address_id
-
-        if address_type:
-            body["address"]["addressType"] = address_type
+        body["address"]["addressType"] = address_type.value
 
     @staticmethod
     def build_packages(body, transport_type, build_type=1, **kwargs):
@@ -148,19 +149,18 @@ class HomaryTMS(ServiceRobot):
         Args:
             body: 参数字典
             transport_type: 运输方式
-            build_type: 方法类型 1 试算 2 下单
+            build_type: 调用类型 1 试算 2 下单
 
         Keyword Args:
-            prod_name: 货物名称，仓库sku
-            weight: 重量
-            length: 长
-            width: 宽
-            height: 高
-            category: 货物品类
+            prod_name: 货物名称：传入仓库sku用于获取申报价
+            weight: 重量，定义包裹/托盘 的重量
+            length: 长，定义包裹/托盘 的长
+            width: 宽，定义包裹/托盘 的宽
+            height: 高，定义包裹/托盘 的高
+            category: 货物品类，卡车托盘品类，不传时默认为空
             goods_desc: 货物描述
-            channel_id: 渠道id
+            channel_id: 渠道id，用于指定渠道下单
         """
-        # 包裹参数里指定的channel_id，必须是int类型
         if kwargs.get('channel_id'):
             if not isinstance(kwargs.get('channel_id'), int):
                 raise AssertionError("渠道id 类型必须为 int")
@@ -187,7 +187,7 @@ class HomaryTMS(ServiceRobot):
         pack_key = 'expressPacks'
 
         # 卡车下单，托盘信息是 dict 类型，快递试算/快递下单/卡车试算，都是 list
-        if transport_type == TransportType.TRACK.value and build_type != 1:
+        if transport_type.value == TransportType.TRACK.value and build_type != 1:
             pack_key = 'carTray'
             body[pack_key] = {
                 "trays": [
@@ -207,7 +207,7 @@ class HomaryTMS(ServiceRobot):
 
         else:
             # 这堆 if else 为了兼容 卡车/快递 的接口字段命名和类型不一致...
-            if transport_type == TransportType.TRACK.value:
+            if transport_type.value == TransportType.TRACK.value:
                 pack_key = 'carTrayDetails'
 
             body[pack_key] = [
@@ -217,7 +217,7 @@ class HomaryTMS(ServiceRobot):
             ]
             body[pack_key][0].update(good_specs)
 
-            if transport_type != TransportType.TRACK.value:
+            if transport_type.value != TransportType.TRACK.value:
                 body[pack_key][0]['packName'] = '测试包裹'
             else:
                 body[pack_key][0]['prodName'] = '测试托盘'
@@ -255,20 +255,23 @@ class HomaryTMS(ServiceRobot):
             "insureGoodsCurrency": kwargs.get('insure_currency')
         }
 
-    def build_trial_body(self, transport_type, address_id, trial_country, **kwargs):
+    def build_trial_body(self, transport_type: TransportType,
+                         address_id: int, trial_country: str,
+                         address_type: AddressType = None,
+                         **kwargs):
         """
         试算参数组装
         Args:
             transport_type: 运输方式 1-快递；2-卡车
             address_id: 仓库地址id
             trial_country: 试算地址区域 US 美国 DE 德国 FR 法国
+            address_type: 地址类型
 
         Keyword Args:
             channel_id: 渠道id，类型为 tuple or int
             forward_flag: 正向订单标志 true:正向 false:逆向
             unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
-            address_type: 地址类型
-            prod_name: 货物名称
+            prod_name: 货物名称：传入仓库sku用于获取申报价
             weight: 重量
             length: 长
             width: 宽
@@ -276,8 +279,15 @@ class HomaryTMS(ServiceRobot):
             category: 货物品类
 
         """
+        # 未传入地址类型时，使用 商业地址带月台
+        if not address_type:
+            address_type = AddressType.BUSINESS_ADDRESS_P
+
+        check_isinstance(address_type, AddressType, 'address_type')
+        check_isinstance(transport_type, TransportType, 'transport_type')
+
         req = {
-            "transportType": transport_type,
+            "transportType": transport_type.value,
             "unit": kwargs.get('unit', UnitType.NATIONAL.value),
             "forwardFlag": kwargs.get('forward_flag', False),
             "channelIds": []
@@ -289,36 +299,47 @@ class HomaryTMS(ServiceRobot):
         elif isinstance(channels, int):
             req["channelIds"].append(channels)
 
-        self.build_address(req, address_id, trial_country, kwargs.get('address_type'))
+        self.build_address(req, address_id, trial_country, address_type)
         self.build_packages(req, transport_type, **kwargs)
 
         return req
 
-    def build_order_body(self, transport_type, address_id, trial_country, **kwargs):
+    def build_order_body(self, transport_type: TransportType,
+                         address_id: int, trial_country: str,
+                         address_type: AddressType = None,
+                         **kwargs):
         """
         下单参数组装
         Args:
-            transport_type: 运输方式 1-快递；2-卡车
+            transport_type: 运输方式 TransportType 枚举 1-快递；2-卡车
             address_id: 仓库地址id
             trial_country: 试算地址区域 US 美国 DE 德国 FR 法国
+            address_type: 地址类型：AddressType枚举，未传时默认为 商业地址
 
         Keyword Args:
-            channel_id: 渠道id
+            channel_id: 渠道id，用于指定渠道下单
             forward_flag: 正向订单标志 true:正向 false:逆向
-            pick_date: 提货日期
+            pick_date: 提货日期，不传时取默认时间
             source_pack_code: 来源包裹号
             unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
-            address_type: 地址类型
-            prod_name: 货物名称
+            prod_name: 货物名称：传入仓库sku用于获取申报价
             weight: 重量
             length: 长
             width: 宽
             height: 高
             category: 货物品类
         """
+
+        # 未传入地址类型时，使用 商业地址带月台
+        if not address_type:
+            address_type = AddressType.BUSINESS_ADDRESS_P
+
+        check_isinstance(address_type, AddressType, 'address_type')
+        check_isinstance(transport_type, TransportType, 'transport_type')
+
         req = {
             "idempotentId": str(uuid.uuid4()),
-            "transportType": transport_type,
+            "transportType": transport_type.value,
             "unit": kwargs.get('unit', UnitType.NATIONAL.value),
             "forwardFlag": kwargs.get('forward_flag', False),
             "sourceOrderCode": kwargs.get('source_order_code', '自动测试单'),
@@ -329,7 +350,7 @@ class HomaryTMS(ServiceRobot):
         if kwargs.get('channel_id'):
             req["assignChannelFlag"] = True
 
-        self.build_address(req, address_id, trial_country, kwargs.get('address_type'))
+        self.build_address(req, address_id, trial_country, address_type)
         self.build_packages(req, transport_type, build_type=2, **kwargs)
         self.build_pick_info(req, **kwargs)
 
