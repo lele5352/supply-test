@@ -155,16 +155,14 @@ class CostPriceConversion:
         """
         返回国际，英制单位的转化，{'weight': 27.0, 'length': 5.3, 'height': 5.3, 'width': 44.7}
         """
-        temp_data=[]
-        for x,y in self.goods_info.items():
-            if x=="weight":
-                t=x
-            else :
-                t="size"
-            print(x,y)
-            temp_data.append({x: UnitChange.change(
-                y,t,
+        temp_data=dict()
+        for k,v in self.goods_info.items():
+            num_type="size" if k != "size" else "weight"
+
+            temp_data.update({k: UnitChange.change(
+                v,num_type,
                 self.source_unit, self.target_unit)})
+        print(temp_data)
         return temp_data
 
 
@@ -172,25 +170,24 @@ class CostPriceConversion:
         temp_dict = dict()
 
         """ 进行精度的转化 """
-        for item in self.unit_changed_items():
-            for i_value,i_key in item.items():
-                if i_value == "weight":
+        for k_item,v_item in self.unit_changed_items().items():
+                if k_item == "weight":
                     if self.weight_rounding == "向上取整":
-                        temp_dict[i_value] = float(Rounding.round_up(i_key, self.weight_precision))
+                        temp_dict[k_item] = float(Rounding.round_up(v_item, self.weight_precision))
                         print(temp_dict)
                     elif self.weight_rounding == "向下取整":
-                        temp_dict[i_value] = float(Rounding.round_down(i_key, self.weight_precision))
+                        temp_dict[k_item] = float(Rounding.round_down(v_item, self.weight_precision))
                     else:
-                        temp_dict[i_value] = float(Rounding.round_half_up(i_key,
+                        temp_dict[k_item] = float(Rounding.round_half_up(v_item,
                                                              self.weight_precision))
                 else:
                      if self.size_rounding == "向上取整":
-                         temp_dict[i_value] = float(Rounding.round_up(i_key, self.size_precision))
+                         temp_dict[k_item] = float(Rounding.round_up(v_item, self.size_precision))
 
                      elif self.size_rounding == "向下取整":
-                         temp_dict[i_value] = float(Rounding.round_down(i_key, self.size_precision))
+                         temp_dict[k_item] = float(Rounding.round_down(v_item, self.size_precision))
                      else:
-                         temp_dict[i_value] = float(Rounding.round_half_up(i_key, self.size_precision))
+                         temp_dict[k_item] = float(Rounding.round_half_up(v_item, self.size_precision))
 
         """ 用转化后的数值，计算其围长，三边长，体积等 """
         tms_items = TMSCalcItems(**temp_dict)
