@@ -109,10 +109,10 @@ class HomaryTMS(ServiceRobot):
             >> t = HomaryTMS()
 
         生成参数
-            >> express_trial_body = t.build_trial_body(1, 170, 'US') # 生成快递试算参数
-            >> track_trial_body = t.build_trial_body(2, 170, 'US') # 生成卡车试算参数
-            >> express_order_body = t.build_order_body(1, 170, 'US') # 生成快递下单参数
-            >> track_order_body = t.build_order_body(2, 170, 'US') # 生成卡车下单参数
+            >> express_trial_body = t.build_trial_body(TransportType.EXPRESS, 170, 'US') # 生成快递试算参数
+            >> track_trial_body = t.build_trial_body(TransportType.TRACK, 170, 'US') # 生成卡车试算参数
+            >> express_order_body = t.build_order_body(TransportType.EXPRESS, 170, 'US') # 生成快递下单参数
+            >> track_order_body = t.build_order_body(TransportType.TRACK, 170, 'US') # 生成卡车下单参数
 
         调用试算
             >> t.do_trial(express_trial_body)  # 执行快递试算
