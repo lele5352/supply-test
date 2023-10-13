@@ -102,6 +102,23 @@ class TMSRobot(AppRobot):
 class HomaryTMS(ServiceRobot):
     """
     爆米物流应用
+
+        初始化类
+            >> t = HomaryTMS()
+        调用试算
+            >> express_trial_body = t.build_trial_body(1, 153, 'US') # 生成快递试算参数
+            >> t.do_trial(express_trial_body)  # 执行快递试算
+
+            >> track_trial_body = t.build_trial_body(2, 153, 'US') # 生成卡车试算参数
+            >> t.do_trial(track_trial_body)  # 执行卡车试算
+
+        调用下单
+            >> express_order_body = t.build_order_body(1, 153, 'US') # 生成快递下单参数
+            >> t.do_order(express_order_body)  # 执行快递下单
+
+            >> track_order_body = t.build_order_body(2, 153, 'US') # 生成卡车下单参数
+            >> t.do_order(track_order_body)  # 执行卡车下单
+
     """
 
     def __init__(self):
@@ -125,12 +142,13 @@ class HomaryTMS(ServiceRobot):
             body["address"]["addressType"] = address_type
 
     @staticmethod
-    def build_packages(body, transport_type, **kwargs):
+    def build_packages(body, transport_type, build_type=1, **kwargs):
         """
         组装包裹信息
         Args:
             body: 参数字典
             transport_type: 运输方式
+            build_type: 方法类型 1 试算 2 下单
 
         Keyword Args:
             prod_name: 货物名称
@@ -142,48 +160,59 @@ class HomaryTMS(ServiceRobot):
             goods_desc: 货物描述
             channel_id: 渠道id
         """
+        if kwargs.get('channel_id'):
+            if not isinstance(kwargs.get('channel_id'), int):
+                raise AssertionError("渠道id 类型必须为 int")
+
+        channel_id = kwargs.get('channel_id', None)
+
+        good_specs = {
+            "weight": kwargs.get("weight", 3.9),
+            "length": kwargs.get("length", 29.9),
+            "height": kwargs.get("height", 29.9),
+            "width": kwargs.get("width", 31.9)
+        }
         goods = [
             {
-                "prodName": kwargs.get("prod_name", "JF128Z202IF01"),
-                "qty": 1,
-                "weight": kwargs.get("weight", 3.9),
-                "length": kwargs.get("length", 29.9),
-                "height": kwargs.get("height", 29.9),
-                "width": kwargs.get("width", 31.9)
+                "prodName": kwargs.get("prod_name", "J04CJ000483BA02"),
+                "qty": 1
             }
         ]
+        goods[0].update(good_specs)
 
         pack_key = 'expressPacks'
-        if transport_type == TransportType.TRACK.value:
-            pack_key = 'carTrayDetails'
 
-        body[pack_key] = [
-            {
-                "weight": kwargs.get("weight", 3.9),
-                "length": kwargs.get("length", 29.9),
-                "height": kwargs.get("height", 29.9),
-                "width": kwargs.get("height", 31.9),
-                "goodsDetails": goods
+        if transport_type == TransportType.TRACK.value and build_type != 1:
+            pack_key = 'carTray'
+            body[pack_key] = {
+                "trays": [
+                    {
+                        "prodName": "测试托盘",
+                        "qty": 1,
+                        "category": kwargs.get("category"),
+                        "goodsDesc": kwargs.get("goods_desc")
+                    }
+                ]
             }
-        ]
+            body[pack_key].update(good_specs)
 
-        for _ in body[pack_key]:
-            # 包裹指定渠道下单
-            if kwargs.get('channel_id'):
-                if not isinstance(kwargs.get('channel_id'), int):
-                    raise AssertionError("渠道id 类型必须为 int")
+            if channel_id:
+                body[pack_key]["channelId"] = channel_id
 
-                _['channelId'] = kwargs.get('channel_id')
+        else:
+            if transport_type == TransportType.TRACK.value:
+                pack_key = 'carTrayDetails'
 
-            # 快递/卡车 ，字段参数不同
-            if transport_type == TransportType.EXPRESS.value:
-                _['packName'] = '测试包裹'
-                _['sourcePackCode'] = kwargs.get('source_pack_code', '测试包裹号123')
-            else:
-                _['prodName'] = '测试托盘'
-                _['qty'] = 1
-                _['category'] = kwargs.get("category")
-                _['goodsDesc'] = kwargs.get("goods_desc")
+            body[pack_key] = [
+                {
+                    "goodsDetails": goods
+                }
+            ]
+            body[pack_key][0].update(good_specs)
+
+            if channel_id:
+                for _ in body[pack_key]:
+                    _['channelId'] = kwargs.get('channel_id')
 
     @staticmethod
     def build_pick_info(body, **kwargs):
@@ -288,7 +317,7 @@ class HomaryTMS(ServiceRobot):
             req["assignChannelFlag"] = True
 
         self.build_address(req, address_id, trial_country, kwargs.get('address_type'))
-        self.build_packages(req, transport_type, **kwargs)
+        self.build_packages(req, transport_type, build_type=2, **kwargs)
         self.build_pick_info(req, **kwargs)
 
         return req
