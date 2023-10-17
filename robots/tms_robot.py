@@ -212,7 +212,8 @@ class HomaryTMS(ServiceRobot):
 
             body[pack_key] = [
                 {
-                    "goodsDetails": goods
+                    "goodsDetails": goods,
+                    "category": kwargs.get("category")
                 }
             ]
             body[pack_key][0].update(good_specs)
@@ -258,6 +259,7 @@ class HomaryTMS(ServiceRobot):
     def build_trial_body(self, transport_type: TransportType,
                          address_id: int, trial_country: str,
                          address_type: AddressType = None,
+                         unit: UnitType = None,
                          **kwargs):
         """
         试算参数组装
@@ -266,11 +268,11 @@ class HomaryTMS(ServiceRobot):
             address_id: 仓库地址id
             trial_country: 试算地址区域 US 美国 DE 德国 FR 法国
             address_type: 地址类型
+            unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
 
         Keyword Args:
             channel_id: 渠道id，类型为 tuple or int
             forward_flag: 正向订单标志 true:正向 false:逆向
-            unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
             prod_name: 货物名称：传入仓库sku用于获取申报价
             weight: 重量
             length: 长
@@ -282,13 +284,16 @@ class HomaryTMS(ServiceRobot):
         # 未传入地址类型时，使用 商业地址带月台
         if not address_type:
             address_type = AddressType.BUSINESS_ADDRESS_P
+        if not unit:
+            unit = UnitType.NATIONAL
 
         check_isinstance(address_type, AddressType, 'address_type')
         check_isinstance(transport_type, TransportType, 'transport_type')
+        check_isinstance(unit, UnitType, 'unit')
 
         req = {
             "transportType": transport_type.value,
-            "unit": kwargs.get('unit', UnitType.NATIONAL.value),
+            "unit": unit.value,
             "forwardFlag": kwargs.get('forward_flag', False),
             "channelIds": []
         }
@@ -307,6 +312,7 @@ class HomaryTMS(ServiceRobot):
     def build_order_body(self, transport_type: TransportType,
                          address_id: int, trial_country: str,
                          address_type: AddressType = None,
+                         unit: UnitType = None,
                          **kwargs):
         """
         下单参数组装
@@ -315,32 +321,42 @@ class HomaryTMS(ServiceRobot):
             address_id: 仓库地址id
             trial_country: 试算地址区域 US 美国 DE 德国 FR 法国
             address_type: 地址类型：AddressType枚举，未传时默认为 商业地址
+            unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
 
         Keyword Args:
             channel_id: 渠道id，用于指定渠道下单
             forward_flag: 正向订单标志 true:正向 false:逆向
             pick_date: 提货日期，不传时取默认时间
             source_pack_code: 来源包裹号
-            unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
             prod_name: 货物名称：传入仓库sku用于获取申报价
             weight: 重量
             length: 长
             width: 宽
             height: 高
             category: 货物品类
+            min_pick: 最小提货时间
+            max_pick: 最大提货时间
+            min_delivery: 最小送货时间
+            max_delivery: 最大送货时间
+            insure_category: 投保类目
+            insure_price: 投保金额
+            insure_currency: 投保币种
         """
 
         # 未传入地址类型时，使用 商业地址带月台
         if not address_type:
             address_type = AddressType.BUSINESS_ADDRESS_P
+        if not unit:
+            unit = UnitType.NATIONAL
 
         check_isinstance(address_type, AddressType, 'address_type')
         check_isinstance(transport_type, TransportType, 'transport_type')
+        check_isinstance(unit, UnitType, 'unit')
 
         req = {
             "idempotentId": str(uuid.uuid4()),
             "transportType": transport_type.value,
-            "unit": kwargs.get('unit', UnitType.NATIONAL.value),
+            "unit": unit.value,
             "forwardFlag": kwargs.get('forward_flag', False),
             "sourceOrderCode": kwargs.get('source_order_code', '自动测试单'),
             "assignChannelFlag": False
