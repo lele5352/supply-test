@@ -2,7 +2,7 @@ from cases import *
 
 from utils.log_handler import logger as log
 from utils.code_handler import GenerateCode
-
+from utils.custom_wrapper import until
 from data_generator.receipt_data_generator import WmsReceiptDataGenerator
 from robot_run.run_transfer import run_transfer, TransferProcessNode
 from robots.robot_biz_exception import InventoryNotEnough
@@ -33,14 +33,22 @@ class WmsTransferDataGenerator:
         """
         self.wms_app.common_switch_warehouse(trans_out_id)
 
-        # 按调拨数量 增加库存
-        self.wms_data.create_other_in_order_and_up_shelf(
-            sale_sku_code, bom, trans_qty, trans_out_id, trans_out_to_id
-        )
-
         # 判断bom版本库存是否足够
-        if not self.ims.is_bom_stock_enough(sale_sku_code, bom, trans_qty, trans_out_id, trans_out_to_id):
-            raise InventoryNotEnough(sale_sku_code, bom, trans_out_id)
+        is_stock_enough = self.ims.is_bom_stock_enough(sale_sku_code, bom, trans_qty, trans_out_id, trans_out_to_id)
+
+        if not is_stock_enough:
+            add_stock_res = self.wms_data.create_other_in_order_and_up_shelf(
+                sale_sku_code, bom, trans_qty, trans_out_id, trans_out_to_id
+            )
+            if not add_stock_res or add_stock_res.get("code") != 1:
+                log.error('创建调拨需求失败：加库存失败！')
+                return
+
+        # 用户检查库存是否加成功了，加库存需要时间
+        until(120, 0.1)(
+            lambda: trans_qty <= self.ims.dbo.query_central_inventory(
+                sale_sku_code, trans_out_id, trans_out_to_id).get("remain", 0)
+        )()
 
         # 仓库id转换为code
         trans_out_code = self.wms_app.db_ck_id_to_code(trans_out_id)
@@ -157,7 +165,9 @@ if __name__ == '__main__':
     demand_qty = 10
     # transfer_data.create_transfer_demand(565, '', 568, 568, '63203684930', "B", 1)
     # transfer_data.create_transfer_demand(511, 513, 513, 513, '63203684930', "B", 1)
-    # transfer_data.create_handover_order(512, '', 513, 513, '63203684930', "B", 1)
+    transfer_data.create_handover_order(512, 0, 513, 513, "HWS189S597", "A", 2)
+    # transfer_data.create_transfer_pick_order(512, 0, 513, 513, "HWU450M690", "A", 4)
+
     # transfer_data.create_transfer_pick_order(565, '', 568, 568, '63203684930', "B", 1)
-    transfer_data.create_transfer_in_up_shelf_order(512, 0, 513, 513, "HWK8646W27", "A", 5,  up_shelf_mode="sku")
+    # transfer_data.create_transfer_in_up_shelf_order(512, 0, 513, 513, "HW8JX57504", "A", 6, up_shelf_mode="sku")
     # transfer_data.create_entry_order(640, 0,642, 642,  "HW25D920D9", "A", 16,"received")
