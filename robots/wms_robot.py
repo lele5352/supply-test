@@ -154,6 +154,8 @@ class WMSAppRobot(AppRobot):
 
     def common_switch_warehouse(self, warehouse_id):
         data_perm_id = self.common_get_data_perm_id(warehouse_id)
+        if not data_perm_id:
+            return self.formatted_result()
         content = deepcopy(BaseApiConfig.SwitchDefaultWarehouse.get_attributes())
         content["data"].update({
             "dataPermId": data_perm_id

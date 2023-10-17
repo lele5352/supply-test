@@ -111,7 +111,7 @@ class Robot:
         return result
 
     @classmethod
-    def formatted_result(cls, res_data):
+    def formatted_result(cls, res_data=None):
         if not res_data:
             return cls.report(0, "操作失败", None)
         elif res_data.get("code") == 200:
