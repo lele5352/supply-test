@@ -35,6 +35,7 @@ class ADPSAppRobot(AppRobot):
                     "country_code": "US", "site": "us", "card_type": "visa", "business_code": "1",
                     "business_name": "商城订单", "bill_source": 10, "create_username": "自动化批量写入",
                     "create_time": pay_at, "del_flag": 0,
+                    "payment_code": None, "refund_no": None,
                     "account_status": AccountStatus.INIT.value,
                     key_config.card_group_code.value: row[key_config.card_group_code.description],
                     key_config.external_transaction_id.value: row[key_config.external_transaction_id.description],
@@ -55,11 +56,9 @@ class ADPSAppRobot(AppRobot):
 
             data_list.append(data)
 
-        return data_list
+        log.info(f"数据解析完成，总记录条数{len(data_list)}，开始执行批量写入")
 
-        # log.info(f"数据解析完成，总记录条数{len(data_list)}，开始执行批量写入")
-        #
-        # self.dbo.batch_insert_hm(data_list, 500)
+        self.dbo.batch_insert_hm(data_list, 500)
 
 
 class WMSBaseServiceRobot(AppRobot):

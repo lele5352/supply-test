@@ -17,6 +17,7 @@ class TestDBMethod:
                 "payment_channel": "HelloWorld",
                 "channel_account": "Homary",
                 "payment_code": str(uuid.uuid4()).split('-')[0],
+                "refund_no": None,
                 "fee_item_name": "回款",
                 "fee_item_code": "FYX001",
                 "currency": "USD",
@@ -42,5 +43,6 @@ class TestDBMethod:
                 "del_flag": 0
             }
         ]
+        print(hm_list)
         ADPSDBOperator.batch_insert_hm(hm_list, batch_size=5)
 

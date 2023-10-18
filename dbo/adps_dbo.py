@@ -76,6 +76,8 @@ class ADPSDBOperator:
     def batch_insert_hm(hm_list: list, batch_size):
         """
         批量 insert hm 账单
+        :param hm_list: list of hm
+        :param batch_size:  number of batch
         """
         if not isinstance(hm_list, list):
             raise TypeError('Parameter hm_list is expected to be of type list')
