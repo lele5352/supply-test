@@ -236,7 +236,7 @@ class HomaryTMS(ServiceRobot):
             body: 参数字典
 
         Keyword Args:
-            pick_date: 提货日期，未传时，默认为 8天后 (fedex快递未来提货日期不能超过10天，卡车不能超过5天)
+            pick_date: 提货日期，未传时，默认为3天后 (fedex快递未来提货日期不能超过10天，卡车不能超过5天)
             min_pick: 最小提货时间
             max_pick: 最大提货时间
             min_delivery: 最小送货时间
@@ -246,7 +246,7 @@ class HomaryTMS(ServiceRobot):
             insure_currency: 投保币种
         """
         body["pickInfo"] = {
-            "pickDate": kwargs.get('pick_date', HumanDateTime().add(days=8).human_time()),
+            "pickDate": kwargs.get('pick_date', HumanDateTime().add(days=3).human_time()),
             "minPickTime": kwargs.get('min_pick', '08:00'),
             "maxPickTime": kwargs.get('max_pick', '17:00'),
             "minDeliveryTime": kwargs.get('min_delivery', '08:00'),
