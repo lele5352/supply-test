@@ -1,35 +1,49 @@
 import json
 import os
-import time
+import random
 from copy import deepcopy
 
-from config.third_party_api_configs.wms_api_config import *
 from config.third_party_api_configs.adps_api_config import *
-from robots.robot import ServiceRobot, AppRobot
+from robots.robot import AppRobot
 from dbo.adps_dbo import ADPSDBOperator
 from utils.log_handler import logger as log
 from utils.time_handler import HumanDateTime
 from utils.excel_handler import ExcelTool
 
 
-class ADPSAppRobot(AppRobot):
+class ADPSRobot(AppRobot):
     def __init__(self):
         self.dbo = ADPSDBOperator
         super().__init__()
 
-    def create_hm_from_file(self, file_path, key_config: BrainTreeMap,
-                            payment_channel, channel_account):
+    def create_hm_from_file(self, file_path, key_config, payment_channel,
+                            channel_account, pay_time=None, random_mis=False):
         """
         读取excel文件，解析为hm账单
+        :param file_path: 文件路径
+        :param key_config: 文件字段映射类
+        :param payment_channel: 支付渠道
+        :param channel_account: 支付主体
+        :param pay_time: 支付时间
+        :param random_mis: 是否随机打乱数据（支付单号、外部交易ID、卡组流水号）
         """
         data_list = []
-        pay_at = HumanDateTime().human_time()
+        pay_at = pay_time or HumanDateTime().sub(days=30).human_time()
         abs_file_path = os.path.abspath(file_path)
+        log.info("开始进行数据解析...")
         raw_data = ExcelTool(abs_file_path).multi_read2dict()
         if not raw_data:
             raise ValueError("解析hm账单数据为空")
 
-        for row in raw_data:
+        for i, row in enumerate(raw_data):
+            # random_mis 为True时，选取一半数据，随机选取（支付单号、外部交易ID、卡组流水号）拼接 1
+            if random_mis and i % 2 == 0:
+                random_key = random.choice([
+                    key_config.external_transaction_id.description,
+                    key_config.card_group_code.description,
+                    key_config.payment_code.description
+                ])
+                row[random_key] = f"{str(row[random_key])}_1" if row[random_key] is not None else row[random_key]
 
             data = {"payment_channel": payment_channel, "channel_account": channel_account, "pay_at": pay_at,
                     "country_code": "US", "site": "us", "card_type": "visa", "business_code": "1",
@@ -41,7 +55,7 @@ class ADPSAppRobot(AppRobot):
                     key_config.external_transaction_id.value: row[key_config.external_transaction_id.description],
                     key_config.currency.value: row[key_config.currency.description],
                     key_config.pay_amount.value: row[key_config.pay_amount.description]
-            }
+                    }
 
             # 金额大于等于0 解析为 回款，小于0 则解析为 退款
             if row.get(key_config.pay_amount.description, 0) >= 0:
@@ -58,14 +72,7 @@ class ADPSAppRobot(AppRobot):
 
         log.info(f"数据解析完成，总记录条数{len(data_list)}，开始执行批量写入")
 
-        self.dbo.batch_insert_hm(data_list, 500)
-
-
-class WMSBaseServiceRobot(AppRobot):
-
-    def __init__(self):
-        self.dbo = ADPSDBOperator
-        super().__init__()
+        self.dbo.batch_insert_hm(data_list, 2000)
 
     def get_hm_detail_by_db(self, payment_channel, channel_account, pay_at) -> list:
         """
@@ -168,27 +175,3 @@ class WMSBaseServiceRobot(AppRobot):
         hm_reconcilable_detail.remove(aa[1])
 
         print(hm_reconcilable_detail)
-
-
-# if __name__ == "__main__":
-#     wms = WMSAppRobot()
-#     # print(wms.entry_order_page(["FH2211022680"]))
-#     # wms.delivery_order_assign_stock(["PRE-CK2211100010"])
-#     # print(wms.get_delivery_order_page(["PRE-CK2211100010"]))
-#     # print(wms.get_user_info())
-#     # print(wms.delivery_get_pick_data("1881"))
-#     # print(wms.dbo.query_wait_assign_demands())
-#
-#     # order_sku_list = [
-#     #     {
-#     #         "skuCode": "63203684930B01", "skuName": "酒柜-金色A款08 1/2 X1", "num": 2
-#     #     },{
-#     #         "skuCode": "63203684930B02", "skuName": "酒柜(金色)07 2/2 X5", "num": 10
-#     #     }]
-#     # wms.delivery_mock_package_call_back("PRE-CK2302020006",1,order_sku_list)
-#     wms.delivery_mock_label_callback("PRE-CK2302020007", ["PRE-BG2302020026"], False)
-#
-#
-# wms = WMSBaseServiceRobot()
-#
-# print(wms.Into_account())

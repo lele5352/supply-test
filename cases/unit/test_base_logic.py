@@ -2,8 +2,10 @@
 用于内部逻辑的单元测试
 """
 from dbo.adps_dbo import ADPSDBOperator
+from config.third_party_api_configs.adps_api_config import BrainTreeMap
 import uuid
 from utils.time_handler import HumanDateTime
+from cases import adps_app
 
 
 class TestDBMethod:
@@ -45,4 +47,11 @@ class TestDBMethod:
         ]
         print(hm_list)
         ADPSDBOperator.batch_insert_hm(hm_list, batch_size=5)
+
+    def test_create_braintree_hm(self):
+
+        file = "../../test_data/Braintree_Popi.xlsx"
+        payment_channel = 'Braintree'
+        channel_account = 'POPICORNS E-COMMERCE CO., LIMITED'
+        adps_app.create_hm_from_file(file, BrainTreeMap, payment_channel, channel_account, random_mis=True)
 

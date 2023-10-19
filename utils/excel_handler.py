@@ -1,5 +1,7 @@
 import concurrent.futures
 import json
+import time
+
 import openpyxl
 
 
@@ -71,6 +73,10 @@ class ExcelTool:
 if __name__ == '__main__':
     # data = ExcelTool("../test_data/transfer_test_data.xlsx")
     # fhc_cp_other_in_data = ExcelTool("../test_data/ims_test_data.xlsx").read_data("fhc_cp_other_in",2)
+    start_time = time.time()
+    print(f"开始时间{start_time}")
     fhc_cp_other_in_data = ExcelTool("../test_data/Braintree_Popi.xlsx").multi_read2dict()
-    print(fhc_cp_other_in_data)
+    # print(fhc_cp_other_in_data)
+    exec_time = time.time() - start_time
+    print(f"执行耗时{exec_time}秒")
 
