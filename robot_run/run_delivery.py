@@ -18,29 +18,31 @@ class ExecuteResult:
     fail = "fail"
 
 
-def get_delivery_order_status(delivery_order_code):
+def get_delivery_order_info(delivery_order_code):
     data = wms_app.dbo.get_delivery_order_info(delivery_order_code)
-    return data[0].get("state")
+    if data:
+        return data[0]
+    return {}
 
 
-def get_delivery_order_package_status(delivery_order_code):
-    data = wms_app.dbo.get_delivery_order_info(delivery_order_code)
-    return data[0].get("package_state")
+def get_delivery_order_statuses(delivery_order_code):
+    data = get_delivery_order_info(delivery_order_code)
+    return {
+        "order_status": data.get("state"),
+        "package_status": data.get("package_state"),
+        "express_status": data.get("express_state")
+    }
 
 
-def get_delivery_order_express_status(delivery_order_code):
-    data = wms_app.dbo.get_delivery_order_info(delivery_order_code)
-    return data[0].get("express_state")
-
-
-def check_status(get_status, status):
+def check_status(get_status, status_type, status):
     """检验获取到的状态是否在状态列表中
     :param get_status: 获取状态函数
+    :param status_type: 状态类型：order_status、package_status、express_status
     :param list status: 状态列表"""
 
     def decorator(func):
         def wrapper(*args, **kwargs):
-            order_status = get_status(args[1])
+            order_status = get_status(args[1]).get(status_type)
             if order_status in status:
                 result = func(*args, **kwargs)
                 return result
@@ -76,7 +78,7 @@ class RunDelivery:
             ) for _ in data if _["warehouse_id"] in warehouse_id_set]
         return order_list
 
-    @check_status(get_delivery_order_status, [0, 5])
+    @check_status(get_delivery_order_statuses, "order_status", [0, 5])
     def execute_assign_stock(self, delivery_order_code):
         assign_stock_result = self.wms_app.delivery_assign_stock([delivery_order_code])
         if not self.wms_app.is_success(assign_stock_result) or assign_stock_result["data"]["failNum"] > 0:
@@ -85,7 +87,7 @@ class RunDelivery:
         self.execute_info += "分配库存成功-->"
         return {"result": ExecuteResult.success, "info": self.execute_info, "data": assign_stock_result}
 
-    @check_status(get_delivery_order_package_status, [0, 1, 3])
+    @check_status(get_delivery_order_statuses, "package_status", [0, 1, 3])
     def execute_mock_package_call_back(self, delivery_order_code, transport_mode, order_sku_list):
         package_call_back_result = self.wms_app.delivery_mock_package_call_back(delivery_order_code, transport_mode,
                                                                                 order_sku_list)
@@ -96,7 +98,7 @@ class RunDelivery:
 
         return {"result": ExecuteResult.success, "info": self.execute_info, "data": package_call_back_result}
 
-    @check_status(get_delivery_order_express_status, [0, 1, 3])
+    @check_status(get_delivery_order_statuses, "express_status", [0, 1, 3])
     def execute_mock_label_call_back(self, delivery_order_code, package_list):
         label_call_back_result = self.wms_app.delivery_mock_label_callback(delivery_order_code, package_list)
         if not self.wms_app.is_success(label_call_back_result):
@@ -105,8 +107,8 @@ class RunDelivery:
         self.execute_info += "回调面单成功-->"
         return {"result": ExecuteResult.success, "info": self.execute_info, "data": label_call_back_result}
 
-    @check_status(get_delivery_order_status, [10])
-    @check_status(get_delivery_order_package_status, [2])
+    @check_status(get_delivery_order_statuses, "order_status", [10])
+    @check_status(get_delivery_order_statuses, "package_status", [2])
     def backend_execute_create_pick_order(self, delivery_order_code, prod_type):
         create_pick_order_result = self.wms_app.delivery_create_pick_order(delivery_order_code, prod_type)
         if not self.wms_app.is_success(create_pick_order_result):
@@ -115,7 +117,7 @@ class RunDelivery:
         self.execute_info += "创建拣货单成功-->"
         return {"result": ExecuteResult.success, "info": self.execute_info, "data": create_pick_order_result["data"]}
 
-    @check_status(get_delivery_order_status, [20])
+    @check_status(get_delivery_order_statuses, "order_status", [20])
     def execute_pick(self, delivery_order_code, pick_order_code, pick_order_id):
         # 分配拣货人
         assign_pick_user_result = self.wms_app.delivery_assign_pick_user(pick_order_code)
@@ -147,8 +149,8 @@ class RunDelivery:
         self.execute_info += "拣货成功-->"
         return {"result": ExecuteResult.success, "info": self.execute_info, "data": confirm_pick_result}
 
-    @check_status(get_delivery_order_status, [30])
-    @check_status(get_delivery_order_package_status, [2])
+    @check_status(get_delivery_order_statuses, "order_status", [30])
+    @check_status(get_delivery_order_statuses, "package_status", [2])
     def execute_backend_save_package(self, delivery_order_code):
         # 获取出库单包裹方案信息
         package_info_result = self.wms_app.delivery_package_info(delivery_order_code)
@@ -165,7 +167,7 @@ class RunDelivery:
         self.execute_info += "维护包裹成功-->"
         return {"result": ExecuteResult.success, "info": self.execute_info, "data": save_package_result}
 
-    @check_status(get_delivery_order_status, [30])
+    @check_status(get_delivery_order_statuses, "order_status", [30])
     def execute_review(self, delivery_order_code, delivery_order_id):
         # 构造复核正常数据
         normal_list = [{"deliveryOrderId": delivery_order_id, "deliveryOrderCode": delivery_order_code}]
@@ -177,7 +179,7 @@ class RunDelivery:
         self.execute_info += "复核成功-->"
         return {"result": ExecuteResult.success, "info": self.execute_info, "data": review_result}
 
-    @check_status(get_delivery_order_status, [40])
+    @check_status(get_delivery_order_statuses, "order_status", [40])
     def execute_shipped(self, delivery_order_code, delivery_order_id):
         # 构造发货正常数据
         normal_ids = [delivery_order_id]
@@ -438,9 +440,8 @@ class RunDelivery:
         return result
 
 
-#
 if __name__ == "__main__":
-    delivery_order_code = "PRE-CK2310190003"
+    delivery_order_code = "PRE-CK2310200003"
     warehouse_id = 513
     flag = DeliveryFlow.call_package
     run = RunDelivery()
