@@ -6,6 +6,7 @@ from robots.scm_robot import SCMRobot
 from robots.pms_robot import PMSAppRobot
 from robots.pwms_robot import PWMSRobot
 from robots.tms_robot import HomaryTMS
+from robots.adps_robot import ADPSRobot
 from utils.excel_handler import ExcelTool
 
 ims_robot = IMSRobot()
@@ -19,3 +20,4 @@ pms_app = PMSAppRobot()
 cds_app = CDSAppRobot()
 pwms_app = PWMSRobot()
 homary_tms = HomaryTMS()
+adps_app = ADPSRobot()
