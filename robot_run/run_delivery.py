@@ -61,6 +61,7 @@ class RunDelivery:
 
     def __init__(self, app_entity=None):
         self.wms_app = app_entity or wms_app
+        self.execute_info = ""
 
     def get_wait_delivery_data(self):
         data = self.wms_app.dbo.query_wait_delivery_order()
@@ -81,7 +82,7 @@ class RunDelivery:
         assign_stock_result = self.wms_app.delivery_assign_stock([delivery_order_code])
         if not self.wms_app.is_success(assign_stock_result) or assign_stock_result["data"]["failNum"] > 0:
             return {"result": ExecuteResult.fail, "info": "分配库存失败！", "data": assign_stock_result}
-        print("分配库存成功！")
+        self.execute_info += "分配库存成功-->"
         return {"result": ExecuteResult.success, "info": "分配库存成功！", "data": assign_stock_result}
 
     @check_status(get_delivery_order_package_status, [0, 1, 3])
@@ -90,7 +91,8 @@ class RunDelivery:
                                                                                 order_sku_list)
         if not self.wms_app.is_success(package_call_back_result):
             return {"result": ExecuteResult.fail, "info": "包裹方案回调失败！", "data": package_call_back_result}
-        print("回调包裹方案成功！")
+        self.execute_info += "回调包裹方案成功-->"
+
         return {"result": ExecuteResult.success, "info": "包裹方案回调成功！", "data": package_call_back_result}
 
     @check_status(get_delivery_order_express_status, [0, 1, 3])
@@ -98,7 +100,7 @@ class RunDelivery:
         label_call_back_result = self.wms_app.delivery_mock_label_callback(delivery_order_code, package_list)
         if not self.wms_app.is_success(label_call_back_result):
             return {"result": ExecuteResult.fail, "info": "面单回调失败！", "data": label_call_back_result}
-        print("回调面单成功！")
+        self.execute_info += "回调面单成功-->"
         return {"result": ExecuteResult.success, "info": "面单回调成功！", "data": label_call_back_result}
 
     @check_status(get_delivery_order_status, [10])
@@ -107,7 +109,8 @@ class RunDelivery:
         create_pick_order_result = self.wms_app.delivery_create_pick_order(delivery_order_code, prod_type)
         if not self.wms_app.is_success(create_pick_order_result):
             return {"result": ExecuteResult.fail, "info": "创建拣货单失败！", "data": create_pick_order_result}
-        print("创建拣货单成功！")
+        self.execute_info += "创建拣货单成功-->"
+
         return {"result": ExecuteResult.success, "info": "创建拣货单成功！", "data": create_pick_order_result["data"]}
 
     @check_status(get_delivery_order_status, [20])
@@ -136,7 +139,8 @@ class RunDelivery:
         confirm_pick_result = self.wms_app.delivery_confirm_pick(pick_order_code, normal_list, [])
         if not self.wms_app.is_success(confirm_pick_result):
             return {"result": ExecuteResult.fail, "info": "确认拣货失败！", "data": confirm_pick_result}
-        print("拣货成功！")
+        self.execute_info += "拣货成功-->"
+
         return {"result": ExecuteResult.success, "info": "确认拣货成功！", "data": confirm_pick_result}
 
     @check_status(get_delivery_order_status, [30])
@@ -152,7 +156,7 @@ class RunDelivery:
         save_package_result = self.wms_app.delivery_save_package(package_info)
         if not self.wms_app.is_success(save_package_result):
             return {"result": ExecuteResult.fail, "info": "提交维护包裹信息失败！", "data": save_package_result}
-        print("维护包裹成功！")
+        self.execute_info += "维护包裹成功-->"
         return {"result": ExecuteResult.success, "info": "提交维护包裹信息成功！", "data": save_package_result}
 
     @check_status(get_delivery_order_status, [30])
@@ -163,7 +167,7 @@ class RunDelivery:
         review_result = self.wms_app.delivery_review(normal_list, [])
         if not self.wms_app.is_success(review_result) or review_result["data"]["failSize"] > 0:
             return {"result": ExecuteResult.fail, "info": "复核失败！", "data": review_result}
-        print("复核成功！")
+        self.execute_info += "复核成功-->"
         return {"result": ExecuteResult.success, "info": "复核成功！", "data": review_result}
 
     @check_status(get_delivery_order_status, [40])
@@ -175,7 +179,8 @@ class RunDelivery:
         shipping_result = self.wms_app.delivery_shipping(normal_ids, normal_codes, [])
         if not self.wms_app.is_success(shipping_result):
             return {"result": ExecuteResult.fail, "info": "发货失败！", "data": shipping_result}
-        print("发货成功！")
+        self.execute_info += "发货成功"
+
         return {"result": ExecuteResult.success, "info": "发货成功！", "data": shipping_result}
 
     def run_front_label_delivery(self, delivery_order_info, delivery_order_detail, flow_flag=None):
@@ -209,8 +214,7 @@ class RunDelivery:
             } for _ in delivery_order_detail["packageItems"]]
 
         # 模拟包裹回调
-        mock_package_result = self.execute_mock_package_call_back(delivery_order_code, transport_mode,
-                                                                  order_sku_list)
+        mock_package_result = self.execute_mock_package_call_back(delivery_order_code, transport_mode, order_sku_list)
         # 如果流程标识为生成包裹方案，则执行就返回，中断流程
         if mock_package_result.get("result") == ExecuteResult.fail:
             return "Fail", mock_package_result.get("info")
@@ -356,7 +360,7 @@ class RunDelivery:
         shipped_result = self.execute_shipped(delivery_order_code, delivery_order_id)
         if shipped_result.get("result") == ExecuteResult.fail:
             return "Fail", shipped_result.get("info")
-        return "Success", None
+        return "Success", self.execute_info
 
     def run_delivery(self, delivery_order_code, warehouse_id, flow_flag=None):
         """
@@ -391,16 +395,18 @@ class RunDelivery:
 
         if operate_mode == 1:
             # 作业模式为1代表前置面单，执行前置面单出库流程
+            print("执行前置面单发货流程:")
             result = self.run_front_label_delivery(delivery_order_info, delivery_order_detail, flow_flag)
         else:
             # 其他代表后置面单，执行后置面单出库流程
+            print("执行后置面单发货流程:")
             result = self.run_backend_label_delivery(delivery_order_info, delivery_order_detail, flow_flag)
         return result
 
 
 #
 if __name__ == "__main__":
-    delivery_order_code = "PRE-CK2302020021"
+    delivery_order_code = "PRE-CK2306280011"
     warehouse_id = 513
     flag = DeliveryFlow.call_package
     run = RunDelivery()
