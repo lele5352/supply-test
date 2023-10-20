@@ -79,7 +79,7 @@ class ScmDataGenerator:
         if not confirm_and_buy_res["code"]:
             log.error("采购需求确认并生单失败：%s" % confirm_and_buy_res)
         # 采购需求下单是异步，可能有延迟
-        time.sleep(1)
+        time.sleep(3)
         purchase_order_page_result = self.scm_app.get_purchase_order_page(order_no=plan_no)
         if not purchase_order_page_result["code"]:
             log.error("根据备货计划单号查询采购单号失败")
@@ -209,4 +209,4 @@ if __name__ == '__main__':
     # scm.create_purchase_demand(['14093131604'], 10, 'ESBH', '')
     # scm.create_wait_delivery_purchase_order(["14093131604"], 10, 'ESBH', '')
 
-    scm.create_distribute_order(["HW929O38V1"], 1, 'LINBH01', '')
+    scm.create_distribute_order(["HW929O38V1"], 20, 'HWBH', '')

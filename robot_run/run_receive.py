@@ -9,12 +9,17 @@ def query_wait_receive_data():
     return entry_order_list
 
 
-def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None):
+def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None, up_shelf_mode="kw",
+                is_all_up_shelf=True):
     """
     执行采购入库流程，默认执行全部
     :param need_quality_check: 是否需要质检
     :param distribute_order_code: 分货单号
-    :param flow_flag:流程标识，默认为空，执行全部；可选标识：confirm_received,finish_quality_check
+    :param flow_flag:流程标识，默认为空，执行全部；可选标识：confirm_received,finish_quality_check,handover
+    :param up_shelf_mode:上架方式，为空默认整托上架；可选标识："kw"-整托上架、"sku"-逐件上架
+    :param bool is_all_up_shelf: 是否全部上架
+
+
     @return:
     """
     order_data = wms_app.dbo.query_receive_entry_order_detail(distribute_order_code)
@@ -127,24 +132,45 @@ def run_receive(distribute_order_code, need_quality_check=False, flow_flag=None)
     if not wms_app.is_success(handover_result):
         return False, "Fail to handover to up shelf!"
 
+    # 如果流程节点指定为确认收货，则流程结束
+    if flow_flag == "handover":
+        return True, entry_order_code
+
     # 整托上架
     for sh_kw_code, sj_kw_code in zip(sh_kw_codes, sj_kw_codes):
         kw_detail_result = wms_app.receipt_location_detail(sh_kw_code)
         if not wms_app.is_success(kw_detail_result):
             return False, "Fail to get location received detail!"
 
-        up_shelf_result = wms_app.receipt_upshelf_whole_location(sh_kw_code, sj_kw_code)
-        if not wms_app.is_success(up_shelf_result):
-            return False, "Fail to up shelf by location!"
+        if up_shelf_mode == "kw":
+            up_shelf_result = wms_app.receipt_upshelf_whole_location(sh_kw_code, sj_kw_code)
+            if not wms_app.is_success(up_shelf_result):
+                return False, "Fail to up shelf by location!"
+            if not is_all_up_shelf:
+                return True, entry_order_code
+        elif up_shelf_mode == "sku":
+            sku_data = kw_detail_result.get("taskLocations").get("pendingSkuList")
+            for sku in sku_data:
+                items = [{
+                    "sourceLocCode": sh_kw_code,
+                    "targetLocCode": sj_kw_code,
+                    "skuCode": sku["skuCode"],
+                    "qty": 1,
+                    "operateType": 0
+                }]
+                up_shelf_result = wms_app.receipt_upshelf_by_sku(items)
+                if not wms_app.is_success(up_shelf_result):
+                    return False, "Fail to up shelf by sku!"
+                if not is_all_up_shelf:
+                    return True, entry_order_code
 
-    # 最后需要再调用上架完成接口，结束流程
-    complete_up_shelf_result = wms_app.receipt_complete_upshelf()
-    if not wms_app.is_success(complete_up_shelf_result):
-        return False, "Fail to complete up shelf!"
-
+        # 最后需要再调用上架完成接口，结束流程
+        complete_up_shelf_result = wms_app.receipt_complete_upshelf()
+        if not wms_app.is_success(complete_up_shelf_result):
+            return False, "Fail to complete up shelf!"
     return True, entry_order_code
 
 
 if __name__ == '__main__':
-    wms = run_receive('FH2308239971', False)
+    wms = run_receive('FH2310169673', False, up_shelf_mode="kw", is_all_up_shelf=True)
     print(wms)

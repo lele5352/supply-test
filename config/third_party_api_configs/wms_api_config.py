@@ -547,6 +547,19 @@ class ReceiptApiConfig:
         method = "POST"
         data = {"upshelfLocationCode": "KW-SJQ-01", "oldLocationCode": "TX-ZJ001"}
 
+    class UpShelfBySku(ApiConfig):
+        uri_path = "/api/ec-wms-api/upshelfV2/location/scanUpshelf"
+        method = "POST"
+        data = {
+            "items": [{
+                "sourceLocCode": "SHKW-002",
+                "targetLocCode": "SJKW-001",
+                "skuCode": "14093131604G01",
+                "qty": 1,
+                "operateType": 0
+            }]
+        }
+
     class CompleteUpShelf(ApiConfig):
         uri_path = "/api/ec-wms-api/upshelfV2/location/confirmUpshelf"
         method = "POST"

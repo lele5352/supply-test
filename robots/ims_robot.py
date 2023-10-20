@@ -1379,7 +1379,6 @@ class IMSRobot(ServiceRobot):
         # except :
         #     return False
 
-    @until(50, 0.2)
     def is_bom_stock_enough(self, sale_sku, bom, qty, warehouse_id, to_warehouse_id):
         """
         是否有指定数量库存
@@ -1399,6 +1398,18 @@ class IMSRobot(ServiceRobot):
                 return False
         except KeyError:
             return False
+
+    @until(50, 0.2)
+    def is_stock_enough(self, sale_sku, qty, warehouse_id, to_warehouse_id):
+        """
+        是否有指定数量库存
+        :param sale_sku: 销售sku编码
+        :param qty: 数量
+        :param warehouse_id: 仓库id
+        :param to_warehouse_id: 目的id
+        """
+        return qty <= self.dbo.query_central_inventory(
+            sale_sku, warehouse_id, to_warehouse_id).get("remain", 0)
 
 
 if __name__ == '__main__':

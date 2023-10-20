@@ -72,7 +72,8 @@ if __name__ == '__main__':
     # env188 = EnvManager(ServerInfoConfig.test_188, services.get('188'))
     # env189 = EnvManager(ServerInfoConfig.test_189, services.get('189'))
 
-    env160.restart_service('ec-warehouse-transfer-service')
+    env160.restart_service()
+    env159.restart_service()
 
     # env_uat_2222.restart_service()
     # env_uat_2221.restart_service()
