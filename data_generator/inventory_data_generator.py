@@ -80,7 +80,9 @@ class AddInventory:
         :param bom:bom版本
         :param sale_sku:销售sku编码
         """
-        wms_app.common_switch_warehouse(warehouse_id)
+        switch_res = wms_app.common_switch_warehouse(warehouse_id)
+        if not wms_app.is_success(switch_res):
+            return wms_app.formatted_result(switch_res)
         add_res = self.receipt_data.create_other_in_order_and_up_shelf(sale_sku, bom, count, warehouse_id,
                                                                        to_warehouse_id)
         return add_res
@@ -165,20 +167,20 @@ if __name__ == '__main__':
 
     # -------------------现货相关------------------------------------------------------------------------------------
     # 通过参数模板组装参数
-    # params = DataTemplate.spot_data_template("KK931075TA", "A", 799, 540, 540)
-    # params = DataTemplate.spot_data_template("COCOM974W132", "A", 1, 532, 532)
-    # params = DataTemplate.spot_data_template("COCOZE527222", "A", 177, 650, 650)
+    # params = DataTemplate.spot_data_template("HW7T265V96", "A", 10, 511, 513)
+    # params = DataTemplate.spot_data_template("HW7T265V96", "A", 5, 512, 0)
+    params = DataTemplate.spot_data_template("HW7T265V96", "A", 2000, 672, 672)
 
     # # 添加1发货仓现货库存，7中转仓现货库存、8备货仓现货库存，都用这个，控制warehouse_id和to_warehouse_id即可，没有
-    # data.add_in_stock_inventory(*params)
+    data.add_in_stock_inventory(*params)
 
     # -------------------采购相关------------------------------------------------------------------------------------
     # 通过参数模板组装参数
-    # params = DataTemplate.scm_data_template(["COCOZE527222"], 13, "ESZF", "ESZF")
+    # params = DataTemplate.scm_data_template(["HW7T265V96"], 2, "ESZF", "ESZF")
     # # 采购在途库存:3直发仓仓采购在途/9中转在途/10备货在途都用这个
     # data.add_purchase_on_way_inventory(*params)
     #
-    # # 采购申购库存:4采购申购/12备货仓申购都用这个
+    # # 采购申购库存:4采购申购（送货仓为中转，目的仓为发货仓）/12备货仓申购都用这个
     # data.add_purchase_wait_buy_inventory(*params)
     #
     # # 采购下单库存:6采购下单/13备货仓采购下单都用这个
@@ -187,16 +189,16 @@ if __name__ == '__main__':
     #
     # # -------------------------------------------------------------------------------------------------------
     # 通过参数模板组装参数
-    in_wid = 542
-    out_wid = 543
-    sku_code = "COCOZE527222"
-    params = DataTemplate.transfer_data_template(in_wid, 0, out_wid, out_wid, sku_code, "A", 150)
+    # out_id = 512
+    # out_to_id = 0
+    # in_id = 514
+    # in_to_id = 514
+
+    # sku_code = "HW7T265V96"
+    # params = DataTemplate.transfer_data_template(out_id, out_to_id, in_id, in_to_id, sku_code, "A", 10)
     # 调拨在途库存:2调拨在途
-    #data.add_transfer_on_way_inventory(*params)
+    # data.add_transfer_on_way_inventory(*params)
 
     #
     # # 调拨计划库存: 5调拨计划
     # data.add_transfer_plan_inventory(*params)
-    transfer_data = WmsTransferDataGenerator()
-    handover_order_no_list = transfer_data.generate_cds_cabin_order(sku_list=[sku_code], step=8, trans_in_id=in_wid,
-                                                                    trans_out_id=out_wid)
