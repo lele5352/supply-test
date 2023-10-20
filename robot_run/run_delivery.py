@@ -45,7 +45,6 @@ def check_status(get_status, status):
                 result = func(*args, **kwargs)
                 return result
             else:
-                # print("状态为%s,无需执行%s，跳过执行" % (order_status, func.__name__))
                 return {
                     "result": ExecuteResult.skipped,
                     "info": "状态为%s,跳过执行%s" % (order_status, func.__name__),
@@ -150,7 +149,7 @@ class RunDelivery:
 
     @check_status(get_delivery_order_status, [30])
     @check_status(get_delivery_order_package_status, [2])
-    def backend_save_package(self, delivery_order_code):
+    def execute_backend_save_package(self, delivery_order_code):
         # 获取出库单包裹方案信息
         package_info_result = self.wms_app.delivery_package_info(delivery_order_code)
         if not self.wms_app.is_success(package_info_result):
@@ -203,7 +202,6 @@ class RunDelivery:
         delivery_order_id = delivery_order_info["deliveryOrderId"]
         prod_type = delivery_order_info["operationMode"]
         transport_mode = delivery_order_info["transportMode"]
-
         pick_order_code_list = delivery_order_info["pickOrderCodeList"] or []
         pick_order_id_list = delivery_order_info["pickOrderIdList"] or []
 
@@ -251,7 +249,6 @@ class RunDelivery:
 
         # 创建拣货单
         create_pick_order_result = self.backend_execute_create_pick_order(delivery_order_code, prod_type)
-
         if create_pick_order_result.get("result") == ExecuteResult.fail:
             return "Fail", create_pick_order_result.get("info")
         elif create_pick_order_result.get("result") == ExecuteResult.skipped:
@@ -263,6 +260,7 @@ class RunDelivery:
                  pick_order["pickOrderId"]
                  ) for pick_order in create_pick_order_result.get("data")
             ]
+
         # 执行拣货
         for pick_order_code, pick_order_id in pick_order_list:
             pick_result = self.execute_pick(delivery_order_code, pick_order_code, pick_order_id)
@@ -270,11 +268,11 @@ class RunDelivery:
                 return "Fail", pick_result.get("info")
             if pick_result.get("result") == ExecuteResult.skipped:
                 self.execute_info += "跳过执行拣货%s-->" % pick_order_code
-
         # 如果流程标识为拣货完成，则执行就返回，中断流程
         if flow_flag == DeliveryFlow.confirm_pick:
             return "Success", self.execute_info
 
+        # 执行复核
         review_result = self.execute_review(delivery_order_code, delivery_order_id)
         if review_result.get("result") == ExecuteResult.fail:
             return "Fail", review_result.get("info")
@@ -304,7 +302,6 @@ class RunDelivery:
         delivery_order_id = delivery_order_info["deliveryOrderId"]
         prod_type = delivery_order_info["operationMode"]
         transport_mode = delivery_order_info["transportMode"]
-
         pick_order_code_list = delivery_order_info["pickOrderCodeList"] or []
         pick_order_id_list = delivery_order_info["pickOrderIdList"] or []
 
@@ -336,7 +333,6 @@ class RunDelivery:
 
         # 创建拣货单
         create_pick_order_result = self.backend_execute_create_pick_order(delivery_order_code, prod_type)
-
         if create_pick_order_result.get("result") == ExecuteResult.fail:
             return "Fail", create_pick_order_result.get("info")
         elif create_pick_order_result.get("result") == ExecuteResult.skipped:
@@ -345,9 +341,10 @@ class RunDelivery:
         else:
             pick_order_list = [
                 (pick_order["pickOrderCode"],
-                 pick_order["pickOrderId"]
-                 ) for pick_order in create_pick_order_result.get("data")
+                 pick_order["pickOrderId"])
+                for pick_order in create_pick_order_result.get("data")
             ]
+
         # 执行拣货
         for pick_order_code, pick_order_id in pick_order_list:
             pick_result = self.execute_pick(delivery_order_code, pick_order_code, pick_order_id)
@@ -358,8 +355,9 @@ class RunDelivery:
         # 如果流程标识为拣货完成，则执行就返回，中断流程
         if flow_flag == DeliveryFlow.confirm_pick:
             return "Success", self.execute_info
+
         # 维护包裹
-        save_package_result = self.backend_save_package(delivery_order_code)
+        save_package_result = self.execute_backend_save_package(delivery_order_code)
         if save_package_result.get("result") == ExecuteResult.fail:
             return "Fail", save_package_result.get("info")
         if save_package_result.get("result") == ExecuteResult.skipped:
@@ -380,6 +378,7 @@ class RunDelivery:
         if flow_flag == DeliveryFlow.call_label:
             return "Success", self.execute_info
 
+        # 执行复核
         review_result = self.execute_review(delivery_order_code, delivery_order_id)
         if review_result.get("result") == ExecuteResult.fail:
             return "Fail", review_result.get("info")
@@ -441,7 +440,7 @@ class RunDelivery:
 
 #
 if __name__ == "__main__":
-    delivery_order_code = "PRE-CK2306280004"
+    delivery_order_code = "PRE-CK2310190003"
     warehouse_id = 513
     flag = DeliveryFlow.call_package
     run = RunDelivery()
