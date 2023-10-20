@@ -36,6 +36,10 @@ class ADPSRobot(AppRobot):
             raise ValueError("解析hm账单数据为空")
 
         for i, row in enumerate(raw_data):
+            # 过滤支付单号为空的数据
+            if row[key_config.payment_code.description] is None:
+                continue
+
             # random_mis 为True时，选取一半数据，随机选取（支付单号、外部交易ID、卡组流水号）拼接 1
             if random_mis and i % 2 == 0:
                 random_key = random.choice([
@@ -54,7 +58,7 @@ class ADPSRobot(AppRobot):
                     key_config.card_group_code.value: row[key_config.card_group_code.description],
                     key_config.external_transaction_id.value: row[key_config.external_transaction_id.description],
                     key_config.currency.value: row[key_config.currency.description],
-                    key_config.pay_amount.value: row[key_config.pay_amount.description]
+                    key_config.pay_amount.value: abs(row[key_config.pay_amount.description])
                     }
 
             # 金额大于等于0 解析为 回款，小于0 则解析为 退款
