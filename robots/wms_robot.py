@@ -776,12 +776,12 @@ class WMSAppRobot(AppRobot):
     def delivery_create_pick_order(self, delivery_order_code, prod_type=0):
         """
         创建拣货单
-        :param prod_type: 0前置面单；1后置面单
+        :param prod_type: 1前置面单；2后置面单
         :param delivery_order_code: 销售出库单编码
         :return:
         """
         content = deepcopy(DeliveryApiConfig.CreatePickOrder.get_attributes())
-        if prod_type == 0:
+        if prod_type == 1:
             content["data"].update({
                 "singleDeliveryOrderCodes": [delivery_order_code],
                 "singleMaxQty": 1,  # 最大单数
