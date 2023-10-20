@@ -1,21 +1,84 @@
 import json
-import time
+import os
+import random
 from copy import deepcopy
 
-from config.third_party_api_configs.wms_api_config import *
-from robots.robot import ServiceRobot, AppRobot
+from config.third_party_api_configs.adps_api_config import *
+from robots.robot import AppRobot
 from dbo.adps_dbo import ADPSDBOperator
 from utils.log_handler import logger as log
 from utils.time_handler import HumanDateTime
+from utils.excel_handler import ExcelTool
 
 
-class ADPSAppRobot(AppRobot):
+class ADPSRobot(AppRobot):
     def __init__(self):
         self.dbo = ADPSDBOperator
         super().__init__()
 
+    def create_hm_from_file(self, file_path, key_config, payment_channel,
+                            channel_account, pay_time=None, random_mis=False):
+        """
+        读取excel文件，解析为hm账单
+        :param file_path: 文件路径
+        :param key_config: 文件字段映射类
+        :param payment_channel: 支付渠道
+        :param channel_account: 支付主体
+        :param pay_time: 支付时间
+        :param random_mis: 是否随机打乱数据（支付单号、外部交易ID、卡组流水号）
+        """
+        data_list = []
+        pay_at = pay_time or HumanDateTime().sub(days=30).human_time()
+        abs_file_path = os.path.abspath(file_path)
+        log.info("开始进行数据解析...")
+        raw_data = ExcelTool(abs_file_path).multi_read2dict()
+        if not raw_data:
+            raise ValueError("解析hm账单数据为空")
 
-    def get_hm_detail_by_db(self, payment_channel,channel_account,pay_at) -> list:
+        for i, row in enumerate(raw_data):
+            # 过滤支付单号为空的数据
+            if row[key_config.payment_code.description] is None:
+                continue
+
+            # random_mis 为True时，选取一半数据，随机选取（支付单号、外部交易ID、卡组流水号）拼接 1
+            if random_mis and i % 2 == 0:
+                random_key = random.choice([
+                    key_config.external_transaction_id.description,
+                    key_config.card_group_code.description,
+                    key_config.payment_code.description
+                ])
+                row[random_key] = f"{str(row[random_key])}_1" if row[random_key] is not None else row[random_key]
+
+            data = {"payment_channel": payment_channel, "channel_account": channel_account, "pay_at": pay_at,
+                    "country_code": "US", "site": "us", "card_type": "visa", "business_code": "1",
+                    "business_name": "商城订单", "bill_source": 10, "create_username": "自动化批量写入",
+                    "create_time": pay_at, "del_flag": 0,
+                    "payment_code": None, "refund_no": None,
+                    "account_status": AccountStatus.INIT.value,
+                    key_config.card_group_code.value: row[key_config.card_group_code.description],
+                    key_config.external_transaction_id.value: row[key_config.external_transaction_id.description],
+                    key_config.currency.value: row[key_config.currency.description],
+                    key_config.pay_amount.value: abs(row[key_config.pay_amount.description])
+                    }
+
+            # 金额大于等于0 解析为 回款，小于0 则解析为 退款
+            if row.get(key_config.pay_amount.description, 0) >= 0:
+                data[key_config.payment_code.value] = row[key_config.payment_code.description]
+                data["fee_item_name"] = Fee.CHARGE.description
+                data["fee_item_code"] = Fee.CHARGE.value
+
+            else:
+                data[key_config.refund_no.value] = row[key_config.refund_no.description]
+                data["fee_item_name"] = Fee.REFUND.description
+                data["fee_item_code"] = Fee.REFUND.value
+
+            data_list.append(data)
+
+        log.info(f"数据解析完成，总记录条数{len(data_list)}，开始执行批量写入")
+
+        self.dbo.batch_insert_hm(data_list, 2000)
+
+    def get_hm_detail_by_db(self, payment_channel, channel_account, pay_at) -> list:
         """
         从数据库获取HM账单状态为未对账的单据
         :param str payment_channel: 支付渠道
@@ -25,9 +88,7 @@ class ADPSAppRobot(AppRobot):
 
         :return list
         """
-        return self.dbo.query_hm_detail(payment_channel,channel_account,pay_at)
-
-
+        return self.dbo.query_hm_detail(payment_channel, channel_account, pay_at)
 
     def get_payment_channel_detail_by_db(self, payment_channel_code, legal_entity) -> list:
         """
@@ -39,15 +100,16 @@ class ADPSAppRobot(AppRobot):
         """
         return self.dbo.query_payment_channel_detail(payment_channel_code, legal_entity)
 
-
     def get_base_fee_item_by_db(self) -> list:
         """
         从数据库获取可以对账的费用项
         :return list
         """
-        result_sql=self.dbo.query_base_fee_item()
-        reconciliation_fee_list=[]
+        result_sql = self.dbo.query_base_fee_item()
+        reconciliation_fee_list = []
         for i in result_sql:
+            if list(filter(lambda i1: int(i1["amountType"]) == 100 and i1["reconciledFlag"] == 10,
+                           json.loads(i["amount_conf"]))) != []:
             if list(filter(lambda x: int(x["amountType"])==100 and x["reconciledFlag"]==10, json.loads(i["amount_conf"]))) != []:
                 reconciliation_fee_list.append(i)
         return reconciliation_fee_list

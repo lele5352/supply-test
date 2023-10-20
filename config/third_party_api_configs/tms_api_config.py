@@ -24,6 +24,7 @@ class TMSApiConfig:
         """
         经过调试，可正常试算下单的测试地址
         """
+        # 美国地址
         US = {
             "deliveryContactEmail": "et@aa.com",
             "countryCode": "US",
@@ -41,6 +42,7 @@ class TMSApiConfig:
             "contactPhone": "102-02931"
         }
 
+        # 德国地址
         DE = {
             "deliveryContactEmail": "et@aa.com",
             "countryCode": "DE",
@@ -58,6 +60,7 @@ class TMSApiConfig:
             "contactPhone": "102-02931"
         }
 
+        # 法国地址
         FR = {
             "deliveryContactEmail": "et@aa.com",
             "countryCode": "FR",
