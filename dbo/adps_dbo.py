@@ -14,9 +14,9 @@ class ADPSDBOperator:
         """
         with adps_db.cursor() as cursor:
             raw_sql = (
-                "select id,payment_code,card_group_code,external_transaction_id,fee_item_code "
+                "select id,upper(payment_code) as payment_code,upper(card_group_code) as card_group_code,upper(external_transaction_id) as external_transaction_id,fee_item_code,ABS(pay_amount) as pay_amount,currency "
                 "from re_hm_bill "
-                "where payment_channel = %s and del_flag = 0 and channel_account = %s and pay_at <= %s;"
+                "where payment_channel = %s and del_flag = 0 and channel_account = %s and pay_at < %s;"
             )
             cursor.execute(raw_sql, (payment_channel, channel_account,pay_at ))
             cursor.connection.commit()
@@ -60,7 +60,7 @@ class ADPSDBOperator:
         with adps_db.cursor() as cursor:
             raw_sql = (
 
-                "select rbd.bill_code,rbd.payment_code,rbd.item_code,rbd.trade_out_id,rbd.card_group_code,rbd.commission_relate_id "
+                "select rbd.bill_code,upper(rbd.payment_code)as payment_code,rbd.item_code,upper(rbd.trade_out_id) as trade_out_id,upper (rbd.card_group_code) as card_group_code,rbd.commission_relate_id,ABS(rbd.trade_amount) as trade_amount, rbd.trade_currency "
                 "from re_payment_channel_bill_detail rbd "
                 "left join  re_payment_channel_bill rb on rbd.bill_code = rb.bill_code where rb.payment_channel_code= %s and  rb.legal_entity= %s  and  rbd.state =10 and rbd.del_flag=0;"
             )
