@@ -1,6 +1,7 @@
 from cases import *
 from utils.log_handler import logger
 from utils.custom_wrapper import until
+from abc import ABC, abstractmethod
 
 
 class DeliveryFlow:
@@ -13,13 +14,13 @@ class DeliveryFlow:
 
 
 class ExecuteResult:
-    skipped = "skipped"
-    success = "success"
-    fail = "fail"
+    skipped = "Skipped"
+    success = "Success"
+    fail = "Fail"
 
 
 def get_delivery_order_info(delivery_order_code):
-    data = wms_app.dbo.get_delivery_order_info(delivery_order_code)
+    data = wms_app.dbo.query_delivery_order_info(delivery_order_code)
     if data:
         return data[0]
     return {}
@@ -49,7 +50,6 @@ def check_status(get_status, status_type, status):
             else:
                 return {
                     "result": ExecuteResult.skipped,
-                    "info": "状态为%s,跳过执行%s" % (order_status, func.__name__),
                     "data": ""
                 }
 
@@ -58,8 +58,7 @@ def check_status(get_status, status_type, status):
     return decorator
 
 
-class RunDelivery:
-
+class DeliveryProcessTemplate(ABC):
     def __init__(self, app_entity=None):
         self.wms_app = app_entity or wms_app
         self.execute_info = "开始-->"
@@ -82,40 +81,31 @@ class RunDelivery:
     def execute_assign_stock(self, delivery_order_code):
         assign_stock_result = self.wms_app.delivery_assign_stock([delivery_order_code])
         if not self.wms_app.is_success(assign_stock_result) or assign_stock_result["data"]["failNum"] > 0:
-            self.execute_info += "分配库存失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": assign_stock_result}
-        self.execute_info += "分配库存成功-->"
-        return {"result": ExecuteResult.success, "info": self.execute_info, "data": assign_stock_result}
+            return {"result": ExecuteResult.fail, "data": assign_stock_result}
+        return {"result": ExecuteResult.success, "data": assign_stock_result}
 
     @check_status(get_delivery_order_statuses, "package_status", [0, 1, 3])
     def execute_mock_package_call_back(self, delivery_order_code, transport_mode, order_sku_list):
         package_call_back_result = self.wms_app.delivery_mock_package_call_back(delivery_order_code, transport_mode,
                                                                                 order_sku_list)
         if not self.wms_app.is_success(package_call_back_result):
-            self.execute_info += "包裹方案回调失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": package_call_back_result}
-        self.execute_info += "回调包裹方案成功-->"
-
-        return {"result": ExecuteResult.success, "info": self.execute_info, "data": package_call_back_result}
+            return {"result": ExecuteResult.fail, "data": package_call_back_result}
+        return {"result": ExecuteResult.success, "data": package_call_back_result}
 
     @check_status(get_delivery_order_statuses, "express_status", [0, 1, 3])
     def execute_mock_label_call_back(self, delivery_order_code, package_list):
         label_call_back_result = self.wms_app.delivery_mock_label_callback(delivery_order_code, package_list)
         if not self.wms_app.is_success(label_call_back_result):
-            self.execute_info += "面单回调失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": label_call_back_result}
-        self.execute_info += "回调面单成功-->"
-        return {"result": ExecuteResult.success, "info": self.execute_info, "data": label_call_back_result}
+            return {"result": ExecuteResult.fail, "data": label_call_back_result}
+        return {"result": ExecuteResult.success, "data": label_call_back_result}
 
     @check_status(get_delivery_order_statuses, "order_status", [10])
     @check_status(get_delivery_order_statuses, "package_status", [2])
     def backend_execute_create_pick_order(self, delivery_order_code, prod_type):
         create_pick_order_result = self.wms_app.delivery_create_pick_order(delivery_order_code, prod_type)
         if not self.wms_app.is_success(create_pick_order_result):
-            self.execute_info += "创建拣货单失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": create_pick_order_result}
-        self.execute_info += "创建拣货单成功-->"
-        return {"result": ExecuteResult.success, "info": self.execute_info, "data": create_pick_order_result["data"]}
+            return {"result": ExecuteResult.fail, "data": create_pick_order_result}
+        return {"result": ExecuteResult.success, "data": create_pick_order_result}
 
     @check_status(get_delivery_order_statuses, "order_status", [20])
     def execute_pick(self, delivery_order_code, pick_order_code, pick_order_id):
@@ -123,12 +113,12 @@ class RunDelivery:
         assign_pick_user_result = self.wms_app.delivery_assign_pick_user(pick_order_code)
         if not self.wms_app.is_success(assign_pick_user_result):
             self.execute_info += "分配拣货人失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": assign_pick_user_result}
+            return {"result": ExecuteResult.fail, "data": assign_pick_user_result}
         # 获取拣货明细
         get_to_pick_data_result = self.wms_app.delivery_get_pick_data(pick_order_id)
         if not self.wms_app.is_success(get_to_pick_data_result):
             self.execute_info += "获取拣货单待拣货明细失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": get_to_pick_data_result}
+            return {"result": ExecuteResult.fail, "data": get_to_pick_data_result}
         to_pick_data = get_to_pick_data_result["data"]
 
         # 确认拣货，无异常，非短拣
@@ -144,10 +134,8 @@ class RunDelivery:
         # 确认拣货
         confirm_pick_result = self.wms_app.delivery_confirm_pick(pick_order_code, normal_list, [])
         if not self.wms_app.is_success(confirm_pick_result):
-            self.execute_info += "确认拣货失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": confirm_pick_result}
-        self.execute_info += "拣货成功-->"
-        return {"result": ExecuteResult.success, "info": self.execute_info, "data": confirm_pick_result}
+            return {"result": ExecuteResult.fail, "data": confirm_pick_result}
+        return {"result": ExecuteResult.success, "data": confirm_pick_result}
 
     @check_status(get_delivery_order_statuses, "order_status", [30])
     @check_status(get_delivery_order_statuses, "package_status", [2])
@@ -156,16 +144,14 @@ class RunDelivery:
         package_info_result = self.wms_app.delivery_package_info(delivery_order_code)
         if not self.wms_app.is_success(package_info_result):
             self.execute_info += "获取包裹方案信息失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": package_info_result}
+            return {"result": ExecuteResult.fail, "data": package_info_result}
         package_info = package_info_result["data"]
 
         # 提交维护包裹
         save_package_result = self.wms_app.delivery_save_package(package_info)
         if not self.wms_app.is_success(save_package_result):
-            self.execute_info += "提交维护包裹信息失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": save_package_result}
-        self.execute_info += "维护包裹成功-->"
-        return {"result": ExecuteResult.success, "info": self.execute_info, "data": save_package_result}
+            return {"result": ExecuteResult.fail, "data": save_package_result}
+        return {"result": ExecuteResult.success, "data": save_package_result}
 
     @check_status(get_delivery_order_statuses, "order_status", [30])
     def execute_review(self, delivery_order_code, delivery_order_id):
@@ -174,10 +160,8 @@ class RunDelivery:
         # 执行复核
         review_result = self.wms_app.delivery_review(normal_list, [])
         if not self.wms_app.is_success(review_result) or review_result["data"]["failSize"] > 0:
-            self.execute_info += "复核失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": review_result}
-        self.execute_info += "复核成功-->"
-        return {"result": ExecuteResult.success, "info": self.execute_info, "data": review_result}
+            return {"result": ExecuteResult.fail, "data": review_result}
+        return {"result": ExecuteResult.success, "data": review_result}
 
     @check_status(get_delivery_order_statuses, "order_status", [40])
     def execute_shipped(self, delivery_order_code, delivery_order_id):
@@ -187,240 +171,40 @@ class RunDelivery:
         # 执行发货
         shipping_result = self.wms_app.delivery_shipping(normal_ids, normal_codes, [])
         if not self.wms_app.is_success(shipping_result):
-            self.execute_info += "发货失败"
-            return {"result": ExecuteResult.fail, "info": self.execute_info, "data": shipping_result}
-        self.execute_info += "发货成功"
-        return {"result": ExecuteResult.success, "info": self.execute_info, "data": shipping_result}
+            return {"result": ExecuteResult.fail, "data": shipping_result}
+        return {"result": ExecuteResult.success, "data": shipping_result}
 
-    def run_front_label_delivery(self, delivery_order_info, delivery_order_detail, flow_flag=None):
-        """
-        执行前置面单销售出库单发货流程
-        :param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
-        :param delivery_order_detail: 出库单详情
-        :param delivery_order_info: 销售出库单信息
-        :return
-        """
-        delivery_order_code = delivery_order_info["deliveryOrderCode"]
-        delivery_order_id = delivery_order_info["deliveryOrderId"]
-        prod_type = delivery_order_info["operationMode"]
-        transport_mode = delivery_order_info["transportMode"]
-        pick_order_code_list = delivery_order_info["pickOrderCodeList"] or []
-        pick_order_id_list = delivery_order_info["pickOrderIdList"] or []
+    @abstractmethod
+    def execute_specific_flow(self, delivery_order_code, flow_flag):
+        # 执行特定流程的抽象方法，子类必须实现
+        pass
 
-        # 出库单分配库存
-        assign_result = self.execute_assign_stock(delivery_order_code)
-        if assign_result.get("result") == ExecuteResult.fail:
-            return "Fail", assign_result.get("info")
-        if assign_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行分配库存-->"
-        # 如果流程标识为分配库存，则执行就返回，中断流程
-        if flow_flag == DeliveryFlow.assign_stock:
-            return "Success", self.execute_info
-
-        # 提取出库单sku明细
-        order_sku_list = [
-            {
-                "skuCode": _["skuCode"], "skuName": _["skuName"], "num": _["skuQty"]
-            } for _ in delivery_order_detail["packageItems"]]
-
-        # 模拟包裹回调
-        mock_package_result = self.execute_mock_package_call_back(delivery_order_code, transport_mode, order_sku_list)
-        # 如果流程标识为生成包裹方案，则执行就返回，中断流程
-        if mock_package_result.get("result") == ExecuteResult.fail:
-            return "Fail", mock_package_result.get("info")
-        if mock_package_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行包裹方案回调-->"
-        if flow_flag == DeliveryFlow.call_package:
-            return "Success", self.execute_info
-
-        # 生成包裹是异步，有延迟，等待包裹数据生成
-        until(99, 0.5)(
-            lambda: self.wms_app.dbo.query_delivery_order_package_info(delivery_order_code) is not None)()
-
-        # 获取维护好的包裹信息
-        package_list = self.wms_app.db_get_delivery_order_package_list(delivery_order_code)
-        # 面单回调
-        mock_label_result = self.execute_mock_label_call_back(delivery_order_code, package_list)
-        if mock_label_result.get("result") == ExecuteResult.fail:
-            return "Fail", mock_label_result.get("info")
-        if mock_label_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行面单回调-->"
-        # 如果流程标识为生成面单，则执行就返回，中断流程
-        if flow_flag == DeliveryFlow.call_label:
-            return "Success", self.execute_info
-
-        # 创建拣货单
-        create_pick_order_result = self.backend_execute_create_pick_order(delivery_order_code, prod_type)
-        if create_pick_order_result.get("result") == ExecuteResult.fail:
-            return "Fail", create_pick_order_result.get("info")
-        elif create_pick_order_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行创建拣货单-->"
-            pick_order_list = list(zip(pick_order_code_list, pick_order_id_list))
+    def handle_result(self, execute_result, success_msg="", fail_msg="", skipped_msg=""):
+        if execute_result.get("result") == ExecuteResult.fail:
+            self.execute_info += fail_msg
+            return ExecuteResult.fail
+        elif execute_result.get("result") == ExecuteResult.skipped:
+            self.execute_info += skipped_msg
+            return ExecuteResult.skipped
         else:
-            pick_order_list = [
-                (pick_order["pickOrderCode"],
-                 pick_order["pickOrderId"]
-                 ) for pick_order in create_pick_order_result.get("data")
-            ]
+            self.execute_info += success_msg
+            return execute_result.get("data")
 
-        # 执行拣货
-        for pick_order_code, pick_order_id in pick_order_list:
-            pick_result = self.execute_pick(delivery_order_code, pick_order_code, pick_order_id)
-            if pick_result.get("result") == ExecuteResult.fail:
-                return "Fail", pick_result.get("info")
-            if pick_result.get("result") == ExecuteResult.skipped:
-                self.execute_info += "跳过执行拣货%s-->" % pick_order_code
-        # 如果流程标识为拣货完成，则执行就返回，中断流程
-        if flow_flag == DeliveryFlow.confirm_pick:
-            return "Success", self.execute_info
-
-        # 执行复核
-        review_result = self.execute_review(delivery_order_code, delivery_order_id)
-        if review_result.get("result") == ExecuteResult.fail:
-            return "Fail", review_result.get("info")
-        if review_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行复核-->"
-        # 如果流程标识为完成复核，则执行就返回，中断流程
-        if flow_flag == "finish_review":
-            return "Success", self.execute_info
-
-        # 执行发货
-        shipped_result = self.execute_shipped(delivery_order_code, delivery_order_id)
-        if shipped_result.get("result") == ExecuteResult.fail:
-            return "Fail", shipped_result.get("info")
-        if shipped_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行发货"
-        return "Success", self.execute_info
-
-    def run_backend_label_delivery(self, delivery_order_info, delivery_order_detail, flow_flag=None):
+    def run_delivery(self, delivery_order_info, flow_flag=None):
         """
         执行后置面单销售出库单发货流程
+        :param delivery_order_info: 通过数据库查询到的销售出库单表的数据
         :param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
-        :param delivery_order_detail: 销售出库单详情
-        :param delivery_order_info: 销售出库单信息
         :return:
         """
-        delivery_order_code = delivery_order_info["deliveryOrderCode"]
-        delivery_order_id = delivery_order_info["deliveryOrderId"]
-        prod_type = delivery_order_info["operationMode"]
-        transport_mode = delivery_order_info["transportMode"]
-        pick_order_code_list = delivery_order_info["pickOrderCodeList"] or []
-        pick_order_id_list = delivery_order_info["pickOrderIdList"] or []
-
-        # 出库单分配库存
-        assign_result = self.execute_assign_stock(delivery_order_code)
-        if assign_result.get("result") == ExecuteResult.fail:
-            return "Fail", assign_result.get("info")
-        if assign_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行分配库存-->"
-        # 如果流程标识为分配库存，则执行就返回，中断流程
-        if flow_flag == DeliveryFlow.assign_stock:
-            return "Success", self.execute_info
-
-        # 提取出库单sku明细
-        order_sku_list = [
-            {
-                "skuCode": _["skuCode"], "skuName": _["skuName"], "num": _["skuQty"]
-            } for _ in delivery_order_detail["packageItems"]]
-
-        # 模拟包裹回调
-        mock_package_result = self.execute_mock_package_call_back(delivery_order_code, transport_mode, order_sku_list)
-        # 如果流程标识为生成包裹方案，则执行就返回，中断流程
-        if mock_package_result.get("result") == ExecuteResult.fail:
-            return "Fail", mock_package_result.get("info")
-        if mock_package_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行包裹方案回调-->"
-        if flow_flag == DeliveryFlow.call_package:
-            return "Success", self.execute_info
-
-        # 创建拣货单
-        create_pick_order_result = self.backend_execute_create_pick_order(delivery_order_code, prod_type)
-        if create_pick_order_result.get("result") == ExecuteResult.fail:
-            return "Fail", create_pick_order_result.get("info")
-        elif create_pick_order_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行创建拣货单-->"
-            pick_order_list = list(zip(pick_order_code_list, pick_order_id_list))
-        else:
-            pick_order_list = [
-                (pick_order["pickOrderCode"],
-                 pick_order["pickOrderId"])
-                for pick_order in create_pick_order_result.get("data")
-            ]
-
-        # 执行拣货
-        for pick_order_code, pick_order_id in pick_order_list:
-            pick_result = self.execute_pick(delivery_order_code, pick_order_code, pick_order_id)
-            if pick_result.get("result") == ExecuteResult.fail:
-                return "Fail", pick_result.get("info")
-            if pick_result.get("result") == ExecuteResult.skipped:
-                self.execute_info += "跳过执行拣货%s-->" % pick_order_code
-        # 如果流程标识为拣货完成，则执行就返回，中断流程
-        if flow_flag == DeliveryFlow.confirm_pick:
-            return "Success", self.execute_info
-
-        # 维护包裹
-        save_package_result = self.execute_backend_save_package(delivery_order_code)
-        if save_package_result.get("result") == ExecuteResult.fail:
-            return "Fail", save_package_result.get("info")
-        if save_package_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行维护包裹-->"
-        # 如果流程标识为维护包裹完成，则执行就返回，中断流程
-        if flow_flag == DeliveryFlow.save_package:
-            return "Success", self.execute_info
-
-        # 获取维护好的包裹信息
-        package_list = self.wms_app.db_get_delivery_order_package_list(delivery_order_code)
-        # 面单回调
-        mock_label_result = self.execute_mock_label_call_back(delivery_order_code, package_list)
-        if mock_label_result.get("result") == ExecuteResult.fail:
-            return "Fail", mock_label_result.get("info")
-        if mock_label_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行面单回调-->"
-        # 如果流程标识为生成面单，则执行就返回，中断流程
-        if flow_flag == DeliveryFlow.call_label:
-            return "Success", self.execute_info
-
-        # 执行复核
-        review_result = self.execute_review(delivery_order_code, delivery_order_id)
-        if review_result.get("result") == ExecuteResult.fail:
-            return "Fail", review_result.get("info")
-        if review_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行复核-->"
-        # 如果流程标识为完成复核，则执行就返回，中断流程
-        if flow_flag == "finish_review":
-            return "Success", self.execute_info
-
-        # 执行发货
-        shipped_result = self.execute_shipped(delivery_order_code, delivery_order_id)
-        if shipped_result.get("result") == ExecuteResult.fail:
-            return "Fail", shipped_result.get("info")
-        if shipped_result.get("result") == ExecuteResult.skipped:
-            self.execute_info += "跳过执行发货"
-        return "Success", self.execute_info
-
-    def run_delivery(self, delivery_order_code, warehouse_id, flow_flag=None):
-        """
-        执行销售出库发货流程
-        :param flow_flag: 流程标识，默认为空，执行全部；可选标识：assign_stock,confirm_pick,call_package,call_label,finish_review
-        :param warehouse_id: 仓库id
-        :param delivery_order_code: 销售出库单号列表
-        :return:
-        """
+        # 通过查询获取出库单所属仓库
+        warehouse_id = delivery_order_info.get("warehouse_id")
+        delivery_order_id = delivery_order_info["id"]
+        transport_mode = delivery_order_info["transport_mode"]
+        # 切换到对应仓库
         switch_result = self.wms_app.common_switch_warehouse(warehouse_id)
         if not self.wms_app.is_success(switch_result):
             return "Fail", "Fail to switch warehouse!"
-
-        # 通过销售出库单列表用出库单号查询获取销售出库单信息
-        delivery_order_page_result = self.wms_app.delivery_get_delivery_order_page([delivery_order_code])
-        if not self.wms_app.is_success(delivery_order_page_result) or self.wms_app.is_data_empty(
-                delivery_order_page_result):
-            return "Fail", "Fail to get delivery order page info"
-
-        delivery_order_info = delivery_order_page_result["data"]["records"][0]
-        delivery_order_id = delivery_order_info["deliveryOrderId"]
-
-        # 提取出库单作业模式
-        operate_mode = delivery_order_info["operationMode"]
 
         # 获取出库单明细
         delivery_order_detail_result = self.wms_app.delivery_get_delivery_order_detail(delivery_order_id)
@@ -429,20 +213,192 @@ class RunDelivery:
 
         delivery_order_detail = delivery_order_detail_result["data"]
 
-        if operate_mode == 1:
-            # 作业模式为1代表前置面单，执行前置面单出库流程
-            print("执行前置面单发货流程:")
-            result = self.run_front_label_delivery(delivery_order_info, delivery_order_detail, flow_flag)
+        # 出库单分配库存
+        assign_res = self.execute_assign_stock(delivery_order_code)
+        assign_result = self.handle_result(assign_res, "分配库存成功-->", "分配库存失败", "跳过执行分配库存-->")
+        if assign_result == ExecuteResult.fail:
+            return "Fail", self.execute_info
+        # 如果流程标识为分配库存，则执行就返回，中断流程
+        if flow_flag == DeliveryFlow.assign_stock:
+            self.execute_info += "流程结束"
+            return "Success", self.execute_info
+
+        # 提取出库单sku明细
+        order_sku_list = [
+            {
+                "skuCode": _["skuCode"], "skuName": _["skuName"], "num": _["skuQty"]
+            } for _ in delivery_order_detail["packageItems"]]
+
+        # 模拟包裹回调
+        mock_pkg_res = self.execute_mock_package_call_back(delivery_order_code, transport_mode, order_sku_list)
+        mock_pkg_result = self.handle_result(mock_pkg_res, "包裹方案回调成功-->", "包裹方案回调失败",
+                                             "跳过回调包裹方案-->")
+        # 如果流程标识为生成包裹方案，则执行就返回，中断流程
+        if mock_pkg_result == ExecuteResult.fail:
+            return "Fail", self.execute_info
+        if flow_flag == DeliveryFlow.call_package:
+            self.execute_info += "流程结束"
+            return "Success", self.execute_info
+
+        result, info = self.execute_specific_flow(delivery_order_code, flow_flag)
+        if result == ExecuteResult.fail:
+            return "Fail", info
+        # 子类里面执行结果为成功时代表子类行为触发了流程标识需要中断流程，所以这里强行退出
+        elif result == ExecuteResult.success:
+            return "Success", info
+
+        # 执行复核
+        review_res = self.execute_review(delivery_order_code, delivery_order_id)
+        review_result = self.handle_result(review_res, "复核成功-->", "复核失败", "跳过复核-->")
+        if review_result == ExecuteResult.fail:
+            return "Fail", self.execute_info
+        # 如果流程标识为完成复核，则执行就返回，中断流程
+        if flow_flag == "finish_review":
+            self.execute_info += "流程结束"
+            return "Success", self.execute_info
+
+        # 执行发货
+        shipped_res = self.execute_shipped(delivery_order_code, delivery_order_id)
+        shipped_result = self.handle_result(shipped_res, "发货成功", "发货失败", "跳过发货")
+        if shipped_result == ExecuteResult.fail:
+            return "Fail", self.execute_info
+        return "Success", self.execute_info
+
+
+class FrontLabelDeliveryProcess(DeliveryProcessTemplate):
+    def execute_specific_flow(self, delivery_order_code, flow_flag):
+        # 通过销售出库单列表用出库单号查询获取销售出库单信息
+        query_result = self.wms_app.delivery_get_delivery_order_page([delivery_order_code])
+        if not self.wms_app.is_success(query_result) or self.wms_app.is_data_empty(query_result):
+            return "Fail", "Fail to get delivery order page info"
+
+        delivery_order_info = query_result["data"]["records"][0]
+
+        prod_type = delivery_order_info["operationMode"]
+        pick_order_code_list = delivery_order_info["pickOrderCodeList"] or []
+        pick_order_id_list = delivery_order_info["pickOrderIdList"] or []
+
+        # 生成包裹是异步，有延迟，等待包裹数据生成
+        until(99, 0.5)(
+            lambda: self.wms_app.dbo.query_delivery_order_package_info(delivery_order_code) is not None)()
+        # 获取维护好的包裹信息
+        package_list = self.wms_app.db_get_delivery_order_package_list(delivery_order_code)
+
+        # 面单回调
+        mock_label_res = self.execute_mock_label_call_back(delivery_order_code, package_list)
+        mock_label_result = self.handle_result(mock_label_res, "面单回调成功-->", "面单回调失败", "跳过回调面单-->")
+        if mock_label_result == ExecuteResult.fail:
+            return "Fail", self.execute_info
+        # 如果流程标识为生成面单，则执行就返回，中断流程
+        if flow_flag == DeliveryFlow.call_label:
+            self.execute_info += "流程结束"
+            return "Success", self.execute_info
+
+        # 创建拣货单
+        create_pick_order_res = self.backend_execute_create_pick_order(delivery_order_code, prod_type)
+        create_result = self.handle_result(create_pick_order_res, "创建拣货单成功-->", "创建拣货单失败",
+                                           "跳过创建拣货单-->")
+        if create_result == ExecuteResult.fail:
+            return "Fail", self.execute_info
+        elif create_result == ExecuteResult.skipped:
+            pick_order_list = list(zip(pick_order_code_list, pick_order_id_list))
         else:
-            # 其他代表后置面单，执行后置面单出库流程
-            print("执行后置面单发货流程:")
-            result = self.run_backend_label_delivery(delivery_order_info, delivery_order_detail, flow_flag)
-        return result
+            pick_order_list = [
+                (pick_order["pickOrderCode"],
+                 pick_order["pickOrderId"])
+                for pick_order in create_result.get("data")
+            ]
+
+        # 执行拣货
+        for pick_order_code, pick_order_id in pick_order_list:
+            pick_res = self.execute_pick(delivery_order_code, pick_order_code, pick_order_id)
+            pick_result = self.handle_result(pick_res, "拣货成功-->", "拣货失败", f"跳过拣货{pick_order_code}-->")
+            if pick_result == ExecuteResult.fail:
+                return "Fail", self.execute_info
+        # 如果流程标识为拣货完成，则执行就返回，中断流程
+        if flow_flag == DeliveryFlow.confirm_pick:
+            self.execute_info += "流程结束"
+            return "Success", self.execute_info
+        return "Continue", self.execute_info
+
+
+class BackendLabelDeliveryProcess(DeliveryProcessTemplate):
+    def execute_specific_flow(self, delivery_order_info, flow_flag):
+        # 通过销售出库单列表用出库单号查询获取销售出库单信息
+        query_result = self.wms_app.delivery_get_delivery_order_page([delivery_order_code])
+        if not self.wms_app.is_success(query_result) or self.wms_app.is_data_empty(query_result):
+            return "Fail", "Fail to get delivery order page info"
+
+        delivery_order_info = query_result["data"]["records"][0]
+
+        prod_type = delivery_order_info["operationMode"]
+        pick_order_code_list = delivery_order_info["pickOrderCodeList"] or []
+        pick_order_id_list = delivery_order_info["pickOrderIdList"] or []
+        # 创建拣货单
+        create_pick_order_res = self.backend_execute_create_pick_order(delivery_order_code, prod_type)
+        create_result = self.handle_result(create_pick_order_res, "创建拣货单成功-->", "创建拣货单失败",
+                                           "跳过创建拣货单-->")
+        if create_result == ExecuteResult.fail:
+            return "Fail", self.execute_info
+        elif create_result == ExecuteResult.skipped:
+            pick_order_list = list(zip(pick_order_code_list, pick_order_id_list))
+        else:
+            pick_order_list = [
+                (pick_order["pickOrderCode"],
+                 pick_order["pickOrderId"])
+                for pick_order in create_result.get("data")
+            ]
+
+        # 执行拣货
+        for pick_order_code, pick_order_id in pick_order_list:
+            pick_res = self.execute_pick(delivery_order_code, pick_order_code, pick_order_id)
+            pick_result = self.handle_result(pick_res, "拣货成功-->", "拣货失败", f"跳过拣货{pick_order_code}-->")
+            if pick_result == ExecuteResult.fail:
+                return "Fail", self.execute_info
+        # 如果流程标识为拣货完成，则执行就返回，中断流程
+        if flow_flag == DeliveryFlow.confirm_pick:
+            self.execute_info += "流程结束"
+            return "Success", self.execute_info
+
+        # 维护包裹
+        save_package_res = self.execute_backend_save_package(delivery_order_code)
+        save_package_result = self.handle_result(save_package_res, "维护包裹成功-->", "维护包裹失败", "跳过维护包裹-->")
+        if save_package_result == ExecuteResult.fail:
+            return "Fail", self.execute_info
+        # 如果流程标识为维护包裹完成，则执行就返回，中断流程
+        if flow_flag == DeliveryFlow.save_package:
+            self.execute_info += "流程结束"
+            return "Success", self.execute_info
+
+        # 获取维护好的包裹信息
+        package_list = self.wms_app.db_get_delivery_order_package_list(delivery_order_code)
+        # 面单回调
+        mock_label_res = self.execute_mock_label_call_back(delivery_order_code, package_list)
+        mock_label_result = self.handle_result(mock_label_res, "面单回调成功-->", "面单回调失败", "跳过回调面单-->")
+        if mock_label_result == ExecuteResult.fail:
+            return "Fail", self.execute_info
+        # 如果流程标识为生成面单，则执行就返回，中断流程
+        if flow_flag == DeliveryFlow.call_label:
+            self.execute_info += "流程结束"
+            return "Success", self.execute_info
+        return "Continue", self.execute_info
+
+
+def main(delivery_order_code, flow_flag):
+    delivery_order_info = get_delivery_order_info(delivery_order_code)
+    operate_mode = delivery_order_info.get("operation_mode")
+    if operate_mode == 1:
+        # 作业模式为1代表前置面单，执行前置面单出库流程
+        print("执行前置面单发货流程:")
+        result = FrontLabelDeliveryProcess().run_delivery(delivery_order_info, flow_flag)
+    else:
+        # 其他代表后置面单，执行后置面单出库流程
+        print("执行后置面单发货流程:")
+        result = BackendLabelDeliveryProcess().run_delivery(delivery_order_info, flow_flag)
+    return result
 
 
 if __name__ == "__main__":
-    delivery_order_code = "PRE-CK2310200003"
-    warehouse_id = 513
-    flag = DeliveryFlow.call_package
-    run = RunDelivery()
-    print(run.run_delivery(delivery_order_code, warehouse_id))
+    delivery_order_code = "PRE-CK2211100004"
+    flag = DeliveryFlow.confirm_pick
+    print(main(delivery_order_code, flag))
