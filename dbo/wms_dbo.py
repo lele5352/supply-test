@@ -208,7 +208,7 @@ class WMSDBOperator:
                 for i in items]
 
     @classmethod
-    def get_delivery_order_info(cls, delivery_order_code):
+    def query_delivery_order_info(cls, delivery_order_code):
         """
         获取出库单信息
         :param string delivery_order_code:销售出库单号
