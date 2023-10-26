@@ -7,6 +7,7 @@ from robots.robot import ServiceRobot, AppRobot
 from dbo.wms_dbo import WMSDBOperator
 from utils.log_handler import logger as log
 from utils.time_handler import HumanDateTime
+from utils.random_code import get_random_code
 
 
 class WMSAppRobot(AppRobot):
@@ -299,17 +300,19 @@ class WMSAppRobot(AppRobot):
         confirm_pick_res = self.call_api(**content)
         return self.formatted_result(confirm_pick_res)
 
-    def transfer_out_submit_tray(self, pick_order_code, pick_order_details, tp_kw_ids):
+    def transfer_out_submit_tray(self, pick_order_code, pick_order_details, tp_kw_ids, batch_no=None):
         """
         调拨按需装托
         :param str pick_order_code: 拣货单号
         :param dict pick_order_details: 拣货单详情数据
         :param list tp_kw_ids: 托盘库位id列表
+        :param batch_no: 批次号，不传时随机生成一个单号
         """
         # 获取托盘编码
         tp_kw_codes = [self.db_kw_id_to_code(kw_id) for kw_id in tp_kw_ids]
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         tray_info_list = list()
+        batch_no = batch_no or get_random_code('AUTO_F', 8)
         for detail, code in zip(pick_order_details, tp_kw_codes):
             tray_info_list.append(
                 {
@@ -320,7 +323,7 @@ class WMSAppRobot(AppRobot):
                         "goodsSkuCode": detail["goodsSkuCode"],
                         "skuQty": detail["shouldPickQty"],
                         "batchInfos": [{
-                            "batchNo": "",
+                            "batchNo": batch_no,
                             "skuQty": detail["shouldPickQty"]
                         }]
                     }]

@@ -26,9 +26,12 @@ class RandomCode(object):
         :rtype: list[str]
         """
         code_list = [
-            self.prefix + ''.join(random.sample(
-                self.RANDOM_RANGE, self.suffix_length
-            ))
+            self.prefix + ''.join(
+                random.sample(
+                    self.RANDOM_RANGE,
+                    self.suffix_length
+                )
+            )
             for _ in range(count)
         ]
         if self.name:
@@ -77,7 +80,7 @@ def get_random_code(
     :param type random_cls: 编码规则类，用于指定后缀随机字符的范围，默认为数字加大小写字符
     :rtype: str | list[str]
     """
-    code_list = random_cls(prefix, suffix_length, name).barcode_generate(count)
+    code_list = random_cls(prefix, suffix_length, name).generate(count)
     if len(code_list) == 1:
         return code_list[0]
     else:

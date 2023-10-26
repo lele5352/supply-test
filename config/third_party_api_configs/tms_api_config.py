@@ -39,7 +39,7 @@ class TMSApiConfig:
             "firstName": "Will",
             "lastName": "Wilde",
             "contactEmail": "et@aa.com",
-            "contactPhone": "102-02931"
+            "contactPhone": "248 378 8218"
         }
 
         # 德国地址

@@ -7,6 +7,26 @@ from threading import Thread
 import json
 
 
+def exec_spend(func):
+    """记录方法的执行耗时"""
+
+    @wraps(func)
+    def inner(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        try:
+            log.info(
+                'Function [%s.%s] spend: [%0.8fs]'
+                % (func.__module__, func.__qualname__, (end - start))
+            )
+        except Exception as e:
+            log.error(e)
+        return result
+
+    return inner
+
+
 def until(try_times: int, gap: [int, float]):
     """等待装饰器，运行等待时间，func返回值为真或超过重试次数时退出
 
@@ -56,7 +76,6 @@ def until_false(try_times: int, gap: [int, float]):
 
 
 def deserialize(func):
-
     """装饰器，反序列化字符串"""
 
     @wraps(func)
@@ -83,6 +102,7 @@ def deserialize(func):
 
 def async_call(func):
     """装饰器，异步线程执行"""
+
     def wrapper(*args, **kwargs):
         Thread(target=func, args=args, kwargs=kwargs).start()
 
@@ -95,6 +115,7 @@ def extract_json(json_path):
     可用于通用的接口返回，提取结果
     被装饰的函数必须保证返回结果是可以被 json.loads() 解析的有效 JSON 数据类型
     """
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -118,10 +139,3 @@ def extract_json(json_path):
         return wrapper
 
     return decorator
-
-
-
-
-
-
-
