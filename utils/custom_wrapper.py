@@ -35,6 +35,7 @@ def until(try_times: int, gap: [int, float]):
     """
 
     def wrapper(func):
+        @wraps(func)
         def inner(*args, **kwargs):
             result = False
             for i in range(try_times):
@@ -59,6 +60,7 @@ def until_false(try_times: int, gap: [int, float]):
     """
 
     def wrapper(func):
+        @wraps(func)
         def inner(*args, **kwargs):
             result = True
             for i in range(try_times):
