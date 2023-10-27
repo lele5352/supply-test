@@ -27,9 +27,9 @@ class RandomCode(object):
         """
         code_list = [
             self.prefix + ''.join(
-                random.sample(
+                random.choices(
                     self.RANDOM_RANGE,
-                    self.suffix_length
+                    k=self.suffix_length
                 )
             )
             for _ in range(count)

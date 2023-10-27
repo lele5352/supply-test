@@ -7,7 +7,7 @@ from robots.robot import ServiceRobot, AppRobot
 from dbo.wms_dbo import WMSDBOperator
 from utils.log_handler import logger as log
 from utils.time_handler import HumanDateTime
-from utils.random_code import get_random_code
+from utils.random_code import get_number_random_code
 
 
 class WMSAppRobot(AppRobot):
@@ -312,7 +312,7 @@ class WMSAppRobot(AppRobot):
         tp_kw_codes = [self.db_kw_id_to_code(kw_id) for kw_id in tp_kw_ids]
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         tray_info_list = list()
-        batch_no = batch_no or get_random_code('AUTO_F', 8)
+        batch_no = batch_no or get_number_random_code('AUTO_F', 8)
         for detail, code in zip(pick_order_details, tp_kw_codes):
             tray_info_list.append(
                 {
