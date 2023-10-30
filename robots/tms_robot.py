@@ -246,7 +246,7 @@ class HomaryTMS(ServiceRobot):
             insure_currency: 投保币种
         """
         body["pickInfo"] = {
-            "pickDate": kwargs.get('pick_date', HumanDateTime().add(days=3).human_time()),
+            "pickDate": kwargs.get('pick_date', HumanDateTime().add(days=5).human_time()),
             "minPickTime": kwargs.get('min_pick', '08:00'),
             "maxPickTime": kwargs.get('max_pick', '17:00'),
             "minDeliveryTime": kwargs.get('min_delivery', '08:00'),
