@@ -89,12 +89,12 @@ class FMSAppRobot(AppRobot):
 
         return [] if not res.get("data") else res.get("data")
 
-    def auto_save_expect_fee_item(self, fee_type: int, num: int = 1):
+    def auto_save_expect_fee_item(self, fee_type: int, num: int = 1, unit=10):
         """
         创建预估费用项
         """
         result_ids = []
-        sea_type = fms_api_config.FmsEnum.TransactionType.SEA.value.get("value")
+        sea_type = fms_api_config.TransactionType.SEA.value
         fee_list = self.get_fee_item_list()
 
         if not fee_list:
@@ -133,14 +133,14 @@ class FMSAppRobot(AppRobot):
                 "servicer": servicer_code,
                 "transportType": random.choice(
                     [
-                        item.value.get('value')
-                        for item in fms_api_config.FmsEnum.TransportType
+                        item.value
+                        for item in fms_api_config.TransportType
                     ]
                 ),
                 "transactionType": random.choice(
                     [
-                        item.value.get("value")
-                        for item in fms_api_config.FmsEnum.TransactionType
+                        item.value
+                        for item in fms_api_config.TransactionType
                         if item.name != "SEA"
                     ]
                 ),
@@ -171,7 +171,8 @@ class FMSAppRobot(AppRobot):
                         "length": 10,
                         "width": 10,
                         "high": 10,
-                        "weight": 5
+                        "weight": 5,
+                        "unit": unit
                     }
                 ]
             }

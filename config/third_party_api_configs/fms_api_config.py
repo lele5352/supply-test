@@ -1,49 +1,50 @@
-from config.third_party_api_configs import ApiConfig
-from enum import Enum
+from config.third_party_api_configs import ApiConfig, BizEnum
 
 
-class FmsEnum:
+class FeeItemType(BizEnum):
+    """费用项类型枚举"""
+    LAST_FARE = (1, "尾程费用")  # 尾程费用
+    RE_FARE = (2, "客退运费")  # 客退运费
+    DIRECT_FARE = (3, "直发运费")  # 直发运费
+    CARRIER_FARE = (4, "承运商赔款")  # 承运商赔款
+    FBA_FARE = (5, "FBA运费")  # FBA运费
+    SEA_FARE = (6, "海运费")  # 海运费
+    SPECIAL_FARE = (99, "特殊运费")  # 特殊运费
 
-    class FeeItemType(Enum):
-        """费用项类型枚举"""
-        LAST_FARE = {"name": "尾程费用", "value": 1}  # 尾程费用
-        RE_FARE = {"name": "客退运费", "value": 2}  # 客退运费
-        DIRECT_FARE = {"name": "直发运费", "value": 3}  # 直发运费
-        CARRIER_FARE = {"name": "承运商赔款", "value": 4}  # 承运商赔款
-        FBA_FARE = {"name": "FBA运费", "value": 5}  # FBA运费
-        SEA_FARE = {"name": "海运费", "value": 6}  # 海运费
-        SPECIAL_FARE = {"name": "特殊运费", "value": 99}  # 特殊运费
 
-    class FeeItemCategory(Enum):
-        """费用项分类枚举"""
-        REGULAR = {"name": "常规费用", "value": 1}  # 常规费用
-        TARIFF = {"name": "关税费用", "value": 2}  # 关税费用
+class FeeItemCategory(BizEnum):
+    """费用项分类枚举"""
+    REGULAR = (1, "常规费用")  # 常规费用
+    TARIFF = (2, "关税费用")  # 关税费用
 
-    class TransportType(Enum):
-        """运输类型枚举"""
-        EXPRESS = {"name": "快递", "value": 1}
-        CAR = {"name": "卡车", "value": 2}
-        SEA = {"name": "海运", "value": 3}
-        LINE = {"name": "专线", "value": 4}
-        PACKET = {"name": "小包", "value": 5}
-        INTERNAL_DIRECT = {"name": "国内直发", "value": 6}
-        INTERNAL_TRANSPORT = {"name": "国内运输", "value": 7}
-        INTERNATIONAL_TRANSPORT = {"name": "国际运输", "value": 8}
 
-    class TransactionType(Enum):
-        """单据类型枚举"""
-        SALES = {"name": "销售单", "value": 1}
-        SEA = {"name": "海运单", "value": 2}
-        REISSUE = {"name": "补发单", "value": 3}
-        CUSTOMER_RE = {"name": "客退单", "value": 4}
+class TransportType(BizEnum):
+    """运输类型枚举"""
+    EXPRESS = (1, "快递")
+    CAR = (2, "卡车")
+    SEA = (3, "海运")
+    LINE = (4, "专线")
+    PACKET = (5, "小包")
+    INTERNAL_DIRECT = (6, "国内直发")
+    INTERNAL_TRANSPORT = (7, "国内运输")
+    INTERNATIONAL_TRANSPORT = (8, "国际运输")
 
-    class TransportPart(Enum):
-        """运输阶段枚举"""
-        ALL = {"name": "全运段", "value": 1}
-        INTERNAL = {"name": "国内运段", "value": 2}
-        SEA = {"name": "海上运段", "value": 3}
-        CLEARANCE = {"name": "国外清关", "value": 4}
-        DELIVERY = {"name": "国外派送", "value": 5}
+
+class TransactionType(BizEnum):
+    """单据类型枚举"""
+    SALES = (1, "销售单")
+    SEA = (2, "海运单")
+    REISSUE = (3, "补发单")
+    CUSTOMER_RE = (4, "客退单")
+
+
+class TransportPart(BizEnum):
+    """运输阶段枚举"""
+    ALL = (1, "全运段")
+    INTERNAL = (2, "国内运段")
+    SEA = (3, "海上运段")
+    CLEARANCE = (4, "国外清关")
+    DELIVERY = (5, "国外派送")
 
 
 class BaseApi:

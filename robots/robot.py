@@ -57,8 +57,12 @@ class Robot:
         method = method.upper()
 
         log.info("请求头：%s" % json.dumps(self.headers, ensure_ascii=False))
-        log.info(
-            "请求内容：%s" % json.dumps({"method": method, "url": url, "data": kwargs.get('data')}, ensure_ascii=False))
+        log.info("请求接口：%s" % json.dumps({"method": method, "url": url}, ensure_ascii=False))
+
+        try:
+            log.info("请求参数：%s" % json.dumps(kwargs.get('data'), ensure_ascii=False))
+        except json.JSONDecodeError:
+            log.info("请求参数：%s" % kwargs.get('data'))
 
         if method in self.methods_mapping:
             response_data = self.methods_mapping[method](url, **kwargs)
@@ -66,7 +70,7 @@ class Robot:
             raise ValueError("Invalid request method")
 
         log.info(f"traceId：{response_data.headers.get('Trace-Id')}")
-        log.info("响应内容：" + json.dumps(response_data.json(), ensure_ascii=False))
+        log.info("响应内容：%s" % json.dumps(response_data.json(), ensure_ascii=False))
         log.info(
             "-------------------------------------------------我是分隔符-------------------------------------------------")
         return response_data.json()
