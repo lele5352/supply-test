@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+from typing import Union
 
 from config.third_party_api_configs.pwms_api_config import *
 from robots.robot_biz_exception import *
@@ -65,7 +66,8 @@ class PWMSRobot(AppRobot):
 
         return False
 
-    def write_template(self, sku_code, demand_qty, delivery_warehouse,
+    def write_template(self, sku_code: Union[str, int, tuple],
+                       demand_qty, delivery_warehouse,
                        target_warehouse, receive_warehouse
                        ):
         """
@@ -88,8 +90,13 @@ class PWMSRobot(AppRobot):
             row = []
             order_code = f"TS-FBA-{self.timestamp}-{i+1}"
             try:
-                row.extend([order_code, delivery_warehouse, target_warehouse, receive_warehouse,
-                            sku["platformCode"], sku["storeCode"], sku["fnSkuCode"], sku_code, demand_qty])
+                row.extend(
+                    [
+                        order_code, delivery_warehouse, target_warehouse, receive_warehouse,
+                        sku["platformCode"], sku["storeCode"], sku["fnSkuCode"],
+                        sku["productSkuCode"], demand_qty
+                    ]
+                )
             except KeyError:
                 log.error(f"平台sku详情：{json.dumps(sku)}")
                 raise PlatSkuValueError(sku)
