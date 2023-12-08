@@ -1326,6 +1326,7 @@ class WMSAppRobot(AppRobot):
 class WMSTransferServiceRobot(ServiceRobot):
     def __init__(self):
         super().__init__("transfer")
+        super().get_user_info()
 
     def transfer_out_create_demand(self, delivery_warehouse_code, delivery_target_warehouse_code,
                                    receive_warehouse_code, receive_target_warehouse_code, sale_sku_code, bom,
@@ -1360,6 +1361,36 @@ class WMSTransferServiceRobot(ServiceRobot):
         )
         res_data = self.call_api(**content)
         return self.formatted_result(res_data)
+
+    def transfer_create_pick_order_v3(self, demand_list, pick_type, warehouse_id,
+                                      demand_type=30, total_volume=0,
+                                      pick_order_type=1, check_pick_complete=True):
+        """
+        创建调拨拣货单
+        :param list demand_list: 调拨需求列表
+        :param int pick_type: 拣货方式: 1-纸质；2-PDA
+        :param int warehouse_id: 仓库id
+        :param int demand_type: 拣货单需求类型 10 缺货 20 备货 30 混合
+        :param float total_volume: 拣货体积
+        :param int pick_order_type: 拣货单类型 1 调拨拣货
+        :param boolean check_pick_complete: 部件成套校验
+        """
+        content = deepcopy(TransferApiConfig.TransferCreateV3.get_attributes())
+        content["data"].update(
+            {
+                "demandCodes": demand_list,
+                "pickType": pick_type,
+                "userId": self.user_info.get("userId"),
+                "username": self.user_info.get("username"),
+                "pickOrderType": pick_order_type,
+                "warehouseId": warehouse_id,
+                "demandType": demand_type,
+                "totalVolume": total_volume,
+                "checkPickCompleteFlag": check_pick_complete
+            }
+        )
+        res = self.call_api(**content)
+        return self.formatted_result(res)
 
     def get_demand_list(self, goods_list, trans_out_code, trans_out_to_code, trans_in_code, trans_in_to_code):
         demand_list = list()

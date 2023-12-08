@@ -29,7 +29,7 @@ class BPMSRobot(AppRobot):
         elif isinstance(sku_code, str) or isinstance(sku_code, int):
             content["data"]["param"]["productSkuCodeList"].append(sku_code)
 
-        content["data"]["param"]["pageNo"] = page_no
+        content["data"]["pageNo"] = page_no
 
         if store_code:
             content["data"]["param"]["storeSkuCodeList"] = [store_code]
@@ -37,3 +37,24 @@ class BPMSRobot(AppRobot):
             content["data"]["param"]["fnSkuCodeList"] = [fn_sku_code]
 
         return self.call_api(**content)
+
+    @extract_json("$.data.records")
+    def sale_sku_page(self, sku_code: Union[str, int, tuple], page_no=1):
+        """
+        查询销售sku列表
+        :param sku_code: 销售sku编码
+        :param page_no: 页码
+        """
+        content = deepcopy(ProductInfo.SaleSkuPage.get_attributes())
+        if isinstance(sku_code, tuple):
+            content["data"]["param"]["skuCodeList"] = list(sku_code)
+        elif isinstance(sku_code, str) or isinstance(sku_code, int):
+            content["data"]["param"]["skuCodeList"].append(sku_code)
+
+        content["data"]["pageNo"] = page_no
+
+        return self.call_api(**content)
+
+
+
+
