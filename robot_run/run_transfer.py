@@ -26,7 +26,7 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
     trans_in_id = demand_data[0].get("receive_warehouse_id")
     trans_in_to_id = demand_data[0].get("receive_target_warehouse_id")
     # 体积
-    volume = float(round(demand_data[0].get("volume", 0)*demand_data[0].get("demand_qty", 0), 2))
+    volume = float(round(demand_data[0].get("volume", 0), 2))
 
     # 切到调出仓
     switch_warehouse_result = wms_app.common_switch_warehouse(trans_out_id)
