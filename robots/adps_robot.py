@@ -242,13 +242,27 @@ class ADPSRobot(AppRobot):
                                                              "sum_same_with_amount": sum_same_with_amount,
                                                              "sum_same_with_currency": sum_same_with_currency}
 
-    def Into_account(self):
+    def Into_account(self, reconciliation_rules):
         """
         获取hm账单 和支付渠道账单，分别可以对账的原始数据
+        先根据外部交易id，卡组流水号，交易单号
         """
+        """
+        
+        {"payment_channel"}
+                    :param str payment_channel: 支付渠道
+                    :param str channel_account: 签约主体
+                    :param str pay_at: 支付时间 "2023-07-05"
+                    :param int rule_type :1 (外部交易id-卡组流水-支付单号)，2 (外部交易id-卡组流水)，3（仅外部交易id），4（仅支付单号），5（仅卡组流水号）
+                    """
         base_fee_item = [i["fee_item_code"] for i in self.get_base_fee_item_by_db()]
-        payment_channel_detail = self.get_payment_channel_detail_by_db("Airwallex", "HOMARY SERVICE (UK) LIMITED")
-        hm_detail = self.get_hm_detail_by_db("Airwallex", "HOMARY SERVICE (UK) LIMITED", "2023-09-01")
+        payment_channel_detail = self.get_payment_channel_detail_by_db(reconciliation_rules["payment_channel"],
+                                                                       reconciliation_rules["channel_account"])
+        hm_detail = self.get_hm_detail_by_db(reconciliation_rules["payment_channel"],
+                                             reconciliation_rules["channel_account"], reconciliation_rules["pay_at"])
+
+        # payment_channel_detail = self.get_payment_channel_detail_by_db("Airwallex", "HOMARY SERVICE (UK) LIMITED")
+        # hm_detail = self.get_hm_detail_by_db("Airwallex", "HOMARY SERVICE (UK) LIMITED", "2023-09-01")
 
         # payment_channel_detail = self.get_payment_channel_detail_by_db("Braintree", "POPICORNS E-COMMERCE CO., LIMITED")
         # hm_detail = self.get_hm_detail_by_db("Braintree", "POPICORNS E-COMMERCE CO., LIMITED", "2023-11-06")
@@ -261,50 +275,67 @@ class ADPSRobot(AppRobot):
         log.info(f"原始支付渠道账单的数据，共: {len(payment_channel_reconcilable_detail1)} 条")
 
         """ 根据外部交易id进行匹配 """
-        match_tradeOutId, cmp_hm_result, cmp_amount_currency_tradeOutId = self.cmp_tradeOutId(hm_reconcilable_detail,
-                                                                                              payment_channel_reconcilable_detail1)
+        if reconciliation_rules["rule_type"] in (1, 2, 3):
+            match_tradeOutId, cmp_hm_result, cmp_amount_currency_tradeOutId = self.cmp_tradeOutId(
+                hm_reconcilable_detail,
+                payment_channel_reconcilable_detail1)
 
-        log.info(f"Hm和渠道，可根据外部交易id进行匹配的数据，共: {len(match_tradeOutId)} 条")
-        log.info('匹配的外部交易数据中，其中二者无差异的共 {0}条,金额不一致的 {1}条，币种不一致{2}条'.format(
-            cmp_amount_currency_tradeOutId["sum_same_with_both"],
-            cmp_amount_currency_tradeOutId["sum_same_with_amount"],
-            cmp_amount_currency_tradeOutId["sum_same_with_currency"]))
+            log.info(f"Hm和渠道，可根据外部交易id进行匹配的数据，共: {len(match_tradeOutId)} 条")
+            log.info('匹配的外部交易数据中，其中二者无差异的共 {0}条,金额不一致的 {1}条，币种不一致{2}条'.format(
+                cmp_amount_currency_tradeOutId["sum_same_with_both"],
+                cmp_amount_currency_tradeOutId["sum_same_with_amount"],
+                cmp_amount_currency_tradeOutId["sum_same_with_currency"]))
 
-        if cmp_hm_result:
-            for _ in cmp_hm_result:
-                """ 原始hm单据 移除已经进行外部交易id的数据"""
-                hm_reconcilable_detail.remove(_)
+            if cmp_hm_result:
+                for _ in cmp_hm_result:
+                    """ 原始hm单据 移除已经进行外部交易id的数据"""
+                    hm_reconcilable_detail.remove(_)
 
         """ 二者根据卡组流水号进行匹配 """
-        match_card, cmp_card_hm_result, cmp_amount_currency_cardcode = self.cmp_card_group_code(hm_reconcilable_detail,
-                                                                                                payment_channel_reconcilable_detail1)
-        log.info('匹配的卡组交易数据中，其中二者无差异的共 {0}条,金额不一致的 {1}条，币种不一致{2}条'.format(
-            cmp_amount_currency_cardcode["sum_same_with_both"],
-            cmp_amount_currency_cardcode["sum_same_with_amount"],
-            cmp_amount_currency_cardcode["sum_same_with_currency"]))
+        if reconciliation_rules["rule_type"] in (2, 5):
+            match_card, cmp_card_hm_result, cmp_amount_currency_cardcode = self.cmp_card_group_code(
+                hm_reconcilable_detail,
+                payment_channel_reconcilable_detail1)
+            log.info(f"Hm和渠道，可根据卡组流水号进行匹配的数据，共: {len(match_card)} 条")
+            log.info('匹配的卡组交易数据中，其中二者无差异的共 {0}条,金额不一致的 {1}条，币种不一致{2}条'.format(
+                cmp_amount_currency_cardcode["sum_same_with_both"],
+                cmp_amount_currency_cardcode["sum_same_with_amount"],
+                cmp_amount_currency_cardcode["sum_same_with_currency"]))
 
-        log.info(f"Hm和渠道，可根据卡组流水号进行匹配的数据，共: {len(match_card)} 条")
-        if cmp_card_hm_result:
-            for _ in cmp_card_hm_result:
-                """ 原始hm单据 移除已经进行外部交易id的数据"""
-                hm_reconcilable_detail.remove(_)
+
+            if cmp_card_hm_result:
+                for _ in cmp_card_hm_result:
+                    """ 原始hm单据 移除已经进行外部交易id的数据"""
+                    hm_reconcilable_detail.remove(_)
 
         """ 二者根据交易单号进行匹配 """
-        match_paymentCode, cmp_paymentcode_hm_result, cmp_amount_currency_paymentcode = self.cmp_payment_code(
-            hm_reconcilable_detail,
-            payment_channel_reconcilable_detail1)
+        if reconciliation_rules["rule_type"] in (1, 4):
+            match_paymentCode, cmp_paymentcode_hm_result, cmp_amount_currency_paymentcode = self.cmp_payment_code(
+                hm_reconcilable_detail,
+                payment_channel_reconcilable_detail1)
+            log.info(f"Hm和渠道，可根据交易单号进行匹配的数据，共: {len(match_paymentCode)} 条")
 
-        log.info('匹配的卡组交易数据中，其中二者无差异的共 {0}条,金额不一致的 {1}条，币种不一致{2}条'.format(
-            cmp_amount_currency_paymentcode["sum_same_with_both"],
-            cmp_amount_currency_paymentcode["sum_same_with_amount"],
-            cmp_amount_currency_paymentcode["sum_same_with_currency"]))
+            log.info('匹配的卡组交易数据中，其中二者无差异的共 {0}条,金额不一致的 {1}条，币种不一致{2}条'.format(
+                cmp_amount_currency_paymentcode["sum_same_with_both"],
+                cmp_amount_currency_paymentcode["sum_same_with_amount"],
+                cmp_amount_currency_paymentcode["sum_same_with_currency"]))
 
-        log.info(f"Hm和渠道，可根据交易单号进行匹配的数据，共: {len(match_paymentCode)} 条")
-        if cmp_paymentcode_hm_result:
-            for _ in cmp_paymentcode_hm_result:
-                """ 原始hm单据 移除已经进行外部交易id的数据"""
+            if cmp_paymentcode_hm_result:
+                for _ in cmp_paymentcode_hm_result:
+                    """ 原始hm单据 移除已经进行外部交易id的数据"""
                 hm_reconcilable_detail.remove(_)
 
         log.info(f"支付渠道少结的数据共：{len(hm_reconcilable_detail)}")
 
         log.info(f"支付渠道多结的数据共：{len(payment_channel_reconcilable_detail1)}")
+
+
+if __name__ == '__main__':
+    aa = ADPSRobot()
+    data={
+        "payment_channel":"Airwallex",
+        "channel_account":"HOMARY SERVICE (UK) LIMITED",
+        "pay_at":"2023-09-01",
+        "rule_type":5
+    }
+    print(aa.Into_account(data))
