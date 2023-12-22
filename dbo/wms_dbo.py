@@ -208,6 +208,21 @@ class WMSDBOperator:
                 for i in items]
 
     @classmethod
+    def query_delivery_order_info(cls, delivery_order_code):
+        """
+        获取出库单信息
+        :param string delivery_order_code:销售出库单号
+        """
+        items = TdoDeliveryOrder.select().where(
+            TdoDeliveryOrder.delivery_order_code == delivery_order_code)
+
+        if not items:
+            return None
+
+        items = [model_to_dict(item) for item in items]
+        return items
+
+    @classmethod
     def get_workday_calendar(cls, warehouse_id, start_time, end_time=None):
         """
         获取仓库工作日

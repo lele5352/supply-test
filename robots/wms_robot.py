@@ -7,6 +7,7 @@ from robots.robot import ServiceRobot, AppRobot
 from dbo.wms_dbo import WMSDBOperator
 from utils.log_handler import logger as log
 from utils.time_handler import HumanDateTime
+from utils.random_code import get_number_random_code
 
 
 class WMSAppRobot(AppRobot):
@@ -95,7 +96,8 @@ class WMSAppRobot(AppRobot):
         :param bool force: 默认不会强制创建新库位
         """
         # 若不是中转仓类型，同样需要target_warehouse_id为空(缺货需求生成的采购单包含目的仓，但仅有中转仓库位支持dest_warehouse_id)
-        if self.dbo.query_warehouse_info_by_id(ck_id).get('operate_mode') != 1:
+        ck_info = self.dbo.query_warehouse_info_by_id(ck_id)
+        if ck_info.get('operate_mode') not in ['1', ',1,']:
             to_ck_id = ""
         location_data = self.db_get_kw(kw_type, num, ck_id, to_ck_id)
         if force:
@@ -153,6 +155,8 @@ class WMSAppRobot(AppRobot):
 
     def common_switch_warehouse(self, warehouse_id):
         data_perm_id = self.common_get_data_perm_id(warehouse_id)
+        if not data_perm_id:
+            return self.formatted_result()
         content = deepcopy(BaseApiConfig.SwitchDefaultWarehouse.get_attributes())
         content["data"].update({
             "dataPermId": data_perm_id
@@ -296,17 +300,19 @@ class WMSAppRobot(AppRobot):
         confirm_pick_res = self.call_api(**content)
         return self.formatted_result(confirm_pick_res)
 
-    def transfer_out_submit_tray(self, pick_order_code, pick_order_details, tp_kw_ids):
+    def transfer_out_submit_tray(self, pick_order_code, pick_order_details, tp_kw_ids, batch_no=None):
         """
         调拨按需装托
         :param str pick_order_code: 拣货单号
         :param dict pick_order_details: 拣货单详情数据
         :param list tp_kw_ids: 托盘库位id列表
+        :param batch_no: 批次号，不传时随机生成一个单号
         """
         # 获取托盘编码
         tp_kw_codes = [self.db_kw_id_to_code(kw_id) for kw_id in tp_kw_ids]
         # 通过获取拣货单明细，构造确认拣货不短拣情况下该传的参数
         tray_info_list = list()
+        batch_no = batch_no or get_number_random_code('AUTO_F', 8)
         for detail, code in zip(pick_order_details, tp_kw_codes):
             tray_info_list.append(
                 {
@@ -317,7 +323,7 @@ class WMSAppRobot(AppRobot):
                         "goodsSkuCode": detail["goodsSkuCode"],
                         "skuQty": detail["shouldPickQty"],
                         "batchInfos": [{
-                            "batchNo": "",
+                            "batchNo": batch_no,
                             "skuQty": detail["shouldPickQty"]
                         }]
                     }]
@@ -596,6 +602,28 @@ class WMSAppRobot(AppRobot):
         res = self.call_api(**content)
         return self.formatted_result(res)
 
+    def receipt_upshelf_by_sku(self, item_list):
+        """
+        逐件上架
+        :param item_list: 上架的商品列表，格式：
+            [{
+                "sourceLocCode": "SHKW-002",
+                "targetLocCode": "SJKW-001",
+                "skuCode": "14093131604G01",
+                "qty": 1,
+                "operateType": 0
+            }]
+            :return:
+        """
+        content = deepcopy(ReceiptApiConfig.UpShelfBySku.get_attributes())
+        content["data"].update(
+            {
+                "items": item_list
+            }
+        )
+        res = self.call_api(**content)
+        return self.formatted_result(res)
+
     def receipt_complete_upshelf(self):
         """
         上架完成
@@ -751,12 +779,12 @@ class WMSAppRobot(AppRobot):
     def delivery_create_pick_order(self, delivery_order_code, prod_type=0):
         """
         创建拣货单
-        :param prod_type: 0前置面单；1后置面单
+        :param prod_type: 1前置面单；2后置面单
         :param delivery_order_code: 销售出库单编码
         :return:
         """
         content = deepcopy(DeliveryApiConfig.CreatePickOrder.get_attributes())
-        if prod_type == 0:
+        if prod_type == 1:
             content["data"].update({
                 "singleDeliveryOrderCodes": [delivery_order_code],
                 "singleMaxQty": 1,  # 最大单数
@@ -1504,20 +1532,19 @@ class WMSBaseServiceRobot(ServiceRobot):
         }
         return result
 
-# if __name__ == "__main__":
-#     wms = WMSAppRobot()
-#     # print(wms.entry_order_page(["FH2211022680"]))
-#     # wms.delivery_order_assign_stock(["PRE-CK2211100010"])
-#     # print(wms.get_delivery_order_page(["PRE-CK2211100010"]))
-#     # print(wms.get_user_info())
-#     # print(wms.delivery_get_pick_data("1881"))
-#     # print(wms.dbo.query_wait_assign_demands())
-#
-#     # order_sku_list = [
-#     #     {
-#     #         "skuCode": "63203684930B01", "skuName": "酒柜-金色A款08 1/2 X1", "num": 2
-#     #     },{
-#     #         "skuCode": "63203684930B02", "skuName": "酒柜(金色)07 2/2 X5", "num": 10
-#     #     }]
-#     # wms.delivery_mock_package_call_back("PRE-CK2302020006",1,order_sku_list)
-#     wms.delivery_mock_label_callback("PRE-CK2302020007", ["PRE-BG2302020026"], False)
+
+if __name__ == "__main__":
+    wms = WMSAppRobot()
+    #     # print(wms.entry_order_page(["FH2211022680"]))
+    #     # wms.delivery_order_assign_stock(["PRE-CK2211100010"])
+    #     # print(wms.get_delivery_order_page(["PRE-CK2211100010"]))
+    #     # print(wms.get_user_info())
+    #     # print(wms.delivery_get_pick_data("1881"))
+    #     # print(wms.dbo.query_wait_assign_demands())
+    #
+    # order_sku_list = [
+    #     {
+    #         "skuCode": "HW2A53869QA01", "skuName": "package0 1/1 X1", "num": 2
+    #     }]
+    # wms.delivery_mock_package_call_back("PRE-CK2310160001",2,order_sku_list)
+    wms.delivery_mock_label_callback("PRE-CK2310160001", ["PRE-BG2310160001"], False)

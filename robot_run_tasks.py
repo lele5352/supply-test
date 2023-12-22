@@ -45,9 +45,9 @@ def robot_run_delivery():
     if not order_list:
         print('当前无待发货状态的销售出库单！')
         return
-    for (ck_id, ck_code, order_no) in order_list:
-        print("正在执行仓库id为：{0}、仓库编码：{1}的销售出库单号为{2}的销售发货流程".format(ck_id, ck_code, order_no))
-        result, info = run_delivery(order_no, ck_id)
+    for order_no in order_list:
+        print(f"正在执行销售出库单号为{order_no}的出库流程")
+        result, info = main(order_no)
         print("执行结果：{0}；对应销售出库单号：{1}；错误信息：{2}".format(result, order_no, info))
 
 
@@ -87,18 +87,18 @@ def robot_run_purchase():
 if __name__ == '__main__':
     # p1 = Process(target=robot_run_transfer)
     # p2 = Process(target=robot_run_receive)
-    # p3 = Process(target=robot_run_delivery)
+    p3 = Process(target=robot_run_delivery)
     # p4 = Process(target=robot_run_purchase)
     # p1.start()
     # p2.start()
-    # p3.start()
+    p3.start()
     # p4.start()
     # p1.join()
     # p2.join()
-    # p3.join()
+    p3.join()
     # p4.join()
-    robot_run_purchase()
-    robot_run_receive()
-    robot_run_transfer()
+    # robot_run_purchase()
+    # robot_run_receive()
+    # robot_run_transfer()
     robot_run_delivery()
     print('tasks have been completely run!')

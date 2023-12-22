@@ -93,11 +93,10 @@ def create_verified_order(order_sku_info_list, auto_add_stock=True):
     # 加库存是异步，需要检查库存是否满足
     for order_sku_info in order_sku_info_list:
         # 库存不足时，直接抛异常
-        if not ims_robot.is_bom_stock_enough(
-                order_sku_info["sku_code"], order_sku_info["bom"],
-                order_sku_info["qty"], order_sku_info["warehouse_id"],
-                order_sku_info["warehouse_id"]):
-            raise InventoryNotEnough(order_sku_info["sku_code"], order_sku_info["bom"], order_sku_info["warehouse_id"])
+        until(99, 0.5)(lambda: ims_robot.is_bom_stock_enough(
+            order_sku_info["sku_code"], order_sku_info["bom"],
+            order_sku_info["qty"], order_sku_info["warehouse_id"],
+            order_sku_info["warehouse_id"]) is True)()
 
     # 执行跟单
     follow_result = oms_app_ip.oms_order_follow(follow_order_list)
@@ -151,7 +150,7 @@ if __name__ == '__main__':
     # data = [{"sku_code": "63203684930", "qty": 2, "bom": "A", "warehouse_id": "513"},
     #         {"sku_code": "67330337129", "qty": 2, "bom": "A", "warehouse_id": "513"}]
     # data = [{"sku_code": "63203684930", "qty": 2, "bom": "B", "warehouse_id": "513"}]
-    data = [{"sku_code": "HW855K290Z", "qty": 5, "bom": "A", "warehouse_id": "532"}]
+    data = [{"sku_code": "HW2A53869Q", "qty": 2, "bom": "A", "warehouse_id": "514"}]
     # create_verified_order(data, False)
     create_wms_sale_outbound_order(data, False)
     # [{"skuCode": "KK29O72S66", "bomVersion": "A"}]
