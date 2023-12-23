@@ -123,6 +123,21 @@ class TransferApiConfig:
         method = "POST"
         data = {"demandCodes": ["XQ2201250017"], "pickType": 1}
 
+    class TransferCreateV3(ApiConfig):
+        uri_path = "/transferPick/create/V3"
+        method = "POST"
+        data = {
+            "userId": None,
+            "username": None,
+            "demandType": 30,
+            "demandCodes": [],
+            "pickType": 1,
+            "pickOrderType": 1,
+            "warehouseId": None,
+            "checkPickCompleteFlag": True,
+            "totalVolume": 0
+        }
+
     class TransferOutPickOrderAssign(ApiConfig):
         uri_path = "/api/ec-wms-api/transferOut/picking/assignPickUser"
         method = "POST"

@@ -25,6 +25,8 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
     trans_out_to_id = demand_data[0].get("delivery_target_warehouse_id")
     trans_in_id = demand_data[0].get("receive_warehouse_id")
     trans_in_to_id = demand_data[0].get("receive_target_warehouse_id")
+    # 体积
+    volume = float(round(demand_data[0].get("volume", 0), 2))
 
     # 切到调出仓
     switch_warehouse_result = wms_app.common_switch_warehouse(trans_out_id)
@@ -32,10 +34,14 @@ def run_transfer(demand_code, flow_flag=None, kw_force=False, up_shelf_mode="box
         return False, "Fail to switch to trans out warehouse!"
 
     # 创建调拨拣货单
-    create_pick_order_result = wms_app.transfer_out_create_pick_order([demand_code], 1)
+    create_pick_order_result = wms_transfer.transfer_create_pick_order_v3(
+        demand_list=[demand_code], pick_type=1, warehouse_id=trans_out_id,
+        demand_type=30, total_volume=volume
+    )
+
     if not wms_app.is_success(create_pick_order_result):
         return False, "Fail to create pick order!"
-    pick_order_code = create_pick_order_result['data']
+    pick_order_code = create_pick_order_result['data']['pickOrderNo']
     print('生成调拨拣货单：%s' % pick_order_code)
 
     # 如果流程标识为创建调拨拣货单，则执行就返回，中断流程

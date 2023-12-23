@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from config.third_party_api_configs.tms_api_config \
-    import TMSApiConfig, UnitType, TransportType, AddressType
+    import TMSApiConfig, UnitType, TransportType, AddressType, FaultPerson
 from robots.robot import AppRobot, ServiceRobot
 from dbo.tms_dbo import TMSBaseDBOperator
 from utils.tms_cal_items import TMSCalcItems
@@ -160,6 +160,9 @@ class HomaryTMS(ServiceRobot):
             category: 货物品类，卡车托盘品类，不传时默认为空
             goods_desc: 货物描述
             channel_id: 渠道id，用于指定渠道下单
+            sale_code: 销售单号
+            back_reason: 退货原因
+            fault_person: 运费承担方 1 我司 ；2 客户 ；3 双方
         """
         if kwargs.get('channel_id'):
             if not isinstance(kwargs.get('channel_id'), int):
@@ -190,6 +193,9 @@ class HomaryTMS(ServiceRobot):
         if transport_type.value == TransportType.TRACK.value and build_type != 1:
             pack_key = 'carTray'
             body[pack_key] = {
+                "saleCode": kwargs.get("sale_code") or '自动化测试单',
+                "backReason": kwargs.get("back_reason") or "7天无理由",
+                "faultPerson": kwargs.get("fault_person") or FaultPerson.我司.value,
                 "trays": [
                     {
                         "prodName": "测试托盘",
@@ -212,6 +218,9 @@ class HomaryTMS(ServiceRobot):
 
             body[pack_key] = [
                 {
+                    "saleCode": kwargs.get("sale_code") or '自动化测试单',
+                    "backReason": kwargs.get("back_reason") or "7天无理由",
+                    "faultPerson": kwargs.get("fault_person") or FaultPerson.我司.value,
                     "goodsDetails": goods,
                     "category": kwargs.get("category")
                 }
@@ -272,6 +281,7 @@ class HomaryTMS(ServiceRobot):
 
         Keyword Args:
             channel_id: 渠道id，类型为 tuple or int
+            services: 附加服务，类型为 tuple or str
             forward_flag: 正向订单标志 true:正向 false:逆向
             prod_name: 货物名称：传入仓库sku用于获取申报价
             weight: 重量
@@ -279,7 +289,6 @@ class HomaryTMS(ServiceRobot):
             width: 宽
             height: 高
             category: 货物品类
-
         """
         # 未传入地址类型时，使用 商业地址带月台
         if not address_type:
@@ -295,7 +304,8 @@ class HomaryTMS(ServiceRobot):
             "transportType": transport_type.value,
             "unit": unit.value,
             "forwardFlag": kwargs.get('forward_flag', False),
-            "channelIds": []
+            "channelIds": [],
+            "services": []
         }
 
         channels = kwargs.get('channel_id')
@@ -303,6 +313,12 @@ class HomaryTMS(ServiceRobot):
             req["channelIds"].extend(list(channels))
         elif isinstance(channels, int):
             req["channelIds"].append(channels)
+
+        add_services = kwargs.get('services')
+        if isinstance(add_services, tuple):
+            req["services"].extend(list(add_services))
+        elif isinstance(add_services, str):
+            req["services"].append(add_services)
 
         self.build_address(req, address_id, trial_country, address_type)
         self.build_packages(req, transport_type, **kwargs)
@@ -325,6 +341,7 @@ class HomaryTMS(ServiceRobot):
 
         Keyword Args:
             channel_id: 渠道id，用于指定渠道下单
+            services: 附加服务，类型为 tuple or str
             forward_flag: 正向订单标志 true:正向 false:逆向
             pick_date: 提货日期，不传时取默认时间
             source_pack_code: 来源包裹号
@@ -365,6 +382,12 @@ class HomaryTMS(ServiceRobot):
         # 如果有传渠道id，则认定为 指定渠道下单
         if kwargs.get('channel_id'):
             req["assignChannelFlag"] = True
+
+        add_services = kwargs.get('services')
+        if isinstance(add_services, tuple):
+            req["services"].extend(list(add_services))
+        elif isinstance(add_services, str):
+            req["services"].append(add_services)
 
         self.build_address(req, address_id, trial_country, address_type)
         self.build_packages(req, transport_type, build_type=2, **kwargs)
