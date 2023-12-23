@@ -94,3 +94,22 @@ class AddressType(BizEnum):
     BUSINESS_ADDRESS = ("BUSINESS_ADDRESS", "商业地址")
     BUSINESS_ADDRESS_P = ("BUSINESS_ADDRESS_P", "商业地址带月台")
     BUSINESS_ADDRESS_NO_P = ("BUSINESS_ADDRESS_NO_P", "商业地址无月台")
+
+
+class FaultPerson(BizEnum):
+    我司 = (1, "我司")
+    客户 = (2, "客户")
+    双方 = (3, "双方")
+
+
+class AdditionalService(BizEnum):
+    上门提货 = ("door_pickup", "上门提货")
+    升降尾板车_收货 = ("liftgate_pickup", "升降尾板车_收货")
+    升降尾板车_送货 = ("liftgate_delivery", "升降尾板车_送货")
+    白手套 = ("white_gloves", "白手套")
+    预约送货 = ("book_delivery", "预约送货")
+    当面签收 = ("sign_in_face", "当面签收")
+    保险服务 = ("insurance", "保险服务")
+    增值服务 = ("additional", "增值服务")
+    送货到门 = ("delivery_to_door", "送货到门")
+    送货到房间 = ("delivery_to_room", "送货到房间")

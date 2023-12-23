@@ -4,11 +4,11 @@ from urllib.parse import urljoin
 from copy import deepcopy
 import time
 
+from dbo.ums_dbo import UMSDBOperator
 from utils.log_handler import logger as log
 from utils.redis_client import BaseRedisClient
 from config import env_prefix_config
 from robots import service_headers, app_prefix, login, default_user
-from config.third_party_api_configs.ums_api_config import UMSApiConfig
 from robots.robot_biz_exception import MissingPasswordError, ConfigImportError, ConfigNotFoundError
 
 _cache_headers = {}
@@ -138,14 +138,18 @@ class Robot:
     def get_user_info(self):
 
         if not self.user_info:
-            content = deepcopy(UMSApiConfig.UserInfo.get_attributes())
-            content["data"].update({
-                "t": str(int(time.time() * 1000))
-            })
-            url = urljoin(self.prefix, content["uri_path"])
-            res = requests.get(url, headers=self.headers, params=content["data"]).json()
+            username = default_user['username']
+            user_info = UMSDBOperator.query_sys_user(username)
+            if not user_info:
+                raise ValueError(f"根据账号 {username} 查找不到用户信息")
 
-            self.user_info = res["data"]
+            self.user_info = {
+                "userId": user_info["id"],
+                "nickname": user_info["nickname"],
+                "username": user_info["username"],
+                "mobile": user_info["mobile"],
+                "email": user_info["email"]
+            }
 
         return self.user_info
 

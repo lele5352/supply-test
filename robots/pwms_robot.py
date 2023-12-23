@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+from typing import Union
 
 from config.third_party_api_configs.pwms_api_config import *
 from robots.robot_biz_exception import *
@@ -65,7 +66,8 @@ class PWMSRobot(AppRobot):
 
         return False
 
-    def write_template(self, sku_code, demand_qty, delivery_warehouse,
+    def write_template(self, sku_code: Union[str, int, tuple],
+                       demand_qty, delivery_warehouse,
                        target_warehouse, receive_warehouse
                        ):
         """
@@ -80,16 +82,25 @@ class PWMSRobot(AppRobot):
         work_sheet = work_book.active
         work_sheet.append(PWmsApi.Template.sheet_headers)
         save_path = PWmsApi.Template.abs_file_path
-        sku_list = BPMSRobot().plat_product_page(sku_code)
-        if not sku_list:
-            raise PlatSkuNotFoundError(sku_code)
+        result_list = BPMSRobot().plat_product_page(sku_code)
 
-        for i, sku in enumerate(sku_list):
+        # 校验平台sku是否存在
+        sku_list = [i["productSkuCode"] for i in result_list]
+        for s in sku_code:
+            if s not in sku_list:
+                raise PlatSkuNotFoundError(s)
+
+        for i, sku in enumerate(result_list):
             row = []
-            order_code = f"TS-FBA-{self.timestamp}-{i+1}"
+            order_code = f"TS-FBA-{self.timestamp}-{i + 1}"
             try:
-                row.extend([order_code, delivery_warehouse, target_warehouse, receive_warehouse,
-                            sku["platformCode"], sku["storeCode"], sku["fnSkuCode"], sku_code, demand_qty])
+                row.extend(
+                    [
+                        order_code, delivery_warehouse, target_warehouse, receive_warehouse,
+                        sku["platformCode"], sku["storeCode"], sku["fnSkuCode"],
+                        sku["productSkuCode"], demand_qty
+                    ]
+                )
             except KeyError:
                 log.error(f"平台sku详情：{json.dumps(sku)}")
                 raise PlatSkuValueError(sku)
@@ -114,5 +125,3 @@ class PWMSRobot(AppRobot):
         content["data"].update({key: value for key, value in kwargs.items() if key in kwargs_list})
 
         return self.call_api(**content)
-
-

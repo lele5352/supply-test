@@ -157,7 +157,7 @@ class CostPriceConversion:
         """
         temp_data=dict()
         for k,v in self.goods_info.items():
-            num_type="size" if k != "size" else "weight"
+            num_type="size" if k != "weight" else "weight"
 
             temp_data.update({k: UnitChange.change(
                 v,num_type,

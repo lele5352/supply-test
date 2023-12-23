@@ -1,6 +1,6 @@
 from cases import homary_tms
 import json
-from config.third_party_api_configs.tms_api_config import TransportType, AddressType, UnitType
+from config.third_party_api_configs.tms_api_config import TransportType, AddressType, UnitType, AdditionalService
 
 """
 单元测试
@@ -20,10 +20,12 @@ def test_build_express_trial():
     unit = UnitType.FRACTIONAL
     weight = 21.5
     sku_name = 'HHF01'
+    services = AdditionalService.上门提货.value
 
     result = homary_tms.build_trial_body(
         transport_type, address_id, trial_country, address_type,
-        unit=unit, channel_id=channel_id, weight=weight, prod_name=sku_name
+        unit=unit, channel_id=channel_id, weight=weight, prod_name=sku_name,
+        services=services
     )
     print(json.dumps(result, ensure_ascii=False))
 
