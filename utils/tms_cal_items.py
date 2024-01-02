@@ -3,7 +3,7 @@ from utils.unit_change_handler import *
 
 
 class TMSCalcItems:
-    def __init__(self, weight, length, width, height):
+    def __init__(self, length, width, height, weight):
         self.weight = weight
         self.length = length
         self.width = width
@@ -60,6 +60,9 @@ class TMSCalcItems:
         """体积重=(长*宽*高)/体积重系数"""
         return round(self.volume() / precision, 2)
 
+    def sku_longest_side(self):
+        """单件SKU最长边"""
+
     def density(self, unit_change=False):
         """美卡托盘密度"""
         if unit_change:
@@ -75,26 +78,33 @@ class GoodsMeasurementItems:
     """货物计量项信息"""
 
     def __init__(self, goods_info, goods_unit, channel_unit, weight_rounding, weight_precision, size_rounding,
-                 size_precision):
+                 size_precision, volume_precision):
         self.source_unit = goods_unit
         self.target_unit = channel_unit
         self.weight_rounding = weight_rounding
         self.weight_precision = weight_precision
         self.size_rounding = size_rounding
         self.size_precision = size_precision
-        self.goods_info = goods_info
-        self.tms_items = TMSCalcItems(**self.goods_info)
+        self.volume_precision = volume_precision
+        self.tms_items = TMSCalcItems(*goods_info)
 
     def origin_items(self):
         return {
-            "重量": {"num": self.goods_info.get("weight"), "num_type": "weight"},
+            "实重": {"num": self.tms_items.weight, "num_type": "weight"},
+            "体积重": {"num": self.tms_items.volume_weight(self.volume_precision), "num_type": "weight"},
+            "计费重": {"num": max(self.tms_items.volume_weight(self.volume_precision), self.tms_items.weight),
+                       "num_type": "weight"},
             "最长边": {"num": self.tms_items.longest_side(), "num_type": "size"},
             "次长边": {"num": self.tms_items.mid_side(), "num_type": "size"},
             "最短边": {"num": self.tms_items.shortest_side(), "num_type": "size"},
             "围长": {"num": self.tms_items.girth(), "num_type": "size"},
             "周长": {"num": self.tms_items.perimeter(), "num_type": "size"},
             "两边长": {"num": self.tms_items.two_sides_length(), "num_type": "size"},
-            "体积": {"num": self.tms_items.volume(), "num_type": "volume"}
+            "体积": {"num": self.tms_items.volume(), "num_type": "volume"},
+            "长": {"num": self.tms_items.length, "num_type": "size"},
+            "宽": {"num": self.tms_items.width, "num_type": "size"},
+            "高": {"num": self.tms_items.height, "num_type": "size"}
+
         }
 
     def unit_changed_items(self):
@@ -128,6 +138,7 @@ class GoodsMeasurementItems:
                     temp_dict[item] = Rounding.round_half_up(self.unit_changed_items().get(item), self.size_precision)
         return temp_dict
 
+
 class CostPriceConversion:
     """成本价货物计量项信息"""
     """
@@ -150,50 +161,48 @@ class CostPriceConversion:
         self.size_precision = size_precision
         self.goods_info = goods_info
 
-
     def unit_changed_items(self):
         """
         返回国际，英制单位的转化，{'weight': 27.0, 'length': 5.3, 'height': 5.3, 'width': 44.7}
         """
-        temp_data=dict()
-        for k,v in self.goods_info.items():
-            num_type="size" if k != "weight" else "weight"
+        temp_data = dict()
+        for k, v in self.goods_info.items():
+            num_type = "size" if k != "weight" else "weight"
 
             temp_data.update({k: UnitChange.change(
-                v,num_type,
+                v, num_type,
                 self.source_unit, self.target_unit)})
         print(temp_data)
         return temp_data
-
 
     def rounded_result(self):
         temp_dict = dict()
 
         """ 进行精度的转化 """
-        for k_item,v_item in self.unit_changed_items().items():
-                if k_item == "weight":
-                    if self.weight_rounding == "向上取整":
-                        temp_dict[k_item] = float(Rounding.round_up(v_item, self.weight_precision))
-                        print(temp_dict)
-                    elif self.weight_rounding == "向下取整":
-                        temp_dict[k_item] = float(Rounding.round_down(v_item, self.weight_precision))
-                    else:
-                        temp_dict[k_item] = float(Rounding.round_half_up(v_item,
-                                                             self.weight_precision))
+        for k_item, v_item in self.unit_changed_items().items():
+            if k_item == "weight":
+                if self.weight_rounding == "向上取整":
+                    temp_dict[k_item] = float(Rounding.round_up(v_item, self.weight_precision))
+                    print(temp_dict)
+                elif self.weight_rounding == "向下取整":
+                    temp_dict[k_item] = float(Rounding.round_down(v_item, self.weight_precision))
                 else:
-                     if self.size_rounding == "向上取整":
-                         temp_dict[k_item] = float(Rounding.round_up(v_item, self.size_precision))
+                    temp_dict[k_item] = float(Rounding.round_half_up(v_item,
+                                                                     self.weight_precision))
+            else:
+                if self.size_rounding == "向上取整":
+                    temp_dict[k_item] = float(Rounding.round_up(v_item, self.size_precision))
 
-                     elif self.size_rounding == "向下取整":
-                         temp_dict[k_item] = float(Rounding.round_down(v_item, self.size_precision))
-                     else:
-                         temp_dict[k_item] = float(Rounding.round_half_up(v_item, self.size_precision))
+                elif self.size_rounding == "向下取整":
+                    temp_dict[k_item] = float(Rounding.round_down(v_item, self.size_precision))
+                else:
+                    temp_dict[k_item] = float(Rounding.round_half_up(v_item, self.size_precision))
 
         """ 用转化后的数值，计算其围长，三边长，体积等 """
         tms_items = TMSCalcItems(**temp_dict)
 
         return {
-            "单位_度转化完的原始数据":temp_dict,
+            "单位_度转化完的原始数据": temp_dict,
             "重量": temp_dict.get("weight"),
             "最长边": tms_items.longest_side(),
             "次长边": tms_items.mid_side(),
@@ -202,19 +211,18 @@ class CostPriceConversion:
             "三边长": tms_items.perimeter_origin(),
             "两边长": tms_items.casual_two_sides_length(),
             "体积": tms_items.volume()
-         }
+        }
 
 
 if __name__ == '__main__':
-
     goods_info = {
-        "weight":12.22,
+        "weight": 12.22,
         "length": 13.32,
 
-        "height":13.32,
+        "height": 13.32,
         "width": 113.48
     }
-    result= CostPriceConversion(goods_info,"gj","yz","向上取整",0.5,"向上取整",0.1)
+    result = CostPriceConversion(goods_info, "gj", "yz", "向上取整", 0.5, "向上取整", 0.1)
 
     # print(result.unit_changed_items())
     print(result.rounded_result())

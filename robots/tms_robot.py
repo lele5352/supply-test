@@ -4,7 +4,7 @@ from config.third_party_api_configs.tms_api_config \
     import TMSApiConfig, UnitType, TransportType, AddressType, FaultPerson
 from robots.robot import AppRobot, ServiceRobot
 from dbo.tms_dbo import TMSBaseDBOperator
-from utils.tms_cal_items import TMSCalcItems
+from utils.tms_cal_items import TMSCalcItems, GoodsMeasurementItems
 from utils.unit_change_handler import UnitChange
 from utils.time_handler import HumanDateTime
 from utils.log_handler import logger
@@ -23,6 +23,13 @@ class TMSRobot(AppRobot):
         express_limit = json.loads(express_limit_data)
         express_limit = {key.upper(): value for key, value in express_limit.items()}
         return express_limit.get(country_code)
+
+    def get_pack_config(self, country_code):
+        """获取基础库字典分包参数配置"""
+        pack_limit_data = self.dbo.get_base_dict("bm_pack_limit").get("label_value")
+        pack_limit = json.loads(pack_limit_data)
+        pack_limit = {key.upper(): value for key, value in pack_limit.items()}
+        return pack_limit.get(country_code.upper())
 
     def get_package_limit(self, country_code):
         """获取基础库字典包裹限制"""
@@ -82,22 +89,27 @@ class TMSRobot(AppRobot):
         # 只要货物换算出来的计量项小于快递限制就可发快递
         return self.is_less_than_limit(express_limit, goods_items_list)
 
-    def package_calc(self, goods_info_list, precision):
+    def package_calc(self, goods_info_list, goods_unit, channel_measure_config, reverse_length=True):
+        """
+        :param list goods_info_list: sku列表，格式:[(长,宽,高,重),(长,宽,高,重)]
+        :param string goods_unit: 货物单位
+        :param list channel_measure_config: 渠道的计量配置，格式：[渠道单位，重量取整方式，重量取整精度，尺寸取整方式，尺寸取整精度]；eg:["gj","向上取整",0.1,"向下取整",1]
+        :param bool reverse_length:是否重排长宽高，用于快递
+        """
         temp_result = [0, 0, 0]
         temp_weight = 0
         for length, width, height, weight in goods_info_list:
             sides = [length, width, height]
-            sides.sort(reverse=True)
+            if reverse_length:
+                sides.sort(reverse=True)
             temp_result = [max(temp_result[0], sides[0]), max(temp_result[1], sides[1]), temp_result[2] + sides[2]]
-            temp_result.sort(reverse=True)
+            if reverse_length:
+                temp_result.sort(reverse=True)
             temp_weight += weight
         temp_result.append(round(temp_weight, 6))
-        items = TMSCalcItems(temp_result[3], temp_result[0], temp_result[1], temp_result[2])
-        grith = items.girth()
-        volume_weight = items.volume_weight(precision)
-        temp_result.extend([grith, volume_weight])
+        package_items = GoodsMeasurementItems(temp_result, goods_unit, *channel_measure_config).unit_changed_items()
 
-        return temp_result
+        return package_items
 
 
 class HomaryTMS(ServiceRobot):
@@ -416,3 +428,15 @@ class HomaryTMS(ServiceRobot):
         content["data"] = req_data
 
         return self.call_api(**content)
+
+
+if __name__ == '__main__':
+    tms = TMSRobot()
+    channel_config = ["gj", "向上取整", 0.1, "向下取整", 1,1000]
+    goods_list = [
+        (15, 16, 21, 2.1),
+        (15, 20, 6, 1.01),
+        (3, 5, 10, 3.5)
+    ]
+    package_info = tms.package_calc(goods_list, "gj", channel_config)
+    print(package_info)
