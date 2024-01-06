@@ -1,7 +1,12 @@
 import json
+import random
+import uuid
 from copy import deepcopy
+
+from typing import Tuple
+
 from config.third_party_api_configs.tms_api_config \
-    import TMSApiConfig, UnitType, TransportType, AddressType, FaultPerson
+    import TMSApiConfig, UnitType, TransportType, AddressType, AdditionalService
 from robots.robot import AppRobot, ServiceRobot
 from dbo.tms_dbo import TMSBaseDBOperator
 from utils.tms_cal_items import TMSCalcItems
@@ -9,7 +14,6 @@ from utils.unit_change_handler import UnitChange
 from utils.time_handler import HumanDateTime
 from utils.log_handler import logger
 from utils.check_util import check_isinstance
-import uuid
 
 
 class TMSRobot(AppRobot):
@@ -125,7 +129,7 @@ class HomaryTMS(ServiceRobot):
     """
 
     def __init__(self):
-        super().__init__('homary_tms')
+        super().__init__('tms_api')
 
     @staticmethod
     def build_address(body, address_id, trial_country, address_type):
@@ -143,99 +147,73 @@ class HomaryTMS(ServiceRobot):
         body["address"]["addressType"] = address_type.value
 
     @staticmethod
-    def build_packages(body, transport_type, build_type=1, **kwargs):
+    def single_goods_detail(sku_code, **kwargs):
         """
-        组装包裹信息
-        Args:
-            body: 参数字典
-            transport_type: 运输方式
-            build_type: 调用类型 1 试算 2 下单
-
-        Keyword Args:
-            prod_name: 货物名称：传入仓库sku用于获取申报价
-            weight: 重量，定义包裹/托盘 的重量
-            length: 长，定义包裹/托盘 的长
-            width: 宽，定义包裹/托盘 的宽
-            height: 高，定义包裹/托盘 的高
-            category: 货物品类，卡车托盘品类，不传时默认为空
-            goods_desc: 货物描述
-            channel_id: 渠道id，用于指定渠道下单
-            sale_code: 销售单号
-            back_reason: 退货原因
-            fault_person: 运费承担方 1 我司 ；2 客户 ；3 双方
+        根据传入的sku编码，组装货物详情
         """
-        if kwargs.get('channel_id'):
-            if not isinstance(kwargs.get('channel_id'), int):
-                raise AssertionError("渠道id 类型必须为 int")
-
-        channel_id = kwargs.get('channel_id', None)
-
-        # 初始化货物规格：包裹长宽高重量/托盘长宽高重量
-        good_specs = {
-            "weight": kwargs.get("weight", 3.9),
-            "length": kwargs.get("length", 29.9),
-            "height": kwargs.get("height", 29.9),
-            "width": kwargs.get("width", 31.9)
+        good_detail = {
+            "prodName": sku_code,
+            "qty": kwargs.get("qty", 1),
+            "weight": kwargs.get("weight", random.uniform(2, 5)),
+            "length": kwargs.get("length", random.uniform(10, 30)),
+            "width": kwargs.get("width", random.uniform(10, 30)),
+            "height": kwargs.get("height", random.uniform(10, 30)),
+            "purchasePriceAmount": kwargs.get("purchasePriceAmount", random.uniform(30, 50)),
+            "purchasePriceCurrency": kwargs.get("purchasePriceCurrency", "CNY"),
+            "salePriceAmount": kwargs.get("salePriceAmount", random.uniform(100, 200)),
+            "salePriceCurrency": kwargs.get("purchasePriceCurrency", "CNY"),
+            "declareSkuVo": kwargs.get("declareSkuVo", None)
         }
-        # 货物信息
-        goods = [
-            {
-                "prodName": kwargs.get("prod_name", "J04CJ000483BA02"),
-                "qty": 1
-            }
-        ]
-        # 填充货物规格属性
-        goods[0].update(good_specs)
 
-        pack_key = 'expressPacks'
+        return good_detail
 
-        # 卡车下单，托盘信息是 dict 类型，快递试算/快递下单/卡车试算，都是 list
-        if transport_type.value == TransportType.TRACK.value and build_type != 1:
-            pack_key = 'carTray'
-            body[pack_key] = {
-                "saleCode": kwargs.get("sale_code") or '自动化测试单',
-                "backReason": kwargs.get("back_reason") or "7天无理由",
-                "faultPerson": kwargs.get("fault_person") or FaultPerson.我司.value,
-                "trays": [
-                    {
-                        "prodName": "测试托盘",
-                        "qty": 1,
-                        "category": kwargs.get("category"),
-                        "goodsDesc": kwargs.get("goods_desc"),
-                        'goodsDetails': goods
-                    }
-                ]
-            }
-            body[pack_key]['trays'][0].update(good_specs)
+    def single_express_pack(self, pack_name, sku_code: tuple, **kwargs):
+        """
+        组装快递参数
+        Args:
+             pack_name: 包裹名称
+             sku_code: tuple类型，sku编码
+        """
+        express_pack = {
+            "packName": pack_name,
+            "weight": kwargs.get("weight", random.uniform(2, 5)),
+            "length": kwargs.get("length", random.uniform(10, 30)),
+            "width": kwargs.get("width", random.uniform(10, 30)),
+            "height": kwargs.get("height", random.uniform(10, 30)),
+            "goodsDetails": [self.single_goods_detail(sku, **kwargs) for sku in sku_code]
+        }
 
-            if channel_id:
-                body[pack_key]["channelId"] = channel_id
+        return express_pack
 
-        else:
-            # 这堆 if else 为了兼容 卡车/快递 的接口字段命名和类型不一致...
-            if transport_type.value == TransportType.TRACK.value:
-                pack_key = 'carTrayDetails'
+    def single_car_tray_detail(self, prod_name, sku_code: tuple, **kwargs):
+        """
+        组装试算卡车参数
+        """
+        car_tray = {
+            "prodName": prod_name,
+            "weight": kwargs.get("weight", random.uniform(2, 5)),
+            "length": kwargs.get("length", random.uniform(10, 30)),
+            "width": kwargs.get("width", random.uniform(10, 30)),
+            "height": kwargs.get("height", random.uniform(10, 30)),
+            "category": kwargs.get("category", None),
+            "goodsDetails": [self.single_goods_detail(sku, **kwargs) for sku in sku_code]
+        }
 
-            body[pack_key] = [
-                {
-                    "saleCode": kwargs.get("sale_code") or '自动化测试单',
-                    "backReason": kwargs.get("back_reason") or "7天无理由",
-                    "faultPerson": kwargs.get("fault_person") or FaultPerson.我司.value,
-                    "goodsDetails": goods,
-                    "category": kwargs.get("category")
-                }
-            ]
-            body[pack_key][0].update(good_specs)
+        return car_tray
 
-            if transport_type.value != TransportType.TRACK.value:
-                body[pack_key][0]['packName'] = '测试包裹'
-            else:
-                body[pack_key][0]['prodName'] = '测试托盘'
-                body[pack_key][0]['qty'] = 1
+    @staticmethod
+    def build_services(body, services, increase_services):
 
-            if channel_id:
-                for _ in body[pack_key]:
-                    _['channelId'] = kwargs.get('channel_id')
+        if services and isinstance(services, tuple):
+            for service in services:
+                check_isinstance(service, AdditionalService, '附加服务值')
+                body["services"].append(service.value)
+
+        # 处理增值服务
+        if increase_services and isinstance(increase_services, tuple):
+            for service in increase_services:
+                check_isinstance(service, AdditionalService, '增值服务值')
+                body["increaseServices"].append(service.value)
 
     @staticmethod
     def build_pick_info(body, **kwargs):
@@ -265,25 +243,61 @@ class HomaryTMS(ServiceRobot):
             "insureGoodsCurrency": kwargs.get('insure_currency')
         }
 
-    def build_trial_body(self, transport_type: TransportType,
-                         address_id: int, trial_country: str,
+    @staticmethod
+    def fill_package_attribute(body, **kwargs):
+        """
+        完善下单包裹信息
+        """
+        if body["transportType"] == TransportType.EXPRESS.value:
+            for index,value in enumerate(body["expressPacks"]):
+                value["channelId"] = kwargs.get("channel_id")
+                value["sourcePackCode"] = f"来源包裹号_{HumanDateTime().timestamp()}_{index}"
+                value["saleCode"] = kwargs.get("sale_code")
+                value["backReason"] = kwargs.get("back_reason")
+                value["faultPerson"] = kwargs.get("fault_person")
+
+        else:
+            body["carTray"]["channelId"] = kwargs.get("channel_id")
+            body["carTray"]["sourcePackCode"] = f"来源包裹号_{HumanDateTime().timestamp()}"
+            body["carTray"]["saleCode"] = kwargs.get("sale_code")
+            body["carTray"]["backReason"] = kwargs.get("back_reason")
+            body["carTray"]["faultPerson"] = kwargs.get("fault_person")
+
+    def build_trial_body(self,
+                         transport_type: TransportType,
+                         address_id: int,
+                         trial_country: str,
+                         forward_flag: bool,
+                         sku_codes: Tuple[int, str],
                          address_type: AddressType = None,
                          unit: UnitType = None,
+                         sub_package_flag=True,
+                         declare_sku_flag=False,
+                         package_num=1,
+                         services: Tuple[AdditionalService] = None,
+                         increase_services: Tuple[AdditionalService] = None,
                          **kwargs):
         """
         试算参数组装
         Args:
-            transport_type: 运输方式 1-快递；2-卡车
+            transport_type: 运输方式：快递、卡车
             address_id: 仓库地址id
             trial_country: 试算地址区域 US 美国 DE 德国 FR 法国
-            address_type: 地址类型
+            address_type: 地址类型：商业地址、住宅地址、商业地址带月台、商业地址无月台
             unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
+            forward_flag: 正逆向订单标志 true:正向 false:逆向
+            sku_codes: 仓库sku编码组合
+            sub_package_flag: 是否需要分包：true 需要api处理分包，false 已处理分包
+            declare_sku_flag: 传入申报商品标志 true: 需要传入，false: 不需要传，默认去CDS拿
+            package_num: 包裹数量，默认1
+            services: 附加服务，类型为tuple
+            increase_services: 增值服务，类型为tuple
 
         Keyword Args:
             channel_id: 渠道id，类型为 tuple or int
-            services: 附加服务，类型为 tuple or str
-            forward_flag: 正向订单标志 true:正向 false:逆向
-            prod_name: 货物名称：传入仓库sku用于获取申报价
+            delivery_ware_code: 发货仓库编码，类型为 str
+            source_platform: 来源平台，类型为 str
+            order_category: 订单类型 10：销售订单 20：线下订单 30：补发订单
             weight: 重量
             length: 长
             width: 宽
@@ -303,10 +317,22 @@ class HomaryTMS(ServiceRobot):
         req = {
             "transportType": transport_type.value,
             "unit": unit.value,
-            "forwardFlag": kwargs.get('forward_flag', False),
+            "forwardFlag": forward_flag,
             "channelIds": [],
-            "services": []
+            "deliveryWareCode": kwargs.get("delivery_ware_code"),
+            "sourcePlatformCode": kwargs.get("source_platform", "Python"),
+            "declareSkuFlag": declare_sku_flag,
+            "services": [],
+            "increaseServices": []
         }
+
+        # 正向订单，传订单类型，默认销售订单; 分包标识取传参值
+        if forward_flag:
+            req["orderCategory"] = kwargs.get("order_category", 10)
+            req["subPackageFlag"] = sub_package_flag
+        # 逆向订单，分包标识强制置为false
+        else:
+            req["subPackageFlag"] = False
 
         channels = kwargs.get('channel_id')
         if isinstance(channels, tuple):
@@ -314,38 +340,62 @@ class HomaryTMS(ServiceRobot):
         elif isinstance(channels, int):
             req["channelIds"].append(channels)
 
-        add_services = kwargs.get('services')
-        if isinstance(add_services, tuple):
-            req["services"].extend(list(add_services))
-        elif isinstance(add_services, str):
-            req["services"].append(add_services)
+        # 处理附加服务
+        self.build_services(req, services, increase_services)
 
         self.build_address(req, address_id, trial_country, address_type)
-        self.build_packages(req, transport_type, **kwargs)
+
+        # 根据快递、卡车类型，组装不同的参数体
+        if req["transportType"] == TransportType.EXPRESS.value:
+            if req["subPackageFlag"] and forward_flag:
+                req["goodsDetails"] = [self.single_goods_detail(sku, **kwargs) for sku in sku_codes]
+            else:
+                req["expressPacks"] = [self.single_express_pack(f'包裹{i+1}', sku_codes, **kwargs)
+                                       for i in range(package_num)
+                                       ]
+        else:
+            req["carTrayDetails"] = [self.single_car_tray_detail(f'托盘{i+1}', sku_codes, **kwargs)
+                                     for i in range(package_num)
+                                     ]
 
         return req
 
     def build_order_body(self, transport_type: TransportType,
-                         address_id: int, trial_country: str,
+                         address_id: int,
+                         trial_country: str,
+                         forward_flag: bool,
+                         sku_codes: Tuple[int, str],
                          address_type: AddressType = None,
                          unit: UnitType = None,
+                         sub_package_flag=True,
+                         declare_sku_flag=False,
+                         package_num=1,
+                         services: Tuple[AdditionalService] = None,
+                         increase_services: Tuple[AdditionalService] = None,
                          **kwargs):
         """
         下单参数组装
         Args:
-            transport_type: 运输方式 TransportType 枚举 1-快递；2-卡车
+            transport_type: 运输方式：快递、卡车
             address_id: 仓库地址id
             trial_country: 试算地址区域 US 美国 DE 德国 FR 法国
-            address_type: 地址类型：AddressType枚举，未传时默认为 商业地址
+            address_type: 地址类型：商业地址、住宅地址、商业地址带月台、商业地址无月台
             unit: 单位  10-国标（kg/cm）；20-英制（lb/inch），默认 国标
+            forward_flag: 正逆向订单标志 true:正向 false:逆向
+            sku_codes: 仓库sku编码组合
+            sub_package_flag: 是否需要分包：true 需要api处理分包，false 已处理分包
+            declare_sku_flag: 传入申报商品标志 true: 需要传入，false: 不需要传，默认去CDS拿
+            package_num: 包裹数量，默认1
+            services: 附加服务，类型为tuple
+            increase_services: 增值服务，类型为tuple
 
         Keyword Args:
             channel_id: 渠道id，用于指定渠道下单
-            services: 附加服务，类型为 tuple or str
-            forward_flag: 正向订单标志 true:正向 false:逆向
             pick_date: 提货日期，不传时取默认时间
-            source_pack_code: 来源包裹号
-            prod_name: 货物名称：传入仓库sku用于获取申报价
+            source_order_code: 来源订单号
+            sale_code: 销售单号
+            back_reason: 退货原因
+            fault_person: 运费承担方 1.我司、2.客户、3.双方
             weight: 重量
             length: 长
             width: 宽
@@ -374,24 +424,51 @@ class HomaryTMS(ServiceRobot):
             "idempotentId": str(uuid.uuid4()),
             "transportType": transport_type.value,
             "unit": unit.value,
-            "forwardFlag": kwargs.get('forward_flag', False),
-            "sourceOrderCode": kwargs.get('source_order_code', '自动测试单'),
-            "assignChannelFlag": False
+            "forwardFlag": forward_flag,
+            "sourceOrderCode": kwargs.get('source_order_code', f'自动测试单_{HumanDateTime().timestamp()}'),
+            "assignChannelFlag": False,
+            "deliveryWareCode": kwargs.get("delivery_ware_code"),
+            "sourcePlatformCode": kwargs.get("source_platform", "Python"),
+            "declareSkuFlag": declare_sku_flag,
+            "services": [],
+            "increaseServices": [],
+            "remarks": "自动化测试"
         }
-
+        # 正向订单，传订单类型，默认销售订单; 分包标识取传参值
+        if forward_flag:
+            req["orderCategory"] = kwargs.get("order_category", 10)
+            req["subPackageFlag"] = sub_package_flag
+        # 逆向订单，分包标识强制置为false
+        else:
+            req["subPackageFlag"] = False
         # 如果有传渠道id，则认定为 指定渠道下单
         if kwargs.get('channel_id'):
             req["assignChannelFlag"] = True
 
-        add_services = kwargs.get('services')
-        if isinstance(add_services, tuple):
-            req["services"].extend(list(add_services))
-        elif isinstance(add_services, str):
-            req["services"].append(add_services)
+        # 处理附加服务、增值服务
+        self.build_services(req, services, increase_services)
 
         self.build_address(req, address_id, trial_country, address_type)
-        self.build_packages(req, transport_type, build_type=2, **kwargs)
         self.build_pick_info(req, **kwargs)
+
+        # 根据快递、卡车类型，组装不同的参数体
+        if req["transportType"] == TransportType.EXPRESS.value:
+            if req["subPackageFlag"] and forward_flag:
+                req["goodsDetails"] = [self.single_goods_detail(sku, **kwargs) for sku in sku_codes]
+            else:
+                req["expressPacks"] = [self.single_express_pack(f'包裹{i + 1}', sku_codes, **kwargs)
+                                       for i in range(package_num)
+                                       ]
+        else:
+            req["carTray"] = {
+                "trays": [self.single_car_tray_detail(f'托盘{i + 1}', sku_codes, **kwargs)
+                          for i in range(package_num)
+                          ]
+            }
+
+        # 已经分好包的情况下，填充一些包裹来源属性
+        if not req["subPackageFlag"]:
+            self.fill_package_attribute(req, **kwargs)
 
         return req
 
