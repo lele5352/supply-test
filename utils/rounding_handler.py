@@ -13,7 +13,7 @@ class Rounding:
         rounded_decimal = (num_decimal * factor).to_integral_value(rounding=decimal.ROUND_CEILING)
         rounded_decimal /= factor
         rounded_decimal = rounded_decimal.quantize(precision_decimal, rounding=decimal.ROUND_CEILING)
-        return rounded_decimal
+        return float(rounded_decimal)
 
     @classmethod
     def round_down(cls, num, precision):
@@ -24,7 +24,7 @@ class Rounding:
         rounded_decimal = (num_decimal * factor).to_integral_value(rounding=decimal.ROUND_FLOOR)
         rounded_decimal /= factor
         rounded_decimal = rounded_decimal.quantize(precision_decimal, rounding=decimal.ROUND_FLOOR)
-        return rounded_decimal
+        return float(rounded_decimal)
 
     @classmethod
     def round_half_up(cls, num, precision):
@@ -35,4 +35,4 @@ class Rounding:
         rounded_decimal = (num_decimal * factor).to_integral_value(rounding=decimal.ROUND_HALF_EVEN)
         rounded_decimal /= factor
         rounded_decimal = rounded_decimal.quantize(precision_decimal, rounding=decimal.ROUND_HALF_EVEN)
-        return rounded_decimal
+        return float(rounded_decimal)

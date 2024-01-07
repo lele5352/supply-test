@@ -10,6 +10,55 @@ class TMSApiConfig:
             "size": 1000,
             "deliveryWarehouseCodes": []}
 
+    class SubPackage(ApiConfig):
+        uri_path = "/subPackage/calc/bm"
+        method = "POST"
+        data = {"unit": 10,
+                "subRule": {"maxQuantity": 1, "girdSize": 410, "maxWeight": 65, "maxLength": 270, "maxVolumeWeight": 65,
+                            "volumeCoefficient": 9032},
+                "goodsDetails": [
+                    {
+                        "prodName": "JFT073L898A01",
+                        "qty": 2,
+                        "weight": 2.1,
+                        "length": 15.1,
+                        "width": 18.3,
+                        "height": 21.74}
+                ]
+                }
+
+    class CalcPackParamTest(ApiConfig):
+        uri_path = "/trial/calcPackParamTest"
+        method = "POST"
+        data = {
+            "packs": [
+                {
+                    "pack": {
+                        "weight": 14363213.55030495,
+                        "length": -5227445.767588228,
+                        "width": -79208136.93745315,
+                        "height": 75598943.52105388,
+                        "packCode": "mollit dolor",
+                        "goods": [
+                            {
+                                "prodName": "voluptate in cupidatat",
+                                "qty": 47673721,
+                                "weight": 87908786.60719624,
+                                "length": 30416820.517926842,
+                                "width": 8699843.03494808,
+                                "height": 48842372.30599743
+                            }
+                        ]
+                    },
+                    "oldUnit": -97309722,
+                    "newUnit": 31589393,
+                    "sortFlag": True,
+                    "volumeCoefficient":1000,
+                    "trialCalcInfo":{}
+                }
+            ]
+        }
+
     class SyncTrial(ApiConfig):
         uri_path = '/trial/doTrial'
         method = 'POST'
