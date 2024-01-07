@@ -421,7 +421,7 @@ class HomaryTMS(ServiceRobot):
         return ChannelCalcItems(temp_result, goods_unit, channel_calc_config, volume_precision).rounded_result()
 
     def build_channel_pack_calc_data(self, sub_package_data, goods_unit, channel_calc_config, sort_flag,
-                                     volume_precision):
+                                     volume_precision, is_car=False):
         """构造调用渠道试算包裹信息接口的参数
         :param dict sub_package_data: 分包接口返回的data数据
         :param string goods_unit: 货物单位,10-国际单位,20-英制单位
@@ -446,13 +446,16 @@ class HomaryTMS(ServiceRobot):
                 "height": package_params.get("height")
             }
             formatted_data.append({
-                "pack": combined_goods,
+                "pack": {} if is_car else combined_goods,
+                "carTrayDetail": combined_goods if is_car else {},
                 "oldUnit": goods_unit,
                 "newUnit": channel_calc_config.get("currency"),
                 "sortFlag": sort_flag,
                 "volumeCoefficient": volume_precision,
-                "trialCalcInfo": json.dumps(channel_calc_config)
+                "trialCalcInfo": json.dumps(channel_calc_config),
+                "carOrExpress": is_car
             })
+
         req_data.update({
             "packs": formatted_data
         })
@@ -548,7 +551,6 @@ if __name__ == '__main__':
         "weightRoundMode": "ROUND_UP"}
     result_list = list()
     for package in packages_data:
-        # print(tms_app.get_package_items(package.get("goods"), "10", 1000))
         result = tms_app.get_package_items(package.get("goods"), "10", volume_precision, sort_flag, True,
                                            channel_config)
         result_list.append(result)
