@@ -442,6 +442,7 @@ class HomaryTMS(ServiceRobot):
                 "goods": goods,
                 "weight": package_params.get("weight"),
                 "length": package_params.get("length"),
+                "width": package_params.get("width"),
                 "height": package_params.get("height")
             }
             formatted_data.append({
@@ -450,7 +451,7 @@ class HomaryTMS(ServiceRobot):
                 "newUnit": channel_calc_config.get("currency"),
                 "sortFlag": sort_flag,
                 "volumeCoefficient": volume_precision,
-                "trialCalcInfo": channel_calc_config
+                "trialCalcInfo": json.dumps(channel_calc_config)
             })
         req_data.update({
             "packs": formatted_data
@@ -483,7 +484,6 @@ class TMSBaseService(ServiceRobot):
         pack_limit_data = str_under2hump(pack_limit_data)
         pack_limit = json.loads(pack_limit_data)
         pack_limit = {key.upper(): value for key, value in pack_limit.items()}
-
         return pack_limit.get(country_code.upper())
 
     def get_package_limit(self, country_code):
@@ -516,6 +516,8 @@ if __name__ == '__main__':
     base = TMSBaseService()
     rule = base.get_sub_package_limit("us")
     good_unit = '10'
+    sort_flag = True
+    volume_precision = 1000
     goods = [
         {
             "prodName": "JFT073L898A01",
@@ -544,10 +546,13 @@ if __name__ == '__main__':
         "volumeCoefficient": None,
         "weightRoundAccuracy": "0.01",
         "weightRoundMode": "ROUND_UP"}
-
-    # for package in packages_data:
-    # print(tms_app.get_package_items(package.get("goods"), "10", 1000))
-    # print(tms_app.get_package_items(package.get("goods"), "10", 1000, True, True, channel_config))
-
-    pack_data = tms_app.build_channel_pack_calc_data(packages_data, good_unit, channel_config, True, 1000)
-    print(tms_app.calc_pack_param(pack_data))
+    result_list = list()
+    for package in packages_data:
+        # print(tms_app.get_package_items(package.get("goods"), "10", 1000))
+        result = tms_app.get_package_items(package.get("goods"), "10", volume_precision, sort_flag, True,
+                                           channel_config)
+        result_list.append(result)
+    pack_data = tms_app.build_channel_pack_calc_data(packages_data, good_unit, channel_config, sort_flag,
+                                                     volume_precision)
+    dev_result = tms_app.calc_pack_param(pack_data).get("data")
+    assert result_list == dev_result

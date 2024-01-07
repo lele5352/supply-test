@@ -37,7 +37,7 @@ class PackageCalcItems:
 
     def girth(self):
         """围长"""
-        return self.longest_side() + (self.mid_side() + self.shortest_side()) * 2
+        return self.length + (self.width + self.height) * 2
 
     def girth_origin(self):
         """围长,原始的 长+(宽+高)×2"""
@@ -85,24 +85,23 @@ class PackageCalcItems:
     def package_items(self, with_unit=False):
         items = {
             "weight": {"num": self.weight, "num_type": "weight"},
-            "volume_weight": {"num": self.volume_weight(self.volume_precision), "num_type": "weight"},
-            "bill_weight": {"num": max(self.volume_weight(self.volume_precision), self.weight),
-                            "num_type": "weight"},
-            "longest_side": {"num": self.longest_side(), "num_type": "size"},
-            "mid_side": {"num": self.mid_side(), "num_type": "size"},
-            "shortest_side": {"num": self.shortest_side(), "num_type": "size"},
+            "volumeWeight": {"num": self.volume_weight(self.volume_precision), "num_type": "weight"},
+            "billWeight": {"num": max(self.volume_weight(self.volume_precision), self.weight), "num_type": "weight"},
+            "longestEdge": {"num": self.longest_side(), "num_type": "size"},
+            "secondSide": {"num": self.mid_side(), "num_type": "size"},
+            "shortestEdge": {"num": self.shortest_side(), "num_type": "size"},
             "grith": {"num": self.girth(), "num_type": "size"},
             "perimeter": {"num": self.perimeter(), "num_type": "size"},
-            "max_two_side_length": {"num": self.max_two_sides_length(), "num_type": "size"},
-            "min_two_side_length": {"num": self.min_two_sides_length(), "num_type": "size"},
+            "maxSideLength": {"num": self.max_two_sides_length(), "num_type": "size"},
+            "minSideLength": {"num": self.min_two_sides_length(), "num_type": "size"},
             "volume": {"num": self.volume(), "num_type": "volume"},
             "length": {"num": self.length, "num_type": "size"},
             "width": {"num": self.width, "num_type": "size"},
             "height": {"num": self.height, "num_type": "size"},
-            "sku_max_length": {"num": self.sku_max_side_length, "num_type": "size"},
-            "sku_min_length": {"num": self.sku_min_side_length, "num_type": "size"},
-            "sku_max_weight": {"num": self.sku_max_weight, "num_type": "weight"},
-            "sku_min_weight": {"num": self.sku_min_weight, "num_type": "weight"},
+            "skuMaxLength": {"num": self.sku_max_side_length, "num_type": "size"},
+            "skuMinLength": {"num": self.sku_min_side_length, "num_type": "size"},
+            "skuMaxWeight": {"num": self.sku_max_weight, "num_type": "weight"},
+            "skuMinWeight": {"num": self.sku_min_weight, "num_type": "weight"},
 
         }
         if not with_unit:
