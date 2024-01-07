@@ -90,7 +90,7 @@ class PackageCalcItems:
             "longestEdge": {"num": self.longest_side(), "num_type": "size"},
             "secondSide": {"num": self.mid_side(), "num_type": "size"},
             "shortestEdge": {"num": self.shortest_side(), "num_type": "size"},
-            "grith": {"num": self.girth(), "num_type": "size"},
+            "girth": {"num": self.girth(), "num_type": "size"},
             "perimeter": {"num": self.perimeter(), "num_type": "size"},
             "maxSideLength": {"num": self.max_two_sides_length(), "num_type": "size"},
             "minSideLength": {"num": self.min_two_sides_length(), "num_type": "size"},
