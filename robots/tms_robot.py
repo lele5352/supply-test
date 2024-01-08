@@ -472,12 +472,19 @@ class HomaryTMS(ServiceRobot):
             package_params = self.get_package_items(goods, goods_unit, volume_precision, sort_flag, reverse_length)
             combined_goods = {
                 "packCode": package["packCode"],
-                "goods": goods,
                 "weight": package_params.get("weight"),
                 "length": package_params.get("length"),
                 "width": package_params.get("width"),
                 "height": package_params.get("height")
             }
+            if is_car:
+                combined_goods.update({
+                    "goodsDetails":goods
+                })
+            else:
+                combined_goods.update({
+                    "goods": goods
+                })
             formatted_data.append({
                 "pack": {} if is_car else combined_goods,
                 "carTrayDetail": combined_goods if is_car else {},
