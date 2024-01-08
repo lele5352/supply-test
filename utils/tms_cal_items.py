@@ -1,5 +1,5 @@
 from utils.rounding_handler import *
-from utils.unit_change_handler import *
+from utils.unit_change_handler import UnitChange as UC
 
 
 class PackageCalcItems:
@@ -21,23 +21,23 @@ class PackageCalcItems:
         """最长边"""
         sides = [self.length, self.width, self.height]
         sides.sort(reverse=True)
-        return sides[0]
+        return round(sides[0], 6)
 
     def mid_side(self):
         """第二长边"""
         sides = [self.length, self.width, self.height]
         sides.sort(reverse=True)
-        return sides[1]
+        return round(sides[1], 6)
 
     def shortest_side(self):
         """最短边"""
         sides = [self.length, self.width, self.height]
         sides.sort(reverse=True)
-        return sides[2]
+        return round(sides[2], 6)
 
     def girth(self):
         """围长"""
-        return self.length + (self.width + self.height) * 2
+        return round(self.length + (self.width + self.height) * 2, 6)
 
     def girth_origin(self):
         """围长,原始的 长+(宽+高)×2"""
@@ -45,15 +45,15 @@ class PackageCalcItems:
 
     def perimeter_origin(self):
         """三边长，原始长度  """
-        return self.length + self.width + self.height
+        return round(self.length + self.width + self.height, 6)
 
     def max_two_sides_length(self):
         """最大任意两边长"""
-        return max([self.length + self.width, self.length + self.height, self.width + self.height])
+        return round(max([self.length + self.width, self.length + self.height, self.width + self.height]), 6)
 
     def min_two_sides_length(self):
         """最小任意两边长"""
-        return min([self.length + self.width, self.length + self.height, self.width + self.height])
+        return round(min([self.length + self.width, self.length + self.height, self.width + self.height]), 6)
 
     def casual_two_sides_length(self):
         """任意两边长，长+宽；长+高；宽+高"""
@@ -62,51 +62,60 @@ class PackageCalcItems:
 
     def perimeter(self):
         """周长"""
-        return self.longest_side() + self.mid_side() + self.shortest_side()
+        return round(self.longest_side() + self.mid_side() + self.shortest_side(), 6)
 
     def volume(self):
         """体积=长*宽*高"""
-        return self.longest_side() * self.mid_side() * self.shortest_side()
+        return round(self.longest_side() * self.mid_side() * self.shortest_side(), 6)
 
     def volume_weight(self, precision):
         """体积重=(长*宽*高)/体积重系数"""
-        return round(self.volume() / precision, 2)
+        return round(self.volume() / precision, 6)
+
+    def bill_weight(self, precision):
+        return max(self.weight, self.volume_weight(precision))
 
     def density(self, unit_change=False):
         """美卡托盘密度"""
         if unit_change:
             # 判断是否需要换算单位，若货物信息的单位为国际单位，则需要换算，传True
-            weight = UnitChange.change(self.weight, "weight", "10", "20")
-            volume = UnitChange.change(self.volume(), "volume", "10", "20") / 1728
+            weight = UC.change(self.weight, "weight", "10", "20")
+            volume = UC.change(self.volume(), "volume", "10", "20") / 1728
             density = weight / volume
             return density
         return self.weight / self.volume() * 1728
 
-    def package_items(self, with_unit=False):
-        items = {
-            "weight": {"num": self.weight, "num_type": "weight"},
-            "volumeWeight": {"num": self.volume_weight(self.volume_precision), "num_type": "weight"},
-            "billWeight": {"num": max(self.volume_weight(self.volume_precision), self.weight), "num_type": "weight"},
-            "longestEdge": {"num": self.longest_side(), "num_type": "size"},
-            "secondSide": {"num": self.mid_side(), "num_type": "size"},
-            "shortestEdge": {"num": self.shortest_side(), "num_type": "size"},
-            "girth": {"num": self.girth(), "num_type": "size"},
-            "perimeter": {"num": self.perimeter(), "num_type": "size"},
-            "maxSideLength": {"num": self.max_two_sides_length(), "num_type": "size"},
-            "minSideLength": {"num": self.min_two_sides_length(), "num_type": "size"},
-            "volume": {"num": self.volume(), "num_type": "volume"},
-            "length": {"num": self.length, "num_type": "size"},
-            "width": {"num": self.width, "num_type": "size"},
-            "height": {"num": self.height, "num_type": "size"},
-            "skuMaxLength": {"num": self.sku_max_side_length, "num_type": "size"},
-            "skuMinLength": {"num": self.sku_min_side_length, "num_type": "size"},
-            "skuMaxWeight": {"num": self.sku_max_weight, "num_type": "weight"},
-            "skuMinWeight": {"num": self.sku_min_weight, "num_type": "weight"},
+    def package_items(self, source_unit, target_unit):
+        if source_unit and target_unit and source_unit != target_unit:
+            self.weight = round(UC.change(self.weight, "weight", source_unit, target_unit), 6)
+            self.length = round(UC.change(self.length, "size", source_unit, target_unit), 6)
+            self.width = round(UC.change(self.width, "size", source_unit, target_unit), 6)
+            self.height = round(UC.change(self.height, "size", source_unit, target_unit), 6)
+            self.sku_max_weight = round(UC.change(self.sku_max_weight, "weight", source_unit, target_unit), 6)
+            self.sku_min_weight = round(UC.change(self.sku_min_weight, "weight", source_unit, target_unit), 6)
+            self.sku_max_side_length = round(UC.change(self.sku_max_side_length, "size", source_unit, target_unit), 6)
+            self.sku_min_side_length = round(UC.change(self.sku_min_side_length, "size", source_unit, target_unit), 6)
 
+        return {
+            "weight": self.weight,
+            "volumeWeight": self.volume_weight(self.volume_precision),
+            "billWeight": max(self.volume_weight(self.volume_precision), self.weight),
+            "longestEdge": self.longest_side(),
+            "secondSide": self.mid_side(),
+            "shortestEdge": self.shortest_side(),
+            "girth": self.girth(),
+            "perimeter": self.perimeter(),
+            "maxSideLength": self.max_two_sides_length(),
+            "minSideLength": self.min_two_sides_length(),
+            "volume": self.volume(),
+            "length": self.length,
+            "width": self.width,
+            "height": self.height,
+            "skuMaxLength": self.sku_max_side_length,
+            "skuMinLength": self.sku_min_side_length,
+            "skuMaxWeight": self.sku_max_weight,
+            "skuMinWeight": self.sku_min_weight,
         }
-        if not with_unit:
-            items = {x: items[x]["num"] for x in items}
-        return items
 
 
 class ChannelCalcItems:
@@ -117,7 +126,6 @@ class ChannelCalcItems:
         :param string goods_unit: 货物单位，10-国际，20-英制
         :param dict channel_calc_config: 渠道配置的calc_info，从channel表读取
         :param float volume_precision: 体积重
-
         """
         self.source_unit = goods_unit
         self.target_unit = channel_calc_config.get("currency")
@@ -126,37 +134,28 @@ class ChannelCalcItems:
         self.size_rounding = channel_calc_config.get("dimensionRoundMode")
         self.size_precision = channel_calc_config.get("dimensionRoundAccuracy")
         self.volume_precision = volume_precision
-        self.tms_items = PackageCalcItems(*goods_info, volume_precision).package_items(True)
-
-    def unit_changed_items(self):
-        return {
-            x: UnitChange.change(
-                self.tms_items.get(x).get("num"),
-                self.tms_items.get(x).get("num_type"),
-                self.source_unit, self.target_unit)
-            for x in self.tms_items
-        }
+        self.tms_items = PackageCalcItems(*goods_info, volume_precision).package_items(self.source_unit,
+                                                                                       self.target_unit)
 
     def rounded_result(self):
         temp_dict = dict()
-        origin_items = self.tms_items
-        unit_changed_items = self.unit_changed_items()
-        for item in unit_changed_items:
-            if origin_items.get(item).get("num_type") == "weight":
+
+        for item in self.tms_items:
+            if item in ["weight", "volumeWeight", "billWeight", "skuMaxWeight", "skuMinWeight"]:
                 if self.weight_rounding == "ROUND_UP":
-                    temp_dict[item] = Rounding.round_up(unit_changed_items.get(item), self.weight_precision)
+                    temp_dict[item] = Rounding.round_up(self.tms_items.get(item), self.weight_precision)
                 elif self.weight_rounding == "ROUND_DOWN":
-                    temp_dict[item] = Rounding.round_down(unit_changed_items.get(item), self.weight_precision)
+                    temp_dict[item] = Rounding.round_down(self.tms_items.get(item), self.weight_precision)
                 else:
-                    temp_dict[item] = Rounding.round_half_up(unit_changed_items.get(item), self.weight_precision)
+                    temp_dict[item] = Rounding.round_half_up(self.tms_items.get(item), self.weight_precision)
             else:
                 if self.size_rounding == "ROUND_UP":
-                    temp_dict[item] = Rounding.round_up(self.unit_changed_items().get(item), self.size_precision)
+                    temp_dict[item] = Rounding.round_up(self.tms_items.get(item), self.size_precision)
 
                 elif self.size_rounding == "ROUND_DOWN":
-                    temp_dict[item] = Rounding.round_down(self.unit_changed_items().get(item), self.size_precision)
+                    temp_dict[item] = Rounding.round_down(self.tms_items.get(item), self.size_precision)
                 else:
-                    temp_dict[item] = Rounding.round_half_up(self.unit_changed_items().get(item), self.size_precision)
+                    temp_dict[item] = Rounding.round_half_up(self.tms_items.get(item), self.size_precision)
         return temp_dict
 
 
@@ -190,7 +189,7 @@ class CostPriceConversion:
         for k, v in self.goods_info.items():
             num_type = "size" if k != "weight" else "weight"
 
-            temp_data.update({k: UnitChange.change(
+            temp_data.update({k: UC.change(
                 v, num_type,
                 self.source_unit, self.target_unit)})
         print(temp_data)

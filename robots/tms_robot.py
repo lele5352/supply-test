@@ -382,22 +382,21 @@ class HomaryTMS(ServiceRobot):
 
         return self.call_api(**content)
 
-    def get_package_items(self, goods_info_list, goods_unit, volume_precision, reverse_length=True, channel_calc=False,
-                          channel_calc_config=None):
+    def get_package_items(self, goods_info_list, goods_unit, target_unit, volume_precision, reverse_length=True):
         """
         根据包裹里面sku计算得到包裹各维度数据，最终按指定的渠道信息换算配置转换为渠道换算后的包裹各维度数据，用于比较是否超出渠道限制规则
         :param list goods_info_list: sku列表，格式:[(长,宽,高,重),(长,宽,高,重)]
         :param string goods_unit: 货物单位,10-国际单位,20-英制单位
+        :param string target_unit: 货物属性换算的目标单位,10-国际单位,20-英制单位
         :param double volume_precision:体积重系数
         :param bool reverse_length:是否重排长宽高，用于快递
-        :param bool channel_calc: 是否按渠道配置换算
-        :param dict channel_calc_config: 渠道配置的calc_info，从channel表读取
         """
         temp_result = [0, 0, 0]
         temp_weight = 0
         sku_side_length = []
         sku_weights = []
-        for good in goods_info_list:
+        sorted_goods_list = sorted(goods_info_list, key=lambda s: s["weight"])
+        for good in sorted_goods_list:
             length = good.get("length")
             width = good.get("width")
             height = good.get("height")
@@ -416,12 +415,47 @@ class HomaryTMS(ServiceRobot):
                         max(sku_side_length)]
         temp_result.extend(other_params)
 
-        if not channel_calc:
-            return PackageCalcItems(*temp_result, volume_precision).package_items()
+        return PackageCalcItems(*temp_result, volume_precision).package_items(goods_unit, target_unit)
+
+    def get_channel_package_items(self, goods_info_list, goods_unit, volume_precision, channel_calc_config,
+                                  reverse_length=True):
+        """
+        根据包裹里面sku计算得到包裹各维度数据，最终按指定的渠道信息换算配置转换为渠道换算后的包裹各维度数据，用于比较是否超出渠道限制规则
+        :param list goods_info_list: sku列表，格式:[(长,宽,高,重),(长,宽,高,重)]
+        :param string goods_unit: 货物单位,10-国际单位,20-英制单位
+        :param double volume_precision:体积重系数
+        :param bool reverse_length:是否重排长宽高，用于快递
+        :param bool channel_calc: 是否按渠道配置换算
+        :param dict channel_calc_config: 渠道配置的calc_info，从channel表读取
+        """
+        temp_result = [0, 0, 0]
+        temp_weight = 0
+        sku_side_length = []
+        sku_weights = []
+        sorted_goods_list = sorted(goods_info_list, key=lambda s: s["weight"])
+        for good in sorted_goods_list:
+            length = good.get("length")
+            width = good.get("width")
+            height = good.get("height")
+            weight = good.get("weight")
+            sides = [length, width, height]
+            if reverse_length:
+                sides.sort(reverse=True)
+            sku_side_length.extend(sides)
+            temp_result = [max(temp_result[0], sides[0]), max(temp_result[1], sides[1]), temp_result[2] + sides[2]]
+            if reverse_length:
+                temp_result.sort(reverse=True)
+            temp_weight += weight
+            sku_weights.append(weight)
+        # other_params指的是除了包裹长宽高外的其他属性，这里包含包裹总实重，sku最小实重，sku最大实重，sku最长边，sku最短边
+        other_params = [round(temp_weight, 6), min(sku_weights), max(sku_weights), min(sku_side_length),
+                        max(sku_side_length)]
+        temp_result.extend(other_params)
+
         return ChannelCalcItems(temp_result, goods_unit, channel_calc_config, volume_precision).rounded_result()
 
     def build_channel_pack_calc_data(self, sub_package_data, goods_unit, channel_calc_config, sort_flag,
-                                     volume_precision, is_car=False):
+                                     volume_precision, reverse_length=True, is_car=False):
         """构造调用渠道试算包裹信息接口的参数
         :param dict sub_package_data: 分包接口返回的data数据
         :param string goods_unit: 货物单位,10-国际单位,20-英制单位
@@ -435,8 +469,7 @@ class HomaryTMS(ServiceRobot):
         formatted_data = list()
         for package in sub_package_data:
             goods = package.get("goods")
-            package_params = self.get_package_items(goods, goods_unit, volume_precision, sort_flag, True,
-                                                    channel_calc_config)
+            package_params = self.get_package_items(goods, goods_unit, volume_precision, sort_flag, reverse_length)
             combined_goods = {
                 "packCode": package["packCode"],
                 "goods": goods,
@@ -518,43 +551,51 @@ if __name__ == '__main__':
     tms_app = HomaryTMS()
     base = TMSBaseService()
     rule = base.get_sub_package_limit("us")
-    good_unit = '10'
+    good_unit = '20'
+    target_unit = '10'
     sort_flag = True
     volume_precision = 1000
     goods = [
         {
             "prodName": "JFT073L898A01",
             "qty": 1,
-            "weight": 2.1,
-            "length": 15.1,
-            "width": 18.3,
-            "height": 21.74
+            "weight": 2,
+            "length": 15,
+            "width": 20,
+            "height": 30,
+            "purchasePriceAmount": 22,
+            "purchasePriceCurrency": "CNY",
+            "salePriceAmount": 90,
+            "salePriceCurrency": "USD"
         },
         {
             "prodName": "JFT073L898A02",
             "qty": 1,
-            "weight": 3.1,
-            "length": 25.1,
-            "width": 18.3,
-            "height": 21.74
+            "weight": 1,
+            "length": 15,
+            "width": 20,
+            "height": 6,
+            "purchasePriceAmount": 22,
+            "purchasePriceCurrency": "CNY",
+            "salePriceAmount": 90,
+            "salePriceCurrency": "USD"
+        },
+        {
+            "prodName": "JFT073L898A03",
+            "qty": 1,
+            "weight": 3,
+            "length": 3,
+            "width": 5,
+            "height": 10,
+            "purchasePriceAmount": 22,
+            "purchasePriceCurrency": "CNY",
+            "salePriceAmount": 90,
+            "salePriceCurrency": "USD"
         }
     ]
-    packages_data = base.get_sub_package(good_unit, rule, goods).get("data").get("packs")
-
     channel_config = {
-        "currency": "10",
-        "dimensionRoundAccuracy": "0.01",
-        "dimensionRoundMode": "ROUND_UP",
-        "exemptionAmount": 0.9,
-        "volumeCoefficient": None,
-        "weightRoundAccuracy": "0.01",
+        "currency": "10", "dimensionRoundAccuracy": "0.01", "dimensionRoundMode": "ROUND_UP",
+        "exemptionAmount": 0.9, "volumeCoefficient": None, "weightRoundAccuracy": "0.01",
         "weightRoundMode": "ROUND_UP"}
-    result_list = list()
-    for package in packages_data:
-        result = tms_app.get_package_items(package.get("goods"), "10", volume_precision, sort_flag, True,
-                                           channel_config)
-        result_list.append(result)
-    pack_data = tms_app.build_channel_pack_calc_data(packages_data, good_unit, channel_config, sort_flag,
-                                                     volume_precision)
-    dev_result = tms_app.calc_pack_param(pack_data).get("data")
-    assert result_list == dev_result
+    result = tms_app.get_package_items(goods, good_unit, target_unit, volume_precision, True)
+    print(result)
