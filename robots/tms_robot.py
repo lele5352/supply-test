@@ -191,6 +191,7 @@ class HomaryTMS(ServiceRobot):
         """
         car_tray = {
             "prodName": prod_name,
+            "qty": 1,
             "weight": kwargs.get("weight", random.uniform(2, 5)),
             "length": kwargs.get("length", random.uniform(10, 30)),
             "width": kwargs.get("width", random.uniform(10, 30)),
@@ -268,7 +269,7 @@ class HomaryTMS(ServiceRobot):
                          address_id: int,
                          trial_country: str,
                          forward_flag: bool,
-                         sku_codes: Tuple[int, str],
+                         sku_codes: Tuple[str],
                          address_type: AddressType = None,
                          unit: UnitType = None,
                          sub_package_flag=True,
@@ -364,7 +365,7 @@ class HomaryTMS(ServiceRobot):
                          address_id: int,
                          trial_country: str,
                          forward_flag: bool,
-                         sku_codes: Tuple[int, str],
+                         sku_codes: Tuple[str],
                          address_type: AddressType = None,
                          unit: UnitType = None,
                          sub_package_flag=True,
@@ -434,13 +435,18 @@ class HomaryTMS(ServiceRobot):
             "increaseServices": [],
             "remarks": "自动化测试"
         }
-        # 正向订单，传订单类型，默认销售订单; 分包标识取传参值
-        if forward_flag:
+        # 正向订单，传订单类型，默认销售订单; 快递 分包标识取传参值
+        if forward_flag and req["transportType"] == TransportType.EXPRESS.value:
             req["orderCategory"] = kwargs.get("order_category", 10)
             req["subPackageFlag"] = sub_package_flag
-        # 逆向订单，分包标识强制置为false
+        # 正向订单，卡车 分包标识强制置为false
+        elif forward_flag and req["transportType"] == TransportType.TRACK.value:
+            req["orderCategory"] = kwargs.get("order_category", 10)
+            req["subPackageFlag"] = False
+        # 逆向订单，分包标识强制置为 false
         else:
             req["subPackageFlag"] = False
+
         # 如果有传渠道id，则认定为 指定渠道下单
         if kwargs.get('channel_id'):
             req["assignChannelFlag"] = True

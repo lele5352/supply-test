@@ -57,7 +57,7 @@ class TMSApiConfig:
             "firstName": "Will",
             "lastName": "Wilde",
             "contactEmail": "et@aa.com",
-            "contactPhone": "102-02931"
+            "contactPhone": "2483788218"
         }
 
         # 法国地址
@@ -75,7 +75,24 @@ class TMSApiConfig:
             "firstName": "Will",
             "lastName": "Wilde",
             "contactEmail": "et@aa.com",
-            "contactPhone": "102-02931"
+            "contactPhone": "2483788218"
+        }
+
+        GB = {
+            "deliveryContactEmail": "et@aa.com",
+            "countryCode": "GB",
+            "countryName": "United Kingdom",
+            "province": "England",
+            "provinceName": "England",
+            "city": "London",
+            "cityName": "London",
+            "postcode": "SW7 4BQ",
+            "address": "100 Cornwall Gardens Flat 6 Lanarkslea House",
+            "addressType": "RESIDENTIAL_ADDRESS",
+            "firstName": "Will",
+            "lastName": "Wilde",
+            "contactEmail": "et@aa.com",
+            "contactPhone": "2483788218"
         }
 
 
