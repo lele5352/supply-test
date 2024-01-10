@@ -383,11 +383,10 @@ class HomaryTMS(ServiceRobot):
         return self.call_api(**content)
 
     @staticmethod
-    def build_package_base_items(goods_info_list, reverse_length=True):
+    def build_pkg_base_items(goods_info_list, reverse_length=True):
         temp_result = [0, 0, 0]
         temp_weight = 0
-        sku_side_length = []
-        sku_weights = []
+        sku_list = []
         sorted_goods_list = sorted(goods_info_list, key=lambda s: s["weight"])
         for good in sorted_goods_list:
             length = good.get("length")
@@ -397,61 +396,63 @@ class HomaryTMS(ServiceRobot):
             sides = [length, width, height]
             if reverse_length:
                 sides.sort(reverse=True)
-            sku_side_length.extend(sides)
             temp_result = [max(temp_result[0], sides[0]), max(temp_result[1], sides[1]), temp_result[2] + sides[2]]
             if reverse_length:
                 temp_result.sort(reverse=True)
             temp_weight += weight
-            sku_weights.append(weight)
+            sku_list.append({
+                "skuMaxLength": max(sides),
+                "skuWeight": weight
+            })
         # other_params指的是除了包裹长宽高外的其他属性，这里包含包裹总实重，sku最小实重，sku最大实重，sku最长边，sku最短边
-        other_params = [round(temp_weight, 6), min(sku_weights), max(sku_weights), min(sku_side_length),
-                        max(sku_side_length)]
+        other_params = [round(temp_weight, 6), sku_list]
         temp_result.extend(other_params)
         return temp_result
 
-    def get_package_items(self, goods_info_list, goods_unit, target_unit, volume_precision, reverse_length=True):
+    def get_pkg_items(self, goods_info_list, goods_unit, target_unit, volume_precision, reverse_length=True):
         """
         根据包裹里面sku计算得到包裹各维度数据，最终按指定的渠道信息换算配置转换为渠道换算后的包裹各维度数据，用于比较是否超出渠道限制规则
         :param list goods_info_list: sku列表，格式:[(长,宽,高,重),(长,宽,高,重)]
-        :param string goods_unit: 货物单位,10-国际单位,20-英制单位
-        :param string target_unit: 货物属性换算的目标单位,10-国际单位,20-英制单位
+        :param int goods_unit: 货物单位,10-国际单位,20-英制单位
+        :param int target_unit: 货物属性换算的目标单位,10-国际单位,20-英制单位
         :param double volume_precision:体积重系数
         :param bool reverse_length:是否重排长宽高，用于快递
         """
-        package_base_items = self.build_package_base_items(goods_info_list, reverse_length)
+        package_base_items = self.build_pkg_base_items(goods_info_list, reverse_length)
         return PackageCalcItems(*package_base_items, volume_precision).package_items(goods_unit, target_unit)
 
-    def get_channel_package_items(self, goods_info_list, goods_unit, volume_precision, channel_calc_config,
-                                  reverse_length=True):
+    def get_ch_pkg_items(self, goods_info_list, goods_unit, ch_unit, volume_precision, ch_calc_config,
+                         reverse_length=True):
         """
         根据包裹里面sku计算得到包裹各维度数据，最终按指定的渠道信息换算配置转换为渠道换算后的包裹各维度数据，用于比较是否超出渠道限制规则
         :param list goods_info_list: sku列表，格式:[(长,宽,高,重),(长,宽,高,重)]
-        :param string goods_unit: 货物单位,10-国际单位,20-英制单位
+        :param int goods_unit: 货物单位,10-国际单位,20-英制单位
+        :param int ch_unit: 渠道单位,10-国际单位,20-英制单位
         :param double volume_precision:体积重系数
         :param bool reverse_length:是否重排长宽高，用于快递
-        :param dict channel_calc_config: 渠道配置的calc_info，从channel表读取
+        :param dict ch_calc_config: 渠道配置的calc_info，从channel表读取后转为dict
         """
-        package_base_items = self.build_package_base_items(goods_info_list, reverse_length)
-        return ChannelCalcItems(package_base_items, goods_unit, channel_calc_config, volume_precision).rounded_result()
+        pkg_base_items = self.build_pkg_base_items(goods_info_list, reverse_length)
+        return ChannelCalcItems(pkg_base_items, goods_unit, ch_unit, ch_calc_config, volume_precision).rounded_result()
 
-    def build_channel_pack_calc_data(self, sub_package_data, goods_unit, channel_calc_config, volume_precision,
-                                     reverse_length=True, is_car=False):
+    def build_ch_pkg_calc_data(self, sub_pkg_data, goods_unit, channel_calc_config, volume_precision,
+                               reverse_length=True, is_car=False, rounding_flag=True):
         """构造调用渠道试算包裹信息接口的参数
-        :param dict sub_package_data: 分包接口返回的data数据
-        :param string goods_unit: 货物单位,10-国际单位,20-英制单位
+        :param dict sub_pkg_data: 分包接口返回的data数据
+        :param int goods_unit: 货物单位,10-国际单位,20-英制单位
         :param dict channel_calc_config: 渠道配置的calc_info，从channel表读取
         :param bool reverse_length: 是否重排长宽高
         :param float volume_precision: 体积系数
         :param bool is_car: 是否卡车,True-卡车，False-快递
-
+        :param bool rounding_flag: 是否取整,True-取整，False-不取整
         """
-        if not sub_package_data:
+        if not sub_pkg_data:
             return
         req_data = dict()
         formatted_data = list()
-        for package in sub_package_data:
+        for package in sub_pkg_data:
             goods = package.get("goods")
-            package_params = self.get_package_items(goods, goods_unit, target_unit, volume_precision, reverse_length)
+            package_params = self.get_pkg_items(goods, goods_unit, goods_unit, volume_precision, reverse_length)
             combined_goods = {
                 "packCode": package["packCode"],
                 "weight": package_params.get("weight"),
@@ -459,14 +460,10 @@ class HomaryTMS(ServiceRobot):
                 "width": package_params.get("width"),
                 "height": package_params.get("height")
             }
-            if is_car:
-                combined_goods.update({
-                    "goodsDetails": goods
-                })
-            else:
-                combined_goods.update({
-                    "goods": goods
-                })
+
+            combined_goods.update(
+                {"goodsDetails": goods} if is_car else {"goods": goods}
+            )
             formatted_data.append({
                 "pack": {} if is_car else combined_goods,
                 "carTrayDetail": combined_goods if is_car else {},
@@ -475,15 +472,15 @@ class HomaryTMS(ServiceRobot):
                 "sortFlag": sort_flag,
                 "volumeCoefficient": volume_precision,
                 "trialCalcInfo": json.dumps(channel_calc_config),
-                "carOrExpress": is_car
+                "carOrExpress": is_car,
+                "roundingFlag": rounding_flag
             })
-
         req_data.update({
             "packs": formatted_data
         })
         return req_data
 
-    def calc_pack_param(self, package_data):
+    def calc_pkg_param(self, package_data):
         """传入包裹信息，得出包裹按渠道单位、取整精度、取整方式计算出来的渠道包裹属性"""
         content = deepcopy(TMSApiConfig.CalcPackParamTest.get_attributes())
         content["data"].update(package_data)
@@ -520,7 +517,7 @@ class TMSBaseService(ServiceRobot):
     def get_sub_package(self, unit, sub_rule, good_details):
         """
         仅快递需要分包，传入货物单位、分配参数配置数据、货物列表
-        :param string unit: 单位，10-国际单位，20-英制单位
+        :param int unit: 单位，10-国际单位，20-英制单位
         :param dict sub_rule: 分包参数配置，从数据库读取
         :param list good_details: 要分包的sku列表
         """
@@ -536,14 +533,28 @@ class TMSBaseService(ServiceRobot):
         return res.get("data")
 
 
+class TMSChannelService(ServiceRobot):
+    def __init__(self):
+        self.dbo = TMSBaseDBOperator
+        super().__init__('tms_channel_service')
+
+    def get_ch_calc_info(self, ch_id):
+        """获取渠道的试算信息，试算信息里面含渠道的单位，尺寸、重量的取整精度和方式"""
+        calc_info_data = self.dbo.get_channel_data(ch_id)
+
+        return calc_info_data
+
+
 if __name__ == '__main__':
     tms_app = HomaryTMS()
     base = TMSBaseService()
+    ch = TMSChannelService()
+
     rule = base.get_sub_package_limit("us")
-    good_unit = '20'
-    target_unit = '10'
+
+    good_unit = 10
     sort_flag = True
-    volume_precision = 1000
+    volume_precision = 3000
     goods = [
         {
             "prodName": "JFT073L898A01",
@@ -582,23 +593,37 @@ if __name__ == '__main__':
             "salePriceCurrency": "USD"
         }
     ]
-    channel_config = {
-        "currency": "10", "dimensionRoundAccuracy": "0.01", "dimensionRoundMode": "ROUND_DOWN",
-        "exemptionAmount": 0.9, "volumeCoefficient": None, "weightRoundAccuracy": "0.01",
-        "weightRoundMode": "ROUND_UP"}
-    # package_result = tms_app.get_package_items(goods, good_unit, target_unit, volume_precision, True)
-    # print(package_result)
-    sub_package_data = base.get_sub_package(good_unit, rule, goods).get("packs")
-    req_data = tms_app.build_channel_pack_calc_data(sub_package_data, good_unit, channel_config, volume_precision)
-    dev_result = tms_app.calc_pack_param(req_data).get("data")
-    print(dev_result)
 
-    calc_result = list()
-    for package in sub_package_data:
-        package_goods = package.get("goods")
-        channel_result = tms_app.get_channel_package_items(package_goods, good_unit, volume_precision, channel_config,
-                                                           True)
-        calc_result.append(channel_result)
-        print(calc_result)
+    # result = tms_app.get_pkg_items(goods, good_unit, target_unit, volume_precision, True)
+    # print(result)
 
-    assert dev_result == calc_result
+    # sub_package_data = base.get_sub_package(good_unit, rule, goods).get("packs")
+    # req_data = tms_app.build_ch_pkg_calc_data(goods, good_unit, channel_config, volume_precision)
+    # dev_result = tms_app.calc_pkg_param(req_data).get("data")
+    # origin_result = list()
+    # changed_result = list()
+    # for package in sub_package_data:
+    #     package_goods = package.get("goods")
+    #     # package_items = tms_app.get_pkg_items(package_goods, good_unit, good_unit, volume_precision)
+    #     channel_items = tms_app.get_ch_pkg_items(package_goods, good_unit, channel_unit, volume_precision,
+    #                                              channel_config,False)
+    #     # origin_result.append(package_items)
+    #     changed_result.append(channel_items)
+    # print(dev_result)
+    # # print(origin_result)
+    # print(changed_result)
+    # package_items = tms_app.get_pkg_items(goods, good_unit, good_unit, volume_precision, False)
+
+    # car_ch_id = 101
+    # ch_data = ch.get_ch_calc_info(car_ch_id)
+    # channel_config = json.loads(ch_data.get("trial_calc_info"))
+    # channel_unit = ch_data.get("unit")
+    # car_ch_items = tms_app.get_ch_pkg_items(goods,good_unit,channel_unit,volume_precision,channel_config,False)
+    # print(car_ch_items)
+
+    kd_ch_id = 102
+    ch_data = ch.get_ch_calc_info(kd_ch_id)
+    channel_config = json.loads(ch_data.get("trial_calc_info"))
+    channel_unit = ch_data.get("unit")
+    kd_ch_items = tms_app.get_ch_pkg_items(goods, good_unit, channel_unit, volume_precision, channel_config, True)
+    print(kd_ch_items)

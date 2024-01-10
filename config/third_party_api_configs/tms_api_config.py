@@ -54,7 +54,8 @@ class TMSApiConfig:
                     "newUnit": 31589393,
                     "sortFlag": True,
                     "volumeCoefficient":1000,
-                    "trialCalcInfo":{}
+                    "trialCalcInfo":{},
+                    "roundingFlag":{}
                 }
             ]
         }
