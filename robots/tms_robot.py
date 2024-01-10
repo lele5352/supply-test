@@ -499,3 +499,76 @@ class HomaryTMS(ServiceRobot):
         content["data"] = req_data
 
         return self.call_api(**content)
+
+    def cancel_package(self, package_no):
+        """
+        取消包裹运单
+        """
+        content = deepcopy(TMSApiConfig.CancelPackage.get_attributes())
+        content["data"]["packageNo"] = package_no
+
+        return self.call_api(**content)
+
+    def focus_without_time(self, *ware_codes):
+        """
+        执行集中下单，忽略截单时间控制
+        :param ware_codes: 仓库编码
+        """
+        content = deepcopy(TMSApiConfig.FocusOrder.get_attributes())
+        for ware in ware_codes:
+            content["data"]["wareCodes"].append(ware)
+
+        return self.call_api(**content)
+
+
+class ChannelService(ServiceRobot):
+
+    def __init__(self):
+        super().__init__('channel_service')
+
+    def get_tracking(self, channel_id, track_code, trans_code=None, postcode=None):
+        """
+        领域获取轨迹接口
+        :param channel_id: 渠道id
+        :param track_code: 运单号
+        :param trans_code: 转运单号
+        :param postcode: 收货地邮编
+        """
+        content = deepcopy(TMSApiConfig.TrackingCheck.get_attributes())
+        content["data"]["channelId"] = channel_id
+        content["data"]["trackCode"] = track_code
+        content["data"]["transhipmentCode"] = trans_code if trans_code else ''
+        if postcode:
+            content["data"]["extInfo"]["postcode"] = postcode
+        else:
+            content["data"].pop("extInfo", None)
+
+        return self.call_api(**content)
+
+    def tran_track_order(self, channel_id, trans_code):
+        """
+        领域获取运单号接口，传入转运单号
+        :param channel_id: 渠道id
+        :param trans_code: 转运单号
+        """
+        content = deepcopy(TMSApiConfig.BolCode.get_attributes())
+        content["data"]["channelId"] = channel_id
+        content["data"]["bolOrderCode"] = trans_code
+
+        return self.call_api(**content)
+
+    def cancel_tracking(self, channel_id, package_code, express_code, trans_code=None):
+        """
+        领域取消运单（调用服务商接口取消，不会处理包裹状态）
+        :param channel_id: 渠道id
+        :param package_code: 包裹号
+        :param express_code: 运单号
+        :param trans_code: 转运单号
+        """
+        content = deepcopy(TMSApiConfig.CancelTrack.get_attributes())
+        content["data"]["channelId"] = channel_id
+        content["data"]["sourceOrderCode"] = package_code
+        content["data"]["trackOrderCode"] = express_code
+        content["data"]["transferOrderCode"] = trans_code if trans_code else ""
+
+        return self.call_api(**content)

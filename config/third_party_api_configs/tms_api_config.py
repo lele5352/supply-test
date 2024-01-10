@@ -20,6 +20,50 @@ class TMSApiConfig:
         method = 'POST'
         data = None
 
+    class CancelPackage(ApiConfig):
+        uri_path = '/trial/package/cancel'
+        method = 'POST'
+        data = {
+            "packageNo": None
+        }
+
+    class CancelTrack(ApiConfig):
+        uri_path = '/channel/order/cancel'
+        method = 'POST'
+        data = {
+            "channelId": None,
+            "sourceOrderCode": None,
+            "transferOrderCode": None,
+            "trackOrderCode": None
+        }
+
+    class TrackingCheck(ApiConfig):
+        uri_path = '/channel/tracking/check'
+        method = 'POST'
+        data = {
+            "channelId": None,
+            "trackCode": None,
+            "transhipmentCode": None,
+            "extInfo": {
+                "postcode": None
+            }
+        }
+
+    class BolCode(ApiConfig):
+        uri_path = '/channel/order/check'
+        method = 'POST'
+        data = {
+            "channelId": None,
+            "bolOrderCode": None
+        }
+
+    class FocusOrder(ApiConfig):
+        uri_path = '/trial/focus/address'
+        method = 'POST'
+        data = {
+            "wareCodes": []
+        }
+
     class TrialAddress(ApiConfig):
         """
         经过调试，可正常试算下单的测试地址
@@ -78,6 +122,57 @@ class TMSApiConfig:
             "contactPhone": "2483788218"
         }
 
+        FR2 = {
+            "deliveryContactEmail": "et@aa.com",
+            "countryCode": "FR",
+            "countryName": "France",
+            "province": "Grand Est",
+            "provinceName": "Grand Est",
+            "city": "TUCQUEGNIEUX",
+            "cityName": "TUCQUEGNIEUX",
+            "postcode": "54640",
+            "address": "39 RUE CLEMENCEAU",
+            "addressType": "BUSINESS_ADDRESS_P",
+            "firstName": "Printz",
+            "lastName": "regis",
+            "contactEmail": "tt@aa.com",
+            "contactPhone": "2483788219"
+        }
+
+        FR3 = {
+            "deliveryContactEmail": "et@aa.com",
+            "countryCode": "FR",
+            "countryName": "France",
+            "province": "Occitanie",
+            "provinceName": "Occitanie",
+            "city": "Gignac",
+            "cityName": "Gignac",
+            "postcode": "34150",
+            "address": "23 Avenue Antoine de Saint-Exupéry",
+            "addressType": "BUSINESS_ADDRESS_P",
+            "firstName": "Michele",
+            "lastName": "Merette",
+            "contactEmail": "ss@aa.com",
+            "contactPhone": "2483788319"
+        }
+
+        FR4 = {
+            "deliveryContactEmail": "et@aa.com",
+            "countryCode": "FR",
+            "countryName": "France",
+            "province": "Île-de-France",
+            "provinceName": "Île-de-France",
+            "city": "Paris",
+            "cityName": "Paris",
+            "postcode": "75015",
+            "address": "33 Boulevard de Grenelle",
+            "addressType": "BUSINESS_ADDRESS_P",
+            "firstName": "Diaty",
+            "lastName": "Djimera",
+            "contactEmail": "ss@aa.com",
+            "contactPhone": "3483788319"
+        }
+
         GB = {
             "deliveryContactEmail": "et@aa.com",
             "countryCode": "GB",
@@ -91,6 +186,23 @@ class TMSApiConfig:
             "addressType": "RESIDENTIAL_ADDRESS",
             "firstName": "Will",
             "lastName": "Wilde",
+            "contactEmail": "et@aa.com",
+            "contactPhone": "2483788218"
+        }
+
+        GB2 = {
+            "deliveryContactEmail": "et@aa.com",
+            "countryCode": "GB",
+            "countryName": "United Kingdom",
+            "province": "England",
+            "provinceName": "England",
+            "city": "Lambourn",
+            "cityName": "Lambourn",
+            "postcode": "RG17 7LL",
+            "address": "8 Newbury Road",
+            "addressType": "RESIDENTIAL_ADDRESS",
+            "firstName": "Alan",
+            "lastName": "Bruter",
             "contactEmail": "et@aa.com",
             "contactPhone": "2483788218"
         }
@@ -123,10 +235,10 @@ class AdditionalService(BizEnum):
     上门提货 = ("door_pickup", "上门提货")
     升降尾板车_收货 = ("liftgate_pickup", "升降尾板车_收货")
     升降尾板车_送货 = ("liftgate_delivery", "升降尾板车_送货")
-    白手套 = ("white_gloves", "白手套")
     预约送货 = ("book_delivery", "预约送货")
     当面签收 = ("sign_in_face", "当面签收")
     保险服务 = ("insurance", "保险服务")
     增值服务 = ("additional", "增值服务")
+    白手套 = ("white_gloves", "白手套")
     送货到门 = ("delivery_to_door", "送货到门")
     送货到房间 = ("delivery_to_room", "送货到房间")
