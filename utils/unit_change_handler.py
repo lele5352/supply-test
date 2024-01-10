@@ -32,7 +32,7 @@ class UnitChange:
         """
         if source_unit == target_unit:
             return num
-        elif target_unit == "10":
+        elif target_unit == 10:
             if num_type == "size":
                 return cls.in_to_cm(num)
             elif num_type == "weight":
@@ -41,7 +41,7 @@ class UnitChange:
                 return cls.in3_to_cm3(num)
             else:
                 return "error"
-        elif target_unit == "20":
+        elif target_unit == 20:
             if num_type == "size":
                 return cls.cm_to_in(num)
             elif num_type == "weight":
