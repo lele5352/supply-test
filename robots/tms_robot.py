@@ -715,5 +715,3 @@ class TMSChannelService(ServiceRobot):
             express_code=express_info['express_order_code'],
             trans_code=express_info['transfer_order_code']
         )
-
-
