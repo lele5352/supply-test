@@ -17,23 +17,23 @@ class PackageCalcItems:
         """最长边"""
         sides = [self.length, self.width, self.height]
         sides.sort(reverse=True)
-        return round(sides[0], 6)
+        return sides[0]
 
     def mid_side(self):
         """第二长边"""
         sides = [self.length, self.width, self.height]
         sides.sort(reverse=True)
-        return round(sides[1], 6)
+        return sides[1]
 
     def shortest_side(self):
         """最短边"""
         sides = [self.length, self.width, self.height]
         sides.sort(reverse=True)
-        return round(sides[2], 6)
+        return sides[2]
 
     def girth(self):
         """围长"""
-        return round(self.length + (self.width + self.height) * 2, 6)
+        return self.length + (self.width + self.height) * 2
 
     def girth_origin(self):
         """围长,原始的 长+(宽+高)×2"""
@@ -44,22 +44,22 @@ class PackageCalcItems:
         return round(self.length + self.width + self.height, 6)
 
     def max_two_sides_length(self):
-        """任意两边长"""
+        """任意两边长：长+宽"""
         sides_list = [self.length + self.width, self.length + self.height, self.width + self.height]
         sides_list.sort(reverse=True)
-        return round(sides_list[0], 6)
+        return sides_list[0]
 
     def mid_two_sides_length(self):
-        """任意两边长"""
+        """任意两边长：长+高"""
         sides_list = [self.length + self.width, self.length + self.height, self.width + self.height]
         sides_list.sort(reverse=True)
-        return round(sides_list[1], 6)
+        return sides_list[1]
 
     def min_two_sides_length(self):
-        """任意两边长"""
+        """任意两边长：宽+高"""
         sides_list = [self.length + self.width, self.length + self.height, self.width + self.height]
         sides_list.sort(reverse=True)
-        return round(sides_list[2], 6)
+        return sides_list[2]
 
     def casual_two_sides_length(self):
         """任意两边长，长+宽；长+高；宽+高"""
@@ -68,15 +68,15 @@ class PackageCalcItems:
 
     def perimeter(self):
         """周长"""
-        return round(self.longest_side() + self.mid_side() + self.shortest_side(), 6)
+        return self.longest_side() + self.mid_side() + self.shortest_side()
 
     def volume(self):
         """体积=长*宽*高"""
-        return round(self.longest_side() * self.mid_side() * self.shortest_side(), 6)
+        return self.longest_side() * self.mid_side() * self.shortest_side()
 
     def volume_weight(self, precision):
         """体积重=(长*宽*高)/体积重系数"""
-        return round(self.volume() / precision, 6)
+        return self.volume() / precision
 
     def bill_weight(self, precision):
         return max(self.weight, self.volume_weight(precision))
@@ -85,11 +85,11 @@ class PackageCalcItems:
         """美卡托盘密度"""
         if unit_change:
             # 判断是否需要换算单位，若货物信息的单位为国际单位，则需要换算，传True
-            weight = UC.change(self.weight, "weight", "10", "20")
-            volume = UC.change(self.volume(), "volume", "10", "20") / 1728
-            density = weight / volume
-            return density
-        return self.weight / self.volume() * 1728
+            weight = UC.change(self.weight, "weight", 10, 20)
+            volume = UC.change(self.volume(), "volume", 10, 20)
+            density = weight / volume * 1728
+            return round(density, 2)
+        return round(self.weight / self.volume() * 1728, 2)
 
     def package_items(self, source_unit, target_unit):
         package_items = {
@@ -113,15 +113,15 @@ class PackageCalcItems:
         if source_unit and target_unit and source_unit != target_unit:
             for item in package_items:
                 if item in ["weight"]:
-                    package_items[item] = round(UC.change(package_items[item], "weight", source_unit, target_unit), 6)
+                    package_items[item] = UC.change(package_items[item], "weight", source_unit, target_unit)
                 elif item in ["volume", "volumeWeight"]:
-                    package_items[item] = round(UC.change(package_items[item], "volume", source_unit, target_unit), 6)
+                    package_items[item] = UC.change(package_items[item], "volume", source_unit, target_unit)
                 elif item in ["skus"]:
                     temp_list = list()
                     temp_list.extend(
                         [{
-                            "skuMaxLength": round(UC.change(sku["skuMaxLength"], "size", source_unit, target_unit), 6),
-                            "skuWeight": round(UC.change(sku["skuWeight"], "weight", source_unit, target_unit), 6)
+                            "skuMaxLength": UC.change(sku["skuMaxLength"], "size", source_unit, target_unit),
+                            "skuWeight": UC.change(sku["skuWeight"], "weight", source_unit, target_unit)
                         } for sku in package_items[item]]
                     )
                     package_items[item] = temp_list
@@ -156,7 +156,8 @@ class ChannelCalcItems:
         temp_dict = dict()
         for item in self.tms_items:
             if item in ["weight", "volumeWeight", "billWeight"]:
-                temp_dict[item] = Rounding.do_round(self.weight_rounding, self.tms_items.get(item), self.weight_precision)
+                temp_dict[item] = Rounding.do_round(self.weight_rounding, self.tms_items.get(item),
+                                                    self.weight_precision)
             elif item in ["skus"]:
                 temp_list = list()
                 temp_list.extend([

@@ -3,7 +3,7 @@ from models.tms_channel import *
 from playhouse.shortcuts import model_to_dict
 
 
-class TMSBaseDBOperator:
+class TMSBaseDBO:
     @classmethod
     def get_base_dict(cls, key_name):
         """
@@ -15,6 +15,8 @@ class TMSBaseDBOperator:
             return
         return model_to_dict(item)
 
+
+class TMSChannelDBO:
     @classmethod
     def get_channel_data(cls, channel_id):
         """
