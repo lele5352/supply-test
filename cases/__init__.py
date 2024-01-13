@@ -5,7 +5,7 @@ from robots.ims_robot import IMSRobot
 from robots.scm_robot import SCMRobot
 from robots.pms_robot import PMSAppRobot
 from robots.pwms_robot import PWMSRobot
-from robots.tms_robot import HomaryTMS, ChannelService
+from robots.tms_robot import HomaryTMS, TMSChannelService
 from robots.adps_robot import ADPSRobot
 from utils.excel_handler import ExcelTool
 
@@ -20,5 +20,5 @@ pms_app = PMSAppRobot()
 cds_app = CDSAppRobot()
 pwms_app = PWMSRobot()
 tms_api = HomaryTMS()
-tms_channel = ChannelService()
+tms_channel = TMSChannelService()
 adps_app = ADPSRobot()

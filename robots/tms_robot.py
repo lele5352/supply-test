@@ -9,8 +9,6 @@ from config.third_party_api_configs.tms_api_config \
     import TMSApiConfig, UnitType, TransportType, AddressType, AdditionalService
 from robots.robot import AppRobot, ServiceRobot
 from dbo.tms_dbo import TMSBaseDBOperator, LogisticOrderDBO
-from utils.tms_cal_items import TMSCalcItems
-from dbo.tms_dbo import TMSBaseDBOperator
 from utils.tms_cal_items import PackageCalcItems, ChannelCalcItems
 from utils.unit_change_handler import UnitChange
 from utils.time_handler import HumanDateTime
@@ -561,7 +559,7 @@ class HomaryTMS(ServiceRobot):
                 "carTrayDetail": combined_goods if is_car else {},
                 "oldUnit": goods_unit,
                 "newUnit": channel_calc_config.get("currency"),
-                "sortFlag": sort_flag,
+                "sortFlag": reverse_length,
                 "volumeCoefficient": volume_precision,
                 "trialCalcInfo": json.dumps(channel_calc_config),
                 "carOrExpress": is_car,
@@ -628,6 +626,7 @@ class TMSBaseService(ServiceRobot):
 class TMSChannelService(ServiceRobot):
     def __init__(self):
         self.dbo = TMSBaseDBOperator
+        self.order_db = LogisticOrderDBO
         super().__init__('tms_channel_service')
 
     def get_ch_calc_info(self, ch_id):
@@ -635,90 +634,6 @@ class TMSChannelService(ServiceRobot):
         calc_info_data = self.dbo.get_channel_data(ch_id)
 
         return calc_info_data
-
-
-if __name__ == '__main__':
-    tms_app = HomaryTMS()
-    base = TMSBaseService()
-    ch = TMSChannelService()
-
-    rule = base.get_sub_package_limit("us")
-
-    good_unit = 10
-    sort_flag = True
-    volume_precision = 3000
-    goods = [
-        {
-            "prodName": "JFT073L898A01",
-            "qty": 1,
-            "weight": 2,
-            "length": 15,
-            "width": 20,
-            "height": 30,
-            "purchasePriceAmount": 22,
-            "purchasePriceCurrency": "CNY",
-            "salePriceAmount": 90,
-            "salePriceCurrency": "USD"
-        },
-        {
-            "prodName": "JFT073L898A02",
-            "qty": 1,
-            "weight": 1,
-            "length": 15,
-            "width": 20,
-            "height": 6,
-            "purchasePriceAmount": 22,
-            "purchasePriceCurrency": "CNY",
-            "salePriceAmount": 90,
-            "salePriceCurrency": "USD"
-        },
-        {
-            "prodName": "JFT073L898A03",
-            "qty": 1,
-            "weight": 3,
-            "length": 3,
-            "width": 5,
-            "height": 10,
-            "purchasePriceAmount": 22,
-            "purchasePriceCurrency": "CNY",
-            "salePriceAmount": 90,
-            "salePriceCurrency": "USD"
-        }
-    ]
-
-    # result = tms_app.get_pkg_items(goods, good_unit, target_unit, volume_precision, True)
-    # print(result)
-
-    # sub_package_data = base.get_sub_package(good_unit, rule, goods).get("packs")
-    # req_data = tms_app.build_ch_pkg_calc_data(goods, good_unit, channel_config, volume_precision)
-    # dev_result = tms_app.calc_pkg_param(req_data).get("data")
-    # origin_result = list()
-    # changed_result = list()
-    # for package in sub_package_data:
-    #     package_goods = package.get("goods")
-    #     # package_items = tms_app.get_pkg_items(package_goods, good_unit, good_unit, volume_precision)
-    #     channel_items = tms_app.get_ch_pkg_items(package_goods, good_unit, channel_unit, volume_precision,
-    #                                              channel_config,False)
-    #     # origin_result.append(package_items)
-    #     changed_result.append(channel_items)
-    # print(dev_result)
-    # # print(origin_result)
-    # print(changed_result)
-    # package_items = tms_app.get_pkg_items(goods, good_unit, good_unit, volume_precision, False)
-
-    # car_ch_id = 101
-    # ch_data = ch.get_ch_calc_info(car_ch_id)
-    # channel_config = json.loads(ch_data.get("trial_calc_info"))
-    # channel_unit = ch_data.get("unit")
-    # car_ch_items = tms_app.get_ch_pkg_items(goods,good_unit,channel_unit,volume_precision,channel_config,False)
-    # print(car_ch_items)
-
-    kd_ch_id = 102
-    ch_data = ch.get_ch_calc_info(kd_ch_id)
-    channel_config = json.loads(ch_data.get("trial_calc_info"))
-    channel_unit = ch_data.get("unit")
-    kd_ch_items = tms_app.get_ch_pkg_items(goods, good_unit, channel_unit, volume_precision, channel_config, True)
-    print(kd_ch_items)
 
     def cancel_package(self, package_no):
         """
@@ -739,13 +654,6 @@ if __name__ == '__main__':
             content["data"]["wareCodes"].append(ware)
 
         return self.call_api(**content)
-
-
-class ChannelService(ServiceRobot):
-
-    def __init__(self):
-        super().__init__('channel_service')
-        self.order_db = LogisticOrderDBO
 
     def get_tracking(self, channel_id, track_code, trans_code=None, postcode=None):
         """
@@ -811,3 +719,4 @@ class ChannelService(ServiceRobot):
             express_code=express_info['express_order_code'],
             trans_code=express_info['transfer_order_code']
         )
+
