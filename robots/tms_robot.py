@@ -218,7 +218,7 @@ class HomaryTMS(ServiceRobot):
         完善下单包裹信息
         """
         if body["transportType"] == TransportType.EXPRESS.value:
-            for index,value in enumerate(body["expressPacks"]):
+            for index, value in enumerate(body["expressPacks"]):
                 value["channelId"] = kwargs.get("channel_id")
                 value["sourcePackCode"] = f"来源包裹号_{HumanDateTime().timestamp()}_{index}"
                 value["saleCode"] = kwargs.get("sale_code")
@@ -319,11 +319,11 @@ class HomaryTMS(ServiceRobot):
             if req["subPackageFlag"] and forward_flag:
                 req["goodsDetails"] = [self.single_goods_detail(sku, **kwargs) for sku in sku_codes]
             else:
-                req["expressPacks"] = [self.single_express_pack(f'包裹{i+1}', sku_codes, **kwargs)
+                req["expressPacks"] = [self.single_express_pack(f'包裹{i + 1}', sku_codes, **kwargs)
                                        for i in range(package_num)
                                        ]
         else:
-            req["carTrayDetails"] = [self.single_car_tray_detail(f'托盘{i+1}', sku_codes, **kwargs)
+            req["carTrayDetails"] = [self.single_car_tray_detail(f'托盘{i + 1}', sku_codes, **kwargs)
                                      for i in range(package_num)
                                      ]
 
@@ -715,4 +715,3 @@ class TMSChannelService(ServiceRobot):
             express_code=express_info['express_order_code'],
             trans_code=express_info['transfer_order_code']
         )
-
