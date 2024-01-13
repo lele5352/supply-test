@@ -5,7 +5,7 @@ from copy import deepcopy
 from config.third_party_api_configs.tms_api_config import *
 from typing import Tuple
 from robots.robot import AppRobot, ServiceRobot
-from dbo.tms_dbo import TMSChannelDBO, TMSBaseDBO,TMSBaseDBOperator, LogisticOrderDBO
+from dbo.tms_dbo import TMSChannelDBO, TMSBaseDBO,LogisticOrderDBO
 from utils.tms_cal_items import PackageCalcItems, ChannelCalcItems
 from utils.unit_change_handler import UnitChange
 from utils.time_handler import HumanDateTime
@@ -717,3 +717,124 @@ class TMSChannelService(ServiceRobot):
             trans_code=express_info['transfer_order_code']
         )
 
+    def cancel_tracking(self, channel_id, package_code, express_code, trans_code=None):
+        """
+        领域取消运单（调用服务商接口取消，不会处理包裹状态）
+        :param channel_id: 渠道id
+        :param package_code: 包裹号
+        :param express_code: 运单号
+        :param trans_code: 转运单号
+        """
+        content = deepcopy(TMSApiConfig.CancelTrack.get_attributes())
+        content["data"]["channelId"] = channel_id
+        content["data"]["sourceOrderCode"] = package_code
+        content["data"]["trackOrderCode"] = express_code
+        content["data"]["transferOrderCode"] = trans_code if trans_code else ""
+
+        return self.call_api(**content)
+
+    def cancel_by_express_code(self, express_code):
+        """
+        通过运单号取消运单（直接调用领域）
+        :param express_code: 运单号
+        """
+        express_info = self.order_db.express_order_info(
+            express_code
+        )
+        if not express_info:
+            raise ValueError("找不到运单信息")
+
+        return self.cancel_tracking(
+            channel_id=express_info['channel_id'],
+            package_code=express_info['package_code'],
+            express_code=express_info['express_order_code'],
+            trans_code=express_info['transfer_order_code']
+        )
+
+
+
+if __name__ == '__main__':
+    tms_app = HomaryTMS()
+    base = TMSBaseService()
+    ch = TMSChannelService()
+
+    rule = base.get_sub_package_limit("us")
+
+    good_unit = 10
+    volume_precision = 30
+    goods = [
+        {
+            "prodName": "JFT073L898A01",
+            "qty": 1,
+            "weight": 2,
+            "length": 15,
+            "width": 20,
+            "height": 30,
+            "purchasePriceAmount": 22,
+            "purchasePriceCurrency": "CNY",
+            "salePriceAmount": 90,
+            "salePriceCurrency": "USD"
+        },
+        {
+            "prodName": "JFT073L898A02",
+            "qty": 1,
+            "weight": 1,
+            "length": 15,
+            "width": 20,
+            "height": 6,
+            "purchasePriceAmount": 22,
+            "purchasePriceCurrency": "CNY",
+            "salePriceAmount": 90,
+            "salePriceCurrency": "USD"
+        },
+        {
+            "prodName": "JFT073L898A03",
+            "qty": 1,
+            "weight": 3,
+            "length": 3,
+            "width": 5,
+            "height": 10,
+            "purchasePriceAmount": 22,
+            "purchasePriceCurrency": "CNY",
+            "salePriceAmount": 90,
+            "salePriceCurrency": "USD"
+        }
+    ]
+
+    # result = tms_app.get_pkg_items(goods, good_unit, target_unit, volume_precision, True)
+    # print(result)
+
+    # sub_package_data = base.get_sub_package(good_unit, rule, goods).get("packs")
+    # req_data = tms_app.build_ch_pkg_calc_data(goods, good_unit, channel_config, volume_precision)
+    # dev_result = tms_app.calc_pkg_param(req_data).get("data")
+    # origin_result = list()
+    # changed_result = list()
+    # for package in sub_package_data:
+    #     package_goods = package.get("goods")
+    #     # package_items = tms_app.get_pkg_items(package_goods, good_unit, good_unit, volume_precision)
+    #     channel_items = tms_app.get_ch_pkg_items(package_goods, good_unit, channel_unit, volume_precision,
+    #                                              channel_config,False)
+    #     # origin_result.append(package_items)
+    #     changed_result.append(channel_items)
+    # print(dev_result)
+    # # print(origin_result)
+    # print(changed_result)
+    # package_items = tms_app.get_pkg_items(goods, good_unit, good_unit, volume_precision, False)
+
+    # car_ch_id = 101
+    # ch_data = ch.get_ch_calc_info(car_ch_id)
+    # channel_config = json.loads(ch_data.get("trial_calc_info"))
+    # channel_unit = ch_data.get("unit")
+    # car_ch_items = tms_app.get_ch_pkg_items(goods, good_unit, channel_unit, volume_precision, channel_config, False)
+    # print(car_ch_items)
+
+    # kd_ch_id = 102
+    # ch_data = ch.get_ch_calc_info(kd_ch_id)
+    # channel_config = json.loads(ch_data.get("trial_calc_info"))
+    # channel_unit = ch_data.get("unit")
+    # kd_ch_items = tms_app.get_ch_pkg_items(goods, good_unit, channel_unit, volume_precision, channel_config, True)
+    # print(kd_ch_items)
+
+    pack_items = [15, 20, 46, 6, []]
+    pck_items = PackageCalcItems(*pack_items, volume_precision)
+    print(pck_items.density(False))
