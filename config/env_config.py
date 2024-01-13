@@ -26,7 +26,11 @@ prefix_config = {
         'oms_app': 'http://10.0.0.160:8826',
         'eta': 'http://10.0.0.159:8701',
         'tms_api': 'http://10.0.0.159:6540',
-        'channel_service': 'http://10.0.0.158:6630'
+        'channel_service': 'http://10.0.0.158:6630',
+        'homary_tms': 'http://10.0.0.159:6540',
+        'tms_base_service': 'http://10.0.0.158:6610',
+        'tms_channel_service': 'http://10.0.0.158:6630',
+        'tms_customer_service':'http://10.0.0.158:6620'
     },
     'test189': {
         'ims': 'http://10.0.0.189:28801',

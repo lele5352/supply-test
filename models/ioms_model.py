@@ -3,15 +3,12 @@ from config import scms_db_config
 
 database = MySQLDatabase('supply_financial_ioms', **scms_db_config)
 
-
 class UnknownField(object):
     def __init__(self, *_, **__): pass
-
 
 class BaseModel(Model):
     class Meta:
         database = database
-
 
 class BatchJobExecution(BaseModel):
     create_time = DateTimeField(column_name='CREATE_TIME')
@@ -27,8 +24,7 @@ class BatchJobExecution(BaseModel):
     version = BigIntegerField(column_name='VERSION', null=True)
 
     class Meta:
-        table_name = 'batch_job_execution'
-
+        table_name = 'BATCH_JOB_EXECUTION'
 
 class BatchJobExecutionContext(BaseModel):
     job_execution_id = BigAutoField(column_name='JOB_EXECUTION_ID')
@@ -36,8 +32,7 @@ class BatchJobExecutionContext(BaseModel):
     short_context = CharField(column_name='SHORT_CONTEXT')
 
     class Meta:
-        table_name = 'batch_job_execution_context'
-
+        table_name = 'BATCH_JOB_EXECUTION_CONTEXT'
 
 class BatchJobExecutionParams(BaseModel):
     date_val = DateTimeField(column_name='DATE_VAL', null=True)
@@ -50,18 +45,16 @@ class BatchJobExecutionParams(BaseModel):
     type_cd = CharField(column_name='TYPE_CD')
 
     class Meta:
-        table_name = 'batch_job_execution_params'
+        table_name = 'BATCH_JOB_EXECUTION_PARAMS'
         primary_key = False
-
 
 class BatchJobExecutionSeq(BaseModel):
     id = BigIntegerField(column_name='ID')
     unique_key = CharField(column_name='UNIQUE_KEY', unique=True)
 
     class Meta:
-        table_name = 'batch_job_execution_seq'
+        table_name = 'BATCH_JOB_EXECUTION_SEQ'
         primary_key = False
-
 
 class BatchJobInstance(BaseModel):
     job_instance_id = BigAutoField(column_name='JOB_INSTANCE_ID')
@@ -70,20 +63,18 @@ class BatchJobInstance(BaseModel):
     version = BigIntegerField(column_name='VERSION', null=True)
 
     class Meta:
-        table_name = 'batch_job_instance'
+        table_name = 'BATCH_JOB_INSTANCE'
         indexes = (
             (('job_name', 'job_key'), True),
         )
-
 
 class BatchJobSeq(BaseModel):
     id = BigIntegerField(column_name='ID')
     unique_key = CharField(column_name='UNIQUE_KEY', unique=True)
 
     class Meta:
-        table_name = 'batch_job_seq'
+        table_name = 'BATCH_JOB_SEQ'
         primary_key = False
-
 
 class BatchStepExecution(BaseModel):
     commit_count = BigIntegerField(column_name='COMMIT_COUNT', null=True)
@@ -106,8 +97,7 @@ class BatchStepExecution(BaseModel):
     write_skip_count = BigIntegerField(column_name='WRITE_SKIP_COUNT', null=True)
 
     class Meta:
-        table_name = 'batch_step_execution'
-
+        table_name = 'BATCH_STEP_EXECUTION'
 
 class BatchStepExecutionContext(BaseModel):
     serialized_context = TextField(column_name='SERIALIZED_CONTEXT', null=True)
@@ -115,17 +105,15 @@ class BatchStepExecutionContext(BaseModel):
     step_execution_id = BigAutoField(column_name='STEP_EXECUTION_ID')
 
     class Meta:
-        table_name = 'batch_step_execution_context'
-
+        table_name = 'BATCH_STEP_EXECUTION_CONTEXT'
 
 class BatchStepExecutionSeq(BaseModel):
     id = BigIntegerField(column_name='ID')
     unique_key = CharField(column_name='UNIQUE_KEY', unique=True)
 
     class Meta:
-        table_name = 'batch_step_execution_seq'
+        table_name = 'BATCH_STEP_EXECUTION_SEQ'
         primary_key = False
-
 
 class FlywaySchemaHistory(BaseModel):
     checksum = IntegerField(null=True)
@@ -142,8 +130,50 @@ class FlywaySchemaHistory(BaseModel):
     class Meta:
         table_name = 'flyway_schema_history'
 
-
 class IoInventoryBatch(BaseModel):
+    balance_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    batch_no = CharField(constraints=[SQL("DEFAULT ''")])
+    bom_count = IntegerField(null=True)
+    bom_map = IntegerField(null=True)
+    bom_percentage = DecimalField(null=True)
+    bom_version = CharField(null=True)
+    business_no = CharField(constraints=[SQL("DEFAULT ''")])
+    business_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    component_flag = IntegerField(null=True)
+    create_time = DateTimeField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    entry_no = CharField(null=True)
+    entry_time = DateTimeField(null=True)
+    finish_time = DateTimeField(index=True, null=True)
+    goods_type = IntegerField(null=True)
+    id = BigAutoField()
+    inventory_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    relation_order_code = CharField(null=True)
+    remark = CharField(null=True)
+    sale_sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sale_sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    short_warehouse_name = CharField(null=True)
+    sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sku_name = CharField(null=True)
+    source_time = DateTimeField(null=True)
+    source_type = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    trade_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    unit_price = DecimalField(null=True)
+    update_time = DateTimeField(null=True)
+    warehouse_code = CharField(constraints=[SQL("DEFAULT ''")])
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    warehouse_name = CharField(null=True)
+
+    class Meta:
+        table_name = 'io_inventory_batch'
+        indexes = (
+            (('del_flag', 'inventory_type', 'warehouse_id', 'sku_code'), False),
+            (('del_flag', 'warehouse_id', 'entry_no', 'component_flag'), False),
+            (('inventory_type', 'sku_code', 'del_flag'), False),
+            (('warehouse_id', 'batch_no'), False),
+        )
+
+class IoInventoryBatchBak(BaseModel):
     balance_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
     batch_no = CharField(constraints=[SQL("DEFAULT ''")])
     bom_count = IntegerField(null=True)
@@ -176,16 +206,139 @@ class IoInventoryBatch(BaseModel):
     warehouse_name = CharField(null=True)
 
     class Meta:
-        table_name = 'io_inventory_batch'
+        table_name = 'io_inventory_batch_bak'
         indexes = (
             (('del_flag', 'warehouse_id', 'entry_no', 'component_flag'), False),
-            (('del_flag', 'warehouse_id', 'inventory_type'), False),
-            (('del_flag', 'warehouse_id', 'inventory_type', 'business_no', 'batch_no'), False),
             (('warehouse_id', 'batch_no'), False),
         )
 
+class IoInventoryBatchCopy1(BaseModel):
+    balance_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    batch_no = CharField(constraints=[SQL("DEFAULT ''")])
+    bom_count = IntegerField(null=True)
+    bom_map = IntegerField(null=True)
+    bom_percentage = DecimalField(null=True)
+    bom_version = CharField(null=True)
+    business_no = CharField(constraints=[SQL("DEFAULT ''")])
+    business_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    component_flag = IntegerField(null=True)
+    create_time = DateTimeField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    entry_no = CharField(null=True)
+    entry_time = DateTimeField(null=True)
+    finish_time = DateTimeField(index=True, null=True)
+    goods_type = IntegerField(null=True)
+    id = BigAutoField()
+    inventory_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    relation_order_code = CharField(null=True)
+    remark = CharField(null=True)
+    sale_sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sale_sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    short_warehouse_name = CharField(null=True)
+    sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sku_name = CharField(null=True)
+    source_time = DateTimeField(null=True)
+    source_type = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    trade_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    unit_price = DecimalField(null=True)
+    update_time = DateTimeField(null=True)
+    warehouse_code = CharField(constraints=[SQL("DEFAULT ''")])
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    warehouse_name = CharField(null=True)
+
+    class Meta:
+        table_name = 'io_inventory_batch_copy1'
+        indexes = (
+            (('del_flag', 'inventory_type', 'warehouse_id', 'sku_code'), False),
+            (('del_flag', 'warehouse_id', 'entry_no', 'component_flag'), False),
+            (('inventory_type', 'sku_code', 'del_flag'), False),
+            (('warehouse_id', 'batch_no'), False),
+        )
+
+class IoInventoryBatchCopy1Copy1(BaseModel):
+    balance_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    batch_no = CharField(constraints=[SQL("DEFAULT ''")])
+    bom_count = IntegerField(null=True)
+    bom_map = IntegerField(null=True)
+    bom_percentage = DecimalField(null=True)
+    bom_version = CharField(null=True)
+    business_no = CharField(constraints=[SQL("DEFAULT ''")])
+    business_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    component_flag = IntegerField(null=True)
+    create_time = DateTimeField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    entry_no = CharField(null=True)
+    entry_time = DateTimeField(null=True)
+    finish_time = DateTimeField(null=True)
+    goods_type = IntegerField(null=True)
+    id = BigAutoField()
+    inventory_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    relation_order_code = CharField(null=True)
+    sale_sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sale_sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    short_warehouse_name = CharField(null=True)
+    sku_code = CharField(constraints=[SQL("DEFAULT ''")])
+    sku_name = CharField(null=True)
+    source_type = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    trade_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    unit_price = DecimalField(null=True)
+    update_time = DateTimeField(null=True)
+    warehouse_code = CharField(constraints=[SQL("DEFAULT ''")])
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    warehouse_name = CharField(null=True)
+
+    class Meta:
+        table_name = 'io_inventory_batch_copy1_copy1'
+        indexes = (
+            (('del_flag', 'warehouse_id', 'entry_no', 'component_flag'), False),
+            (('warehouse_id', 'batch_no'), False),
+        )
 
 class IoInventoryBatchFlow(BaseModel):
+    balance_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    batch_no = CharField(constraints=[SQL("DEFAULT ''")])
+    bom_count = IntegerField(null=True)
+    bom_map = IntegerField(null=True)
+    bom_percentage = DecimalField(null=True)
+    bom_version = CharField(null=True)
+    business_no = CharField(constraints=[SQL("DEFAULT ''")])
+    business_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    component_flag = IntegerField(null=True)
+    create_time = DateTimeField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    entry_no = CharField(null=True)
+    entry_time = DateTimeField(null=True)
+    finish_time = DateTimeField(index=True, null=True)
+    flow_flag = IntegerField(constraints=[SQL("DEFAULT 10")])
+    flow_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    goods_type = IntegerField(null=True)
+    id = BigAutoField()
+    inventory_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    relation_order_code = CharField(null=True)
+    sale_sku_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    sale_sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    short_warehouse_name = CharField(null=True)
+    sku_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    sku_name = CharField(null=True)
+    sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    source_id = BigIntegerField(null=True)
+    source_time = DateTimeField(null=True)
+    source_type = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    unique_id = CharField(constraints=[SQL("DEFAULT ''")])
+    unit_price = DecimalField(null=True)
+    update_time = DateTimeField(null=True)
+    warehouse_code = CharField(constraints=[SQL("DEFAULT ''")])
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    warehouse_name = CharField(null=True)
+
+    class Meta:
+        table_name = 'io_inventory_batch_flow'
+        indexes = (
+            (('business_no', 'del_flag'), False),
+            (('inventory_type', 'flow_type', 'business_type', 'sku_code', 'del_flag'), False),
+        )
+
+class IoInventoryBatchFlowBak(BaseModel):
     balance_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
     batch_no = CharField(constraints=[SQL("DEFAULT ''")])
     bom_count = IntegerField(null=True)
@@ -221,8 +374,51 @@ class IoInventoryBatchFlow(BaseModel):
     warehouse_name = CharField(null=True)
 
     class Meta:
-        table_name = 'io_inventory_batch_flow'
+        table_name = 'io_inventory_batch_flow_bak'
 
+class IoInventoryBatchFlowCopy1(BaseModel):
+    balance_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    batch_no = CharField(constraints=[SQL("DEFAULT ''")])
+    bom_count = IntegerField(null=True)
+    bom_map = IntegerField(null=True)
+    bom_percentage = DecimalField(null=True)
+    bom_version = CharField(null=True)
+    business_no = CharField(constraints=[SQL("DEFAULT ''")])
+    business_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    component_flag = IntegerField(null=True)
+    create_time = DateTimeField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    entry_no = CharField(null=True)
+    entry_time = DateTimeField(null=True)
+    finish_time = DateTimeField(index=True, null=True)
+    flow_flag = IntegerField(constraints=[SQL("DEFAULT 10")])
+    flow_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    goods_type = IntegerField(null=True)
+    id = BigAutoField()
+    inventory_type = IntegerField(constraints=[SQL("DEFAULT 0")])
+    relation_order_code = CharField(null=True)
+    sale_sku_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    sale_sku_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    short_warehouse_name = CharField(null=True)
+    sku_code = CharField(constraints=[SQL("DEFAULT ''")], index=True)
+    sku_name = CharField(null=True)
+    sku_qty = IntegerField(constraints=[SQL("DEFAULT 0")])
+    source_id = BigIntegerField(null=True)
+    source_time = DateTimeField(null=True)
+    source_type = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    unique_id = CharField(constraints=[SQL("DEFAULT ''")])
+    unit_price = DecimalField(null=True)
+    update_time = DateTimeField(null=True)
+    warehouse_code = CharField(constraints=[SQL("DEFAULT ''")])
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    warehouse_name = CharField(null=True)
+
+    class Meta:
+        table_name = 'io_inventory_batch_flow_copy1'
+        indexes = (
+            (('business_no', 'del_flag'), False),
+            (('inventory_type', 'flow_type', 'business_type', 'sku_code', 'del_flag'), False),
+        )
 
 class IoNotCompleteStockBusinessFlow(BaseModel):
     batch_number = CharField()
@@ -235,7 +431,7 @@ class IoNotCompleteStockBusinessFlow(BaseModel):
     business_type = IntegerField(null=True)
     create_time = DateTimeField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    finish_time = DateTimeField(null=True)
+    finish_time = DateTimeField(index=True, null=True)
     first_entry_number = CharField(null=True)
     first_entry_time = DateTimeField(null=True)
     flow_type = IntegerField(null=True)
@@ -257,7 +453,6 @@ class IoNotCompleteStockBusinessFlow(BaseModel):
         indexes = (
             (('flow_type', 'stock_type', 'warehouse_code'), False),
         )
-
 
 class IoNotCompleteStockSnapshot(BaseModel):
     batch_number = CharField()
@@ -287,7 +482,6 @@ class IoNotCompleteStockSnapshot(BaseModel):
     class Meta:
         table_name = 'io_not_complete_stock_snapshot'
 
-
 class IoSaleSkuBusinessFlow(BaseModel):
     batch_number = TextField()
     bom_percentage = DecimalField(null=True)
@@ -298,7 +492,7 @@ class IoSaleSkuBusinessFlow(BaseModel):
     business_type = IntegerField(null=True)
     create_time = DateTimeField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    finish_time = DateTimeField(null=True)
+    finish_time = DateTimeField(index=True, null=True)
     first_entry_time = DateTimeField(null=True)
     flow_type = IntegerField(null=True)
     id = BigAutoField()
@@ -316,7 +510,6 @@ class IoSaleSkuBusinessFlow(BaseModel):
         indexes = (
             (('flow_type', 'stock_type', 'warehouse_code'), False),
         )
-
 
 class IoSaleSkuStockSnapshot(BaseModel):
     batch_number = TextField()
@@ -345,13 +538,12 @@ class IoSaleSkuStockSnapshot(BaseModel):
     class Meta:
         table_name = 'io_sale_sku_stock_snapshot'
 
-
 class IoSourceOrder(BaseModel):
     create_time = DateTimeField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     handle_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     id = BigAutoField()
-    operate_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    operate_time = DateTimeField()
     order_code = CharField()
     order_type = IntegerField()
     state = IntegerField()
@@ -364,7 +556,6 @@ class IoSourceOrder(BaseModel):
             (('order_type', 'order_code'), True),
         )
 
-
 class IoSourceOrderDetail(BaseModel):
     bom_count = IntegerField(null=True)
     bom_scale = DecimalField(null=True)
@@ -372,7 +563,7 @@ class IoSourceOrderDetail(BaseModel):
     create_time = DateTimeField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     distribute_order_code = CharField(null=True)
-    finish_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    finish_time = DateTimeField()
     flow_type = IntegerField(null=True)
     goods_type = IntegerField(null=True)
     id = BigAutoField()
@@ -399,7 +590,6 @@ class IoSourceOrderDetail(BaseModel):
             (('source_order_code', 'sale_sku_code', 'sku_code', 'unit_flag', 'flow_type'), True),
         )
 
-
 class IoSourceOrderHandleDetail(BaseModel):
     bom_count = IntegerField(null=True)
     bom_scale = DecimalField(null=True)
@@ -407,7 +597,7 @@ class IoSourceOrderHandleDetail(BaseModel):
     create_time = DateTimeField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     distribute_order_code = CharField(null=True)
-    finish_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+    finish_time = DateTimeField()
     flow_type = IntegerField(null=True)
     goods_type = IntegerField(null=True)
     handle_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
@@ -434,10 +624,45 @@ class IoSourceOrderHandleDetail(BaseModel):
     class Meta:
         table_name = 'io_source_order_handle_detail'
         indexes = (
-            (('source_order_code', 'order_type', 'sale_sku_code', 'sku_code', 'inventory_type', 'flow_type',
-              'distribute_order_code', 'unit_flag'), True),
+            (('source_order_code', 'order_type', 'sale_sku_code', 'sku_code', 'inventory_type', 'flow_type', 'distribute_order_code', 'unit_flag'), True),
         )
 
+class IoSourceOrderHandleDetailCopy1Copy1(BaseModel):
+    bom_count = IntegerField(null=True)
+    bom_scale = DecimalField(null=True)
+    bom_version = CharField(null=True)
+    create_time = DateTimeField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    distribute_order_code = CharField(null=True)
+    finish_time = DateTimeField()
+    flow_type = IntegerField(null=True)
+    goods_type = IntegerField(null=True)
+    handle_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    id = BigAutoField()
+    inventory_type = IntegerField(null=True)
+    order_create_time = DateTimeField(null=True)
+    order_type = IntegerField(null=True)
+    purchase_price = DecimalField(null=True)
+    relation_order_code = CharField(null=True)
+    sale_sku_code = CharField(null=True)
+    sale_sku_name = CharField(null=True)
+    sku_code = CharField(null=True)
+    sku_name = CharField(null=True)
+    sku_qty = IntegerField(null=True)
+    source_order_code = CharField()
+    source_order_id = BigIntegerField()
+    unit_flag = IntegerField(null=True)
+    update_time = DateTimeField(null=True)
+    warehouse_code = CharField()
+    warehouse_id = BigIntegerField(null=True)
+    warehouse_name = CharField(null=True)
+    warehouse_short_name = CharField(null=True)
+
+    class Meta:
+        table_name = 'io_source_order_handle_detail_copy1_copy1'
+        indexes = (
+            (('source_order_code', 'order_type', 'sale_sku_code', 'sku_code', 'inventory_type', 'flow_type', 'distribute_order_code', 'unit_flag'), True),
+        )
 
 class IoWarehouseSkuBusinessFlow(BaseModel):
     batch_number = CharField()
@@ -451,7 +676,7 @@ class IoWarehouseSkuBusinessFlow(BaseModel):
     component_flag = IntegerField(null=True)
     create_time = DateTimeField(null=True)
     del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    finish_time = DateTimeField(null=True)
+    finish_time = DateTimeField(index=True, null=True)
     first_entry_number = CharField(null=True)
     first_entry_time = DateTimeField(null=True)
     flow_type = IntegerField(null=True)
@@ -460,18 +685,54 @@ class IoWarehouseSkuBusinessFlow(BaseModel):
     remain_qty = IntegerField(null=True)
     sale_sku_code = CharField(null=True)
     short_warehouse_name = CharField(null=True)
+    single_warehouse_entry_time = DateTimeField(null=True)
     sku_deal_qty = IntegerField(null=True)
     stock_type = IntegerField(null=True)
     total_price = DecimalField(null=True)
     unit_price = DecimalField(null=True)
     update_time = DateTimeField(null=True)
     warehouse_code = CharField(null=True)
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
     warehouse_name = CharField(null=True)
     warehouse_sku_code = CharField(null=True)
 
     class Meta:
         table_name = 'io_warehouse_sku_business_flow'
 
+class IoWarehouseSkuBusinessFlowCopy1(BaseModel):
+    batch_number = CharField()
+    bom_map = IntegerField(null=True)
+    bom_percentage = DecimalField(null=True)
+    bom_total = IntegerField(null=True)
+    bom_version = CharField(null=True)
+    business_no = CharField(null=True)
+    business_time = DateTimeField(null=True)
+    business_type = IntegerField(null=True)
+    component_flag = IntegerField(null=True)
+    create_time = DateTimeField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    finish_time = DateTimeField(index=True, null=True)
+    first_entry_number = CharField(null=True)
+    first_entry_time = DateTimeField(null=True)
+    flow_type = IntegerField(null=True)
+    goods_type = IntegerField(null=True)
+    id = BigAutoField()
+    remain_qty = IntegerField(null=True)
+    sale_sku_code = CharField(null=True)
+    short_warehouse_name = CharField(null=True)
+    single_warehouse_entry_time = DateTimeField(null=True)
+    sku_deal_qty = IntegerField(null=True)
+    stock_type = IntegerField(null=True)
+    total_price = DecimalField(null=True)
+    unit_price = DecimalField(null=True)
+    update_time = DateTimeField(null=True)
+    warehouse_code = CharField(null=True)
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    warehouse_name = CharField(null=True)
+    warehouse_sku_code = CharField(null=True)
+
+    class Meta:
+        table_name = 'io_warehouse_sku_business_flow_copy1'
 
 class IoWarehouseSkuStockSnapshot(BaseModel):
     batch_number = CharField()
@@ -495,12 +756,49 @@ class IoWarehouseSkuStockSnapshot(BaseModel):
     unit_price = DecimalField(null=True)
     update_time = DateTimeField(null=True)
     warehouse_code = CharField(null=True)
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
     warehouse_name = CharField(null=True)
     warehouse_sku = CharField(null=True)
 
     class Meta:
         table_name = 'io_warehouse_sku_stock_snapshot'
+        indexes = (
+            (('batch_number', 'del_flag'), False),
+            (('warehouse_code', 'batch_number', 'warehouse_sku', 'stock_type', 'business_time'), False),
+        )
 
+class IoWarehouseSkuStockSnapshotCopy1(BaseModel):
+    batch_number = CharField()
+    bom_map = IntegerField(null=True)
+    bom_percentage = DecimalField(null=True)
+    bom_total = IntegerField(null=True)
+    bom_version = CharField(null=True)
+    business_time = DateTimeField(index=True, null=True)
+    create_time = DateTimeField(null=True)
+    del_flag = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    first_entry_time = DateTimeField(null=True)
+    id = BigAutoField()
+    link_warehouse_sku_age = DecimalField(null=True)
+    sale_sku_code = CharField(null=True)
+    short_warehouse_name = CharField(null=True)
+    single_warehouse_entry_time = DateTimeField(null=True)
+    single_warehouse_sku_age = DecimalField(null=True)
+    sku_qty = IntegerField(null=True)
+    stock_type = IntegerField(null=True)
+    total_price = DecimalField(null=True)
+    unit_price = DecimalField(null=True)
+    update_time = DateTimeField(null=True)
+    warehouse_code = CharField(null=True)
+    warehouse_id = BigIntegerField(constraints=[SQL("DEFAULT 0")])
+    warehouse_name = CharField(null=True)
+    warehouse_sku = CharField(null=True)
+
+    class Meta:
+        table_name = 'io_warehouse_sku_stock_snapshot_copy1'
+        indexes = (
+            (('batch_number', 'del_flag'), False),
+            (('warehouse_code', 'batch_number', 'warehouse_sku', 'stock_type', 'business_time'), False),
+        )
 
 class WaresInventory(BaseModel):
     block = IntegerField(constraints=[SQL("DEFAULT 0")])
@@ -524,3 +822,4 @@ class WaresInventory(BaseModel):
         indexes = (
             (('ware_sku_code', 'warehouse_id', 'storage_location_id', 'target_warehouse_id', 'type'), True),
         )
+

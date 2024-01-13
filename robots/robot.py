@@ -242,4 +242,3 @@ class ServiceRobot(Robot):
     def __init__(self, service_name):
         self.prefix = env_prefix_config.get(service_name)
         super().__init__(self.prefix, service_headers)
-
