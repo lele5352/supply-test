@@ -1,8 +1,11 @@
 import json
 
+import pytest
+
 from cases import tms_api, tms_channel
 from config.third_party_api_configs.tms_api_config \
     import UnitType, TransportType, AddressType, AdditionalService
+from config import order_flag
 
 """
 地址id:
@@ -20,12 +23,13 @@ def test_trial():
     tms_api.do_trial(req)
 
 
+@pytest.mark.skipif(not order_flag, reason='不执行下单')
 def test_order():
     req = tms_api.build_order_body(
         TransportType.EXPRESS, 193, 'US', True, sku_codes=('J04CJ000483BA01', )
     )
-    # print(json.dumps(req, ensure_ascii=False))
-    tms_api.do_order(req)
+    print(json.dumps(req, ensure_ascii=False))
+    # tms_api.do_order(req)
 
 
 def test_4px_trial():
@@ -35,6 +39,7 @@ def test_4px_trial():
     tms_api.do_trial(req)
 
 
+@pytest.mark.skipif(not order_flag, reason='不执行集中下单')
 def test_focus():
     tms_api.focus_without_time('UKFH07')
 
@@ -49,6 +54,7 @@ def test_gs_trial():
     tms_api.do_trial(req)
 
 
+@pytest.mark.skipif(not order_flag, reason='不执行下单')
 def test_gs_order():
     """
     光速时代下单
@@ -70,6 +76,7 @@ def test_dx_trial():
     tms_api.do_trial(req)
 
 
+@pytest.mark.skipif(not order_flag, reason='不执行下单')
 def test_dx_order():
     """
     DX 下单
@@ -92,6 +99,7 @@ def test_db_trial():
     tms_api.do_trial(req)
 
 
+@pytest.mark.skipif(not order_flag, reason='不执行下单')
 def test_db_order():
     """
     DB 下单
