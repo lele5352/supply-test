@@ -59,11 +59,24 @@ def login(user_name, password):
 
 
 def get_service_headers():
+
     username = default_user['username']
-    user_id = UMSDBOperator.query_sys_user(username).get('id')
+    user_info = UMSDBOperator.query_sys_user(username)
+
     # 领域接口请求头，默认去掉 gzip 参数值，以兼容不支持http2的微服务
-    service_header = {"user": json.dumps({"username": username, 'user_id': user_id}), "serviceName": "ec-scm-service",
-                      "Accept-Encoding": "deflate, br"}
+    service_header = {
+        "user": json.dumps(
+            {
+                "username": user_info.get('username'),
+                'user_id': user_info.get('id'),
+                "nickname": user_info.get('username')
+            },
+            ensure_ascii=False
+        ),
+        "serviceName": "ec-scm-service",
+        "Accept-Encoding": "deflate, br"
+    }
+
     return service_header
 
 

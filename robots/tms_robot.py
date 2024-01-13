@@ -8,7 +8,7 @@ from typing import Tuple
 from config.third_party_api_configs.tms_api_config \
     import TMSApiConfig, UnitType, TransportType, AddressType, AdditionalService
 from robots.robot import AppRobot, ServiceRobot
-from dbo.tms_dbo import TMSBaseDBOperator
+from dbo.tms_dbo import TMSBaseDBOperator, LogisticOrderDBO
 from utils.tms_cal_items import TMSCalcItems
 from utils.unit_change_handler import UnitChange
 from utils.time_handler import HumanDateTime
@@ -525,6 +525,7 @@ class ChannelService(ServiceRobot):
 
     def __init__(self):
         super().__init__('channel_service')
+        self.order_db = LogisticOrderDBO
 
     def get_tracking(self, channel_id, track_code, trans_code=None, postcode=None):
         """
@@ -572,3 +573,21 @@ class ChannelService(ServiceRobot):
         content["data"]["transferOrderCode"] = trans_code if trans_code else ""
 
         return self.call_api(**content)
+
+    def cancel_by_express_code(self, express_code):
+        """
+        通过运单号取消运单（直接调用领域）
+        :param express_code: 运单号
+        """
+        express_info = self.order_db.express_order_info(
+            express_code
+        )
+        if not express_info:
+            raise ValueError("找不到运单信息")
+
+        return self.cancel_tracking(
+            channel_id=express_info['channel_id'],
+            package_code=express_info['package_code'],
+            express_code=express_info['express_order_code'],
+            trans_code=express_info['transfer_order_code']
+        )
