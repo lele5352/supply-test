@@ -1,11 +1,10 @@
 import json
 import random
-import uuid
 from copy import deepcopy
 from config.third_party_api_configs.tms_api_config import *
 from typing import Tuple
 from robots.robot import AppRobot, ServiceRobot
-from dbo.tms_dbo import TMSChannelDBO, TMSBaseDBO,TMSBaseDBOperator, LogisticOrderDBO
+from dbo.tms_dbo import TMSChannelDBO, TMSBaseDBO, LogisticOrderDBO
 from utils.tms_cal_items import PackageCalcItems, ChannelCalcItems
 from utils.unit_change_handler import UnitChange
 from utils.time_handler import HumanDateTime
