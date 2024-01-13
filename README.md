@@ -21,12 +21,7 @@
                 'username': '', # 你的账号
                 'password': '' # 你的密码
             }
-            
-            xmind_config = {
-                'xmind_file_path': '',
-                'excel_file_path': ''
-            }
-            
+
             console_log = False  # 日志是否输出到控制台配置，默认否
 
 使用redis:
@@ -91,5 +86,8 @@ model生成：
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_oms > models/oms_model.py
     python3 -m pwiz -e mysql -H 10.0.0.127 -p 3306 -u erp -P supply_scm > models/scm_model.py
     python3 -m pwiz -e mysql -H 10.0.0.156 -p 3306 -u erp -P supply_logistics_base > models/tms_base.py
+    python3 -m pwiz -e mysql -H 10.0.0.156 -p 3306 -u erp -P supply_logistics_channel > models/tms_channel.py
+    python3 -m pwiz -e mysql -H 10.0.0.156 -p 3306 -u erp -P supply_logistics_order > models/tms_order.py
+    python3 -m pwiz -e mysql -H 10.0.0.156 -p 3306 -u erp -P supply_logistics_customer > models/tms_customer.py
 
 
