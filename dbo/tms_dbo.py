@@ -33,11 +33,12 @@ class TMSChannelDBO:
 class LogisticOrderDBO:
 
     @classmethod
-    def express_order_info(cls, express_order_code):
+    def express_order_info(cls, pack_code):
         """
-        通过运单号查询运单信息
+        通过包裹号查询运单信息
+        :param pack_code: 包裹号
         """
         data = LogisticsExpressOrder.get_or_none(
-            LogisticsExpressOrder.express_order_code == express_order_code
+            LogisticsExpressOrder.package_code == pack_code
         )
         return model_to_dict(data) if data else None

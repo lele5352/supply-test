@@ -136,6 +136,40 @@ class TMSApiConfig:
             "contactPhone": "248 378 8218"
         }
 
+        US2 = {
+            "deliveryContactEmail": "et@aa.com",
+            "countryCode": "US",
+            "countryName": "Unite States",
+            "province": "TX",
+            "provinceName": "Texas",
+            "city": "Richmond",
+            "cityName": "Richmond",
+            "postcode": "77407",
+            "address": "17523 Astrachan Road",
+            "addressType": "BUSINESS_ADDRESS_P",
+            "firstName": "Will",
+            "lastName": "Wilde",
+            "contactEmail": "et@aa.com",
+            "contactPhone": "248 378 8218"
+        }
+
+        US3 = {
+            "deliveryContactEmail": "et@aa.com",
+            "countryCode": "US",
+            "countryName": "Unite States",
+            "province": "NY",
+            "provinceName": "New York",
+            "city": "Brooklyn",
+            "cityName": "Brooklyn",
+            "postcode": "11234",
+            "address": "1234 East 49th Street",
+            "addressType": "BUSINESS_ADDRESS_P",
+            "firstName": "Will",
+            "lastName": "Wilde",
+            "contactEmail": "et@aa.com",
+            "contactPhone": "248 378 8218"
+        }
+
         # 德国地址
         DE = {
             "deliveryContactEmail": "et@aa.com",
@@ -256,6 +290,108 @@ class TMSApiConfig:
             "contactEmail": "et@aa.com",
             "contactPhone": "2483788218"
         }
+
+        # 用于 SUP-Express48小包 渠道
+        GB3 = {
+            "deliveryContactEmail": "et@aa.com",
+            "countryCode": "GB",
+            "countryName": "United Kingdom",
+            "province": "England",
+            "provinceName": "England",
+            "city": "Gravesend",
+            "cityName": "Gravesend",
+            "postcode": "DA11 9GP",
+            "address": "Bouverie Avenue",
+            "addressType": "RESIDENTIAL_ADDRESS",
+            "firstName": "Alan",
+            "lastName": "Bruter",
+            "contactEmail": "et@aa.com",
+            "contactPhone": "2483788218"
+        }
+
+        AU = {
+            "deliveryContactEmail": "hm@aa.com",
+            "countryCode": "AU",
+            "countryName": "Australia",
+            "province": "Victoria",
+            "provinceName": "Victoria",
+            "city": "Templestowe",
+            "cityName": "Templestowe",
+            "postcode": "3106",
+            "address": "12 Clendon Court",
+            "addressType": "RESIDENTIAL_ADDRESS",
+            "firstName": "Alan",
+            "lastName": "Bruter",
+            "contactEmail": "et@aa.com",
+            "contactPhone": "2483788218"
+        }
+
+        NL = {
+            "deliveryContactEmail": "hm@aa.com",
+            "countryCode": "NL",
+            "countryName": "Netherlands",
+            "province": "Friesland",
+            "provinceName": "Friesland",
+            "city": "Mantgum",
+            "cityName": "Mantgum",
+            "postcode": "9022 AR",
+            "address": "Swannedrift 19",
+            "addressType": "RESIDENTIAL_ADDRESS",
+            "firstName": "Alan",
+            "lastName": "Bruter",
+            "contactEmail": "et@aa.com",
+            "contactPhone": "2483788218"
+        }
+
+        ES = {
+            "deliveryContactEmail": "hm@aa.com",
+            "countryCode": "ES",
+            "countryName": "Spain",
+            "province": "Madrid",
+            "provinceName": "Madrid",
+            "city": "Madrid",
+            "cityName": "Madrid",
+            "postcode": "28014",
+            "address": "Calle de Ventura de la Vega, 16",
+            "addressType": "RESIDENTIAL_ADDRESS",
+            "firstName": "Alan",
+            "lastName": "Bruter",
+            "contactEmail": "et@aa.com",
+            "contactPhone": "2483788218"
+        }
+
+        CA = {
+            "deliveryContactEmail": "hm@aa.com",
+            "countryCode": "CA",
+            "countryName": "Canada",
+            "province": "ON",
+            "provinceName": "Ontario",
+            "city": "Mississauga",
+            "cityName": "Mississauga",
+            "postcode": "L5J 4L2",
+            "address": "1446 Ithaca Crt.",
+            "addressType": "RESIDENTIAL_ADDRESS",
+            "firstName": "Alan",
+            "lastName": "Bruter",
+            "contactEmail": "et@aa.com",
+            "contactPhone": "2483788218"
+        }
+
+    class PushFMSPack(ApiConfig):
+        uri_path = '/forward/package/push/fms/pack'
+        method = 'POST'
+        data = {
+            "packCodes": []
+        }
+
+    class PushFMSExpress(ApiConfig):
+        uri_path = '/forward/package/push/fms/express'
+        method = 'POST'
+        data = [{
+            "packCode": "",
+            "oldExpressCode": "",
+            "expressCode": ""
+        }]
 
 
 class TransportType(BizEnum):
