@@ -198,7 +198,7 @@ class CurrencyRate(BaseModel):
     belong_time = DateTimeField()
     create_time = DateTimeField()
     current_rate = DecimalField()
-    id = BigAutoField()
+    id = AutoField()
     is_deleted = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     to_currency_code = CharField()
     trace_id = CharField(null=True)

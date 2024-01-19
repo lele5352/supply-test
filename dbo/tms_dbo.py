@@ -35,10 +35,12 @@ class LogisticOrderDBO:
     @classmethod
     def express_order_info(cls, pack_code):
         """
-        通过包裹号查询运单信息
+        通过包裹号查询有效的运单（未被取消、未被删除）
         :param pack_code: 包裹号
         """
         data = LogisticsExpressOrder.get_or_none(
-            LogisticsExpressOrder.package_code == pack_code
+            LogisticsExpressOrder.package_code == pack_code,
+            LogisticsExpressOrder.express_order_state == 0,
+            LogisticsExpressOrder.del_flag == 0
         )
         return model_to_dict(data) if data else None
