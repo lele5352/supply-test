@@ -29,9 +29,10 @@ def test_trial():
     试算调试
     """
     req = tms_api.build_trial_body(
-        TransportType.TRACK, 177, 'US', forward_flag=False, sku_codes=('J04CJ000483BA01',)
+        TransportType.TRACK, 27, 'US', forward_flag=True, sku_codes=('J04CJ000483BA01',)
     )
-    tms_api.do_trial(req)
+    print(json.dumps(req, ensure_ascii=False))
+    # tms_api.do_trial(req)
 
 
 @pytest.mark.skipif(not order_flag, reason='不执行下单')
@@ -40,9 +41,10 @@ def test_order():
     下单调试
     """
     req = tms_api.build_order_body(
-        TransportType.TRACK, 177, 'US', forward_flag=False, sku_codes=('J04CJ000483BA01',)
+        TransportType.EXPRESS, 27, 'US', forward_flag=True, sku_codes=('J04CJ000483BA01',)
     )
-    tms_api.do_order(req)
+    print(json.dumps(req, ensure_ascii=False))
+    # tms_api.do_order(req)
 
 
 def test_fr_dpd_trial():
@@ -72,7 +74,7 @@ def test_uk_dpd_trial():
     """
     req = tms_api.build_trial_body(
         transport_type=TransportType.EXPRESS,
-        address_id=116,
+        address_id=267,
         trial_country='GB',
         forward_flag=True,
         sku_codes=('J04CJ000483BA01',)
@@ -86,7 +88,7 @@ def test_uk_dpd_order():
     英国DPD 下单
     """
     req = tms_api.build_order_body(
-        TransportType.EXPRESS, 116, 'GB', True, sku_codes=('J04CJ000483BA01',)
+        TransportType.EXPRESS, 267, 'GB', True, sku_codes=('J04CJ000483BA01',)
     )
     tms_api.do_order(req)
 
@@ -334,8 +336,8 @@ def test_get_tracking():
     调用channel领域，获取服务商轨迹
     """
     tms_channel.get_tracking(
-        channel_id=130,
-        track_code='641U1780198'
+        channel_id=135,
+        track_code='4569907877'
     )
 
 

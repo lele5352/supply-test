@@ -678,13 +678,16 @@ class TMSChannelService(ServiceRobot):
 
         return self.call_api(**content)
 
-    def get_tracking(self, channel_id, track_code, trans_code=None, postcode=None):
+    def get_tracking(self, channel_id, track_code,
+                     trans_code=None, postcode=None, channel_order_code=None
+                     ):
         """
         领域获取轨迹接口
         :param channel_id: 渠道id
         :param track_code: 运单号
         :param trans_code: 转运单号
         :param postcode: 收货地邮编
+        :param channel_order_code: 渠道下单号
         """
         content = deepcopy(TMSApiConfig.TrackingCheck.get_attributes())
         content["data"]["channelId"] = channel_id
@@ -692,7 +695,11 @@ class TMSChannelService(ServiceRobot):
         content["data"]["transhipmentCode"] = trans_code if trans_code else ''
         if postcode:
             content["data"]["extInfo"]["postcode"] = postcode
-        else:
+
+        if channel_order_code:
+            content["data"]["extInfo"]["channelOrderCode"] = channel_order_code
+
+        if not postcode and not channel_order_code:
             content["data"].pop("extInfo", None)
 
         return self.call_api(**content)
@@ -766,5 +773,25 @@ class TMSChannelService(ServiceRobot):
         dim_weight = Rounding.round_up(dim_weight, 1)
 
         return cubic, weight, dim_weight
+
+    def tracking_by_package(self, pack_code, post_code=None):
+        """
+        包裹号获取服务商轨迹（直接调用领域）
+        :param post_code: 收货地邮编
+        :param pack_code: 包裹号
+        """
+        express_info = self.order_db.express_order_info(
+            pack_code
+        )
+        if not express_info:
+            raise ValueError("找不到运单信息")
+
+        return self.get_tracking(
+            channel_id=express_info['channel_id'],
+            track_code=express_info['express_order_code'],
+            trans_code=express_info['transfer_order_code'],
+            postcode=post_code
+        )
+
 
 
