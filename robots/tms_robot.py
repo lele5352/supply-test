@@ -1,17 +1,19 @@
 import json
 import random
+import uuid
+from typing import Tuple
+
 from copy import deepcopy
 from config.third_party_api_configs.tms_api_config import *
-from typing import Tuple
 from robots.robot import AppRobot, ServiceRobot
 from dbo.tms_dbo import TMSChannelDBO, TMSBaseDBO, LogisticOrderDBO
+from utils.rounding_handler import Rounding
 from utils.tms_cal_items import PackageCalcItems, ChannelCalcItems
 from utils.unit_change_handler import UnitChange
 from utils.time_handler import HumanDateTime
 from utils.log_handler import logger
 from utils.check_util import check_isinstance
 from utils.transformer import str_under2hump
-import uuid
 
 
 class TMSRobot(AppRobot):
@@ -573,6 +575,31 @@ class HomaryTMS(ServiceRobot):
         res = self.call_api(**content)
         return res
 
+    def push_fms_pack(self, *package_code):
+        """
+        推送fms预估费用项
+        :param package_code: 包裹号
+        """
+        content = deepcopy(TMSApiConfig.PushFMSPack.get_attributes())
+        for pack in package_code:
+            content["data"]["packCodes"].append(pack)
+
+        return self.call_api(**content)
+
+    def push_fms_express(self, package_code, old_express, new_express):
+        """
+        推送fms运单号变更
+        :param package_code: 包裹号
+        :param old_express: 旧运单号
+        :param new_express: 新运单号
+        """
+        content = deepcopy(TMSApiConfig.PushFMSExpress.get_attributes())
+        content["data"][0]["packCode"] = package_code
+        content["data"][0]["oldExpressCode"] = old_express
+        content["data"][0]["expressCode"] = new_express
+
+        return self.call_api(**content)
+
 
 class TMSBaseService(ServiceRobot):
     def __init__(self):
@@ -651,13 +678,16 @@ class TMSChannelService(ServiceRobot):
 
         return self.call_api(**content)
 
-    def get_tracking(self, channel_id, track_code, trans_code=None, postcode=None):
+    def get_tracking(self, channel_id, track_code,
+                     trans_code=None, postcode=None, channel_order_code=None
+                     ):
         """
         领域获取轨迹接口
         :param channel_id: 渠道id
         :param track_code: 运单号
         :param trans_code: 转运单号
         :param postcode: 收货地邮编
+        :param channel_order_code: 渠道下单号
         """
         content = deepcopy(TMSApiConfig.TrackingCheck.get_attributes())
         content["data"]["channelId"] = channel_id
@@ -665,7 +695,11 @@ class TMSChannelService(ServiceRobot):
         content["data"]["transhipmentCode"] = trans_code if trans_code else ''
         if postcode:
             content["data"]["extInfo"]["postcode"] = postcode
-        else:
+
+        if channel_order_code:
+            content["data"]["extInfo"]["channelOrderCode"] = channel_order_code
+
+        if not postcode and not channel_order_code:
             content["data"].pop("extInfo", None)
 
         return self.call_api(**content)
@@ -682,7 +716,7 @@ class TMSChannelService(ServiceRobot):
 
         return self.call_api(**content)
 
-    def cancel_tracking(self, channel_id, package_code, express_code, trans_code=None):
+    def channel_cancel_tracking(self, channel_id, package_code, express_code, trans_code=None):
         """
         领域取消运单（调用服务商接口取消，不会处理包裹状态）
         :param channel_id: 渠道id
@@ -698,20 +732,66 @@ class TMSChannelService(ServiceRobot):
 
         return self.call_api(**content)
 
-    def cancel_by_express_code(self, express_code):
+    def cancel_track(self, pack_code):
         """
-        通过运单号取消运单（直接调用领域）
-        :param express_code: 运单号
+        通过包裹号取消运单（直接调用领域）
+        :param pack_code: 包裹号
         """
         express_info = self.order_db.express_order_info(
-            express_code
+            pack_code
         )
         if not express_info:
             raise ValueError("找不到运单信息")
 
-        return self.cancel_tracking(
+        return self.channel_cancel_tracking(
             channel_id=express_info['channel_id'],
             package_code=express_info['package_code'],
             express_code=express_info['express_order_code'],
             trans_code=express_info['transfer_order_code']
         )
+
+    @staticmethod
+    def calculate_all_cubic_for_wwe3(trial_body, volume_coefficient):
+        """
+        wwe3 试算参数计算，计算所有仓库sku的立方英尺体积、体积重、实重
+        :param trial_body: 试算参数体
+        :param volume_coefficient: 体积系数
+        """
+        cubic, weight, dim_weight = 0, 0, 0
+        for car_tray in trial_body["carTrayDetails"]:
+            for good in car_tray["goodsDetails"]:
+                cubic += UnitChange.cm3_to_in3(
+                    good["length"] * good["width"] * good["height"]
+                )
+                weight += UnitChange.kg_to_lb(good["weight"])
+                dim_weight += UnitChange.cm3_to_in3(
+                    good["length"] * good["width"] * good["height"] / volume_coefficient
+                )
+
+        cubic = Rounding.round_up(cubic / 1728, 1)
+        weight = Rounding.round_up(weight, 1)
+        dim_weight = Rounding.round_up(dim_weight, 1)
+
+        return cubic, weight, dim_weight
+
+    def tracking_by_package(self, pack_code, post_code=None):
+        """
+        包裹号获取服务商轨迹（直接调用领域）
+        :param post_code: 收货地邮编
+        :param pack_code: 包裹号
+        """
+        express_info = self.order_db.express_order_info(
+            pack_code
+        )
+        if not express_info:
+            raise ValueError("找不到运单信息")
+
+        return self.get_tracking(
+            channel_id=express_info['channel_id'],
+            track_code=express_info['express_order_code'],
+            trans_code=express_info['transfer_order_code'],
+            postcode=post_code
+        )
+
+
+

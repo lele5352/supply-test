@@ -1,8 +1,10 @@
 import random
+from forex_python.converter import CurrencyRates
+from copy import deepcopy
+
 from robots.robot import AppRobot
 from dbo.fms_dbo import FMSDBOperator
 from dbo.wms_dbo import WMSDBOperator
-from copy import deepcopy
 from utils.log_handler import logger as log
 from utils.random_code import RandomCode
 from utils.time_handler import HumanDateTime
@@ -177,6 +179,49 @@ class FMSAppRobot(AppRobot):
                 ]
             }
             self.save_not_sea_expect_fee_item(**data)
+
+    def init_currency(self, belong_time=None):
+        """
+        初始化汇率
+        :param belong_time: 汇率所属时间，不传默认当前时间
+        """
+        if not belong_time:
+            belong_time = HumanDateTime().human_time()
+
+        base_currency = ['USD', 'GBP', 'CNY', 'EUR']
+
+        result = []
+        index = 0
+
+        c = CurrencyRates()
+
+        try:
+            # 获取汇率
+            for currency_code in base_currency:
+
+                exchange_rate = c.get_rates(currency_code)
+                for k, v in exchange_rate.items():
+                    single_record = {
+                        "id": HumanDateTime().timestamp()+index,
+                        "base_currency_code": currency_code,
+                        "to_currency_code": k,
+                        "current_rate": round(v, 6),
+                        "belong_time": belong_time,
+                        "is_deleted": 0,
+                        "create_time": belong_time
+                    }
+
+                    result.append(single_record)
+                    index += 1
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+        self.dbo.bulk_insert_currency(result)
+
+
+
+
 
 
 
