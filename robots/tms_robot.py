@@ -720,37 +720,89 @@ class TMSChannelService(ServiceRobot):
 if __name__ == '__main__':
     tms_app = HomaryTMS()
     ch = TMSChannelService()
-
-    ch_id = 104
     good_unit = 20
+
+    # 正向卡车
+    # ch_id = 104
+    # cn_unit = 20
+    # volume_precision = 30
+
+    # 逆向卡车
+    # ch_id = 60
+    # cn_unit = 10
+    # volume_precision = 1111
+
+    # 正向快递
+    # ch_id = 57 #fedex-ground
+
+    ch_id = 116
     cn_unit = 10
     volume_precision = 30
+
+    # 逆向快递
+    # ch_id = 56
+    # cn_unit = 10
+    # volume_precision = 30
+
+    # 卡车货物
+    # goods = [
+    #     {
+    #         "prodName": "HW6F57830TA01",
+    #         "qty": 1,
+    #         "weight": 2,
+    #         "length": 15,
+    #         "width": 20,
+    #         "height": 30,
+    #         "purchasePriceAmount": 22,
+    #         "purchasePriceCurrency": "CNY",
+    #         "salePriceAmount": 90,
+    #         "salePriceCurrency": "USD"
+    #     },
+    #     {
+    #         "prodName": "HW6F57830TA02",
+    #         "qty": 1,
+    #         "weight": 1,
+    #         "length": 15,
+    #         "width": 20,
+    #         "height": 6,
+    #         "purchasePriceAmount": 22,
+    #         "purchasePriceCurrency": "CNY",
+    #         "salePriceAmount": 90,
+    #         "salePriceCurrency": "USD"
+    #     }
+    # ]
+
+    # 正向快递货物
+    # goods = [
+    #     {
+    #         "prodName": "HWX23A4203A02",
+    #         "qty": 1,
+    #         "weight": 1,
+    #         "length": 15,
+    #         "width": 20,
+    #         "height": 30
+    #     },
+    #     {
+    #         "prodName": "HWX23A4203A03",
+    #         "qty": 1,
+    #         "weight": 2,
+    #         "length": 15,
+    #         "width": 20,
+    #         "height": 6
+    #     }
+    # ]
+
+    # 逆向快递货物
     goods = [
         {
-            "prodName": "HW6F57830TA01",
+            "prodName": "HWX23A4203A02",
             "qty": 1,
-            "weight": 2,
+            "weight": 3,
             "length": 15,
             "width": 20,
-            "height": 30,
-            "purchasePriceAmount": 22,
-            "purchasePriceCurrency": "CNY",
-            "salePriceAmount": 90,
-            "salePriceCurrency": "USD"
-        },
-        {
-            "prodName": "HW6F57830TA02",
-            "qty": 1,
-            "weight": 1,
-            "length": 15,
-            "width": 20,
-            "height": 6,
-            "purchasePriceAmount": 22,
-            "purchasePriceCurrency": "CNY",
-            "salePriceAmount": 90,
-            "salePriceCurrency": "USD"
+            "height": 36
         }
     ]
-    calc_config = ch.get_ch_calc_info(104)
-    result_pkg_items = tms_app.get_pkg_final_items(goods, good_unit, cn_unit, calc_config, volume_precision)
+    calc_config = ch.get_ch_calc_info(ch_id)
+    result_pkg_items = tms_app.get_pkg_final_items(goods, good_unit, cn_unit, calc_config, volume_precision, True)
     print(result_pkg_items)

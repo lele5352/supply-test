@@ -72,7 +72,7 @@ class PackageCalcItems:
     def pkg_girth(self):
         """围长"""
         girth = self.pkg_length() + (self.pkg_width() + self.pkg_height()) * 2
-        return Rounding.do_round(self.size_rounding, girth, self.size_precision)
+        return Rounding.do_round(self.size_rounding, round(girth, 6), self.size_precision)
 
     def girth_origin(self):
         """围长,原始的 长+(宽+高)×2"""
@@ -88,9 +88,9 @@ class PackageCalcItems:
         len_and_height = self.pkg_length() + self.pkg_height()
         width_and_height = self.pkg_width() + self.pkg_height()
         sides_list = [
-            Rounding.do_round(self.size_rounding, len_and_width, self.size_precision),
-            Rounding.do_round(self.size_rounding, len_and_height, self.size_precision),
-            Rounding.do_round(self.size_rounding, width_and_height, self.size_precision),
+            Rounding.do_round(self.size_rounding, round(len_and_width, 6), self.size_precision),
+            Rounding.do_round(self.size_rounding, round(len_and_height, 6), self.size_precision),
+            Rounding.do_round(self.size_rounding, round(width_and_height, 6), self.size_precision)
         ]
         sides_list.sort(reverse=True)
         return sides_list[0]
@@ -101,9 +101,9 @@ class PackageCalcItems:
         len_and_height = self.pkg_length() + self.pkg_height()
         width_and_height = self.pkg_width() + self.pkg_height()
         sides_list = [
-            Rounding.do_round(self.size_rounding, len_and_width, self.size_precision),
-            Rounding.do_round(self.size_rounding, len_and_height, self.size_precision),
-            Rounding.do_round(self.size_rounding, width_and_height, self.size_precision),
+            Rounding.do_round(self.size_rounding, round(len_and_width, 6), self.size_precision),
+            Rounding.do_round(self.size_rounding, round(len_and_height, 6), self.size_precision),
+            Rounding.do_round(self.size_rounding, round(width_and_height, 6), self.size_precision)
         ]
         sides_list.sort(reverse=True)
         return sides_list[1]
@@ -114,9 +114,9 @@ class PackageCalcItems:
         len_and_height = self.pkg_length() + self.pkg_height()
         width_and_height = self.pkg_width() + self.pkg_height()
         sides_list = [
-            Rounding.do_round(self.size_rounding, len_and_width, self.size_precision),
-            Rounding.do_round(self.size_rounding, len_and_height, self.size_precision),
-            Rounding.do_round(self.size_rounding, width_and_height, self.size_precision),
+            Rounding.do_round(self.size_rounding, round(len_and_width, 6), self.size_precision),
+            Rounding.do_round(self.size_rounding, round(len_and_height, 6), self.size_precision),
+            Rounding.do_round(self.size_rounding, round(width_and_height, 6), self.size_precision)
         ]
         sides_list.sort(reverse=True)
         return sides_list[2]
@@ -129,17 +129,18 @@ class PackageCalcItems:
     def pkg_perimeter(self):
         """周长"""
         perimeter = self.pkg_length() + self.pkg_width() + self.pkg_height()
-        return Rounding.do_round(self.size_rounding, perimeter, self.size_precision)
+        return Rounding.do_round(self.size_rounding, round(perimeter, 6), self.size_precision)
 
     def pkg_volume(self):
         """体积=长*宽*高"""
         volume = self.pkg_length() * self.pkg_width() * self.pkg_height()
-        return Rounding.do_round(self.size_rounding, volume, self.size_precision)
+        return Rounding.do_round(self.size_rounding, round(volume, 6), self.size_precision)
 
     def pkg_volume_weight(self):
         """体积=长*宽*高"""
         volume = self.pkg_volume()
-        return Rounding.do_round(self.weight_rounding, volume / self.volume_precision, self.weight_precision)
+        volume_weight = volume / self.volume_precision
+        return Rounding.do_round(self.weight_rounding, round(volume_weight, 6), self.weight_precision)
 
     def pkg_bill_weight(self):
         return max(self.pkg_weight(), self.pkg_volume_weight())
@@ -150,7 +151,7 @@ class PackageCalcItems:
             [{
                 "skuMaxLength": self.calc_item(sku["skuMaxLength"], "size", self.size_rounding, self.size_precision,
                                                self.source_unit, self.target_unit),
-                "skuWeight": self.calc_item(sku["skuWeight"], "weight", self.size_rounding, self.size_precision,
+                "skuWeight": self.calc_item(sku["skuWeight"], "weight", self.weight_rounding, self.weight_precision,
                                             self.source_unit, self.target_unit)
 
             } for sku in self.sku_list]
