@@ -8,7 +8,7 @@ from config.third_party_api_configs.tms_api_config import *
 from robots.robot import AppRobot, ServiceRobot
 from dbo.tms_dbo import TMSChannelDBO, TMSBaseDBO, LogisticOrderDBO
 from utils.rounding_handler import Rounding
-from utils.tms_cal_items import PackageCalcItems, ChannelCalcItems
+from utils.tms_cal_items import PackageCalcItems
 from utils.unit_change_handler import UnitChange
 from utils.time_handler import HumanDateTime
 from utils.log_handler import logger
@@ -40,38 +40,6 @@ class TMSRobot(AppRobot):
             return False
         else:
             return True
-
-    def is_express_valid(self, goods_info, destination_address):
-        """判断是否支持走快递,快递限制的数值单位为国际单位，当货物每件计算出来的计量项小于等于快递限制时可走快递"""
-        to_country_code = destination_address.get("country")
-        express_limit = self.get_express_limit(to_country_code)
-
-        goods_items_list = list()
-        for good_info in goods_info.get("goods_list"):
-            good_items = PackageCalcItems(*good_info)
-            goods_items_list.append(
-                (
-                    good_items.weight,
-                    good_items.longest_side(),
-                    good_items.girth(),
-                    good_items.volume_weight(express_limit.get("throw_heavy_radio"))
-                )
-            )
-
-        # 判断货物单位，决定是否需要进行单位换算，快递限制单位为国际单位
-        goods_unit = goods_info.get("goods_unit")
-        if goods_unit == "imperial":
-            unit_changed_goods_items_list = [
-                (
-                    UnitChange.change(good_items[0], "weight", "yz", "gj"),
-                    UnitChange.change(good_items[1], "size", "yz", "gj"),
-                    UnitChange.change(good_items[2], "size", "yz", "gj"),
-                    round(UnitChange.change(good_items[3], "volume", "yz", "gj"), 2)
-                ) for good_items in goods_items_list
-            ]
-            goods_items_list = unit_changed_goods_items_list
-        # 只要货物换算出来的计量项小于快递限制就可发快递
-        return self.is_less_than_limit(express_limit, goods_items_list)
 
 
 class HomaryTMS(ServiceRobot):
@@ -471,7 +439,19 @@ class HomaryTMS(ServiceRobot):
         return self.call_api(**content)
 
     @staticmethod
-    def build_pkg_base_items(goods_info_list, reverse_length=True):
+    def build_pkg_base_items(goods_info_list, reverse_sides=True):
+        """
+        根据跟定的货物列表计算打包成包裹的包裹属性
+        :param list goods_info_list: 货物列表，格式[
+            {"length": 111,
+            "width":222,
+            "height":333,
+            "weight":88},
+            {},
+            ...
+        ]
+        :param bool reverse_sides : 是否按边长大小重排长宽高，快递传True，卡车传False
+        """
         temp_result = [0, 0, 0]
         temp_weight = 0
         sku_list = []
@@ -482,10 +462,10 @@ class HomaryTMS(ServiceRobot):
             height = good.get("height")
             weight = good.get("weight")
             sides = [length, width, height]
-            if reverse_length:
+            if reverse_sides:
                 sides.sort(reverse=True)
             temp_result = [max(temp_result[0], sides[0]), max(temp_result[1], sides[1]), temp_result[2] + sides[2]]
-            if reverse_length:
+            if reverse_sides:
                 temp_result.sort(reverse=True)
             temp_weight += weight
             sku_list.append({
@@ -497,76 +477,19 @@ class HomaryTMS(ServiceRobot):
         temp_result.extend(other_params)
         return temp_result
 
-    def get_pkg_items(self, goods_info_list, goods_unit, target_unit, volume_precision, reverse_length=True):
+    def get_pkg_final_items(self, goods_list, goods_unit, channel_unit, calc_config, volume_precision,
+                            reverse_length=True):
         """
         根据包裹里面sku计算得到包裹各维度数据，最终按指定的渠道信息换算配置转换为渠道换算后的包裹各维度数据，用于比较是否超出渠道限制规则
-        :param list goods_info_list: sku列表，格式:[(长,宽,高,重),(长,宽,高,重)]
+        :param list goods_list: sku列表，格式:[(长,宽,高,重),(长,宽,高,重)]
         :param int goods_unit: 货物单位,10-国际单位,20-英制单位
-        :param int target_unit: 货物属性换算的目标单位,10-国际单位,20-英制单位
+        :param int channel_unit: 货物属性换算的目标单位,10-国际单位,20-英制单位
+        :param int calc_config: 取整方式和精度配置
         :param double volume_precision:体积重系数
         :param bool reverse_length:是否重排长宽高，用于快递
         """
-        package_base_items = self.build_pkg_base_items(goods_info_list, reverse_length)
-        return PackageCalcItems(*package_base_items, volume_precision).package_items(goods_unit, target_unit)
-
-    def get_ch_pkg_items(self, goods_info_list, goods_unit, ch_unit, volume_precision, ch_calc_config,
-                         reverse_length=True):
-        """
-        根据包裹里面sku计算得到包裹各维度数据，最终按指定的渠道信息换算配置转换为渠道换算后的包裹各维度数据，用于比较是否超出渠道限制规则
-        :param list goods_info_list: sku列表，格式:[(长,宽,高,重),(长,宽,高,重)]
-        :param int goods_unit: 货物单位,10-国际单位,20-英制单位
-        :param int ch_unit: 渠道单位,10-国际单位,20-英制单位
-        :param double volume_precision:体积重系数
-        :param bool reverse_length:是否重排长宽高，用于快递
-        :param dict ch_calc_config: 渠道配置的calc_info，从channel表读取后转为dict
-        """
-        pkg_base_items = self.build_pkg_base_items(goods_info_list, reverse_length)
-        return ChannelCalcItems(pkg_base_items, goods_unit, ch_unit, ch_calc_config, volume_precision).rounded_result()
-
-    def build_ch_pkg_calc_data(self, sub_pkg_data, goods_unit, channel_calc_config, volume_precision,
-                               reverse_length=True, is_car=False, rounding_flag=True):
-        """构造调用渠道试算包裹信息接口的参数
-        :param dict sub_pkg_data: 分包接口返回的data数据
-        :param int goods_unit: 货物单位,10-国际单位,20-英制单位
-        :param dict channel_calc_config: 渠道配置的calc_info，从channel表读取
-        :param bool reverse_length: 是否重排长宽高
-        :param float volume_precision: 体积系数
-        :param bool is_car: 是否卡车,True-卡车，False-快递
-        :param bool rounding_flag: 是否取整,True-取整，False-不取整
-        """
-        if not sub_pkg_data:
-            return
-        req_data = dict()
-        formatted_data = list()
-        for package in sub_pkg_data:
-            goods = package.get("goods")
-            package_params = self.get_pkg_items(goods, goods_unit, goods_unit, volume_precision, reverse_length)
-            combined_goods = {
-                "packCode": package["packCode"],
-                "weight": package_params.get("weight"),
-                "length": package_params.get("length"),
-                "width": package_params.get("width"),
-                "height": package_params.get("height")
-            }
-
-            combined_goods.update(
-                {"goodsDetails": goods} if is_car else {"goods": goods}
-            )
-            formatted_data.append({
-                "pack": {} if is_car else combined_goods,
-                "carTrayDetail": combined_goods if is_car else {},
-                "oldUnit": goods_unit,
-                "newUnit": channel_calc_config.get("currency"),
-                "sortFlag": reverse_length,
-                "volumeCoefficient": volume_precision,
-                "trialCalcInfo": json.dumps(channel_calc_config),
-                "carOrExpress": is_car,
-                "roundingFlag": rounding_flag
-            })
-        req_data.update({
-            "packs": formatted_data
-        })
-        return req_data
+        base_items = self.build_pkg_base_items(goods_list, reverse_length)
+        return PackageCalcItems(*base_items, goods_unit, channel_unit, calc_config, volume_precision).package_items()
 
     def calc_pkg_param(self, package_data):
         """传入包裹信息，得出包裹按渠道单位、取整精度、取整方式计算出来的渠道包裹属性"""
@@ -654,7 +577,7 @@ class TMSChannelService(ServiceRobot):
 
     def get_ch_calc_info(self, ch_id):
         """获取渠道的试算信息，试算信息里面含渠道的单位，尺寸、重量的取整精度和方式"""
-        calc_info_data = self.dbo.get_channel_data(ch_id)
+        calc_info_data = json.loads(self.dbo.get_channel_data(ch_id).get("trial_calc_info"))
 
         return calc_info_data
 
@@ -794,4 +717,40 @@ class TMSChannelService(ServiceRobot):
         )
 
 
+if __name__ == '__main__':
+    tms_app = HomaryTMS()
+    ch = TMSChannelService()
 
+    ch_id = 104
+    good_unit = 20
+    cn_unit = 10
+    volume_precision = 30
+    goods = [
+        {
+            "prodName": "HW6F57830TA01",
+            "qty": 1,
+            "weight": 2,
+            "length": 15,
+            "width": 20,
+            "height": 30,
+            "purchasePriceAmount": 22,
+            "purchasePriceCurrency": "CNY",
+            "salePriceAmount": 90,
+            "salePriceCurrency": "USD"
+        },
+        {
+            "prodName": "HW6F57830TA02",
+            "qty": 1,
+            "weight": 1,
+            "length": 15,
+            "width": 20,
+            "height": 6,
+            "purchasePriceAmount": 22,
+            "purchasePriceCurrency": "CNY",
+            "salePriceAmount": 90,
+            "salePriceCurrency": "USD"
+        }
+    ]
+    calc_config = ch.get_ch_calc_info(104)
+    result_pkg_items = tms_app.get_pkg_final_items(goods, good_unit, cn_unit, calc_config, volume_precision)
+    print(result_pkg_items)
