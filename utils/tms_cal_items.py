@@ -1,3 +1,4 @@
+from functools import reduce
 from utils.rounding_handler import *
 from utils.unit_change_handler import UnitChange as UC
 
@@ -32,20 +33,12 @@ class PackageCalcItems:
     @staticmethod
     def calc_item(num, num_type, round_mode, round_precision, source_unit, target_unit):
         unit_change_num = UC.change(num, num_type, source_unit, target_unit)
-        rounded_num = Rounding.do_round(round_mode, unit_change_num, round_precision)
-        return rounded_num
+        return Rounding.do_round(round_mode, unit_change_num, round_precision)
 
-    def pkg_length(self):
-        return self.calc_item(self.length, "size", self.size_rounding, self.size_precision, self.source_unit,
-                              self.target_unit)
-
-    def pkg_width(self):
-        return self.calc_item(self.width, "size", self.size_rounding, self.size_precision, self.source_unit,
-                              self.target_unit)
-
-    def pkg_height(self):
-        return self.calc_item(self.height, "size", self.size_rounding, self.size_precision, self.source_unit,
-                              self.target_unit)
+    def pkg_side_lengths(self):
+        return [
+            self.calc_item(length, "size", self.size_rounding, self.size_precision, self.source_unit, self.target_unit)
+            for length in (self.length, self.width, self.height)]
 
     def pkg_weight(self):
         return self.calc_item(self.weight, "weight", self.weight_rounding, self.weight_precision, self.source_unit,
@@ -53,25 +46,19 @@ class PackageCalcItems:
 
     def pkg_longest_side(self):
         """最长边"""
-        sides = [self.pkg_length(), self.pkg_height(), self.pkg_width()]
-        sides.sort(reverse=True)
-        return sides[0]
+        return max(self.pkg_side_lengths())
 
     def pkg_mid_side(self):
         """第二长边"""
-        sides = [self.pkg_length(), self.pkg_height(), self.pkg_width()]
-        sides.sort(reverse=True)
-        return sides[1]
+        return sorted(self.pkg_side_lengths(), reverse=True)[1]
 
     def pkg_shortest_side(self):
         """最短边"""
-        sides = [self.pkg_length(), self.pkg_height(), self.pkg_width()]
-        sides.sort(reverse=True)
-        return sides[2]
+        return min(self.pkg_side_lengths())
 
     def pkg_girth(self):
         """围长"""
-        girth = self.pkg_length() + (self.pkg_width() + self.pkg_height()) * 2
+        girth = self.pkg_side_lengths()[0] + (self.pkg_side_lengths()[1] + self.pkg_side_lengths()[2]) * 2
         return Rounding.do_round(self.size_rounding, round(girth, 6), self.size_precision)
 
     def girth_origin(self):
@@ -82,44 +69,18 @@ class PackageCalcItems:
         """三边长，原始长度  """
         return round(self.length + self.width + self.height, 6)
 
-    def pkg_max_two_sides_length(self):
+    def pkg_two_side_lengths(self):
         """任意两边长：长+宽"""
-        len_and_width = self.pkg_length() + self.pkg_width()
-        len_and_height = self.pkg_length() + self.pkg_height()
-        width_and_height = self.pkg_width() + self.pkg_height()
-        sides_list = [
+        len_and_width = self.pkg_side_lengths()[0] + self.pkg_side_lengths()[1]
+        len_and_height = self.pkg_side_lengths()[0] + self.pkg_side_lengths()[2]
+        width_and_height = self.pkg_side_lengths()[1] + self.pkg_side_lengths()[2]
+        two_side_lengths = [
             Rounding.do_round(self.size_rounding, round(len_and_width, 6), self.size_precision),
             Rounding.do_round(self.size_rounding, round(len_and_height, 6), self.size_precision),
             Rounding.do_round(self.size_rounding, round(width_and_height, 6), self.size_precision)
         ]
-        sides_list.sort(reverse=True)
-        return sides_list[0]
-
-    def pkg_mid_two_sides_length(self):
-        """任意两边长：长+高"""
-        len_and_width = self.pkg_length() + self.pkg_width()
-        len_and_height = self.pkg_length() + self.pkg_height()
-        width_and_height = self.pkg_width() + self.pkg_height()
-        sides_list = [
-            Rounding.do_round(self.size_rounding, round(len_and_width, 6), self.size_precision),
-            Rounding.do_round(self.size_rounding, round(len_and_height, 6), self.size_precision),
-            Rounding.do_round(self.size_rounding, round(width_and_height, 6), self.size_precision)
-        ]
-        sides_list.sort(reverse=True)
-        return sides_list[1]
-
-    def pkg_min_two_sides_length(self):
-        """任意两边长：宽+高"""
-        len_and_width = self.pkg_length() + self.pkg_width()
-        len_and_height = self.pkg_length() + self.pkg_height()
-        width_and_height = self.pkg_width() + self.pkg_height()
-        sides_list = [
-            Rounding.do_round(self.size_rounding, round(len_and_width, 6), self.size_precision),
-            Rounding.do_round(self.size_rounding, round(len_and_height, 6), self.size_precision),
-            Rounding.do_round(self.size_rounding, round(width_and_height, 6), self.size_precision)
-        ]
-        sides_list.sort(reverse=True)
-        return sides_list[2]
+        two_side_lengths.sort(reverse=True)
+        return two_side_lengths
 
     def casual_two_sides_length(self):
         """任意两边长，长+宽；长+高；宽+高"""
@@ -128,12 +89,12 @@ class PackageCalcItems:
 
     def pkg_perimeter(self):
         """周长"""
-        perimeter = self.pkg_length() + self.pkg_width() + self.pkg_height()
+        perimeter = sum(self.pkg_side_lengths())
         return Rounding.do_round(self.size_rounding, round(perimeter, 6), self.size_precision)
 
     def pkg_volume(self):
         """体积=长*宽*高"""
-        volume = self.pkg_length() * self.pkg_width() * self.pkg_height()
+        volume = reduce(lambda x, y: x * y, self.pkg_side_lengths())
         return Rounding.do_round(self.size_rounding, round(volume, 6), self.size_precision)
 
     def pkg_volume_weight(self):
@@ -178,13 +139,13 @@ class PackageCalcItems:
             "shortestEdge": self.pkg_shortest_side(),
             "girth": self.pkg_girth(),
             "perimeter": self.pkg_perimeter(),
-            "maxSideLength": self.pkg_max_two_sides_length(),
-            "midSideLength": self.pkg_mid_two_sides_length(),
-            "minSideLength": self.pkg_min_two_sides_length(),
+            "maxSideLength": max(self.pkg_two_side_lengths()),
+            "midSideLength": self.pkg_two_side_lengths()[1],
+            "minSideLength": min(self.pkg_two_side_lengths()),
             "volume": self.pkg_volume(),
-            "length": self.pkg_length(),
-            "width": self.pkg_width(),
-            "height": self.pkg_height(),
+            "length": self.pkg_side_lengths()[0],
+            "width": self.pkg_side_lengths()[1],
+            "height": self.pkg_side_lengths()[2],
             "skus": self.pkg_sku_item_list()
         }
 
