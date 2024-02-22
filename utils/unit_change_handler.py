@@ -1,54 +1,72 @@
+from enum import Enum
+
+
+class Unit(Enum):
+    INTERNATIONAL = 10
+    IMPERIAL = 20
+
+
+class ItemType(Enum):
+    SIZE = "SIZE"
+    WEIGHT = "WEIGHT"
+    VOLUME = "VOLUME"
+
+
 class UnitChange:
     """单位换算"""
 
-    @classmethod
-    def cm_to_in(cls, number):
+    @staticmethod
+    def cm_to_in(number):
         return number * 0.393700787402
 
-    @classmethod
-    def cm3_to_in3(cls, number):
+    @staticmethod
+    def cm3_to_in3(number):
         return number * 0.0610238
 
-    @classmethod
-    def kg_to_lb(cls, number):
+    @staticmethod
+    def kg_to_lb(number):
         return number * 2.204622
 
-    @classmethod
-    def in_to_cm(cls, number):
+    @staticmethod
+    def in_to_cm(number):
         return number * 2.539950
 
-    @classmethod
-    def in3_to_cm3(cls, number):
+    @staticmethod
+    def in3_to_cm3(number):
         return number * 16.387037
 
-    @classmethod
-    def lb_to_kg(cls, number):
+    @staticmethod
+    def lb_to_kg(number):
         return number * 0.45359237
 
     @classmethod
-    def change(cls, num, num_type, source_unit, target_unit):
-
-        """执行转换,10-国际单位,20英制单位
+    def change(cls, num, num_type, source_unit, target_unit) -> float:
+        """执行转换
+        :param float num: 数值
+        :param string num_type:数值类型
+        :param int source_unit:原单位
+        :param int target_unit:目标单位
         """
+        # 处理大小写差异，统一转大写去匹配数值类型枚举
+        num_type = num_type.upper()
+        change_map = {
+            (Unit.INTERNATIONAL.value, ItemType.SIZE.value): UnitChange.in_to_cm,
+            (Unit.INTERNATIONAL.value, ItemType.WEIGHT.value): UnitChange.lb_to_kg,
+            (Unit.INTERNATIONAL.value, ItemType.VOLUME.value): UnitChange.in3_to_cm3,
+            (Unit.IMPERIAL.value, ItemType.SIZE.value): UnitChange.cm_to_in,
+            (Unit.IMPERIAL.value, ItemType.WEIGHT.value): UnitChange.kg_to_lb,
+            (Unit.IMPERIAL.value, ItemType.VOLUME.value): UnitChange.cm3_to_in3,
+        }
         if source_unit == target_unit:
             return num
-        elif target_unit == 10:
-            if num_type == "size":
-                return cls.in_to_cm(num)
-            elif num_type == "weight":
-                return cls.lb_to_kg(num)
-            elif num_type == "volume":
-                return cls.in3_to_cm3(num)
-            else:
-                return "error"
-        elif target_unit == 20:
-            if num_type == "size":
-                return cls.cm_to_in(num)
-            elif num_type == "weight":
-                return cls.kg_to_lb(num)
-            elif num_type == "volume":
-                return cls.cm3_to_in3(num)
-            else:
-                return "error"
+        change_function = change_map.get((target_unit, num_type))
+        if change_function:
+            return change_function(num)
         else:
-            return "error"
+            raise KeyError("转换失败：单位或数值类型不正确！")
+
+
+if __name__ == '__main__':
+    uc = UnitChange()
+    result = uc.change(115.666, "weight", 10, 20)
+    print(result)
