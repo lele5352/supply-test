@@ -4,8 +4,8 @@ import decimal
 class Rounding:
     """数值取整"""
 
-    @classmethod
-    def round_up(cls, num, precision):
+    @staticmethod
+    def round_up(num, precision):
         """向上取整"""
         num_decimal = decimal.Decimal(str(num))
         precision_decimal = decimal.Decimal(str(precision))
@@ -15,8 +15,8 @@ class Rounding:
         rounded_decimal = rounded_decimal.quantize(precision_decimal, rounding=decimal.ROUND_CEILING)
         return float(rounded_decimal)
 
-    @classmethod
-    def round_down(cls, num, precision):
+    @staticmethod
+    def round_down(num, precision):
         """向下取整"""
         num_decimal = decimal.Decimal(str(num))
         precision_decimal = decimal.Decimal(str(precision))
@@ -26,8 +26,8 @@ class Rounding:
         rounded_decimal = rounded_decimal.quantize(precision_decimal, rounding=decimal.ROUND_FLOOR)
         return float(rounded_decimal)
 
-    @classmethod
-    def round_half_up(cls, num, precision):
+    @staticmethod
+    def round_half_up(num, precision):
         """四舍五入"""
         num_decimal = decimal.Decimal(str(num))
         precision_decimal = decimal.Decimal(str(precision))
@@ -46,4 +46,4 @@ class Rounding:
         elif round_mode == "ROUND_OFF":
             return cls.round_half_up(num, precision)
         else:
-            return "ERROR"
+            raise ValueError("取整方式枚举错误！")
