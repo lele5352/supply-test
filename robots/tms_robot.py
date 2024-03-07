@@ -468,9 +468,12 @@ class HomaryTMS(ServiceRobot):
             if reverse_sides:
                 temp_result.sort(reverse=True)
             temp_weight += weight
+
+            # sku维度的属性长宽高固定需要重排
+            sides.sort(reverse=True)
             sku_list.append({
-                "skuMaxLength": max(sides),
-                "skuWeight": weight
+                "skuWeight": weight,
+                "skuSides": sides
             })
         # other_params指的是除了包裹长宽高外的其他属性，这里包含包裹总实重，sku最小实重，sku最大实重，sku最长边，sku最短边
         other_params = [round(temp_weight, 6), sku_list]

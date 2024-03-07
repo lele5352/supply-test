@@ -35,6 +35,15 @@ class PackageCalcItems:
         unit_change_num = UC.change(num, num_type, source_unit, target_unit)
         return Rounding.do_round(round_mode, unit_change_num, round_precision)
 
+    @staticmethod
+    def calc_girth(length, width, height):
+        return length + (width + height) * 2
+
+    @staticmethod
+    def calc_volume(length, width, height):
+        """体积=长*宽*高"""
+        return length * width * height
+
     def pkg_side_lengths(self):
         return [
             self.calc_item(length, "size", self.size_rounding, self.size_precision, self.source_unit, self.target_unit)
@@ -58,7 +67,8 @@ class PackageCalcItems:
 
     def pkg_girth(self):
         """围长"""
-        girth = self.pkg_side_lengths()[0] + (self.pkg_side_lengths()[1] + self.pkg_side_lengths()[2]) * 2
+        # girth = self.pkg_side_lengths()[0] + (self.pkg_side_lengths()[1] + self.pkg_side_lengths()[2]) * 2
+        girth = self.calc_girth(*self.pkg_side_lengths())
         return Rounding.do_round(self.size_rounding, round(girth, 6), self.size_precision)
 
     def girth_origin(self):
@@ -94,7 +104,7 @@ class PackageCalcItems:
 
     def pkg_volume(self):
         """体积=长*宽*高"""
-        volume = reduce(lambda x, y: x * y, self.pkg_side_lengths())
+        volume = self.calc_volume(*self.pkg_side_lengths())
         return Rounding.do_round(self.size_rounding, round(volume, 6), self.size_precision)
 
     def pkg_volume_weight(self):
@@ -106,18 +116,27 @@ class PackageCalcItems:
     def pkg_bill_weight(self):
         return max(self.pkg_weight(), self.pkg_volume_weight())
 
-    def pkg_sku_item_list(self, ):
-        temp_list = list()
-        temp_list.extend(
-            [{
-                "skuMaxLength": self.calc_item(sku["skuMaxLength"], "size", self.size_rounding, self.size_precision,
-                                               self.source_unit, self.target_unit),
-                "skuWeight": self.calc_item(sku["skuWeight"], "weight", self.weight_rounding, self.weight_precision,
-                                            self.source_unit, self.target_unit)
-
-            } for sku in self.sku_list]
-        )
-        return temp_list
+    def pkg_sku_item_list(self):
+        sku_items = list()
+        for sku in self.sku_list:
+            sides = [
+                self.calc_item(i, "size", self.size_rounding, self.size_precision, self.source_unit, self.target_unit)
+                for i in sku["skuSides"]]
+            sku_max_length = max(sides)
+            sku_weight = self.calc_item(sku["skuWeight"], "weight", self.weight_rounding, self.weight_precision,
+                                        self.source_unit, self.target_unit)
+            sku_girth = self.calc_girth(*sides)
+            sku_volume_weight = self.calc_volume(*sides) / self.volume_precision
+            sku_items.append(
+                {
+                    "skuMaxLength": sku_max_length,
+                    "skuWeight": sku_weight,
+                    "skuGirth": sku_girth,
+                    "skuVolumeWeight": sku_volume_weight,
+                    "skuSides": sides
+                }
+            )
+        return sku_items
 
     def tray_density(self):
         """美卡托盘密度"""
