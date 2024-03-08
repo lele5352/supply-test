@@ -4,13 +4,14 @@ from utils.log_handler import logger
 from robots.robot_biz_exception import InventoryNotEnough
 
 
-def create_sale_order(order_sku_info_list):
+def create_sale_order(order_sku_info_list, additional_info=None):
     """
     创建销售出库单
     :param list order_sku_info_list: 销售sku及数量的数组，格式：[{"sku_code":"","qty":1,"bom":"A","warehouse_id":""}]
+    :param dict additional_info: 站点信息，包含站点和邮编等信息
     :return: sale_order_no，销售出库单号
     """
-    create_result = oms_app.create_sale_order(order_sku_info_list)
+    create_result = oms_app.create_sale_order(order_sku_info_list, **additional_info or {})
     if oms_app.is_data_empty(create_result):
         return
     # 提取销售单号，从data中直接提取
@@ -18,9 +19,17 @@ def create_sale_order(order_sku_info_list):
     return sale_order_no
 
 
-def create_verified_order(order_sku_info_list, auto_add_stock=True):
+def create_verified_order(order_sku_info_list, auto_add_stock=True, site_info=None, skip_check=False):
+    site_info = site_info or {
+        "siteCode": "US",
+        "email": "oms@test.com",
+        "country": "US",
+        "province": "NY",
+        "city": "New York",
+        "postalCode": "10001",
+    }
     # 创建销售订单并自动审单
-    sale_order_no = create_sale_order(order_sku_info_list)
+    sale_order_no = create_sale_order(order_sku_info_list, additional_info=site_info)
     if not sale_order_no:
         return
 
