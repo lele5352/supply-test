@@ -475,7 +475,7 @@ class HomaryTMS(ServiceRobot):
                 "skuWeight": weight,
                 "skuSides": sides
             })
-        # other_params指的是除了包裹长宽高外的其他属性，这里包含包裹总实重，sku最小实重，sku最大实重，sku最长边，sku最短边
+        # other_params指的是除了包裹长宽高外的其他属性，这里包含包裹总实重，sku维度的重量和边长
         other_params = [round(temp_weight, 6), sku_list]
         temp_result.extend(other_params)
         return temp_result
